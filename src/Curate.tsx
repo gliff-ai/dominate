@@ -1,10 +1,12 @@
 import React, { Component, ReactNode } from "react";
 import { DominateEtebase, Collection, Item, Gallery } from "@/etebase";
+import { Link } from "react-router-dom";
 
 interface Props {
   etebaseInstance?: DominateEtebase;
   selectedThing: (thingType: string, thing: Collection | Item) => void;
   match: {
+    path: string;
     params: {
       id: string
     }
@@ -30,7 +32,6 @@ export class Curate extends Component<Props> {
   }
 
   componentDidMount() {
-
     console.log(this.state.collectionId);
     if (this.props.etebaseInstance) {
       if (this.state.collectionId) {
@@ -52,17 +53,17 @@ export class Curate extends Component<Props> {
   }
 
   async componentDidUpdate(prevProps: Props) {
-    if (!prevProps.etebaseInstance) {
-      if (this.state.collectionId) {
-        this.props.etebaseInstance.getImagesMeta(this.state.collectionId).then((items) => {
-          console.log(items);
+    if (prevProps.match.path !== this.props.match.path) { // If we've changed route, definitely update
+      const collectionId = this.props.match?.params?.id ;
+      if (collectionId) {
+        this.props.etebaseInstance.getImagesMeta(collectionId).then((items) => {
           this.setState({ items });
+          this.setState({collectionId})
         });
       } else {
         const collectionsMeta = await this.props.etebaseInstance.getCollectionsMeta(
           "gliff.gallery"
         );
-        console.log(collectionsMeta);
         this.setState({ collectionsMeta });
       }
     }
@@ -78,7 +79,7 @@ export class Curate extends Component<Props> {
           {this.state.collectionsMeta.map((col) => {
             return (
               <span key={col.uid}>
-                <a href={`/curate/${col.uid}`}>{col.name}</a>
+                <Link to={`/curate/${col.uid}`}>{col.name}</Link>
                 <br />
               </span>
             );
@@ -88,7 +89,7 @@ export class Curate extends Component<Props> {
           <h3>Items</h3>
           {this.state.items.map(item => {
             return (<span key={item.uid}>
-              <a href={`/annotate/${item.uid}`}>{item.name}</a>
+              <Link to={`/annotate/${item.uid}`}>{item.name}</Link>
             </span>)
           })}
         </div>
