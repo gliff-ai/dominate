@@ -5,7 +5,7 @@ import { useAuth } from "./hooks/use-auth";
 
 export const Navbar = (): ReactElement => {
   // Get auth state and re-render anytime it changes
-  const auth = useAuth(); // TODO type
+  const auth = useAuth();
   const history = useHistory();
 
   return (

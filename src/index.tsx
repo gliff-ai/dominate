@@ -1,10 +1,8 @@
 import * as React from "react";
 import * as ReactDOM from "react-dom";
 
-import { ProvideAuth } from "./hooks/use-auth";
-
-import { UserInterface } from "./ui";
-
+import { ProvideAuth } from "@/hooks/use-auth";
+import { UserInterface } from "@/ui";
 import { DominateEtebase } from "@/etebase";
 
 const etebaseInstance = new DominateEtebase();

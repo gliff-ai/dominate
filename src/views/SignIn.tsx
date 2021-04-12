@@ -4,7 +4,7 @@ import { useHistory } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 
 export const SignIn = (): ReactElement => {
-  const auth = useAuth(); // TODO type
+  const auth = useAuth();
   const history = useHistory();
 
   const [loading, setLoading] = useState(false);
@@ -15,7 +15,7 @@ export const SignIn = (): ReactElement => {
         type="button"
         onClick={() => {
           setLoading(true);
-          auth.signin("craig", "12345").then(() => {
+          void auth.signin("craig", "12345").then(() => {
             setLoading(false);
             history.push("/");
           });
