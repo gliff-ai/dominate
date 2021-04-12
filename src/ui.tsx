@@ -2,16 +2,40 @@ import React, { Component, ChangeEvent, ReactNode } from "react";
 
 import { DominateEtebase } from "@/etebase";
 
-import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
+import { BrowserRouter as Router, Switch, Route, Link, Redirect } from "react-router-dom";
 
 import { Home } from "./Home.tsx";
 import { Curate } from "./Curate.tsx";
 
 import { Navbar } from "@/NavBar";
 import { SignIn } from "@/views/SignIn";
+import {useAuth} from "@/hooks/use-auth";
 
 interface Props {
   etebaseInstance: DominateEtebase;
+}
+
+// A wrapper for <Route> that redirects to the login
+// screen if you're not yet authenticated.
+function PrivateRoute({ children, ...rest }) {
+  const auth = useAuth();
+  return (
+    <Route
+      {...rest}
+      render={({ location }) =>
+        auth.user ? (
+          children
+        ) : (
+          <Redirect
+            to={{
+              pathname: "/signin",
+              state: { from: location }
+            }}
+          />
+        )
+      }
+    />
+  );
 }
 
 export class UserInterface extends Component<Props> {
@@ -43,9 +67,11 @@ export class UserInterface extends Component<Props> {
           <Route path="/signin">
             <SignIn />
           </Route>
-          <Route path="/annotate">
+
+          <PrivateRoute path="/annotate">
             <div>TODO</div>
-          </Route>
+          </PrivateRoute>
+
           <Route
             path="/curate/:id"
             render={({ match }: any) => (
