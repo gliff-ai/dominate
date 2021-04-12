@@ -8,14 +8,54 @@ export const SignIn = (): ReactElement => {
   const history = useHistory();
 
   const [loading, setLoading] = useState(false);
+  const [login, setLogin] = useState({
+    name: "",
+    password: "",
+  });
+
+  const handleChange = (e) => {
+    const { id, value } = e.target;
+    setLogin((prevState) => ({
+      ...prevState,
+      [id]: value,
+    }));
+    console.log(login.name);
+    console.log(login.password);
+  };
 
   return (
     <div>
+      <form>
+        <label>
+          Name:
+          <input
+            type="text"
+            name="name"
+            onChange={handleChange}
+            value={login.name}
+            id={"name"}
+          />
+        </label>
+      </form>
+
+      <form>
+        <label>
+          Password:
+          <input
+            type="text"
+            name="name"
+            onChange={handleChange}
+            value={login.password}
+            id={"password"}
+          />
+        </label>
+      </form>
+
       <button
         type="button"
         onClick={() => {
           setLoading(true);
-          void auth.signin("craig", "12345").then(() => {
+          void auth.signin(login.name, login.password).then(() => {
             setLoading(false);
             history.push("/");
           });
