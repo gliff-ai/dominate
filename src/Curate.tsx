@@ -32,16 +32,18 @@ export class Curate extends Component<Props> {
   }
 
   componentDidMount() {
+    console.log(this.props)
     console.log(this.state.collectionId);
     if (this.props.etebaseInstance) {
       if (this.state.collectionId) {
+        console.log("getting items!")
         this.props.etebaseInstance.getImagesMeta(this.state.collectionId).then((items) => {
           console.log(items);
           this.setState({ items });
         });
       } else {
         // No id, get all collections
-
+        console.log("getting galleries!")
         this.props.etebaseInstance
           .getCollectionsMeta("gliff.gallery")
           .then((collectionsMeta) => {
@@ -49,10 +51,13 @@ export class Curate extends Component<Props> {
             this.setState({ collectionsMeta });
           });
       }
+    } else {
+      console.log("getting nothing!")
     }
   }
 
   async componentDidUpdate(prevProps: Props) {
+    console.log("did update curate")
     if (prevProps.match.path !== this.props.match.path) { // If we've changed route, definitely update
       const collectionId = this.props.match?.params?.id ;
       if (collectionId) {

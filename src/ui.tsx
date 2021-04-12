@@ -7,14 +7,20 @@ import { BrowserRouter as Router, Switch, Route, Link } from "react-router-dom";
 import { Home } from "./Home.tsx";
 import { Curate } from "./Curate.tsx";
 
-export class UserInterface extends Component {
+import { Navbar } from "@/NavBar";
+import { SignIn } from "@/views/SignIn";
+
+interface Props {
+  etebaseInstance: DominateEtebase;
+}
+
+export class UserInterface extends Component<Props> {
   state: {
     collections?: any;
     loading: boolean;
-    etebase?: DominateEtebase;
   };
 
-  constructor(props) {
+  constructor(props: Props) {
     super(props);
     this.state = { loading: true };
   }
@@ -24,31 +30,19 @@ export class UserInterface extends Component {
   };
 
   componentDidMount() {
-    console.log("Did mount!");
-    const etebase = new DominateEtebase();
-    void etebase.login("craig", "12345").then(async () => {
-      this.setState({ etebase }); // Only when logged in
-    });
   }
 
   render = (): ReactNode => (
     <Router>
       <div>
-        <nav>
-          <ul>
-            <li>
-              <Link to="/">Home</Link>
-            </li>
-            <li>
-              <Link to="/annotate">ANNOTATE</Link>
-            </li>
-            <li>
-              <Link to="/curate">Curate</Link>
-            </li>
-          </ul>
-        </nav>
+        <Navbar />
+
+        <br/><br/><br/>
 
         <Switch>
+          <Route path="/signin">
+            <SignIn />
+          </Route>
           <Route path="/annotate">
             <div>TODO</div>
           </Route>
@@ -56,7 +50,7 @@ export class UserInterface extends Component {
             path="/curate/:id"
             render={({ match }: any) => (
               <Curate
-                etebaseInstance={this.state.etebase}
+                etebaseInstance={this.props.etebaseInstance}
                 selectedThing={this.selectThing}
                 match={match}
               />
@@ -67,7 +61,7 @@ export class UserInterface extends Component {
             path="/curate/"
             render={({ match }: any) => (
               <Curate
-                etebaseInstance={this.state.etebase}
+                etebaseInstance={this.props.etebaseInstance}
                 selectedThing={this.selectThing}
                 match={match}
               />

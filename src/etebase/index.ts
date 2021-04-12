@@ -1,8 +1,12 @@
 import * as Etebase from "etebase";
 import { Account, Collection, Item } from "etebase";
-import {Gallery, Image, Thumbnail} from "./interfaces";
+import { Gallery, Image, Thumbnail } from "./interfaces";
 
 const SERVER_URL = "http://glifftempdeploy3.westeurope.azurecontainer.io:8033/";
+
+interface User {
+  username: string
+}
 
 export class DominateEtebase {
   etebaseInstance: Account;
@@ -11,17 +15,31 @@ export class DominateEtebase {
 
   collectionsMeta: Gallery[];
 
-  loggedIn: boolean;
+  public isLoggedIn: boolean;
 
   constructor() {
     this.collections = [];
     this.collectionsMeta = [];
+    this.isLoggedIn = false;
   }
 
-  login = async (username: string, password: string): Promise<boolean> => {
+  init = async (): Promise<boolean> => {
     const savedSession = localStorage.getItem("etebaseInstance");
+    if (savedSession) {
+      this.etebaseInstance = await Etebase.Account.restore(savedSession);
+      // TODO: check that this is a valid etebase session? how?
+      this.isLoggedIn = true;
+      return true;
+    }
 
-    if (!savedSession) {
+    this.isLoggedIn = false;
+    return false;
+  };
+
+  login = async (username: string, password: string): Promise<User> => {
+    await this.init();
+
+    if (!this.isLoggedIn) {
       this.etebaseInstance = await Etebase.Account.login(
         username,
         password,
@@ -32,14 +50,18 @@ export class DominateEtebase {
 
       // TODO: encrypt this!
       localStorage.setItem("etebaseInstance", newSession);
-    } else {
-      this.etebaseInstance = await Etebase.Account.restore(savedSession);
     }
+    this.isLoggedIn = true;
 
-    this.loggedIn = true;
-
-    return true;
+    return {username: this.etebaseInstance.user.username};
   };
+
+  logout = async (): Promise<boolean> => {
+    await this.etebaseInstance.logout();
+    localStorage.removeItem("etebaseInstance");
+    this.isLoggedIn = false;
+    return true
+  }
 
   wrangleGallery = (col: Collection): Gallery => {
     const meta = col.getMeta();
@@ -65,7 +87,7 @@ export class DominateEtebase {
       type: "gliff.image",
       uid: item.uid,
     } as Image;
-  }
+  };
 
   getImagesMeta = async (collectionId: string): Promise<any> => {
     if (!this.etebaseInstance) throw new Error("No etebase instance");
