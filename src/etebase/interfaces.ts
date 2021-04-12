@@ -24,4 +24,22 @@ interface Annotation extends Omit<Thumbnail, "type"> {
   labels: string[];
 }
 
+type ImageBitmapBlob = string; // TMP
+type Channels = ImageBitmapBlob[]
+type Slices = Channels[];
+
+interface EtebaseImage {
+  meta: {
+    type: "gliff.image";
+    slices: number;
+    channels: number;
+    createdTime: number;
+    modifiedTime: number;
+    width: number;
+    height: number;
+    format: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
+  };
+  content: Slices[]
+}
+
 export {Gallery, Image, Thumbnail, Annotation}

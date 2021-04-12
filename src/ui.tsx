@@ -33,8 +33,6 @@ export class UserInterface extends Component {
 
   render = (): ReactNode => (
     <Router>
-      <h1>{this.state.loading.toString()}</h1>
-
       <div>
         <nav>
           <ul>
@@ -47,14 +45,9 @@ export class UserInterface extends Component {
             <li>
               <Link to="/curate">Curate</Link>
             </li>
-            <li>
-              <Link to="/curate/fsgdhfy">Curate blah blah</Link>
-            </li>
           </ul>
         </nav>
 
-        {/* A <Switch> looks through its children <Route>s and
-            renders the first one that matches the current URL. */}
         <Switch>
           <Route path="/annotate">
             <div>TODO</div>
@@ -70,12 +63,16 @@ export class UserInterface extends Component {
             )}
           />
 
-          <Route path="/curate">
-            <Curate
-              etebaseInstance={this.state.etebase}
-              selectedThing={this.selectThing}
-            />
-          </Route>
+          <Route
+            path="/curate/"
+            render={({ match }: any) => (
+              <Curate
+                etebaseInstance={this.state.etebase}
+                selectedThing={this.selectThing}
+                match={match}
+              />
+            )}
+          />
           <Route path="/">
             <Home />
           </Route>
