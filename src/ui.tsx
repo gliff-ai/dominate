@@ -72,6 +72,8 @@ export class UserInterface extends Component<Props> {
             <div>TODO</div>
           </PrivateRoute>
 
+
+          // TODO private routes
           <Route
             path="/curate/:id"
             render={({ match }: any) => (

@@ -32,8 +32,6 @@ export class Curate extends Component<Props> {
   }
 
   componentDidMount() {
-    console.log(this.props)
-    console.log(this.state.collectionId);
     if (this.props.etebaseInstance) {
       if (this.state.collectionId) {
         console.log("getting items!")

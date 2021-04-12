@@ -5,7 +5,7 @@ import { Gallery, Image, Thumbnail } from "./interfaces";
 const SERVER_URL = "http://glifftempdeploy3.westeurope.azurecontainer.io:8033/";
 
 interface User {
-  username: string
+  username: string;
 }
 
 export class DominateEtebase {
@@ -23,17 +23,17 @@ export class DominateEtebase {
     this.isLoggedIn = false;
   }
 
-  init = async (): Promise<boolean> => {
+  init = async (): Promise<null | User> => {
     const savedSession = localStorage.getItem("etebaseInstance");
     if (savedSession) {
       this.etebaseInstance = await Etebase.Account.restore(savedSession);
-      // TODO: check that this is a valid etebase session? how?
-      this.isLoggedIn = true;
-      return true;
+
+      this.isLoggedIn = !!this.etebaseInstance?.user?.username;
+      return { username: this.etebaseInstance.user.username };
     }
 
     this.isLoggedIn = false;
-    return false;
+    return null;
   };
 
   login = async (username: string, password: string): Promise<User> => {
@@ -53,15 +53,15 @@ export class DominateEtebase {
     }
     this.isLoggedIn = true;
 
-    return {username: this.etebaseInstance.user.username};
+    return { username: this.etebaseInstance.user.username };
   };
 
   logout = async (): Promise<boolean> => {
     await this.etebaseInstance.logout();
     localStorage.removeItem("etebaseInstance");
     this.isLoggedIn = false;
-    return true
-  }
+    return true;
+  };
 
   wrangleGallery = (col: Collection): Gallery => {
     const meta = col.getMeta();
@@ -96,7 +96,6 @@ export class DominateEtebase {
     const collection = await collectionManager.fetch(collectionId);
     const itemManager = collectionManager.getItemManager(collection);
     const { data } = await itemManager.list();
-    console.log(data);
 
     return data.map(this.wrangleImage);
   };
