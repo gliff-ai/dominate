@@ -2,14 +2,22 @@ import React, { Component, ChangeEvent, ReactNode } from "react";
 
 import { DominateEtebase } from "@/etebase";
 
-import { BrowserRouter as Router, Switch, Route, Link, Redirect } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Link,
+  Redirect,
+} from "react-router-dom";
 
 import { Home } from "./Home.tsx";
 import { Curate } from "./Curate.tsx";
 
 import { Navbar } from "@/NavBar";
 import { SignIn } from "@/views/SignIn";
-import {useAuth} from "@/hooks/use-auth";
+import { SignUp } from "@/views/SignUp";
+
+import { useAuth } from "@/hooks/use-auth";
 
 interface Props {
   etebaseInstance: DominateEtebase;
@@ -29,7 +37,7 @@ function PrivateRoute({ children, ...rest }) {
           <Redirect
             to={{
               pathname: "/signin",
-              state: { from: location }
+              state: { from: location },
             }}
           />
         )
@@ -53,26 +61,27 @@ export class UserInterface extends Component<Props> {
     console.log(`you selected the ${type} ${thing} thing`);
   };
 
-  componentDidMount() {
-  }
+  componentDidMount() {}
 
   render = (): ReactNode => (
     <Router>
       <div>
         <Navbar />
 
-        <br/><br/><br/>
+        <br />
+        <br />
+        <br />
 
         <Switch>
           <Route path="/signin">
             <SignIn />
           </Route>
-
+          <Route path="/signup">
+            <SignUp />
+          </Route>
           <PrivateRoute path="/annotate">
             <div>TODO</div>
           </PrivateRoute>
-
-
           // TODO private routes
           <Route
             path="/curate/:id"
@@ -84,7 +93,6 @@ export class UserInterface extends Component<Props> {
               />
             )}
           />
-
           <Route
             path="/curate/"
             render={({ match }: any) => (

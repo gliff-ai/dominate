@@ -16,12 +16,18 @@ export const Navbar = (): ReactElement => {
             <Link to="/annotate">ANNOTATE</Link>&nbsp;
             <Link to="/curate">CURATE</Link>&nbsp;
             <Link to="/account">MANAGE ({auth.user.username})</Link>&nbsp;
-            <button type="button" onClick={() => auth.signout().then(() => history.push("/signin"))}>
+            <button
+              type="button"
+              onClick={() => auth.signout().then(() => history.push("/signin"))}
+            >
               Sign Out
             </button>
           </>
         ) : (
-          <Link to="/signin">Sign In</Link>
+          <>
+            <Link to="/signin">Sign In</Link>&nbsp;
+            <Link to="/signup">Sign Up</Link>
+          </>
         )}
       </nav>
     </div>

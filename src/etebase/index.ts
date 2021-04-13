@@ -56,6 +56,16 @@ export class DominateEtebase {
     return { username: this.etebaseInstance.user.username };
   };
 
+  signup = async (username: string, password: string): Promise<User> => {
+    this.etebaseInstance = await Etebase.Account.login(
+      username,
+      password,
+      SERVER_URL
+    );
+
+    return { username: this.etebaseInstance.user.username };
+  };
+
   logout = async (): Promise<boolean> => {
     await this.etebaseInstance.logout();
     localStorage.removeItem("etebaseInstance");

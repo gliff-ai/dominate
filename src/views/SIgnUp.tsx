@@ -1,28 +1,22 @@
 import React, { ReactElement, useState } from "react";
-import { useHistory } from "react-router-dom";
 
-import { useAuth } from "@/hooks/use-auth";
-
-export const SignIn = (): ReactElement => {
-  const auth = useAuth();
-  const history = useHistory();
-
-  const [loading, setLoading] = useState(false);
-  const [login, setLogin] = useState({
+export const SignUp = (): ReactElement => {
+  const [signUp, setSignUp] = useState({
     name: "",
     password: "",
+    confirmPassword: "",
   });
 
   const handleChange = (e) => {
+    console.log(signUp.name);
     const { id, value } = e.target;
-    setLogin((prevState) => ({
+    setSignUp((prevState) => ({
       ...prevState,
       [id]: value,
     }));
   };
 
   return (
-    //TODO: Click enter to also login
     <div>
       <form>
         <label>
@@ -31,7 +25,7 @@ export const SignIn = (): ReactElement => {
             type="text"
             name="name"
             onChange={handleChange}
-            value={login.name}
+            value={signUp.name}
             id={"name"}
           />
         </label>
@@ -42,10 +36,23 @@ export const SignIn = (): ReactElement => {
           Password:
           <input
             type="text"
-            name="password"
+            name="name"
             onChange={handleChange}
-            value={login.password}
+            value={signUp.password}
             id={"password"}
+          />
+        </label>
+      </form>
+
+      <form>
+        <label>
+          Confirm Password:
+          <input
+            type="text"
+            name="name"
+            onChange={handleChange}
+            value={signUp.confirmPassword}
+            id={"confirmPassword"}
           />
         </label>
       </form>
@@ -53,14 +60,10 @@ export const SignIn = (): ReactElement => {
       <button
         type="button"
         onClick={() => {
-          setLoading(true);
-          void auth.signin(login.name, login.password).then(() => {
-            setLoading(false);
-            history.push("/");
-          });
+          console.log("hello");
         }}
       >
-        {loading ? "Loading..." : "Sign In"}
+        Sign Up
       </button>
     </div>
   );
