@@ -19,8 +19,6 @@ export const SignIn = (): ReactElement => {
       ...prevState,
       [id]: value,
     }));
-    console.log(login.name);
-    console.log(login.password);
   };
 
   return (
