@@ -1,6 +1,11 @@
 import React, { ReactElement, useState } from "react";
+import { useAuth } from "@/hooks/use-auth";
+import { useHistory } from "react-router-dom";
 
 export const SignUp = (): ReactElement => {
+  const auth = useAuth();
+  const history = useHistory();
+  const [loading, setLoading] = useState(false);
   const [signUp, setSignUp] = useState({
     name: "",
     password: "",
@@ -60,10 +65,14 @@ export const SignUp = (): ReactElement => {
       <button
         type="button"
         onClick={() => {
-          console.log("hello");
+          setLoading(true);
+          void auth.signup(signUp.name, signUp.password).then(() => {
+            setLoading(false);
+            history.push("/");
+          });
         }}
       >
-        Sign Up
+        {loading ? "Loading..." : "Sign up"}
       </button>
     </div>
   );

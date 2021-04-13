@@ -56,9 +56,12 @@ export class DominateEtebase {
     return { username: this.etebaseInstance.user.username };
   };
 
-  signup = async (username: string, password: string): Promise<User> => {
-    this.etebaseInstance = await Etebase.Account.login(
-      username,
+  signup = async (email: string, password: string): Promise<User> => {
+    this.etebaseInstance = await Etebase.Account.signup(
+      {
+        username: email,
+        email: email,
+      },
       password,
       SERVER_URL
     );
