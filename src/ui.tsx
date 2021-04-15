@@ -16,11 +16,12 @@ import {
 import { Home } from "./Home";
 import { Curate, Match } from "./Curate";
 
+type Children = ((props: RouteChildrenProps<any>) => React.ReactNode)
+    | React.ReactNode
 interface Props {
   etebaseInstance: DominateEtebase;
-  children?:
-    | ((props: RouteChildrenProps<any>) => React.ReactNode)
-    | React.ReactNode;
+  children?:Children
+
 }
 
 interface State {
@@ -29,11 +30,21 @@ interface State {
 
 // A wrapper for <Route> that redirects to the login
 // screen if you're not yet authenticated.
-function PrivateRoute({ children, ...rest }) {
+type PrivateProps = {
+  children: Children;
+  [x:string]: any;
+}
+
+ /* eslint-disable react/jsx-props-no-spreading */
+function PrivateRoute(props: PrivateProps) {
   const auth = useAuth();
+  const {children, ...rest} = props;
+
   return (
     <Route
-      {...rest}
+      {
+        ...rest
+      }
       render={({ location }) =>
         auth.user ? (
           children
@@ -44,8 +55,7 @@ function PrivateRoute({ children, ...rest }) {
               state: { from: location },
             }}
           />
-        )
-      }
+        )}
     />
   );
 }

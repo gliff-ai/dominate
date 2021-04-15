@@ -64,7 +64,7 @@ export class Curate extends Component<Props, State> {
     }
   }
 
-  async componentDidUpdate(prevProps: Props) {
+  componentDidUpdate(prevProps: Props) {
     if (prevProps.match.path !== this.props.match.path) {
       // If we've changed route, definitely update
       const collectionId = this.props.match?.params?.id;
@@ -79,10 +79,12 @@ export class Curate extends Component<Props, State> {
             console.log(err);
           });
       } else {
-        const collectionsMeta = await this.props.etebaseInstance.getCollectionsMeta(
-          "gliff.gallery"
-        );
-        this.setState({ collectionsMeta });
+        this.props.etebaseInstance
+          .getCollectionsMeta("gliff.gallery")
+          .then((collectionsMeta) => this.setState({ collectionsMeta }))
+          .catch((err) => {
+            console.log(err);
+          });
       }
     }
   }
