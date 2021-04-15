@@ -12,4 +12,9 @@ module.exports = merge(common, {
     historyApiFallback: true,
     open: true,
   },
+    plugins: [
+    new webpack.DefinePlugin({
+      STORE_URL: JSON.stringify("http://localhost:8080/"),
+    }),
+  ],
 });
