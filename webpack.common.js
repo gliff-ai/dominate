@@ -41,8 +41,5 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "public/index.html",
     }),
-    new webpack.DefinePlugin({
-      STORE_URL: JSON.stringify("http://localhost:8080/"),
-    }),
   ],
 };
