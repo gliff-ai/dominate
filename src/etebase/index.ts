@@ -2,7 +2,8 @@ import * as Etebase from "etebase";
 import { Account, Collection, Item } from "etebase";
 import { Gallery, Image, Thumbnail } from "./interfaces";
 
-const SERVER_URL = "https://store.staging.gliff.app/";
+declare const STORE_URL: string;
+const SERVER_URL = STORE_URL;
 
 interface User {
   username: string;

@@ -1,8 +1,6 @@
 const HtmlWebpackPlugin = require("html-webpack-plugin");
-const CopyPlugin = require("copy-webpack-plugin");
 const path = require("path");
-
-const port = process.env.PORT || 3000;
+const webpack = require("webpack");
 
 function resolve(dir) {
   return path.join(__dirname, "..", dir);
@@ -31,9 +29,6 @@ module.exports = {
           },
         },
       },
-      // {
-      //   use: ["style-loader", "css-loader", "sass-loader"],
-      // },
     ],
   },
   resolve: {
@@ -46,11 +41,8 @@ module.exports = {
     new HtmlWebpackPlugin({
       template: "public/index.html",
     }),
+    new webpack.DefinePlugin({
+      STORE_URL: JSON.stringify("http://localhost:8080/"),
+    }),
   ],
-  devServer: {
-    host: "localhost",
-    port,
-    historyApiFallback: true,
-    open: true,
-  },
 };
