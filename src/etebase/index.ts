@@ -102,7 +102,7 @@ export class DominateEtebase {
     } as Image;
   };
 
-  getImagesMeta = async (collectionId: string): Promise<any> => {
+  getImagesMeta = async (collectionId: string): Promise<Image[]> => {
     if (!this.etebaseInstance) throw new Error("No etebase instance");
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
@@ -124,4 +124,4 @@ export class DominateEtebase {
   };
 }
 
-export { Collection, Item, Gallery };
+export { Collection, Item, Gallery, Image };

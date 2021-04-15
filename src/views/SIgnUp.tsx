@@ -31,6 +31,7 @@ export const SignUp = (): ReactElement => {
             onChange={handleChange}
             value={signUp.name}
             id="name"
+            placeholder="Enter email address"
           />
         </label>
       </form>
@@ -67,11 +68,17 @@ export const SignUp = (): ReactElement => {
         type="button"
         onClick={() => {
           setLoading(true);
-          void auth.signup(signUp.name, signUp.password).then(() => {
-            setLoading(false);
-            history.push("/");
-          });
+          auth
+            .signup(signUp.name, signUp.password)
+            .then(() => {
+              setLoading(false);
+              history.push("/");
+            })
+            .catch((err) => {
+              console.log(err);
+            });
         }}
+        disabled={signUp.confirmPassword.length < 1}
       >
         {loading ? "Loading..." : "Sign up"}
       </button>

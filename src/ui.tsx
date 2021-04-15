@@ -1,5 +1,5 @@
 import React, { Component, ReactNode } from "react";
-import { DominateEtebase } from "@/etebase";
+import { Collection, DominateEtebase, Item } from "@/etebase";
 import { useAuth } from "@/hooks/use-auth";
 import { SignIn } from "@/views/SignIn";
 import { SignUp } from "@/views/SignUp";
@@ -10,13 +10,21 @@ import {
   Switch,
   Route,
   Redirect,
+  RouteChildrenProps,
 } from "react-router-dom";
 
 import { Home } from "./Home";
-import { Curate } from "./Curate";
+import { Curate, Match } from "./Curate";
 
 interface Props {
   etebaseInstance: DominateEtebase;
+  children?:
+    | ((props: RouteChildrenProps<any>) => React.ReactNode)
+    | React.ReactNode;
+}
+
+interface State {
+  collections?: Collection[];
 }
 
 // A wrapper for <Route> that redirects to the login
@@ -41,11 +49,7 @@ function PrivateRoute({ children, ...rest }) {
     />
   );
 }
-export class UserInterface extends Component<Props> {
-  state: {
-    collections?: any;
-  };
-
+export class UserInterface extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = { collections: null };
@@ -53,8 +57,8 @@ export class UserInterface extends Component<Props> {
 
   componentDidMount() {}
 
-  selectThing = (type, thing) => {
-    console.log(`you selected the ${type} ${thing} thing`);
+  selectThing = (type: string, thing: Collection | Item): void => {
+    console.log(`you selected the ${type} thing`);
   };
 
   render = (): ReactNode => (
@@ -78,7 +82,7 @@ export class UserInterface extends Component<Props> {
           </PrivateRoute>
           <Route
             path="/curate/:id"
-            render={({ match }: any) => (
+            render={(match: Match) => (
               <Curate
                 etebaseInstance={this.props.etebaseInstance}
                 selectedThing={this.selectThing}
@@ -88,7 +92,7 @@ export class UserInterface extends Component<Props> {
           />
           <Route
             path="/curate/"
-            render={({ match }: any) => (
+            render={(match: Match) => (
               <Curate
                 etebaseInstance={this.props.etebaseInstance}
                 selectedThing={this.selectThing}

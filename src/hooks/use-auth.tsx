@@ -47,13 +47,18 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
 
   // Login initally if we have a session
   useEffect(() => {
-    void etebaseInstance.init().then((authedUser) => {
-      if (authedUser) {
-        setUser(authedUser);
-      } else {
-        setUser(null);
-      }
-    });
+    etebaseInstance
+      .init()
+      .then((authedUser) => {
+        if (authedUser) {
+          setUser(authedUser);
+        } else {
+          setUser(null);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
 
   // Return the user object and auth methods

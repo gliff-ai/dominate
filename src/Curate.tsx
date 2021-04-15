@@ -1,30 +1,29 @@
 import React, { Component, ReactNode } from "react";
-import { DominateEtebase, Collection, Item, Gallery } from "@/etebase";
+import { DominateEtebase, Collection, Item, Gallery, Image } from "@/etebase";
 import { Link } from "react-router-dom";
+
+export interface Match {
+  path: string;
+  params: {
+    id: string;
+  };
+}
 
 interface Props {
   etebaseInstance: DominateEtebase;
   // eslint-disable-next-line react/no-unused-prop-types
   selectedThing: (thingType: string, thing: Collection | Item) => void;
 
-  match: {
-    path: string;
-    params: {
-      id: string;
-    };
-  };
+  match: Match;
 }
 
-export class Curate extends Component<Props> {
-  // eslint-disable-next-line react/static-property-placement
-  props: Props;
+interface State {
+  collectionsMeta: Gallery[];
+  items: Image[];
+  collectionId?: string;
+}
 
-  state: {
-    collectionsMeta: Gallery[];
-    items: any[];
-    collectionId?: string;
-  };
-
+export class Curate extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -43,6 +42,9 @@ export class Curate extends Component<Props> {
           .then((items): void => {
             console.log(items);
             this.setState({ items });
+          })
+          .catch((err) => {
+            console.log(err);
           });
       } else {
         // No id, get all collections
@@ -52,6 +54,9 @@ export class Curate extends Component<Props> {
           .then((collectionsMeta) => {
             console.log(collectionsMeta);
             this.setState({ collectionsMeta });
+          })
+          .catch((err) => {
+            console.log(err);
           });
       }
     } else {
@@ -69,6 +74,9 @@ export class Curate extends Component<Props> {
           .then((items): void => {
             this.setState({ items });
             this.setState({ collectionId });
+          })
+          .catch((err) => {
+            console.log(err);
           });
       } else {
         const collectionsMeta = await this.props.etebaseInstance.getCollectionsMeta(

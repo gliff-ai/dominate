@@ -54,10 +54,15 @@ export const SignIn = (): ReactElement => {
         type="button"
         onClick={() => {
           setLoading(true);
-          void auth.signin(login.name, login.password).then(() => {
-            setLoading(false);
-            history.push("/");
-          });
+          auth
+            .signin(login.name, login.password)
+            .then(() => {
+              setLoading(false);
+              history.push("/");
+            })
+            .catch((err) => {
+              console.log(err);
+            });
         }}
       >
         {loading ? "Loading..." : "Sign In"}
