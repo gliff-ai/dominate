@@ -34,12 +34,10 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
     });
 
   const signup = (email, password): Promise<User> =>
-    etebaseInstance
-      .signup(email, password)
-      .then((etebaseUser) => {
-        setUser(etebaseUser);
-        return etebaseUser;
-      });
+    etebaseInstance.signup(email, password).then((etebaseUser) => {
+      setUser(etebaseUser);
+      return etebaseUser;
+    });
 
   const signout = (): Promise<boolean> =>
     etebaseInstance.logout().then((response) => {

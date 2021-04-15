@@ -13,9 +13,15 @@ export const Navbar = (): ReactElement => {
       <nav>
         {auth.user ? (
           <>
-            <Link to="/annotate">ANNOTATE</Link>&nbsp;
-            <Link to="/curate">CURATE</Link>&nbsp;
-            <Link to="/account">MANAGE ({auth.user.username})</Link>&nbsp;
+            <Link to="/annotate">ANNOTATE</Link>
+            &nbsp;
+            <Link to="/curate">CURATE</Link>
+            &nbsp;
+            <Link to="/account">
+              MANAGE
+              {auth.user.username}
+            </Link>
+            &nbsp;
             <button
               type="button"
               onClick={() => auth.signout().then(() => history.push("/signin"))}
@@ -25,7 +31,8 @@ export const Navbar = (): ReactElement => {
           </>
         ) : (
           <>
-            <Link to="/signin">Sign In</Link>&nbsp;
+            <Link to="/signin">Sign In</Link>
+            &nbsp;
             <Link to="/signup">Sign Up</Link>
           </>
         )}

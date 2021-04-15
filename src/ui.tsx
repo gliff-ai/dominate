@@ -1,23 +1,19 @@
-import React, { Component, ChangeEvent, ReactNode } from "react";
-
+import React, { Component, ReactNode } from "react";
 import { DominateEtebase } from "@/etebase";
+import { useAuth } from "@/hooks/use-auth";
+import { SignIn } from "@/views/SignIn";
+import { SignUp } from "@/views/SignUp";
+import { Navbar } from "@/NavBar";
 
 import {
   BrowserRouter as Router,
   Switch,
   Route,
-  Link,
   Redirect,
 } from "react-router-dom";
 
-import { Home } from "./Home.tsx";
-import { Curate } from "./Curate.tsx";
-
-import { Navbar } from "@/NavBar";
-import { SignIn } from "@/views/SignIn";
-import { SignUp } from "@/views/SignUp";
-
-import { useAuth } from "@/hooks/use-auth";
+import { Home } from "./Home";
+import { Curate } from "./Curate";
 
 interface Props {
   etebaseInstance: DominateEtebase;
@@ -45,23 +41,21 @@ function PrivateRoute({ children, ...rest }) {
     />
   );
 }
-
 export class UserInterface extends Component<Props> {
   state: {
     collections?: any;
-    loading: boolean;
   };
 
   constructor(props: Props) {
     super(props);
-    this.state = { loading: true };
+    this.state = { collections: null };
   }
+
+  componentDidMount() {}
 
   selectThing = (type, thing) => {
     console.log(`you selected the ${type} ${thing} thing`);
   };
-
-  componentDidMount() {}
 
   render = (): ReactNode => (
     <Router>
@@ -82,7 +76,6 @@ export class UserInterface extends Component<Props> {
           <PrivateRoute path="/annotate">
             <div>TODO</div>
           </PrivateRoute>
-          // TODO private routes
           <Route
             path="/curate/:id"
             render={({ match }: any) => (

@@ -12,9 +12,8 @@ export const SignUp = (): ReactElement => {
     confirmPassword: "",
   });
 
-  const handleChange = (e) => {
-    console.log(signUp.name);
-    const { id, value } = e.target;
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = event.target;
     setSignUp((prevState) => ({
       ...prevState,
       [id]: value,
@@ -24,40 +23,42 @@ export const SignUp = (): ReactElement => {
   return (
     <div>
       <form>
-        <label>
+        <label htmlFor="name">
           Name:
           <input
             type="text"
             name="name"
             onChange={handleChange}
             value={signUp.name}
-            id={"name"}
+            id="name"
           />
         </label>
       </form>
 
       <form>
-        <label>
+        <label htmlFor="password">
           Password:
           <input
             type="text"
             name="name"
+            required
             onChange={handleChange}
             value={signUp.password}
-            id={"password"}
+            id="password"
           />
         </label>
       </form>
 
       <form>
-        <label>
+        <label htmlFor="confirmPassword">
           Confirm Password:
           <input
             type="text"
             name="name"
+            required
             onChange={handleChange}
             value={signUp.confirmPassword}
-            id={"confirmPassword"}
+            id="confirmPassword"
           />
         </label>
       </form>

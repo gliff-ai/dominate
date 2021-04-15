@@ -13,8 +13,8 @@ export const SignIn = (): ReactElement => {
     password: "",
   });
 
-  const handleChange = (e) => {
-    const { id, value } = e.target;
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = event.target;
     setLogin((prevState) => ({
       ...prevState,
       [id]: value,
@@ -22,30 +22,30 @@ export const SignIn = (): ReactElement => {
   };
 
   return (
-    //TODO: Click enter to also login
+    // TODO: Click enter to also login
     <div>
       <form>
-        <label>
+        <label htmlFor="name">
           Name:
           <input
             type="text"
             name="name"
             onChange={handleChange}
             value={login.name}
-            id={"name"}
+            id="name"
           />
         </label>
       </form>
 
       <form>
-        <label>
+        <label htmlFor="password">
           Password:
           <input
             type="text"
             name="password"
             onChange={handleChange}
             value={login.password}
-            id={"password"}
+            id="password"
           />
         </label>
       </form>
