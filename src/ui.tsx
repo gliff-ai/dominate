@@ -16,12 +16,12 @@ import {
 import { Home } from "./Home";
 import { Curate, Match } from "./Curate";
 
-type Children = ((props: RouteChildrenProps<any>) => React.ReactNode)
-    | React.ReactNode
+type Children =
+  | ((props: RouteChildrenProps<any>) => React.ReactNode)
+  | React.ReactNode;
 interface Props {
   etebaseInstance: DominateEtebase;
-  children?:Children
-
+  children?: Children;
 }
 
 interface State {
@@ -32,19 +32,17 @@ interface State {
 // screen if you're not yet authenticated.
 type PrivateProps = {
   children: Children;
-  [x:string]: any;
-}
+  [x: string]: any;
+};
 
- /* eslint-disable react/jsx-props-no-spreading */
+/* eslint-disable react/jsx-props-no-spreading */
 function PrivateRoute(props: PrivateProps) {
   const auth = useAuth();
-  const {children, ...rest} = props;
+  const { children, ...rest } = props;
 
   return (
     <Route
-      {
-        ...rest
-      }
+      {...rest}
       render={({ location }) =>
         auth.user ? (
           children
@@ -55,7 +53,8 @@ function PrivateRoute(props: PrivateProps) {
               state: { from: location },
             }}
           />
-        )}
+        )
+      }
     />
   );
 }
@@ -92,21 +91,22 @@ export class UserInterface extends Component<Props, State> {
           </PrivateRoute>
           <Route
             path="/curate/:id"
-            render={(match: Match) => (
-              <Curate
-                etebaseInstance={this.props.etebaseInstance}
-                selectedThing={this.selectThing}
-                match={match}
-              />
+            render={({match}) => (
+              <div>
+                <Curate
+                  etebaseInstance={this.props.etebaseInstance}
+                  selectedThing={this.selectThing}
+                  match={match}
+                />
+              </div>
             )}
           />
           <Route
             path="/curate/"
-            render={(match: Match) => (
+            render={() => (
               <Curate
                 etebaseInstance={this.props.etebaseInstance}
                 selectedThing={this.selectThing}
-                match={match}
               />
             )}
           />

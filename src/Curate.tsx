@@ -14,7 +14,7 @@ interface Props {
   // eslint-disable-next-line react/no-unused-prop-types
   selectedThing: (thingType: string, thing: Collection | Item) => void;
 
-  match: Match;
+  match?: Match;
 }
 
 interface State {
