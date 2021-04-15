@@ -3,13 +3,13 @@ import React, { Component, ChangeEvent, ReactNode } from "react";
 import { DominateEtebase } from "@/etebase";
 
 import { BrowserRouter as Router, Switch, Route, Link, Redirect } from "react-router-dom";
-
-import { Home } from "./Home.tsx";
-import { Curate } from "./Curate.tsx";
-
 import { Navbar } from "@/NavBar";
 import { SignIn } from "@/views/SignIn";
 import {useAuth} from "@/hooks/use-auth";
+
+import { Home } from "./Home";
+import { Curate } from "./Curate";
+
 
 interface Props {
   etebaseInstance: DominateEtebase;
