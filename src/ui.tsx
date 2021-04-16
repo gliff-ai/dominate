@@ -1,3 +1,4 @@
+/* eslint-disable react/jsx-curly-newline */
 import React, { Component, ReactNode } from "react";
 import { Collection, DominateEtebase, Item } from "@/etebase";
 import { useAuth } from "@/hooks/use-auth";
@@ -91,7 +92,7 @@ export class UserInterface extends Component<Props, State> {
           </PrivateRoute>
           <Route
             path="/curate/:id"
-            render={({match}) => (
+            render={({ match }) => (
               <div>
                 <Curate
                   etebaseInstance={this.props.etebaseInstance}
