@@ -1,5 +1,6 @@
 const { merge } = require("webpack-merge");
 const common = require("./webpack.common.js");
+const webpack = require("webpack");
 
 const port = process.env.PORT || 3000;
 
@@ -14,7 +15,7 @@ module.exports = merge(common, {
   },
     plugins: [
     new webpack.DefinePlugin({
-      STORE_URL: JSON.stringify("http://localhost:8080/"),
+      STORE_URL: JSON.stringify(process.env.API_URL || "http://localhost:8080/"),
     }),
   ],
 });
