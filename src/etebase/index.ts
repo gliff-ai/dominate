@@ -2,7 +2,8 @@ import * as Etebase from "etebase";
 import { Account, Collection, Item } from "etebase";
 import { Gallery, Image } from "./interfaces";
 
-const SERVER_URL = "http://glifftempdeploy3.westeurope.azurecontainer.io:8033/";
+declare const STORE_URL: string;
+const SERVER_URL = STORE_URL;
 
 interface User {
   username: string;
