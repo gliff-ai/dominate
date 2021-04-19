@@ -14,6 +14,7 @@ interface Context {
   user: User;
   signin: (username: string, password: string) => Promise<User>;
   signout: () => Promise<boolean>;
+  signup: (username: string, password: string) => Promise<User>;
 }
 
 const authContext = createContext<Context>(null);
@@ -32,6 +33,12 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
       return etebaseUser;
     });
 
+  const signup = (email, password): Promise<User> =>
+    etebaseInstance.signup(email, password).then((etebaseUser) => {
+      setUser(etebaseUser);
+      return etebaseUser;
+    });
+
   const signout = (): Promise<boolean> =>
     etebaseInstance.logout().then((response) => {
       setUser(null);
@@ -40,13 +47,18 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
 
   // Login initally if we have a session
   useEffect(() => {
-    void etebaseInstance.init().then((authedUser) => {
-      if (authedUser) {
-        setUser(authedUser);
-      } else {
-        setUser(null);
-      }
-    });
+    etebaseInstance
+      .init()
+      .then((authedUser) => {
+        if (authedUser) {
+          setUser(authedUser);
+        } else {
+          setUser(null);
+        }
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   }, []);
 
   // Return the user object and auth methods
@@ -54,6 +66,7 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
     user,
     signin,
     signout,
+    signup,
   };
 }
 

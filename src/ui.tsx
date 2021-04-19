@@ -1,24 +1,48 @@
-import React, { Component, ChangeEvent, ReactNode } from "react";
-
-import { DominateEtebase } from "@/etebase";
-
-import { BrowserRouter as Router, Switch, Route, Link, Redirect } from "react-router-dom";
-import { Navbar } from "@/NavBar";
+/* eslint-disable react/jsx-curly-newline */
+import React, { Component, ReactNode } from "react";
+import { Collection, DominateEtebase, Item } from "@/etebase";
+import { useAuth } from "@/hooks/use-auth";
 import { SignIn } from "@/views/SignIn";
-import {useAuth} from "@/hooks/use-auth";
+import { SignUp } from "@/views/SignUp";
+import { Navbar } from "@/NavBar";
+
+import {
+  BrowserRouter as Router,
+  Switch,
+  Route,
+  Redirect,
+  RouteChildrenProps,
+} from "react-router-dom";
 
 import { Home } from "./Home";
-import { Curate } from "./Curate";
+import { Curate, Match } from "./Curate";
 
+type Children =
+  | ((props: RouteChildrenProps<any>) => React.ReactNode)
+  | React.ReactNode;
 
+  
 interface Props {
   etebaseInstance: DominateEtebase;
+  children?: Children;
+}
+
+interface State {
+  collections?: Collection[];
 }
 
 // A wrapper for <Route> that redirects to the login
 // screen if you're not yet authenticated.
-function PrivateRoute({ children, ...rest }) {
+type PrivateProps = {
+  children: Children;
+  [x: string]: any;
+};
+
+/* eslint-disable react/jsx-props-no-spreading */
+function PrivateRoute(props: PrivateProps) {
   const auth = useAuth();
+  const { children, ...rest } = props;
+
   return (
     <Route
       {...rest}
@@ -29,7 +53,7 @@ function PrivateRoute({ children, ...rest }) {
           <Redirect
             to={{
               pathname: "/signin",
-              state: { from: location }
+              state: { from: location },
             }}
           />
         )
@@ -37,61 +61,55 @@ function PrivateRoute({ children, ...rest }) {
     />
   );
 }
-
-export class UserInterface extends Component<Props> {
-  state: {
-    collections?: any;
-    loading: boolean;
-  };
-
+export class UserInterface extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { loading: true };
+    this.state = { collections: null };
   }
 
-  selectThing = (type, thing) => {
-    console.log(`you selected the ${type} ${thing} thing`);
+  componentDidMount() {}
+
+  selectThing = (type: string, thing: Collection | Item): void => {
+    console.log(`you selected the ${type} thing`);
   };
-
-  componentDidMount() {
-  }
 
   render = (): ReactNode => (
     <Router>
       <div>
         <Navbar />
 
-        <br/><br/><br/>
+        <br />
+        <br />
+        <br />
 
         <Switch>
           <Route path="/signin">
             <SignIn />
           </Route>
-
+          <Route path="/signup">
+            <SignUp />
+          </Route>
           <PrivateRoute path="/annotate">
             <div>TODO</div>
           </PrivateRoute>
-
-
-          // TODO private routes
           <Route
             path="/curate/:id"
-            render={({ match }: any) => (
-              <Curate
-                etebaseInstance={this.props.etebaseInstance}
-                selectedThing={this.selectThing}
-                match={match}
-              />
+            render={({ match }) => (
+              <div>
+                <Curate
+                  etebaseInstance={this.props.etebaseInstance}
+                  selectedThing={this.selectThing}
+                  match={match}
+                />
+              </div>
             )}
           />
-
           <Route
             path="/curate/"
-            render={({ match }: any) => (
+            render={() => (
               <Curate
                 etebaseInstance={this.props.etebaseInstance}
                 selectedThing={this.selectThing}
-                match={match}
               />
             )}
           />

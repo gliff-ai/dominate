@@ -1,6 +1,6 @@
 import * as Etebase from "etebase";
 import { Account, Collection, Item } from "etebase";
-import { Gallery, Image, Thumbnail } from "./interfaces";
+import { Gallery, Image } from "./interfaces";
 
 declare const STORE_URL: string;
 const SERVER_URL = STORE_URL;
@@ -57,6 +57,19 @@ export class DominateEtebase {
     return { username: this.etebaseInstance.user.username };
   };
 
+  signup = async (email: string, password: string): Promise<User> => {
+    this.etebaseInstance = await Etebase.Account.signup(
+      {
+        username: Etebase.toBase64(email),
+        email,
+      },
+      password,
+      SERVER_URL
+    );
+
+    return { username: this.etebaseInstance.user.username };
+  };
+
   logout = async (): Promise<boolean> => {
     await this.etebaseInstance.logout();
     localStorage.removeItem("etebaseInstance");
@@ -90,7 +103,7 @@ export class DominateEtebase {
     } as Image;
   };
 
-  getImagesMeta = async (collectionId: string): Promise<any> => {
+  getImagesMeta = async (collectionId: string): Promise<Image[]> => {
     if (!this.etebaseInstance) throw new Error("No etebase instance");
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
@@ -112,4 +125,4 @@ export class DominateEtebase {
   };
 }
 
-export { Collection, Item, Gallery };
+export { Collection, Item, Gallery, Image };

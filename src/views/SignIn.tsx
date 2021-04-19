@@ -13,54 +13,63 @@ export const SignIn = (): ReactElement => {
     password: "",
   });
 
-  const handleChange = (e) => {
-    const { id, value } = e.target;
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = event.target;
     setLogin((prevState) => ({
       ...prevState,
       [id]: value,
     }));
   };
 
+  const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    event.preventDefault();
+    setLoading(true);
+    auth
+      .signin(login.name, login.password)
+      .then(() => {
+        setLoading(false);
+        history.push("/");
+      })
+      .catch((err) => {
+        alert(err);
+        setLoading(false);
+        setLogin({ name: "", password: "" });
+      });
+  };
+
   return (
+    // TODO: Click enter to also login
     <div>
-      <form>
-        <label>
+      <form onSubmit={onFormSubmit}>
+        <label htmlFor="name">
           Name:
           <input
             type="text"
             name="name"
             onChange={handleChange}
             value={login.name}
-            id={"name"}
+            id="name"
           />
         </label>
       </form>
 
-      <form>
-        <label>
+      <form onSubmit={onFormSubmit}>
+        <label htmlFor="password">
           Password:
           <input
             type="text"
-            name="name"
+            name="password"
             onChange={handleChange}
             value={login.password}
-            id={"password"}
+            id="password"
           />
         </label>
       </form>
 
-      <button
-        type="button"
-        onClick={() => {
-          setLoading(true);
-          void auth.signin(login.name, login.password).then(() => {
-            setLoading(false);
-            history.push("/");
-          });
-        }}
-      >
-        {loading ? "Loading..." : "Sign In"}
-      </button>
+      <form onSubmit={onFormSubmit}>
+        <button type="submit">{loading ? "Loading..." : "Sign In"}</button>
+      </form>
     </div>
   );
 };

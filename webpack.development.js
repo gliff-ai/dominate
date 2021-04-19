@@ -13,9 +13,11 @@ module.exports = merge(common, {
     historyApiFallback: true,
     open: true,
   },
-    plugins: [
+  plugins: [
     new webpack.DefinePlugin({
-      STORE_URL: JSON.stringify(process.env.API_URL || "http://localhost:8080/"),
+      STORE_URL: JSON.stringify(
+        process.env.API_URL || "http://localhost:8080/"
+      ),
     }),
   ],
 });
