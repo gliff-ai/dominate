@@ -21,10 +21,27 @@ export const SignIn = (): ReactElement => {
     }));
   };
 
+  const onFormSubmit = (e) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    e.preventDefault();
+    setLoading(true);
+    auth
+      .signin(login.name, login.password)
+      .then(() => {
+        setLoading(false);
+        history.push("/");
+      })
+      .catch((err) => {
+        alert(err);
+        setLoading(false);
+        setLogin({ name: "", password: "" });
+      });
+  };
+
   return (
     // TODO: Click enter to also login
     <div>
-      <form>
+      <form onSubmit={onFormSubmit}>
         <label htmlFor="name">
           Name:
           <input
@@ -35,9 +52,7 @@ export const SignIn = (): ReactElement => {
             id="name"
           />
         </label>
-      </form>
 
-      <form>
         <label htmlFor="password">
           Password:
           <input
@@ -48,25 +63,9 @@ export const SignIn = (): ReactElement => {
             id="password"
           />
         </label>
-      </form>
 
-      <button
-        type="button"
-        onClick={() => {
-          setLoading(true);
-          auth
-            .signin(login.name, login.password)
-            .then(() => {
-              setLoading(false);
-              history.push("/");
-            })
-            .catch((err) => {
-              console.log(err);
-            });
-        }}
-      >
-        {loading ? "Loading..." : "Sign In"}
-      </button>
+        <button type="submit">{loading ? "Loading..." : "Sign In"}</button>
+      </form>
     </div>
   );
 };
