@@ -44,9 +44,31 @@ export const SignUp = (): ReactElement => {
     });
   };
 
+  const onSubmitForm = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const isValid = validate();
+
+    if (isValid) {
+      setLoading(true);
+      auth
+        .signup(signUp.name, signUp.password)
+        .then(() => {
+          setLoading(false);
+          history.push("/");
+        })
+        .catch((err) => {
+          alert(err);
+          setLoading(false);
+          setSignUp({ name: "", password: "", confirmPassword: "" });
+          setNameError("");
+          setPasswordError("");
+        });
+    }
+  };
+
   return (
     <div>
-      <form>
+      <form onSubmit={onSubmitForm}>
         <label htmlFor="name">
           Name:
           <input
@@ -61,7 +83,7 @@ export const SignUp = (): ReactElement => {
         <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
       </form>
 
-      <form>
+      <form onSubmit={onSubmitForm}>
         <label htmlFor="password">
           Password:
           <input
@@ -75,7 +97,7 @@ export const SignUp = (): ReactElement => {
         </label>
       </form>
 
-      <form>
+      <form onSubmit={onSubmitForm}>
         <label htmlFor="confirmPassword">
           Confirm Password:
           <input
@@ -90,29 +112,11 @@ export const SignUp = (): ReactElement => {
         </label>
       </form>
 
-      <button
-        type="button"
-        onClick={(event) => {
-          event.preventDefault();
-          const isValid = validate();
-
-          if (isValid) {
-            setLoading(true);
-            auth
-              .signup(signUp.name, signUp.password)
-              .then(() => {
-                setLoading(false);
-                history.push("/");
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-          }
-        }}
-        disabled={signUp.confirmPassword.length < 1}
-      >
-        {loading ? "Loading..." : "Sign up"}
-      </button>
+      <form onSubmit={onSubmitForm}>
+        <button type="submit" disabled={signUp.confirmPassword.length < 1}>
+          {loading ? "Loading..." : "Sign up"}
+        </button>
+      </form>
     </div>
   );
 };

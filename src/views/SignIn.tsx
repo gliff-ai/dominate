@@ -21,9 +21,9 @@ export const SignIn = (): ReactElement => {
     }));
   };
 
-  const onFormSubmit = (e) => {
+  const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    e.preventDefault();
+    event.preventDefault();
     setLoading(true);
     auth
       .signin(login.name, login.password)
@@ -52,7 +52,9 @@ export const SignIn = (): ReactElement => {
             id="name"
           />
         </label>
+      </form>
 
+      <form onSubmit={onFormSubmit}>
         <label htmlFor="password">
           Password:
           <input
@@ -63,7 +65,9 @@ export const SignIn = (): ReactElement => {
             id="password"
           />
         </label>
+      </form>
 
+      <form onSubmit={onFormSubmit}>
         <button type="submit">{loading ? "Loading..." : "Sign In"}</button>
       </form>
     </div>
