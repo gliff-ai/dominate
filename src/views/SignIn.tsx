@@ -1,4 +1,4 @@
-import React, { ReactElement, useState } from "react";
+import React, { useState } from "react";
 import Avatar from "@material-ui/core/Avatar";
 import Button from "@material-ui/core/Button";
 import CssBaseline from "@material-ui/core/CssBaseline";
@@ -54,6 +54,20 @@ export function SignIn() {
     }));
   };
 
+  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    setLoading(true);
+    auth
+      .signin(login.name, login.password)
+      .then(() => {
+        setLoading(false);
+        history.push("/");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  };
+
   return (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
@@ -64,7 +78,7 @@ export function SignIn() {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        <form className={classes.form}>
+        <form className={classes.form} onSubmit={onSubmit}>
           <TextField
             variant="outlined"
             margin="normal"
@@ -111,18 +125,7 @@ export function SignIn() {
             variant="contained"
             color="primary"
             className={classes.submit}
-            onClick={() => {
-              setLoading(true);
-              auth
-                .signin(login.name, login.password)
-                .then(() => {
-                  setLoading(false);
-                  history.push("/");
-                })
-                .catch((err) => {
-                  console.log(err);
-                });
-            }}
+            // onClick={}
           >
             {loading ? "Loading..." : "Sign In"}
           </Button>
@@ -143,71 +146,3 @@ export function SignIn() {
     </Container>
   );
 }
-
-// export const SignIn = (): ReactElement => {
-//   const auth = useAuth();
-//   const history = useHistory();
-
-//   const [loading, setLoading] = useState(false);
-//   const [login, setLogin] = useState({
-//     name: "",
-//     password: "",
-//   });
-
-//   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-//     const { id, value } = event.target;
-//     setLogin((prevState) => ({
-//       ...prevState,
-//       [id]: value,
-//     }));
-//   };
-
-//   return (
-//     // TODO: Click enter to also login
-//     <div>
-//       <form>
-//         <label htmlFor="name">
-//           Name:
-//           <input
-//             type="text"
-//             name="name"
-//             onChange={handleChange}
-//             value={login.name}
-//             id="name"
-//           />
-//         </label>
-//       </form>
-
-//       <form>
-//         <label htmlFor="password">
-//           Password:
-//           <input
-//             type="text"
-//             name="password"
-//             onChange={handleChange}
-//             value={login.password}
-//             id="password"
-//           />
-//         </label>
-//       </form>
-
-//       <button
-//         type="button"
-//         onClick={() => {
-//           setLoading(true);
-//           auth
-//             .signin(login.name, login.password)
-//             .then(() => {
-//               setLoading(false);
-//               history.push("/");
-//             })
-//             .catch((err) => {
-//               console.log(err);
-//             });
-//         }}
-//       >
-//         {loading ? "Loading..." : "Sign In"}
-//       </button>
-//     </div>
-//   );
-// };
