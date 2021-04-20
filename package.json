@@ -16,7 +16,7 @@
     "serve": "webpack serve --config webpack.development.js",
     "test": "jest --coverage"
   },
-  "license": "AGPL-3.0-only",
+  "license": "UNLICENSED",
   "devDependencies": {
     "@babel/core": "^7.13.8",
     "@babel/plugin-proposal-class-properties": "^7.13.0",

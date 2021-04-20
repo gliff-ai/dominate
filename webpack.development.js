@@ -16,7 +16,7 @@ module.exports = merge(common, {
   plugins: [
     new webpack.DefinePlugin({
       STORE_URL: JSON.stringify(
-        process.env.API_URL || "http://localhost:8080/"
+        process.env.API_URL || "http://localhost:8000/"
       ),
     }),
   ],
