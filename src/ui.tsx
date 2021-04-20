@@ -15,13 +15,13 @@ import {
 } from "react-router-dom";
 
 import { Home } from "./Home";
-import { Curate, Match } from "./Curate";
+import { CurateWrapper } from "./Curate";
 
 type Children =
   | ((props: RouteChildrenProps<any>) => React.ReactNode)
   | React.ReactNode;
 
-  
+
 interface Props {
   etebaseInstance: DominateEtebase;
   children?: Children;
@@ -96,7 +96,7 @@ export class UserInterface extends Component<Props, State> {
             path="/curate/:id"
             render={({ match }) => (
               <div>
-                <Curate
+                <CurateWrapper
                   etebaseInstance={this.props.etebaseInstance}
                   selectedThing={this.selectThing}
                   match={match}
@@ -107,7 +107,7 @@ export class UserInterface extends Component<Props, State> {
           <Route
             path="/curate/"
             render={() => (
-              <Curate
+              <CurateWrapper
                 etebaseInstance={this.props.etebaseInstance}
                 selectedThing={this.selectThing}
               />
