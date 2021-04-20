@@ -1,13 +1,44 @@
-import React, { ReactElement, useState } from "react";
+import React, { useState } from "react";
+import Avatar from "@material-ui/core/Avatar";
+import Button from "@material-ui/core/Button";
+import CssBaseline from "@material-ui/core/CssBaseline";
+import TextField from "@material-ui/core/TextField";
+import Link from "@material-ui/core/Link";
+import Grid from "@material-ui/core/Grid";
+import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
+import Typography from "@material-ui/core/Typography";
+import { makeStyles } from "@material-ui/core/styles";
+import Container from "@material-ui/core/Container";
 import { useAuth } from "@/hooks/use-auth";
 import { useHistory } from "react-router-dom";
 
-export const SignUp = (): ReactElement => {
+const useStyles = makeStyles((theme) => ({
+  paper: {
+    marginTop: theme.spacing(8),
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  avatar: {
+    margin: theme.spacing(1),
+    backgroundColor: theme.palette.secondary.main,
+  },
+  form: {
+    width: "100%", // Fix IE 11 issue.
+    marginTop: theme.spacing(1),
+  },
+  submit: {
+    margin: theme.spacing(3, 0, 2),
+  },
+}));
+
+export const SignUp = () => {
+  const classes = useStyles();
   const auth = useAuth();
   const history = useHistory();
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState("");
-  const [paswordError, setPasswordError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
 
   const [signUp, setSignUp] = useState({
     name: "",
@@ -44,75 +75,102 @@ export const SignUp = (): ReactElement => {
     });
   };
 
+  const onSubmitForm = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const isValid = validate();
+
+    if (isValid) {
+      setLoading(true);
+      auth
+        .signup(signUp.name, signUp.password)
+        .then(() => {
+          setLoading(false);
+          history.push("/");
+        })
+        .catch((err) => {
+          alert(err);
+          setLoading(false);
+          setSignUp({ name: "", password: "", confirmPassword: "" });
+          setNameError("");
+          setPasswordError("");
+        });
+    }
+  };
+
   return (
-    <div>
-      <form>
-        <label htmlFor="name">
-          Name:
-          <input
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <div className={classes.paper}>
+        <Avatar className={classes.avatar}>
+          <LockOutlinedIcon />
+        </Avatar>
+        <Typography component="h1" variant="h5">
+          Sign Up
+        </Typography>
+        <form className={classes.form} onSubmit={onSubmitForm}>
+          <TextField
+            variant="outlined"
+            margin="normal"
             required
+            fullWidth
+            id="name"
+            label="Email Address"
             name="name"
+            autoComplete="email"
+            autoFocus
+            type="text"
             onChange={handleChange}
             value={signUp.name}
-            id="name"
-            placeholder="Enter email address"
           />
-        </label>
-        <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
-      </form>
-
-      <form>
-        <label htmlFor="password">
-          Password:
-          <input
-            type="text"
-            name="name"
+          <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
+          <TextField
+            variant="outlined"
+            margin="normal"
             required
-            onChange={handleChange}
-            value={signUp.password}
+            fullWidth
+            name="password"
+            label="Password"
+            type="password"
             id="password"
-          />
-        </label>
-      </form>
-
-      <form>
-        <label htmlFor="confirmPassword">
-          Confirm Password:
-          <input
-            type="text"
-            name="name"
-            required
+            autoComplete="current-password"
+            value={signUp.password}
             onChange={handleChange}
-            value={signUp.confirmPassword}
-            id="confirmPassword"
           />
-          <div style={{ color: "red", fontSize: 12 }}>{paswordError}</div>
-        </label>
-      </form>
 
-      <button
-        type="button"
-        onClick={(event) => {
-          event.preventDefault();
-          const isValid = validate();
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            name="confirmPassword"
+            label="Password"
+            type="password"
+            id="confirmPassword"
+            autoComplete="current-password"
+            value={signUp.confirmPassword}
+            onChange={handleChange}
+          />
+          <div style={{ color: "red", fontSize: 12 }}>{passwordError}</div>
 
-          if (isValid) {
-            setLoading(true);
-            auth
-              .signup(signUp.name, signUp.password)
-              .then(() => {
-                setLoading(false);
-                history.push("/");
-              })
-              .catch((err) => {
-                console.log(err);
-              });
-          }
-        }}
-        disabled={signUp.confirmPassword.length < 1}
-      >
-        {loading ? "Loading..." : "Sign up"}
-      </button>
-    </div>
+          <Button
+            type="submit"
+            fullWidth
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+          >
+            {loading ? "Loading..." : "Sign Up"}
+          </Button>
+
+          <Grid container>
+            <Grid item>
+              <Link href="/signin" variant="body2">
+                Already have an account? Sign In
+              </Link>
+            </Grid>
+          </Grid>
+        </form>
+      </div>
+    </Container>
   );
 };

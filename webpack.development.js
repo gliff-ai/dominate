@@ -15,7 +15,9 @@ module.exports = merge(common, {
   },
   plugins: [
     new webpack.DefinePlugin({
-      STORE_URL: JSON.stringify("https://store.staging.gliff.app/"),
+      STORE_URL: JSON.stringify(
+        process.env.API_URL || "http://localhost:8080/"
+      ),
     }),
   ],
 });

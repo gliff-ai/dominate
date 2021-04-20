@@ -40,6 +40,7 @@ export function SignIn() {
   const history = useHistory();
 
   const [loading, setLoading] = useState(false);
+  const [nameError, setNameError] = useState("");
 
   const [login, setLogin] = useState({
     name: "",
@@ -54,18 +55,35 @@ export function SignIn() {
     }));
   };
 
-  const onSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const validate = () => {
+    let nameErrorMessage = "";
+    if (!login.name.includes("@")) {
+      nameErrorMessage = "Invalid email";
+    }
+    if (nameErrorMessage) {
+      setNameError(nameErrorMessage);
+      return false;
+    }
+    return true;
+  };
+
+  const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setLoading(true);
-    auth
-      .signin(login.name, login.password)
-      .then(() => {
-        setLoading(false);
-        history.push("/");
-      })
-      .catch((err) => {
-        console.log(err);
-      });
+    const isValid = validate();
+    if (isValid) {
+      setLoading(true);
+      auth
+        .signin(login.name, login.password)
+        .then(() => {
+          setLoading(false);
+          history.push("/");
+        })
+        .catch((err) => {
+          alert(err);
+          setLoading(false);
+          setLogin({ name: "", password: "" });
+        });
+    }
   };
 
   return (
@@ -78,7 +96,7 @@ export function SignIn() {
         <Typography component="h1" variant="h5">
           Sign in
         </Typography>
-        <form className={classes.form} onSubmit={onSubmit}>
+        <form className={classes.form} onSubmit={onFormSubmit}>
           <TextField
             variant="outlined"
             margin="normal"
@@ -93,6 +111,8 @@ export function SignIn() {
             onChange={handleChange}
             value={login.name}
           />
+          <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
+
           <TextField
             variant="outlined"
             margin="normal"
@@ -100,44 +120,25 @@ export function SignIn() {
             fullWidth
             name="password"
             label="Password"
-            // type="password"
+            type="password"
             id="password"
             autoComplete="current-password"
-            type="text"
             value={login.password}
             onChange={handleChange}
           />
-          {/* <FormControlLabel
-            control={
-              <Controller
-                as={Checkbox}
-                control={control}
-                name="remember"
-                color="primary"
-                defaultValue={false}
-              />
-            }
-            label="Remember me"
-          /> */}
           <Button
             type="submit"
             fullWidth
             variant="contained"
             color="primary"
             className={classes.submit}
-            // onClick={}
           >
             {loading ? "Loading..." : "Sign In"}
           </Button>
           <Grid container>
             <Grid item xs>
-              <Link href="#" variant="body2">
-                Forgot password?
-              </Link>
-            </Grid>
-            <Grid item>
-              <Link href="#" variant="body2">
-                {"Don't have an account? Sign Up"}
+              <Link href="/signUp" variant="body2">
+                Don&apos;t have an account? Sign Up
               </Link>
             </Grid>
           </Grid>
