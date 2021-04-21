@@ -1,19 +1,22 @@
 import React, { useState } from "react";
-import Avatar from "@material-ui/core/Avatar";
-import Button from "@material-ui/core/Button";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import TextField from "@material-ui/core/TextField";
-import FormControlLabel from "@material-ui/core/FormControlLabel";
-import Checkbox from "@material-ui/core/Checkbox";
-import Link from "@material-ui/core/Link";
-import Grid from "@material-ui/core/Grid";
+import {
+  Avatar,
+  Button,
+  CssBaseline,
+  TextField,
+  Link,
+  Grid,
+  Typography,
+  makeStyles,
+  Container,
+  CircularProgress,
+  Snackbar,
+  IconButton,
+} from "@material-ui/core";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-import Typography from "@material-ui/core/Typography";
-import { makeStyles } from "@material-ui/core/styles";
-import Container from "@material-ui/core/Container";
+import CloseIcon from "@material-ui/icons/Close";
 import { useAuth } from "@/hooks/use-auth";
 import { useHistory } from "react-router-dom";
-import { CircularProgress } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -42,7 +45,7 @@ export function SignIn() {
 
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState("");
-
+  const [open, setOpen] = useState(false);
   const [login, setLogin] = useState({
     name: "",
     password: "",
@@ -54,6 +57,10 @@ export function SignIn() {
       ...prevState,
       [id]: value,
     }));
+  };
+
+  const handleClose = () => {
+    setOpen(false);
   };
 
   const validate = () => {
@@ -80,7 +87,7 @@ export function SignIn() {
           history.push("/");
         })
         .catch((err) => {
-          alert(err);
+          setOpen(true);
           setLoading(false);
           setLogin({ name: "", password: "" });
         });
@@ -144,6 +151,30 @@ export function SignIn() {
             </Grid>
           </Grid>
         </form>
+        <Snackbar
+          anchorOrigin={{
+            vertical: "top",
+            horizontal: "center",
+          }}
+          open={open}
+          autoHideDuration={6000}
+          onClose={handleClose}
+          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+          message="Login Failed. Your username and/or password do not match"
+          action={
+            // eslint-disable-next-line react/jsx-wrap-multilines
+            <>
+              <IconButton
+                size="small"
+                aria-label="close"
+                color="inherit"
+                onClick={handleClose}
+              >
+                <CloseIcon fontSize="small" />
+              </IconButton>
+            </>
+          }
+        />
       </div>
     </Container>
   );
