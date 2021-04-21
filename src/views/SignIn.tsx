@@ -159,7 +159,6 @@ export function SignIn() {
           open={open}
           autoHideDuration={6000}
           onClose={handleClose}
-          // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
           message="Login Failed. Your username and/or password do not match"
           action={
             // eslint-disable-next-line react/jsx-wrap-multilines
