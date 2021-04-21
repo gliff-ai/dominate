@@ -13,6 +13,7 @@ import { makeStyles } from "@material-ui/core/styles";
 import Container from "@material-ui/core/Container";
 import { useAuth } from "@/hooks/use-auth";
 import { useHistory } from "react-router-dom";
+import { CircularProgress } from "@material-ui/core";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -133,7 +134,7 @@ export function SignIn() {
             color="primary"
             className={classes.submit}
           >
-            {loading ? "Loading..." : "Sign In"}
+            {loading ? <CircularProgress color="inherit" /> : "Sign In"}
           </Button>
           <Grid container>
             <Grid item xs>

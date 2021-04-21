@@ -1,14 +1,20 @@
 import React, { useState } from "react";
-import Avatar from "@material-ui/core/Avatar";
-import Button from "@material-ui/core/Button";
-import CssBaseline from "@material-ui/core/CssBaseline";
-import TextField from "@material-ui/core/TextField";
-import Link from "@material-ui/core/Link";
-import Grid from "@material-ui/core/Grid";
+import {
+  Avatar,
+  Button,
+  CssBaseline,
+  TextField,
+  Link,
+  Grid,
+  Typography,
+  makeStyles,
+  Container,
+  CircularProgress,
+  Snackbar,
+  IconButton,
+} from "@material-ui/core";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-import Typography from "@material-ui/core/Typography";
-import { makeStyles } from "@material-ui/core/styles";
-import Container from "@material-ui/core/Container";
+import CloseIcon from "@material-ui/icons/Close";
 import { useAuth } from "@/hooks/use-auth";
 import { useHistory } from "react-router-dom";
 
@@ -37,8 +43,10 @@ export const SignUp = () => {
   const auth = useAuth();
   const history = useHistory();
   const [loading, setLoading] = useState(false);
+  const [open, setOpen] = useState(false);
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
+  const [etebaseError, setEtebaseError] = useState({});
 
   const [signUp, setSignUp] = useState({
     name: "",
@@ -75,6 +83,10 @@ export const SignUp = () => {
     });
   };
 
+  const handleClose = () => {
+    setOpen(false);
+  };
+
   const onSubmitForm = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const isValid = validate();
@@ -88,7 +100,9 @@ export const SignUp = () => {
           history.push("/");
         })
         .catch((err) => {
-          alert(err);
+          setOpen(true);
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          setEtebaseError(err.message);
           setLoading(false);
           setSignUp({ name: "", password: "", confirmPassword: "" });
           setNameError("");
@@ -159,17 +173,43 @@ export const SignUp = () => {
             color="primary"
             className={classes.submit}
           >
-            {loading ? "Loading..." : "Sign Up"}
+            {loading ? <CircularProgress color="inherit" /> : "Sign Up"}
           </Button>
 
           <Grid container>
-            <Grid item>
+            <Grid item xs>
               <Link href="/signin" variant="body2">
                 Already have an account? Sign In
               </Link>
             </Grid>
           </Grid>
         </form>
+        <div>
+          <Snackbar
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+            open={open}
+            autoHideDuration={6000}
+            onClose={handleClose}
+            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+            message={`${etebaseError}`}
+            action={
+              // eslint-disable-next-line react/jsx-wrap-multilines
+              <>
+                <IconButton
+                  size="small"
+                  aria-label="close"
+                  color="inherit"
+                  onClick={handleClose}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </>
+            }
+          />
+        </div>
       </div>
     </Container>
   );
