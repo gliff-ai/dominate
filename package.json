@@ -58,6 +58,8 @@
     "@gliff-ai/annotate": "^0.3.0",
     "@gliff-ai/curate": "^0.0.1",
     "@gliff-ai/manage": "^0.0.0-dev",
+    "@material-ui/core": "^4.11.3",
+    "@material-ui/icons": "^4.11.2",
     "@types/react-router-dom": "^5.1.7",
     "etebase": "^0.42.0",
     "react": "^17.0.0",
