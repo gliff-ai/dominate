@@ -1,8 +1,8 @@
 {
-  "name": "@gliff-ai/annotate",
+  "name": "@gliff-ai/dominate",
   "version": "0.0.2",
-  "description": "gliff.ai ANNOTATE - a user friendly browser interface for annotating multidimensional images for machine learning",
-  "repository": "git://github.com/gliff-ai/annotate.git",
+  "description": "gliff.ai DOMINATE",
+  "repository": "git://github.com/gliff-ai/dominate.git",
   "main": "dist/main.js",
   "files": [
     "dist/*"
@@ -16,7 +16,7 @@
     "serve": "webpack serve --config webpack.development.js",
     "test": "jest --coverage"
   },
-  "license": "AGPL-3.0-only",
+  "license": "UNLICENSED",
   "devDependencies": {
     "@babel/core": "^7.13.8",
     "@babel/plugin-proposal-class-properties": "^7.13.0",
@@ -55,7 +55,9 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
-    "@gliff-ai/annotate": "github:gliff-ai/annotate",
+    "@gliff-ai/annotate": "^0.3.0",
+    "@gliff-ai/curate": "^0.0.1",
+    "@gliff-ai/manage": "^0.0.0-dev",
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
     "@types/react-router-dom": "^5.1.7",

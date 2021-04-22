@@ -1,6 +1,8 @@
 import React, { Component, ReactNode } from "react";
-import { DominateEtebase, Collection, Item, Gallery, Image } from "@/etebase";
 import { Link } from "react-router-dom";
+import {UserInterface as Curate} from "@gliff-ai/curate"
+
+import { DominateEtebase, Collection, Item, Gallery, Image } from "@/etebase";
 
 export interface Match {
   path: string;
@@ -23,7 +25,7 @@ interface State {
   collectionId?: string;
 }
 
-export class Curate extends Component<Props, State> {
+export class CurateWrapper extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
     this.state = {
@@ -93,7 +95,7 @@ export class Curate extends Component<Props, State> {
     if (this.props.etebaseInstance) {
       return (
         <div>
-          <h1>Curate</h1>
+          <Curate />
 
           <h3>Collections:</h3>
           {this.state.collectionsMeta.map((col) => (
