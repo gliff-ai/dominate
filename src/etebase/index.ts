@@ -3,7 +3,7 @@ import { Account, Collection, Item } from "etebase";
 import { Gallery, Image } from "./interfaces";
 
 declare const STORE_URL: string;
-const SERVER_URL = STORE_URL;
+const SERVER_URL = `${STORE_URL}etebase`;
 
 interface User {
   username: string;
