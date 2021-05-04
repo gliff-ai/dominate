@@ -14,7 +14,7 @@
     "lint": "npm run lint:ts",
     "lint:ts": "npx eslint \"**/*.ts*\"",
     "serve": "webpack serve --config webpack.development.js",
-    "test": "jest --coverage"
+    "test": "jest --coverage --passWithNoTests"
   },
   "license": "UNLICENSED",
   "devDependencies": {
