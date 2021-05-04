@@ -21,7 +21,6 @@ type Children =
   | ((props: RouteChildrenProps<any>) => React.ReactNode)
   | React.ReactNode;
 
-
 interface Props {
   etebaseInstance: DominateEtebase;
   children?: Children;
