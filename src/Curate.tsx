@@ -1,6 +1,6 @@
 import React, { Component, ReactNode } from "react";
 import { Link } from "react-router-dom";
-import {UserInterface as Curate} from "@gliff-ai/curate"
+import { UserInterface as Curate } from "@gliff-ai/curate";
 
 import { DominateEtebase, Collection, Item, Gallery, Image } from "@/etebase";
 
