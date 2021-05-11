@@ -3,7 +3,7 @@ import React, { Component, ReactNode } from "react";
 import { Collection, DominateEtebase, Item } from "@/etebase";
 import { useAuth } from "@/hooks/use-auth";
 import { SignIn } from "@/views/SignIn";
-import { SignUp } from "@/views/SignUp";
+import { SignUp } from "@/views/signup/SignUp";
 import { Navbar } from "@/NavBar";
 
 import {

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useContext, createContext } from "react";
-import { DominateEtebase } from "@/etebase";
+import { DominateEtebase, API_URL } from "@/etebase";
 
 interface Props {
   children: React.ReactElement;
@@ -8,6 +8,7 @@ interface Props {
 
 interface User {
   username: string;
+  authToken: string;
 }
 
 interface Context {
@@ -15,6 +16,7 @@ interface Context {
   signin: (username: string, password: string) => Promise<User>;
   signout: () => Promise<boolean>;
   signup: (username: string, password: string) => Promise<User>;
+  createProfile: (name: string) => Promise<Response>; // TODO add return type
 }
 
 const authContext = createContext<Context>(null);
@@ -45,7 +47,22 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
       return response;
     });
 
-  // Login initally if we have a session
+  const createProfile = (name: string) => {
+    const u = etebaseInstance.getUser();
+
+    if(!u) return null;
+
+    // Handle creating recovery key here!
+    return fetch(`${API_URL}/user/`, {
+      method: "POST",
+      headers: { Authorization: `Token ${u.authToken}` },
+      body: JSON.stringify({
+        name,
+      }),
+    });
+  };
+
+  // Login initially if we have a session
   useEffect(() => {
     etebaseInstance
       .init()
@@ -67,6 +84,7 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
     signin,
     signout,
     signup,
+    createProfile,
   };
 }
 
