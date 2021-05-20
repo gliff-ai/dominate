@@ -95,7 +95,6 @@ export class CurateWrapper extends Component<Props, State> {
     if (this.props.etebaseInstance) {
       return (
         <div>
-          {/*<Curate />*/}
 
           <h3>Collections:</h3>
           {this.state.collectionsMeta ? this.state.collectionsMeta.map((col) => (
