@@ -19,7 +19,7 @@ import CloseIcon from "@material-ui/icons/Close";
 import { useAuth } from "@/hooks/use-auth";
 import { useHistory } from "react-router-dom";
 import { API_URL } from "@/etebase";
-import {createCheckoutSession} from "@/services/user";
+import { createCheckoutSession } from "@/services/user";
 
 const stripePromise = loadStripe(
   "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
@@ -121,7 +121,7 @@ export const SignUp = () => {
       const response = await createCheckoutSession(tierId);
 
       console.log(response);
-      const session = response
+      const session = response;
       // console.log(session);
       // When the customer clicks on the button, redirect them to Checkout.
       const result = await stripe.redirectToCheckout({
