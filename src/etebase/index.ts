@@ -1,9 +1,8 @@
 import * as Etebase from "etebase";
 import { Account, Collection, Item } from "etebase";
-import {User} from "@/services/user/interfaces";
+import { User } from "@/services/user/interfaces";
 
 import { Gallery, Image } from "./interfaces";
-
 
 declare const STORE_URL: string;
 const SERVER_URL = `${STORE_URL}etebase`;

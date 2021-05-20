@@ -95,14 +95,15 @@ export class CurateWrapper extends Component<Props, State> {
     if (this.props.etebaseInstance) {
       return (
         <div>
-
           <h3>Collections:</h3>
-          {this.state.collectionsMeta ? this.state.collectionsMeta.map((col) => (
-            <span key={col.uid}>
-              <Link to={`/curate/${col.uid}`}>{col.name}</Link>
-              <br />
-            </span>
-          )) : null}
+          {this.state.collectionsMeta
+            ? this.state.collectionsMeta.map((col) => (
+                <span key={col.uid}>
+                  <Link to={`/curate/${col.uid}`}>{col.name}</Link>
+                  <br />
+                </span>
+              ))
+            : null}
 
           <h3>Items</h3>
           {this.state.items.map((item) => (
