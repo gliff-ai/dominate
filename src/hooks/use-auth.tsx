@@ -1,7 +1,7 @@
+import axios from "axios";
 import React, { useState, useEffect, useContext, createContext } from "react";
 import { DominateEtebase } from "@/etebase";
 import {User, UserProfile} from "@/services/user/interfaces";
-import axios from "axios";
 import { createUserProfile } from "@/services/user";
 
 interface Props {
@@ -29,8 +29,6 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
 
   // Wrapper to the set hook to add the auth token
   const updateUser = (authedUser: User | null): void => {
-    console.log("updateUser")
-    console.log(authedUser)
     if (authedUser) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       axios.defaults.headers.common.Authorization = `Token ${authedUser.authToken}`;
@@ -58,11 +56,9 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
     });
 
   const createProfile = (name: string) => {
-    const u = etebaseInstance.getUser();
+    if (!etebaseInstance.getUser()) return null;
 
-    if (!u) return null;
-
-    // Handle creating recovery key here!
+    // TODO: Handle creating recovery key here!
     return createUserProfile(name);
   };
 
