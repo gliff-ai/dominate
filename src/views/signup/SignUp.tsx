@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { loadStripe } from "@stripe/stripe-js";
+import { loadStripe, Stripe } from "@stripe/stripe-js";
 import {
   Avatar,
   Button,
@@ -18,8 +18,9 @@ import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import CloseIcon from "@material-ui/icons/Close";
 import { useAuth } from "@/hooks/use-auth";
 import { useHistory } from "react-router-dom";
+import { API_URL } from "@/etebase";
+import {createCheckoutSession} from "@/services/user";
 
-// eslint-disable-next-line @typescript-eslint/no-unsafe-call
 const stripePromise = loadStripe(
   "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
 );
@@ -63,6 +64,8 @@ export const SignUp = () => {
     password: "",
     confirmPassword: "",
   });
+
+  const tierId = query.get("tier_id") || "0";
 
   const validate = () => {
     if (signUp.password !== signUp.confirmPassword) {
@@ -109,26 +112,17 @@ export const SignUp = () => {
       // Create and update their profile
       setLoading(false);
 
-      const tierId = query.get("tier_id") || 0;
-
       if (!tierId) {
         history.push("/"); // It's the free plan so don't bill them
       }
 
       const stripe = await stripePromise;
-      const response = await fetch(
-        "http://127.0.0.1:8000/django/api/billing/create-checkout-session",
-        {
-          method: "POST",
-          headers: { Authorization: `Token ${user.authToken}` },
-          body: JSON.stringify({
-            tier_id: tierId,
-          }),
-        }
-      );
 
-      const session = await response.json();
-      console.log(session);
+      const response = await createCheckoutSession(tierId);
+
+      console.log(response);
+      const session = response
+      // console.log(session);
       // When the customer clicks on the button, redirect them to Checkout.
       const result = await stripe.redirectToCheckout({
         sessionId: session.id,

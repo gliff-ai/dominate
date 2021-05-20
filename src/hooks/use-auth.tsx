@@ -1,14 +1,12 @@
 import React, { useState, useEffect, useContext, createContext } from "react";
-import { DominateEtebase, API_URL } from "@/etebase";
+import { DominateEtebase } from "@/etebase";
+import {User, UserProfile} from "@/services/user/interfaces";
+import axios from "axios";
+import { createUserProfile } from "@/services/user";
 
 interface Props {
   children: React.ReactElement;
   etebaseInstance: DominateEtebase;
-}
-
-interface User {
-  username: string;
-  authToken: string;
 }
 
 interface Context {
@@ -16,7 +14,7 @@ interface Context {
   signin: (username: string, password: string) => Promise<User>;
   signout: () => Promise<boolean>;
   signup: (username: string, password: string) => Promise<User>;
-  createProfile: (name: string) => Promise<Response>; // TODO add return type
+  createProfile: (name: string) => Promise<UserProfile>; // TODO add return type
 }
 
 const authContext = createContext<Context>(null);
@@ -29,37 +27,43 @@ export const useAuth = (): Context => useContext(authContext);
 function useProvideAuth(etebaseInstance: DominateEtebase) {
   const [user, setUser] = useState<User>(null);
 
+  // Wrapper to the set hook to add the auth token
+  const updateUser = (authedUser: User | null): void => {
+    console.log("updateUser")
+    console.log(authedUser)
+    if (authedUser) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      axios.defaults.headers.common.Authorization = `Token ${authedUser.authToken}`;
+    }
+
+    setUser(authedUser);
+  };
+
   const signin = (username, password): Promise<User> =>
     etebaseInstance.login(username, password).then((etebaseUser) => {
-      setUser(etebaseUser);
+      updateUser(etebaseUser);
       return etebaseUser;
     });
 
   const signup = (email, password): Promise<User> =>
     etebaseInstance.signup(email, password).then((etebaseUser) => {
-      setUser(etebaseUser);
+      updateUser(etebaseUser);
       return etebaseUser;
     });
 
   const signout = (): Promise<boolean> =>
     etebaseInstance.logout().then((response) => {
-      setUser(null);
+      updateUser(null);
       return response;
     });
 
   const createProfile = (name: string) => {
     const u = etebaseInstance.getUser();
 
-    if(!u) return null;
+    if (!u) return null;
 
     // Handle creating recovery key here!
-    return fetch(`${API_URL}/user/`, {
-      method: "POST",
-      headers: { Authorization: `Token ${u.authToken}` },
-      body: JSON.stringify({
-        name,
-      }),
-    });
+    return createUserProfile(name);
   };
 
   // Login initially if we have a session
@@ -68,9 +72,9 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
       .init()
       .then((authedUser) => {
         if (authedUser) {
-          setUser(authedUser);
+          updateUser(authedUser);
         } else {
-          setUser(null);
+          updateUser(null);
         }
       })
       .catch((err) => {

@@ -82,6 +82,9 @@ export class UserInterface extends Component<Props, State> {
         <br />
 
         <Switch>
+          <PrivateRoute path="/signup/success">
+            <h1>THANK YOU FOR SIGNING UP</h1>
+          </PrivateRoute>
           <Route path="/signin">
             <SignIn />
           </Route>
