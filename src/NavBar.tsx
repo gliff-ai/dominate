@@ -1,12 +1,12 @@
 import React, { ReactElement } from "react";
-import { Link, useHistory } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 import { useAuth } from "./hooks/use-auth";
 
 export const Navbar = (): ReactElement => {
   // Get auth state and re-render anytime it changes
   const auth = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   return (
     <div>
@@ -17,14 +17,13 @@ export const Navbar = (): ReactElement => {
             &nbsp;
             <Link to="/curate">CURATE</Link>
             &nbsp;
-            <Link to="/account">
-              MANAGE
-              {auth.user.username}
-            </Link>
+            <Link to="/manage">MANAGE</Link>
+            &nbsp;
+            <Link to="/account">{auth.user.username}</Link>
             &nbsp;
             <button
               type="button"
-              onClick={() => auth.signout().then(() => history.push("/signin"))}
+              onClick={() => auth.signout().then(() => navigate(("signin")))}
             >
               Sign Out
             </button>

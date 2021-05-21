@@ -16,7 +16,7 @@ import {
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import CloseIcon from "@material-ui/icons/Close";
 import { useAuth } from "@/hooks/use-auth";
-import { useHistory } from "react-router-dom";
+import {useHistory, useNavigate} from "react-router-dom";
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -41,8 +41,7 @@ const useStyles = makeStyles((theme) => ({
 export const SignUp = () => {
   const classes = useStyles();
   const auth = useAuth();
-  const history = useHistory();
-  const [loading, setLoading] = useState(false);
+  const navigate("home"  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -97,7 +96,7 @@ export const SignUp = () => {
         .signup(signUp.name, signUp.password)
         .then(() => {
           setLoading(false);
-          history.push("/");
+          navigate("home");
         })
         .catch((err) => {
           setOpen(true);
