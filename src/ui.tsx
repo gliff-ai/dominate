@@ -3,7 +3,7 @@ import React, { Component, ReactNode } from "react";
 import { Collection, DominateEtebase, Item } from "@/etebase";
 import { useAuth } from "@/hooks/use-auth";
 import { SignIn } from "@/views/SignIn";
-import { SignUp } from "@/views/SignUp";
+import { SignUp } from "@/views/signup/SignUp";
 import { Navbar } from "@/NavBar";
 
 import {
@@ -82,6 +82,9 @@ export class UserInterface extends Component<Props, State> {
         <br />
 
         <Switch>
+          <PrivateRoute path="/signup/success">
+            <h1>THANK YOU FOR SIGNING UP</h1>
+          </PrivateRoute>
           <Route path="/signin">
             <SignIn />
           </Route>

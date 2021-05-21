@@ -1,13 +1,12 @@
 import * as Etebase from "etebase";
 import { Account, Collection, Item } from "etebase";
+import { User } from "@/services/user/interfaces";
+
 import { Gallery, Image } from "./interfaces";
 
 declare const STORE_URL: string;
 const SERVER_URL = `${STORE_URL}etebase`;
-
-interface User {
-  username: string;
-}
+export const API_URL = `${STORE_URL}django/api`;
 
 export class DominateEtebase {
   etebaseInstance: Account;
@@ -24,13 +23,27 @@ export class DominateEtebase {
     this.isLoggedIn = false;
   }
 
+  getUser = (): null | User => {
+    if (this.etebaseInstance?.user?.username) {
+      return {
+        username: this.etebaseInstance.user.username,
+        authToken: this.etebaseInstance.authToken,
+      };
+    }
+
+    return null;
+  };
+
   init = async (): Promise<null | User> => {
     const savedSession = localStorage.getItem("etebaseInstance");
     if (savedSession) {
       this.etebaseInstance = await Etebase.Account.restore(savedSession);
 
       this.isLoggedIn = !!this.etebaseInstance?.user?.username;
-      return { username: this.etebaseInstance.user.username };
+      return {
+        username: this.etebaseInstance.user.username,
+        authToken: this.etebaseInstance.authToken,
+      };
     }
 
     this.isLoggedIn = false;
@@ -54,7 +67,10 @@ export class DominateEtebase {
     }
     this.isLoggedIn = true;
 
-    return { username: this.etebaseInstance.user.username };
+    return {
+      username: this.etebaseInstance.user.username,
+      authToken: this.etebaseInstance.authToken,
+    };
   };
 
   signup = async (email: string, password: string): Promise<User> => {
@@ -67,7 +83,17 @@ export class DominateEtebase {
       SERVER_URL
     );
 
-    return { username: this.etebaseInstance.user.username };
+    const newSession = await this.etebaseInstance.save();
+
+    // TODO: encrypt this!
+    localStorage.setItem("etebaseInstance", newSession);
+
+    this.isLoggedIn = true;
+
+    return {
+      username: this.etebaseInstance.user.username,
+      authToken: this.etebaseInstance.authToken,
+    };
   };
 
   logout = async (): Promise<boolean> => {
