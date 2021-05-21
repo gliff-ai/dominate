@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { loadStripe, Stripe } from "@stripe/stripe-js";
 import {
   Avatar,
   Button,
@@ -16,7 +17,17 @@ import {
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import CloseIcon from "@material-ui/icons/Close";
 import { useAuth } from "@/hooks/use-auth";
-import {useHistory, useNavigate} from "react-router-dom";
+
+import {useNavigate} from "react-router-dom";
+
+import { API_URL } from "@/etebase";
+import { createCheckoutSession } from "@/services/user";
+
+const stripePromise = loadStripe(
+  "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
+);
+const query = new URLSearchParams(window.location.search);
+
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -41,36 +52,30 @@ const useStyles = makeStyles((theme) => ({
 export const SignUp = () => {
   const classes = useStyles();
   const auth = useAuth();
-  const navigate("home"  const [loading, setLoading] = useState(false);
+  const navigate = useNavigate()
+
+  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [etebaseError, setEtebaseError] = useState({});
 
   const [signUp, setSignUp] = useState({
     name: "",
+    email: "",
     password: "",
     confirmPassword: "",
   });
 
-  const validate = () => {
-    let nameErrorMessage = "";
-    let passwordErrorMessage = "";
+  const tierId = query.get("tier_id") || "0";
 
+  const validate = () => {
     if (signUp.password !== signUp.confirmPassword) {
-      passwordErrorMessage = "Passwords do not match";
-    }
-    if (passwordErrorMessage) {
-      setPasswordError(passwordErrorMessage);
+      setPasswordError("Passwords do not match");
       return false;
     }
-    if (!signUp.name.includes("@")) {
-      nameErrorMessage = "Invalid email";
-    }
-    if (nameErrorMessage) {
-      setNameError(nameErrorMessage);
-      return false;
-    }
+
     return true;
   };
 
@@ -86,9 +91,17 @@ export const SignUp = () => {
     setOpen(false);
   };
 
-  const onSubmitForm = (event: React.FormEvent<HTMLFormElement>) => {
+  const onSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+
+    // Reset any errors
+    setEmailError("");
+    setPasswordError("");
+    setNameError("");
+    setLoading(true);
+
     const isValid = validate();
+
 
     if (isValid) {
       setLoading(true);
@@ -103,10 +116,56 @@ export const SignUp = () => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           setEtebaseError(err.message);
           setLoading(false);
-          setSignUp({ name: "", password: "", confirmPassword: "" });
+          setSignUp({ name: "", email: "", password: "", confirmPassword: "" });
           setNameError("");
           setPasswordError("");
         });
+      }
+    if (!isValid) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const user = await auth.signup(signUp.email, signUp.password);
+
+      const profile = await auth.createProfile(signUp.name);
+
+      // Create and update their profile
+      setLoading(false);
+
+      if (!tierId) {
+        navigate("home"); // It's the free plan so don't bill them
+      }
+
+      const stripe = await stripePromise;
+
+      const response = await createCheckoutSession(tierId);
+
+      console.log(response);
+      const session = response;
+      // console.log(session);
+      // When the customer clicks on the button, redirect them to Checkout.
+      const result = await stripe.redirectToCheckout({
+        sessionId: session.id,
+      });
+
+      if (result.error) {
+        // If `redirectToCheckout` fails due to a browser or network
+        // error, display the localized error message to your customer
+        // using `result.error.message`.
+      }
+    } catch (e) {
+      setOpen(true);
+      setLoading(false);
+      setSignUp({ name: "", email: "", password: "", confirmPassword: "" });
+      setEmailError("");
+      setNameError("");
+      setPasswordError("");
+
+      if (e instanceof Error) {
+        setEtebaseError(e.message);
+      }
     }
   };
 
@@ -126,11 +185,25 @@ export const SignUp = () => {
             margin="normal"
             required
             fullWidth
-            id="name"
+            id="email"
             label="Email Address"
-            name="name"
+            name="email"
             autoComplete="email"
             autoFocus
+            type="email"
+            onChange={handleChange}
+            value={signUp.email}
+          />
+          <div style={{ color: "red", fontSize: 12 }}>{emailError}</div>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="name"
+            label="Name"
+            name="name"
+            autoComplete="full_name"
             type="text"
             onChange={handleChange}
             value={signUp.name}
@@ -156,7 +229,7 @@ export const SignUp = () => {
             required
             fullWidth
             name="confirmPassword"
-            label="Password"
+            label="Confirm Password"
             type="password"
             id="confirmPassword"
             autoComplete="current-password"

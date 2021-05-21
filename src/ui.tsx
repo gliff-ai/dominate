@@ -3,17 +3,13 @@ import React, { Component, ReactNode } from "react";
 import { Collection, DominateEtebase, Item } from "@/etebase";
 import { useAuth } from "@/hooks/use-auth";
 import { SignIn } from "@/views/SignIn";
-import { SignUp } from "@/views/SignUp";
+import { SignUp } from "@/views/signup/SignUp";
 import { Navbar } from "@/NavBar";
 
-import {
-    BrowserRouter,
-
-    Route,
-    Routes,
-} from "react-router-dom";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { Home } from "./Home";
+import { ManageWrapper } from "@/ManageWrapper";
 // import { CurateWrapper } from "./Curate";
 // import { ManageWrapper } from "@/ManageWrapper";
 //
@@ -88,12 +84,17 @@ export class UserInterface extends Component<Props, State> {
           <Route path="/signup">
             <SignUp />
           </Route>
-          {/*<PrivateRoute path="/annotate">*/}
-          {/*  <div>TODO</div>*/}
-          {/*</PrivateRoute>*/}
-          {/*<PrivateRoute path="/manage">*/}
-          {/*  <ManageWrapper etebaseInstance={this.props.etebaseInstance} />*/}
-          {/*</PrivateRoute>*/}
+          <Route path="/annotate">
+            <div>TODO</div>
+          </Route>
+
+          <Route
+            path="manage/*"
+            element={
+              <ManageWrapper etebaseInstance={this.props.etebaseInstance} />
+            }
+          />
+
           {/*<Route*/}
           {/*  path="/curate/:id" >*/}
           {/*    <div>*/}

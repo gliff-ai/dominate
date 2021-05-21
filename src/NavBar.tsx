@@ -17,7 +17,7 @@ export const Navbar = (): ReactElement => {
             &nbsp;
             <Link to="/curate">CURATE</Link>
             &nbsp;
-            <Link to="/manage">MANAGE</Link>
+            <Link to="/managee">MANAGE</Link>
             &nbsp;
             <Link to="/account">{auth.user.username}</Link>
             &nbsp;
