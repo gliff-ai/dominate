@@ -102,6 +102,7 @@ export class AnnotateWrapper extends Component<Props, State> {
         height,
         num_slices: slices,
         num_channels: channels,
+        size: width * height,
       });
     }
     return null;
