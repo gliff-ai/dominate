@@ -111,7 +111,6 @@ export class UserInterface extends Component<Props, State> {
               <div>
                 <CurateWrapper
                   etebaseInstance={this.props.etebaseInstance}
-                  selectedThing={this.selectThing}
                   match={match}
                 />
               </div>
@@ -120,10 +119,7 @@ export class UserInterface extends Component<Props, State> {
           <Route
             path="/curate/"
             render={() => (
-              <CurateWrapper
-                etebaseInstance={this.props.etebaseInstance}
-                selectedThing={this.selectThing}
-              />
+              <CurateWrapper etebaseInstance={this.props.etebaseInstance} />
             )}
           />
           <Route path="/">

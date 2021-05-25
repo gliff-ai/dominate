@@ -1,8 +1,10 @@
 import React, { Component, ReactNode } from "react";
 import { Link } from "react-router-dom";
+import { UploadImage, ImageFileInfo } from "@gliff-ai/upload";
 import { UserInterface as Curate } from "@gliff-ai/curate";
 
-import { DominateEtebase, Collection, Item, Gallery, Image } from "@/etebase";
+import { DominateEtebase, Collection, Item, Gallery } from "@/etebase";
+import { Slices, Image } from "@/etebase/interfaces";
 
 export interface Match {
   path: string;
@@ -13,15 +15,13 @@ export interface Match {
 
 interface Props {
   etebaseInstance: DominateEtebase;
-  // eslint-disable-next-line react/no-unused-prop-types
-  selectedThing: (thingType: string, thing: Collection | Item) => void;
   match?: Match;
 }
 
 interface State {
   collectionsMeta: Gallery[];
-  items: Image[];
   collectionId?: string;
+  items: Image[];
 }
 
 export class CurateWrapper extends Component<Props, State> {
@@ -33,6 +33,9 @@ export class CurateWrapper extends Component<Props, State> {
       collectionId: this.props.match?.params?.id || null,
     };
   }
+
+  imageFileInfo: ImageFileInfo;
+  slicesData: Slices;
 
   componentDidMount() {
     if (this.props.etebaseInstance) {
@@ -90,10 +93,29 @@ export class CurateWrapper extends Component<Props, State> {
     }
   }
 
+  setUploadedImage = async (
+    imageFileInfo: ImageFileInfo,
+    slicesData: Slices
+  ): Promise<void> => {
+    this.imageFileInfo = imageFileInfo;
+    this.slicesData = slicesData;
+    this.props.etebaseInstance
+      .createCollection("temp-gallery")
+      .then((uid) => {
+        this.props.etebaseInstance.createImage(uid, this.slicesData);
+      })
+      .catch((e) => console.log(e));
+  };
+
   render = (): ReactNode => {
     if (this.props.etebaseInstance) {
       return (
         <div>
+          <UploadImage
+            setUploadedImage={this.setUploadedImage}
+            spanElement={<span>Upload</span>}
+            multiple
+          />
           <h3>Collections:</h3>
           {this.state.collectionsMeta
             ? this.state.collectionsMeta.map((col) => (

@@ -2,7 +2,7 @@ import * as Etebase from "etebase";
 import { Account, Collection, Item } from "etebase";
 import { User } from "@/services/user/interfaces";
 import { Annotations } from "@gliff-ai/annotate";
-import { Gallery, Image, Annotation } from "./interfaces";
+import { Gallery, Image, Slices } from "./interfaces";
 
 declare const STORE_URL: string;
 const SERVER_URL = `${STORE_URL}etebase`;
@@ -225,6 +225,46 @@ export class DominateEtebase {
     const { data } = await collectionManager.list(type);
     this.collectionsMeta = data.map(this.wrangleGallery);
     return this.collectionsMeta;
+  };
+
+  createCollection = async (name: string): Promise<string | null> => {
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+
+    // Create, encrypt and upload a new collection
+    const collection = await collectionManager.create(
+      "gliff.gallery",
+      {
+        name,
+      },
+      ""
+    );
+    await collectionManager.upload(collection);
+    return collection.uid;
+  };
+
+  createImage = async (
+    collectionId: string,
+    Slices?: Slices
+  ): Promise<void> => {
+    // Retrieve itemManager
+    const itemManager = await this.getItemManager(collectionId).catch((e) => {
+      console.log(e);
+    });
+
+    // Create new image item
+    const createdTime = new Date().getTime();
+    const item = await itemManager.create(
+      {
+        type: "gliff.image",
+        createdTime: createdTime,
+        modifiedTime: createdTime,
+        labels: [],
+      },
+      { Slices: Slices } || ""
+    );
+
+    // Store item inside its own collection
+    await itemManager.batch([item]);
   };
 }
 
