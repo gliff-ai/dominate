@@ -15,7 +15,6 @@ interface Props {
   etebaseInstance: DominateEtebase;
   // eslint-disable-next-line react/no-unused-prop-types
   selectedThing: (thingType: string, thing: Collection | Item) => void;
-
   match?: Match;
 }
 
@@ -108,7 +107,9 @@ export class CurateWrapper extends Component<Props, State> {
           <h3>Items</h3>
           {this.state.items.map((item) => (
             <span key={item.uid}>
-              <Link to={`/annotate/${item.uid}`}>{item.name}</Link>
+              <Link to={`/annotate/${this.state.collectionId}/${item.uid}`}>
+                {item.name}
+              </Link>
             </span>
           ))}
         </div>

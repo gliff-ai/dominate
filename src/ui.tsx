@@ -5,6 +5,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { SignIn } from "@/views/SignIn";
 import { SignUp } from "@/views/signup/SignUp";
 import { Navbar } from "@/NavBar";
+import { AnnotateWrapper as Annotate } from "./Annotate";
 
 import {
   BrowserRouter as Router,
@@ -45,7 +46,7 @@ function PrivateRoute(props: PrivateProps) {
   return (
     <Route
       {...rest}
-      render={({ location }) =>
+      render={({ location, match }) =>
         auth.user ? (
           children
         ) : (
@@ -63,7 +64,9 @@ function PrivateRoute(props: PrivateProps) {
 export class UserInterface extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { collections: null };
+    this.state = {
+      collections: null,
+    };
   }
 
   componentDidMount() {}
@@ -91,8 +94,16 @@ export class UserInterface extends Component<Props, State> {
           <Route path="/signup">
             <SignUp />
           </Route>
-          <PrivateRoute path="/annotate">
-            <div>TODO</div>
+          <PrivateRoute>
+            <Route
+              path="/annotate/:colId/:imageId"
+              children={({ match }) => {
+                <Annotate
+                  etebaseInstance={this.props.etebaseInstance}
+                  match={match}
+                />;
+              }}
+            />
           </PrivateRoute>
           <Route
             path="/curate/:id"
