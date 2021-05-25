@@ -12,11 +12,30 @@ export const ManageWrapper = (props: Props) => {
 
   if (!props.etebaseInstance || !auth.user) return null;
 
+  const getProjects = async () => {
+    const projects = await props.etebaseInstance.getCollectionsMeta();
+
+    return projects;
+  };
+
+  const createProject = async ({ name }) => {
+    const project = await props.etebaseInstance.createCollection(name);
+
+    return true; // Maybe not always true...
+  };
+
+  const services = {
+    queryTeam: "GET /team",
+    loginUser: "POST /user/login", // Not used, we pass an authd user down
+    getProjects,
+    createProject,
+  };
+
   const user = { email: auth.user.username, authToken: auth.user.authToken };
 
   return (
     <ProvideAuth>
-      <Manage user={user} />
+      <Manage user={user} services={services} />
     </ProvideAuth>
   );
 };

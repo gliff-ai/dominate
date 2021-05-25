@@ -149,6 +149,20 @@ export class DominateEtebase {
     this.collectionsMeta = data.map(this.wrangleGallery);
     return this.collectionsMeta;
   };
+
+  createCollection = async (name: string): Promise<void> => {
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+
+    // Create, encrypt and upload a new collection
+    const collection = await collectionManager.create(
+      "gliff.gallery",
+      {
+        name,
+      },
+      ""
+    );
+    await collectionManager.upload(collection);
+  };
 }
 
 export { Collection, Item, Gallery, Image };
