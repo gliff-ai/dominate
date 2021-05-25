@@ -18,7 +18,7 @@ import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import CloseIcon from "@material-ui/icons/Close";
 import { useAuth } from "@/hooks/use-auth";
 
-import {useNavigate} from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import { API_URL } from "@/etebase";
 import { createCheckoutSession } from "@/services/user";
@@ -27,7 +27,6 @@ const stripePromise = loadStripe(
   "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
 );
 const query = new URLSearchParams(window.location.search);
-
 
 const useStyles = makeStyles((theme) => ({
   paper: {
@@ -52,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
 export const SignUp = () => {
   const classes = useStyles();
   const auth = useAuth();
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -102,7 +101,6 @@ export const SignUp = () => {
 
     const isValid = validate();
 
-
     if (isValid) {
       setLoading(true);
       auth
@@ -120,7 +118,7 @@ export const SignUp = () => {
           setNameError("");
           setPasswordError("");
         });
-      }
+    }
     if (!isValid) {
       setLoading(false);
       return;

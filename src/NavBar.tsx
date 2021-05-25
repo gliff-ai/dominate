@@ -23,7 +23,7 @@ export const Navbar = (): ReactElement => {
             &nbsp;
             <button
               type="button"
-              onClick={() => auth.signout().then(() => navigate(("signin")))}
+              onClick={() => auth.signout().then(() => navigate("signin"))}
             >
               Sign Out
             </button>

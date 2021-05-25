@@ -1,21 +1,15 @@
 /* eslint-disable react/jsx-curly-newline */
-import React, { Component, ReactNode } from "react";
+import { Component, ReactNode } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+
 import { Collection, DominateEtebase, Item } from "@/etebase";
-import { useAuth } from "@/hooks/use-auth";
 import { SignIn } from "@/views/SignIn";
 import { SignUp } from "@/views/signup/SignUp";
 import { Navbar } from "@/NavBar";
 
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-
-import { Home } from "./Home";
 import { ManageWrapper } from "@/ManageWrapper";
+import { Home } from "./Home";
 // import { CurateWrapper } from "./Curate";
-// import { ManageWrapper } from "@/ManageWrapper";
-//
-// type Children =
-//   | ((props: RouteChildrenProps<any>) => React.ReactNode)
-//   | React.ReactNode;
 
 interface Props {
   etebaseInstance: DominateEtebase;
@@ -95,24 +89,6 @@ export class UserInterface extends Component<Props, State> {
             }
           />
 
-          {/*<Route*/}
-          {/*  path="/curate/:id" >*/}
-          {/*    <div>*/}
-          {/*      <CurateWrapper*/}
-          {/*        etebaseInstance={this.props.etebaseInstance}*/}
-          {/*        selectedThing={this.selectThing}*/}
-          {/*      />*/}
-          {/*    </div>*/}
-          {/*</Route>*/}
-          {/*<Route*/}
-          {/*  path="/curate/"*/}
-          {/*  render={() => (*/}
-          {/*    <CurateWrapper*/}
-          {/*      etebaseInstance={this.props.etebaseInstance}*/}
-          {/*      selectedThing={this.selectThing}*/}
-          {/*    />*/}
-          {/*  )}*/}
-          {/*/>*/}
           <Route path="/">
             <Home />
           </Route>
