@@ -1,4 +1,5 @@
 import { Annotations } from "@gliff-ai/annotate";
+
 interface Gallery {
   uid: string;
   type: "gliff.gallery";
@@ -24,7 +25,7 @@ interface Annotation extends Omit<Thumbnail, "type"> {
   };
 }
 
-type ImageBitmapBlob = string; // TMP
+type ImageBitmapBlob = ImageBitmap; // TMP
 type Channels = ImageBitmapBlob[];
 type Slices = Channels[];
 
@@ -36,7 +37,7 @@ interface Image {
   modifiedTime: number; // time item was last modified in milliseconds since epoch
   description?: string; // long description for collection, i.e. project details
   meta: ImageMeta;
-  content: Slices[];
+  content: Slices;
 }
 
 interface ImageMeta {
@@ -48,4 +49,4 @@ interface ImageMeta {
   customMeta?: string; // JSON of custom metadata
 }
 
-export { Gallery, Image, Thumbnail, Annotation };
+export { Gallery, Image, Thumbnail, Annotation, Slices };

@@ -11,7 +11,6 @@ import { Image } from "@/etebase/interfaces";
 interface Props {
   etebaseInstance?: DominateEtebase;
   match?: Match;
-  collectionUid?: string;
 }
 
 interface Match {
