@@ -1,8 +1,8 @@
 import * as Etebase from "etebase";
 import { Account, Collection, Item } from "etebase";
 import { User } from "@/services/user/interfaces";
-
-import { Gallery, Image } from "./interfaces";
+import { Annotations } from "@gliff-ai/annotate";
+import { Gallery, Image, Annotation } from "./interfaces";
 
 declare const STORE_URL: string;
 const SERVER_URL = `${STORE_URL}etebase`;
@@ -116,7 +116,7 @@ export class DominateEtebase {
     } as Gallery;
   };
 
-  wrangleImage = (item: Item): Image => {
+  wrangleImageMeta = (item: Item): Image => {
     const meta = item.getMeta();
     const modifiedTime = meta.mtime;
     delete meta.mtime;
@@ -129,15 +129,92 @@ export class DominateEtebase {
     } as Image;
   };
 
-  getImagesMeta = async (collectionId: string): Promise<Image[]> => {
+  getItemManager = async (collectionId: string): Promise<any> => {
     if (!this.etebaseInstance) throw new Error("No etebase instance");
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     const collection = await collectionManager.fetch(collectionId);
-    const itemManager = collectionManager.getItemManager(collection);
+    return collectionManager.getItemManager(collection);
+  };
+
+  getImagesMeta = async (collectionId: string): Promise<any> => {
+    const itemManager = await this.getItemManager(collectionId).catch((e) => {
+      console.log(e);
+    });
     const { data } = await itemManager.list();
 
-    return data.map(this.wrangleImage);
+    return data.map(this.wrangleImageMeta);
+  };
+
+  getImage = async (collectionId: string, itemUid: string): Promise<Image> => {
+    const itemManager = await this.getItemManager(collectionId).catch((e) => {
+      console.log(e);
+    });
+    return await itemManager.fetch(itemUid);
+  };
+
+  getAnnotationItems = async (
+    collectionId: string,
+    imageUid: string
+  ): Promise<Item[]> => {
+    const itemManager = await this.getItemManager(collectionId).catch((e) => {
+      console.log(e);
+    });
+    const { data } = await itemManager.list();
+
+    return data.filter((item) => {
+      const meta = item.getMeta();
+      return meta.imageUid === imageUid;
+    });
+  };
+
+  createAnnotation = async (
+    collectionId: string,
+    imageUid: string,
+    annotationsObject: Annotations
+  ): Promise<void> => {
+    // Store annotations object in a new item.
+
+    // Retrieve itemManager
+    const itemManager = await this.getItemManager(collectionId).catch((e) => {
+      console.log(e);
+    });
+
+    // Create new item
+    const createdTime = new Date().getTime();
+    const item = await itemManager.create(
+      {
+        type: "gliff.annotation",
+        imageUid: imageUid,
+        createdTime: createdTime,
+        modifiedTime: createdTime,
+        labels: [],
+      },
+      {
+        annotationsObject: annotationsObject,
+      }
+    );
+
+    // Store item inside its own collection
+    await itemManager.batch([item]);
+  };
+
+  updateAnnotation = async (
+    collectionId: string,
+    item: Item,
+    annotationsObject: Annotations
+  ): Promise<void> => {
+    // Retrieve itemManager
+    const itemManager = await this.getItemManager(collectionId).catch((e) => {
+      console.log(e);
+    });
+
+    // Update item's content and meta
+    const modifiedTime = new Date().getTime();
+    item.setMeta({ ...item.getMeta(), modifiedTime });
+    item.setContent(annotationsObject);
+
+    await itemManager.batch([item]);
   };
 
   getCollectionsMeta = async (type = "gliff.gallery"): Promise<Gallery[]> => {

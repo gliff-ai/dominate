@@ -1,3 +1,4 @@
+import { Annotations } from "@gliff-ai/annotate";
 interface Gallery {
   uid: string;
   type: "gliff.gallery";
@@ -16,8 +17,11 @@ interface Thumbnail {
 }
 
 interface Annotation extends Omit<Thumbnail, "type"> {
-  type: "gliff.thumbnail";
+  type: "gliff.annotation";
   labels: string[];
+  content: {
+    annotationsObject: Annotations;
+  };
 }
 
 type ImageBitmapBlob = string; // TMP
@@ -31,15 +35,17 @@ interface Image {
   createdTime: number; // time item was created in milliseconds since epoch
   modifiedTime: number; // time item was last modified in milliseconds since epoch
   description?: string; // long description for collection, i.e. project details
-  meta: {
-    slices: number; // number of z-slices
-    channels: number; // numbers colour channels
-    width: number; // width of each slice
-    height: number; // height of each slice
-    format: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
-    customMeta?: string; // JSON of custom metadata
-  };
+  meta: ImageMeta;
   content: Slices[];
+}
+
+interface ImageMeta {
+  slices: number; // number of z-slices
+  channels: number; // numbers colour channels
+  width: number; // width of each slice
+  height: number; // height of each slice
+  format: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
+  customMeta?: string; // JSON of custom metadata
 }
 
 export { Gallery, Image, Thumbnail, Annotation };
