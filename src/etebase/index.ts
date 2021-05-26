@@ -129,21 +129,31 @@ export class DominateEtebase {
     } as Image;
   };
 
+  getCollectionsMeta = async (type = "gliff.gallery"): Promise<Gallery[]> => {
+    if (this.collections.length > 0) return this.collectionsMeta;
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+
+    const { data } = await collectionManager.list(type);
+    this.collectionsMeta = data.map(this.wrangleGallery);
+    return this.collectionsMeta;
+  };
+
   getItemManager = async (collectionId: string): Promise<any> => {
     if (!this.etebaseInstance) throw new Error("No etebase instance");
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     const collection = await collectionManager.fetch(collectionId);
     return collectionManager.getItemManager(collection);
-    collectionManager.create;
   };
 
   getImagesMeta = async (collectionId: string): Promise<any> => {
     const itemManager = await this.getItemManager(collectionId).catch((e) => {
       console.log(e);
     });
+    console.log(itemManager);
     const { data } = await itemManager.list();
-
+    console.log(data);
     return data.map(this.wrangleImageMeta);
   };
 
@@ -214,16 +224,6 @@ export class DominateEtebase {
     item.setContent(JSON.stringify(annotationsObject));
 
     await itemManager.batch([item]);
-  };
-
-  getCollectionsMeta = async (type = "gliff.gallery"): Promise<Gallery[]> => {
-    if (this.collections.length > 0) return this.collectionsMeta;
-
-    const collectionManager = this.etebaseInstance.getCollectionManager();
-
-    const { data } = await collectionManager.list(type);
-    this.collectionsMeta = data.map(this.wrangleGallery);
-    return this.collectionsMeta;
   };
 
   createCollection = async (name: string): Promise<string> => {
