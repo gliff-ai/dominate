@@ -1,5 +1,3 @@
-import { Annotations } from "@gliff-ai/annotate";
-
 interface Gallery {
   uid: string;
   type: "gliff.gallery";
@@ -20,7 +18,7 @@ interface Thumbnail {
 interface Annotation extends Omit<Thumbnail, "type"> {
   type: "gliff.annotation";
   labels: string[];
-  content: Annotations;
+  content: string; // stringified version of annotationsObject
 }
 
 type ImageBitmapBlob = ImageBitmap; // TMP

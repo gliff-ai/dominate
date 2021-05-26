@@ -135,6 +135,7 @@ export class DominateEtebase {
 
     const collection = await collectionManager.fetch(collectionId);
     return collectionManager.getItemManager(collection);
+    collectionManager.create;
   };
 
   getImagesMeta = async (collectionId: string): Promise<any> => {
@@ -190,9 +191,7 @@ export class DominateEtebase {
         modifiedTime: createdTime,
         labels: [],
       },
-      {
-        annotationsObject: annotationsObject,
-      }
+      JSON.stringify(annotationsObject)
     );
 
     // Store item inside its own collection
@@ -212,7 +211,7 @@ export class DominateEtebase {
     // Update item's content and meta
     const modifiedTime = new Date().getTime();
     item.setMeta({ ...item.getMeta(), modifiedTime });
-    item.setContent(annotationsObject);
+    item.setContent(JSON.stringify(annotationsObject));
 
     await itemManager.batch([item]);
   };
@@ -245,7 +244,7 @@ export class DominateEtebase {
 
   createImage = async (
     collectionId: string,
-    Slices?: Slices
+    slicesData: Slices
   ): Promise<void> => {
     // Retrieve itemManager
     const itemManager = await this.getItemManager(collectionId).catch((e) => {
@@ -261,7 +260,7 @@ export class DominateEtebase {
         modifiedTime: createdTime,
         labels: [],
       },
-      Slices || ""
+      slicesData
     );
 
     // Store item inside its own collection

@@ -54,7 +54,7 @@ export class AnnotateWrapper extends Component<Props, State> {
       .then((image) => {
         this.setState({ image });
       })
-      .catch(() => console.log("Cannot retrieve image."));
+      .catch((e) => console.log(e));
   };
 
   setAnnotationItems = (): void => {
@@ -67,7 +67,7 @@ export class AnnotateWrapper extends Component<Props, State> {
       .then((annotationItems) => {
         this.setState({ annotationItems });
       })
-      .catch(() => console.log("Cannot retrieve annotation."));
+      .catch((e) => console.log(e));
   };
 
   saveAnnotation = (annotationsObject: Annotations): void => {
@@ -120,7 +120,7 @@ export class AnnotateWrapper extends Component<Props, State> {
     if (this.state.annotationItems.length !== 0) {
       const annotation: Annotations =
         this.state.annotationItems[0].getContent();
-      return annotation;
+      return JSON.parse(annotation);
     }
     return null;
   };

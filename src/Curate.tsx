@@ -94,7 +94,7 @@ export class CurateWrapper extends Component<Props, State> {
   }
 
   setUploadedImage =
-    (colUid) =>
+    (colUid?) =>
     async (imageFileInfo: ImageFileInfo, slicesData: Slices): Promise<void> => {
       this.imageFileInfo = imageFileInfo;
       this.slicesData = slicesData;
@@ -106,6 +106,7 @@ export class CurateWrapper extends Component<Props, State> {
       //   })
       //   .catch((e) => console.log(e));
 
+      if (!colUid) return;
       this.props.etebaseInstance
         .createImage(colUid, this.slicesData)
         .then(() => console.log(`Added new image to collection ${colUid}.`))
