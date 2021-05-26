@@ -258,10 +258,10 @@ export class DominateEtebase {
         type: "gliff.image",
         createdTime: createdTime,
         modifiedTime: createdTime,
-        labels: [],
       },
       "some string"
     );
+    console.log(item);
 
     // Store item inside its own collection
     await itemManager.batch([item]);
