@@ -151,9 +151,9 @@ export class DominateEtebase {
     const itemManager = await this.getItemManager(collectionId).catch((e) => {
       console.log(e);
     });
-    console.log(itemManager);
     const { data } = await itemManager.list();
-    console.log(data);
+    console.log(data[0].getContent(Etebase.OutputFormat.String));
+
     return data.map(this.wrangleImageMeta);
   };
 
@@ -247,9 +247,9 @@ export class DominateEtebase {
     slicesData: Slices
   ): Promise<void> => {
     // Retrieve itemManager
-    const itemManager = await this.getItemManager(collectionId).catch((e) => {
-      console.log(e);
-    });
+    const itemManager = await this.getItemManager(collectionId).catch((e) =>
+      console.log(e)
+    );
 
     // Create new image item
     const createdTime = new Date().getTime();
@@ -261,7 +261,8 @@ export class DominateEtebase {
       },
       "some string"
     );
-    console.log(item);
+    console.log(item.getMeta());
+    console.log(item.getContent(Etebase.OutputFormat.String));
 
     // Store item inside its own collection
     await itemManager.batch([item]);
