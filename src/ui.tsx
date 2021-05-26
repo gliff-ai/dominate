@@ -118,8 +118,11 @@ export class UserInterface extends Component<Props, State> {
           />
           <Route
             path="/curate/"
-            render={() => (
-              <CurateWrapper etebaseInstance={this.props.etebaseInstance} />
+            render={({ match }) => (
+              <CurateWrapper
+                etebaseInstance={this.props.etebaseInstance}
+                match={match}
+              />
             )}
           />
           <Route path="/">

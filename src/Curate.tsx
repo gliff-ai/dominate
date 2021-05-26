@@ -8,8 +8,8 @@ import { Slices, Image } from "@/etebase/interfaces";
 
 export interface Match {
   path: string;
-  params: {
-    id: string;
+  params?: {
+    id?: string;
   };
 }
 
@@ -53,6 +53,7 @@ export class CurateWrapper extends Component<Props, State> {
       } else {
         // No id, get all collections
         console.log("getting galleries!");
+
         this.props.etebaseInstance
           .getCollectionsMeta("gliff.gallery")
           .then((collectionsMeta) => {
@@ -68,6 +69,7 @@ export class CurateWrapper extends Component<Props, State> {
   }
 
   componentDidUpdate(prevProps: Props) {
+    console.log(this.props.match.path);
     if (prevProps.match.path !== this.props.match.path) {
       // If we've changed route, definitely update
       const collectionId = this.props.match?.params?.id;
@@ -116,7 +118,7 @@ export class CurateWrapper extends Component<Props, State> {
         <div>
           <UploadImage
             setUploadedImage={this.setUploadedImage}
-            spanElement={<span>Upload</span>}
+            spanElement={<span>Upload Image</span>}
             multiple
           />
           <h3>Collections:</h3>
