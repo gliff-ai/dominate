@@ -17,7 +17,9 @@ import {
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import CloseIcon from "@material-ui/icons/Close";
 import { useAuth } from "@/hooks/use-auth";
-import { useHistory } from "react-router-dom";
+
+import { useNavigate } from "react-router-dom";
+
 import { API_URL } from "@/etebase";
 import { createCheckoutSession } from "@/services/user";
 
@@ -49,7 +51,7 @@ const useStyles = makeStyles((theme) => ({
 export const SignUp = () => {
   const classes = useStyles();
   const auth = useAuth();
-  const history = useHistory();
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -99,6 +101,24 @@ export const SignUp = () => {
 
     const isValid = validate();
 
+    if (isValid) {
+      setLoading(true);
+      auth
+        .signup(signUp.name, signUp.password)
+        .then(() => {
+          setLoading(false);
+          navigate("home");
+        })
+        .catch((err) => {
+          setOpen(true);
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          setEtebaseError(err.message);
+          setLoading(false);
+          setSignUp({ name: "", email: "", password: "", confirmPassword: "" });
+          setNameError("");
+          setPasswordError("");
+        });
+    }
     if (!isValid) {
       setLoading(false);
       return;
@@ -113,7 +133,7 @@ export const SignUp = () => {
       setLoading(false);
 
       if (!tierId) {
-        history.push("/"); // It's the free plan so don't bill them
+        navigate("home"); // It's the free plan so don't bill them
       }
 
       const stripe = await stripePromise;

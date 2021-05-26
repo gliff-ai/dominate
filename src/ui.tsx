@@ -1,29 +1,19 @@
 /* eslint-disable react/jsx-curly-newline */
-import React, { Component, ReactNode } from "react";
+import { Component, ReactNode } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
+
 import { Collection, DominateEtebase, Item } from "@/etebase";
-import { useAuth } from "@/hooks/use-auth";
 import { SignIn } from "@/views/SignIn";
 import { SignUp } from "@/views/signup/SignUp";
 import { Navbar } from "@/NavBar";
 
-import {
-  BrowserRouter as Router,
-  Switch,
-  Route,
-  Redirect,
-  RouteChildrenProps,
-} from "react-router-dom";
-
+import { ManageWrapper } from "@/ManageWrapper";
 import { Home } from "./Home";
-import { CurateWrapper } from "./Curate";
-
-type Children =
-  | ((props: RouteChildrenProps<any>) => React.ReactNode)
-  | React.ReactNode;
+// import { CurateWrapper } from "./Curate";
 
 interface Props {
   etebaseInstance: DominateEtebase;
-  children?: Children;
+  // children?: Children;
 }
 
 interface State {
@@ -32,34 +22,34 @@ interface State {
 
 // A wrapper for <Route> that redirects to the login
 // screen if you're not yet authenticated.
-type PrivateProps = {
-  children: Children;
-  [x: string]: any;
-};
+// type PrivateProps = {
+//   children: Children;
+//   [x: string]: any;
+// };
 
 /* eslint-disable react/jsx-props-no-spreading */
-function PrivateRoute(props: PrivateProps) {
-  const auth = useAuth();
-  const { children, ...rest } = props;
-
-  return (
-    <Route
-      {...rest}
-      render={({ location }) =>
-        auth.user ? (
-          children
-        ) : (
-          <Redirect
-            to={{
-              pathname: "/signin",
-              state: { from: location },
-            }}
-          />
-        )
-      }
-    />
-  );
-}
+// function PrivateRoute(props: PrivateProps) {
+//   const auth = useAuth();
+//   const { children, ...rest } = props;
+//
+//   return (
+//     <Route
+//       {...rest}
+//       render={({ location }) =>
+//         auth.user ? (
+//           children
+//         ) : (
+//           <Redirect
+//             to={{
+//               pathname: "/signin",
+//               state: { from: location },
+//             }}
+//           />
+//         )
+//       }
+//     />
+//   );
+// }
 export class UserInterface extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
@@ -73,7 +63,7 @@ export class UserInterface extends Component<Props, State> {
   };
 
   render = (): ReactNode => (
-    <Router>
+    <BrowserRouter>
       <div>
         <Navbar />
 
@@ -81,44 +71,28 @@ export class UserInterface extends Component<Props, State> {
         <br />
         <br />
 
-        <Switch>
-          <PrivateRoute path="/signup/success">
-            <h1>THANK YOU FOR SIGNING UP</h1>
-          </PrivateRoute>
+        <Routes>
           <Route path="/signin">
             <SignIn />
           </Route>
           <Route path="/signup">
             <SignUp />
           </Route>
-          <PrivateRoute path="/annotate">
+          <Route path="/annotate">
             <div>TODO</div>
-          </PrivateRoute>
+          </Route>
+
           <Route
-            path="/curate/:id"
-            render={({ match }) => (
-              <div>
-                <CurateWrapper
-                  etebaseInstance={this.props.etebaseInstance}
-                  selectedThing={this.selectThing}
-                  match={match}
-                />
-              </div>
-            )}
+            path="manage/*"
+            element={
+              <ManageWrapper etebaseInstance={this.props.etebaseInstance} />
+            }
           />
-          <Route
-            path="/curate/"
-            render={() => (
-              <CurateWrapper
-                etebaseInstance={this.props.etebaseInstance}
-                selectedThing={this.selectThing}
-              />
-            )}
-          />
+
           <Route path="/">
             <Home />
           </Route>
-        </Switch>
+        </Routes>
       </div>
 
       <footer>
@@ -126,6 +100,6 @@ export class UserInterface extends Component<Props, State> {
           {this.state.collections?.map((col) => JSON.stringify(col.getMeta()))}
         </div>
       </footer>
-    </Router>
+    </BrowserRouter>
   );
 }
