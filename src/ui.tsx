@@ -94,17 +94,17 @@ export class UserInterface extends Component<Props, State> {
           <Route path="/signup">
             <SignUp />
           </Route>
-          <PrivateRoute>
-            <Route
-              path="/annotate/:colId/:imageId"
-              children={({ match }) => {
-                <Annotate
-                  etebaseInstance={this.props.etebaseInstance}
-                  match={match}
-                />;
-              }}
-            />
-          </PrivateRoute>
+          {/* <PrivateRoute> */}
+          <Route
+            path="/annotate/:colId/:imageId"
+            children={({ match }) => {
+              <Annotate
+                etebaseInstance={this.props.etebaseInstance}
+                match={match}
+              />;
+            }}
+          />
+          {/* </PrivateRoute> */}
           <Route
             path="/curate/:id"
             render={({ match }) => (

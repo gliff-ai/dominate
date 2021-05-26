@@ -227,7 +227,8 @@ export class DominateEtebase {
     return this.collectionsMeta;
   };
 
-  createCollection = async (name: string): Promise<string | null> => {
+  createCollection = async (name: string): Promise<string> => {
+    if (!this.etebaseInstance) throw new Error("No etebase instance");
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     // Create, encrypt and upload a new collection

@@ -56,7 +56,6 @@ export class CurateWrapper extends Component<Props, State> {
         this.props.etebaseInstance
           .getCollectionsMeta("gliff.gallery")
           .then((collectionsMeta) => {
-            console.log(collectionsMeta);
             this.setState({ collectionsMeta });
           })
           .catch((err) => {
@@ -99,9 +98,13 @@ export class CurateWrapper extends Component<Props, State> {
   ): Promise<void> => {
     this.imageFileInfo = imageFileInfo;
     this.slicesData = slicesData;
+
+    // Create temporary collection
     this.props.etebaseInstance
       .createCollection("temp-gallery")
       .then((uid) => {
+        console.log(uid);
+        // Store the image uploaded
         this.props.etebaseInstance.createImage(uid, this.slicesData);
       })
       .catch((e) => console.log(e));
