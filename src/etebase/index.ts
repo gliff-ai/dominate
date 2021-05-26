@@ -261,7 +261,7 @@ export class DominateEtebase {
         modifiedTime: createdTime,
         labels: [],
       },
-      { Slices: Slices } || ""
+      Slices || ""
     );
 
     // Store item inside its own collection

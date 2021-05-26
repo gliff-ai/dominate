@@ -20,7 +20,6 @@ interface Props {
 
 interface State {
   collectionsMeta: Gallery[];
-  collectionId?: string;
   items: Image[];
 }
 
@@ -30,7 +29,6 @@ export class CurateWrapper extends Component<Props, State> {
     this.state = {
       collectionsMeta: [],
       items: [],
-      collectionId: this.props.match?.params?.id || null,
     };
   }
 
@@ -39,11 +37,13 @@ export class CurateWrapper extends Component<Props, State> {
 
   componentDidMount() {
     if (this.props.etebaseInstance) {
-      if (this.state.collectionId) {
+      const collectionId = this.props.match?.params?.id;
+      if (collectionId) {
         console.log("getting items!");
+        console.log(collectionId);
         this.props.etebaseInstance
-          .getImagesMeta(this.state.collectionId)
-          .then((items): void => {
+          .getImagesMeta(collectionId)
+          .then((items) => {
             console.log(items);
             this.setState({ items });
           })
@@ -76,9 +76,8 @@ export class CurateWrapper extends Component<Props, State> {
       if (collectionId) {
         this.props.etebaseInstance
           .getImagesMeta(collectionId)
-          .then((items): void => {
+          .then((items) => {
             this.setState({ items });
-            this.setState({ collectionId });
           })
           .catch((err) => {
             console.log(err);
@@ -94,47 +93,53 @@ export class CurateWrapper extends Component<Props, State> {
     }
   }
 
-  setUploadedImage = async (
-    imageFileInfo: ImageFileInfo,
-    slicesData: Slices
-  ): Promise<void> => {
-    this.imageFileInfo = imageFileInfo;
-    this.slicesData = slicesData;
+  setUploadedImage =
+    (colUid) =>
+    async (imageFileInfo: ImageFileInfo, slicesData: Slices): Promise<void> => {
+      this.imageFileInfo = imageFileInfo;
+      this.slicesData = slicesData;
 
-    // Create temporary collection
-    this.props.etebaseInstance
-      .createCollection("temp-gallery")
-      .then((uid) => {
-        console.log(uid);
-        // Store the image uploaded
-        this.props.etebaseInstance.createImage(uid, this.slicesData);
-      })
-      .catch((e) => console.log(e));
-  };
+      // Create temporary collection
+      // this.props.etebaseInstance
+      //   .createCollection("temp-gallery")
+      //   .then((uid) => {
+      //   })
+      //   .catch((e) => console.log(e));
+
+      this.props.etebaseInstance
+        .createImage(colUid, this.slicesData)
+        .then(() => console.log(`Added new image to collection ${colUid}.`))
+        .catch((e) => console.log(e));
+    };
 
   render = (): ReactNode => {
     if (this.props.etebaseInstance) {
       return (
         <div>
-          <UploadImage
-            setUploadedImage={this.setUploadedImage}
-            spanElement={<span>Upload Image</span>}
-            multiple
-          />
           <h3>Collections:</h3>
           {this.state.collectionsMeta
             ? this.state.collectionsMeta.map((col) => (
-                <span key={col.uid}>
-                  <Link to={`/curate/${col.uid}`}>{col.name}</Link>
-                  <br />
-                </span>
+                <>
+                  <span key={col.uid}>
+                    <Link to={`/curate/${col.uid}`}>{col.name}</Link>
+                    <br />
+                  </span>
+
+                  <UploadImage
+                    setUploadedImage={this.setUploadedImage(col.uid)}
+                    spanElement={<span>Upload Image</span>}
+                    multiple
+                  />
+                </>
               ))
             : null}
 
           <h3>Items</h3>
           {this.state.items.map((item) => (
             <span key={item.uid}>
-              <Link to={`/annotate/${this.state.collectionId}/${item.uid}`}>
+              <Link
+                to={`/annotate/${this.props.match?.params?.id}/${item.uid}`}
+              >
                 {item.name}
               </Link>
             </span>

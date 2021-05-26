@@ -20,9 +20,7 @@ interface Thumbnail {
 interface Annotation extends Omit<Thumbnail, "type"> {
   type: "gliff.annotation";
   labels: string[];
-  content: {
-    annotationsObject: Annotations;
-  };
+  content: Annotations;
 }
 
 type ImageBitmapBlob = ImageBitmap; // TMP
