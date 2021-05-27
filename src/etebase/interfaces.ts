@@ -20,7 +20,7 @@ interface Annotation extends Omit<Thumbnail, "type"> {
   labels: string[];
 }
 
-type ImageBitmapBlob = string; // TMP
+type ImageBitmapBlob = ImageBitmap; // TMP
 type Channels = ImageBitmapBlob[];
 type Slices = Channels[];
 
@@ -39,7 +39,7 @@ interface Image {
     format: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
     customMeta?: string; // JSON of custom metadata
   };
-  content: Slices[];
+  content: string;
 }
 
-export { Gallery, Image, Thumbnail, Annotation };
+export { Gallery, Image, Thumbnail, Annotation, Slices };

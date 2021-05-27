@@ -1,6 +1,8 @@
 import React, { ReactElement, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
+import { UploadImage, ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase, Gallery, Image } from "@/etebase";
+import { Slices } from "@/etebase/interfaces";
 // import { UserInterface as Curate } from "@gliff-ai/curate";
 
 interface Props {
@@ -50,6 +52,17 @@ export const CurateWrapper = (props: Props): ReactElement => {
     setGalleryCount((prevCount) => prevCount + 1);
   };
 
+  const setUploadedImage = (
+    imageFileInfo: ImageFileInfo,
+    slicesData: Slices
+  ): void => {
+    if (!galleryUid) return;
+    props.etebaseInstance
+      .createImage(galleryUid, "some image")
+      .then(() => console.log(`Added new image to collection ${galleryUid}.`))
+      .catch((e) => console.log(e));
+  };
+
   useEffect(() => {
     fetchGalleryItems();
   }, [props.etebaseInstance]);
@@ -70,8 +83,15 @@ export const CurateWrapper = (props: Props): ReactElement => {
         ? galleryItems.map((item) => (
             <>
               <span key={item.uid}>
-                <Link to={`/curate/${item.uid}`}>{item.name}</Link>
+                <Link key={item.uid} to={`/curate/${item.uid}`}>
+                  {item.name}
+                </Link>
               </span>
+              <UploadImage
+                setUploadedImage={setUploadedImage}
+                spanElement={<span>Add image</span>}
+                multiple
+              />
               <br />
             </>
           ))
@@ -81,7 +101,9 @@ export const CurateWrapper = (props: Props): ReactElement => {
       {imageItems
         ? imageItems.map((item) => (
             <span key={item.uid}>
-              <Link to={`/annotate/${item.uid}`}>{item.name}</Link>
+              <Link key={item.uid} to={`/annotate/${item.uid}`}>
+                {item.name}
+              </Link>
             </span>
           ))
         : null}

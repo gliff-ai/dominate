@@ -1,5 +1,5 @@
 import * as Etebase from "etebase";
-import { Account, Collection, Item } from "etebase";
+import { Account, Collection, Item, ItemManager } from "etebase";
 import { User } from "@/services/user/interfaces";
 
 import { Gallery, Image } from "./interfaces";
@@ -162,6 +162,41 @@ export class DominateEtebase {
       ""
     );
     await collectionManager.upload(collection);
+  };
+
+  getItemManager = async (collectionUid: string): Promise<ItemManager> => {
+    if (!this.etebaseInstance) throw new Error("No etebase instance");
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+
+    const collection = await collectionManager.fetch(collectionUid);
+    return collectionManager.getItemManager(collection);
+  };
+
+  createImage = async (
+    collectionUid: string,
+    imageContent: string | Uint8Array
+  ): Promise<void> => {
+    // Retrieve itemManager
+    await this.getItemManager(collectionUid)
+      .then(async (itemManager) => {
+        // Create new image item
+        const createdTime = new Date().getTime();
+        const item = await itemManager.create(
+          {
+            type: "gliff.image",
+            createdTime: createdTime,
+            modifiedTime: createdTime,
+          },
+          imageContent
+        );
+
+        console.log(item.getMeta());
+        console.log(item.getContent(Etebase.OutputFormat.String));
+
+        // Store item inside its own collection
+        await itemManager.batch([item]);
+      })
+      .catch((e) => console.log(e));
   };
 }
 
