@@ -6,10 +6,9 @@ import { Collection, DominateEtebase, Item } from "@/etebase";
 import { SignIn } from "@/views/SignIn";
 import { SignUp } from "@/views/signup/SignUp";
 import { Navbar } from "@/NavBar";
-
 import { ManageWrapper } from "@/ManageWrapper";
 import { Home } from "./Home";
-// import { CurateWrapper } from "./Curate";
+import { CurateWrapper } from "./CurateWrapper";
 
 interface Props {
   etebaseInstance: DominateEtebase;
@@ -81,7 +80,18 @@ export class UserInterface extends Component<Props, State> {
           <Route path="/annotate">
             <div>TODO</div>
           </Route>
-
+          <Route
+            path="curate/:id"
+            element={
+              <CurateWrapper etebaseInstance={this.props.etebaseInstance} />
+            }
+          />
+          <Route
+            path="curate/"
+            element={
+              <CurateWrapper etebaseInstance={this.props.etebaseInstance} />
+            }
+          />
           <Route
             path="manage/*"
             element={
