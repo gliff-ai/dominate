@@ -131,6 +131,7 @@ export class DominateEtebase {
 
   getImagesMeta = async (collectionUid: string): Promise<Image[]> => {
     if (!this.etebaseInstance) throw new Error("No etebase instance");
+
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     const collection = await collectionManager.fetch(collectionUid);
@@ -143,6 +144,7 @@ export class DominateEtebase {
 
   getCollectionsMeta = async (type = "gliff.gallery"): Promise<Gallery[]> => {
     if (this.collections.length > 0) return this.collectionsMeta;
+    if (!this.etebaseInstance) throw new Error("No etebase instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
@@ -180,22 +182,18 @@ export class DominateEtebase {
     // Retrieve itemManager
     await this.getItemManager(collectionUid)
       .then(async (itemManager) => {
-        // Create new image item
-        const createdTime = new Date().getTime();
+        // Create new image item and add it to the collection
         const item = await itemManager.create(
           {
             type: "gliff.image",
-            createdTime: createdTime,
-            modifiedTime: createdTime,
+            mtime: new Date().getTime(),
           },
           imageContent
         );
+        await itemManager.batch([item]);
 
         console.log(item.getMeta());
         console.log(item.getContent(Etebase.OutputFormat.String));
-
-        // Store item inside its own collection
-        await itemManager.batch([item]);
       })
       .catch((e) => console.log(e));
   };

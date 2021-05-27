@@ -9,13 +9,12 @@ interface Props {
   etebaseInstance: DominateEtebase;
 }
 
-export const CurateWrapper = (props: Props): ReactElement => {
+export const CurateWrapper = (props: Props): ReactElement | null => {
+  if (!props.etebaseInstance) return null;
   const [galleryItems, setGalleryItems] = useState<Gallery[]>([]);
   const [imageItems, setImageItems] = useState<Image[]>([]);
   const { id: galleryUid } = useParams();
   const [galleryCount, setGalleryCount] = useState(0);
-
-  if (!props.etebaseInstance) return null;
 
   const fetchImageItems = (): void => {
     props.etebaseInstance
@@ -52,16 +51,16 @@ export const CurateWrapper = (props: Props): ReactElement => {
     setGalleryCount((prevCount) => prevCount + 1);
   };
 
-  const setUploadedImage = (
-    imageFileInfo: ImageFileInfo,
-    slicesData: Slices
-  ): void => {
-    if (!galleryUid) return;
-    props.etebaseInstance
-      .createImage(galleryUid, "some image")
-      .then(() => console.log(`Added new image to collection ${galleryUid}.`))
-      .catch((e) => console.log(e));
-  };
+  const setUploadedImage =
+    (collectionUid: string) =>
+    (imageFileInfo: ImageFileInfo, slicesData: Slices): void => {
+      props.etebaseInstance
+        .createImage(collectionUid, "some image")
+        .then(() =>
+          console.log(`Added new image to collection ${collectionUid}.`)
+        )
+        .catch((e) => console.log(e));
+    };
 
   useEffect(() => {
     fetchGalleryItems();
@@ -87,12 +86,12 @@ export const CurateWrapper = (props: Props): ReactElement => {
                 <Link key={item.uid} to={`/curate/${item.uid}`}>
                   {item.name}
                 </Link>
+                <UploadImage
+                  setUploadedImage={setUploadedImage(item.uid)}
+                  spanElement={<span>Add image</span>}
+                  multiple
+                />
               </span>
-              <UploadImage
-                setUploadedImage={setUploadedImage}
-                spanElement={<span>Add image</span>}
-                multiple
-              />
               <br />
             </>
           ))

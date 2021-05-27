@@ -27,7 +27,7 @@ type Slices = Channels[];
 interface Image {
   uid: string;
   type: "gliff.image";
-  name: string; // human-readable gallery name, i.e. file name
+  name: string; // human-readable image name, i.e. file name
   createdTime: number; // time item was created in milliseconds since epoch
   modifiedTime: number; // time item was last modified in milliseconds since epoch
   description?: string; // long description for collection, i.e. project details
