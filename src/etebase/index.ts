@@ -129,15 +129,16 @@ export class DominateEtebase {
     } as Image;
   };
 
-  getImagesMeta = async (collectionId: string): Promise<Image[]> => {
+  getImagesMeta = async (collectionUid: string): Promise<Image[]> => {
     if (!this.etebaseInstance) throw new Error("No etebase instance");
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
-    const collection = await collectionManager.fetch(collectionId);
+    const collection = await collectionManager.fetch(collectionUid);
     const itemManager = collectionManager.getItemManager(collection);
-    const { data } = await itemManager.list();
+    const items = await itemManager.list();
+    console.log(items);
 
-    return data.map(this.wrangleImage);
+    return items.data.map(this.wrangleImage);
   };
 
   getCollectionsMeta = async (type = "gliff.gallery"): Promise<Gallery[]> => {

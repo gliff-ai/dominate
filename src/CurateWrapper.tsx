@@ -68,10 +68,11 @@ export const CurateWrapper = (props: Props): ReactElement => {
   }, [props.etebaseInstance]);
 
   useEffect(() => {
+    console.log(galleryUid);
     if (galleryUid) {
       fetchImageItems();
     }
-  }, [galleryItems, galleryUid]);
+  }, [galleryUid]);
 
   return (
     <div>
