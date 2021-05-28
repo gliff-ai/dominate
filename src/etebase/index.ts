@@ -2,7 +2,7 @@ import * as Etebase from "etebase";
 import { Account, Collection, Item, ItemManager } from "etebase";
 import { User } from "@/services/user/interfaces";
 
-import { Gallery, Image } from "./interfaces";
+import { Gallery, Image, ImageMeta } from "./interfaces";
 
 declare const STORE_URL: string;
 const SERVER_URL = `${STORE_URL}etebase`;
@@ -177,8 +177,10 @@ export class DominateEtebase {
 
   createImage = async (
     collectionUid: string,
+    imageMeta: ImageMeta,
     imageContent: string | Uint8Array
   ): Promise<void> => {
+    const createdTime = new Date().getTime();
     // Retrieve itemManager
     await this.getItemManager(collectionUid)
       .then(async (itemManager) => {
@@ -186,7 +188,9 @@ export class DominateEtebase {
         const item = await itemManager.create(
           {
             type: "gliff.image",
-            mtime: new Date().getTime(),
+            createdTime: createdTime,
+            modifiedTime: createdTime,
+            meta: imageMeta,
           },
           imageContent
         );

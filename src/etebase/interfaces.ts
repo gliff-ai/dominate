@@ -31,15 +31,18 @@ interface Image {
   createdTime: number; // time item was created in milliseconds since epoch
   modifiedTime: number; // time item was last modified in milliseconds since epoch
   description?: string; // long description for collection, i.e. project details
-  meta: {
-    slices: number; // number of z-slices
-    channels: number; // numbers colour channels
-    width: number; // width of each slice
-    height: number; // height of each slice
-    format: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
-    customMeta?: string; // JSON of custom metadata
-  };
+  meta: ImageMeta;
   content: string;
 }
 
-export { Gallery, Image, Thumbnail, Annotation, Slices };
+interface ImageMeta {
+  num_slices: number; // number of z-slices
+  num_channels: number; // numbers colour channels
+  width: number; // width of each slice
+  height: number; // height of each slice
+  size: number; // size of the image in bytes
+  format?: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
+  customMeta?: string; // JSON of custom metadata
+}
+
+export { Gallery, Image, Thumbnail, Annotation, Slices, ImageMeta };

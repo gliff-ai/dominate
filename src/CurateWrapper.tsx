@@ -4,6 +4,11 @@ import { UploadImage, ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase, Gallery, Image } from "@/etebase";
 import { Slices } from "@/etebase/interfaces";
 // import { UserInterface as Curate } from "@gliff-ai/curate";
+import {
+  stringifySlices,
+  parseStringifiedSlices,
+  getImageMetaFromImageFileInfo,
+} from "@/imageConversions";
 
 interface Props {
   etebaseInstance: DominateEtebase;
@@ -51,11 +56,39 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     setGalleryCount((prevCount) => prevCount + 1);
   };
 
+  const convertImage = async (
+    imageFileInfo: ImageFileInfo,
+    slicesData: Slices
+  ): Promise<void> => {
+    // Upload an image and convert it to a stringified array of base64
+    // encoded images.
+    // (this function is here to check out the conversion and won't get into main).
+    const t0 = performance.now();
+    const stringifiedImage = stringifySlices(slicesData);
+    console.log(`time1: ${performance.now() - t0}`);
+
+    const slicesBitmap = await parseStringifiedSlices(
+      stringifiedImage,
+      imageFileInfo.width,
+      imageFileInfo.height
+    );
+
+    console.log(`time2: ${performance.now() - t0}`);
+    console.log(`image to string: ${stringifiedImage}`);
+    console.log("from string back to array:");
+    console.log(slicesBitmap);
+  };
+
   const setUploadedImage =
     (collectionUid: string) =>
     (imageFileInfo: ImageFileInfo, slicesData: Slices): void => {
+      // Stringify slices data and get image metadata
+      const stringfiedSlices = stringifySlices(slicesData);
+      const imageMeta = getImageMetaFromImageFileInfo(imageFileInfo);
+
+      // Store slices and metadata inside gliff.image item and add it to gallery
       props.etebaseInstance
-        .createImage(collectionUid, "some image")
+        .createImage(collectionUid, imageMeta, stringfiedSlices)
         .then(() =>
           console.log(`Added new image to collection ${collectionUid}.`)
         )
@@ -75,6 +108,11 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   return (
     <div>
+      <UploadImage
+        setUploadedImage={convertImage}
+        spanElement={<span>Image upload and base64 encode</span>}
+        multiple
+      />
       <button onClick={createGalleryCollection} type="button">
         New Gallery
       </button>
