@@ -137,7 +137,6 @@ export class DominateEtebase {
     const collection = await collectionManager.fetch(collectionUid);
     const itemManager = collectionManager.getItemManager(collection);
     const items = await itemManager.list();
-    console.log(items);
 
     return items.data.map(this.wrangleImage);
   };
@@ -188,16 +187,13 @@ export class DominateEtebase {
         const item = await itemManager.create(
           {
             type: "gliff.image",
-            createdTime: createdTime,
+            createdTime,
             modifiedTime: createdTime,
             meta: imageMeta,
           },
           imageContent
         );
         await itemManager.batch([item]);
-
-        console.log(item.getMeta());
-        console.log(item.getContent(Etebase.OutputFormat.String));
       })
       .catch((e) => console.log(e));
   };

@@ -24,7 +24,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const fetchImageItems = (): void => {
     props.etebaseInstance
       .getImagesMeta(galleryUid)
-      .then((items): void => {
+      .then((items) => {
         console.log(items);
         setImageItems(items);
       })
@@ -126,7 +126,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
                 </Link>
                 <UploadImage
                   setUploadedImage={setUploadedImage(item.uid)}
-                  spanElement={<span>Add image</span>}
+                  spanElement={<span key={item.uid}>Add image</span>}
                   multiple
                 />
               </span>
@@ -138,11 +138,14 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       <h3>Items</h3>
       {imageItems
         ? imageItems.map((item) => (
-            <span key={item.uid}>
-              <Link key={item.uid} to={`/annotate/${item.uid}`}>
-                {item.name}
-              </Link>
-            </span>
+            <>
+              <span key={item.uid}>
+                <Link key={item.uid} to={`/annotate/${item.uid}`}>
+                  {item.uid}
+                </Link>
+              </span>
+              <br />
+            </>
           ))
         : null}
     </div>
