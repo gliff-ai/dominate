@@ -110,8 +110,10 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     <div>
       <UploadImage
         setUploadedImage={convertImage}
-        spanElement={<span>Image upload and base64 encode</span>}
-        multiple
+        spanElement={
+          <span key="base64-convert">Image upload and base64 encode</span>
+        }
+        multiple={false}
       />
       <button onClick={createGalleryCollection} type="button">
         New Gallery
@@ -127,7 +129,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
                 <UploadImage
                   setUploadedImage={setUploadedImage(item.uid)}
                   spanElement={<span key={item.uid}>Add image</span>}
-                  multiple
+                  multiple={false}
                 />
               </span>
               <br />
@@ -140,7 +142,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         ? imageItems.map((item) => (
             <>
               <span key={item.uid}>
-                <Link key={item.uid} to={`/annotate/${item.uid}`}>
+                <Link key={item.uid} to={`/annotate/${galleryUid}/${item.uid}`}>
                   {item.uid}
                 </Link>
               </span>

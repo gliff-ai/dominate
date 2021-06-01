@@ -116,16 +116,15 @@ export class DominateEtebase {
     } as Gallery;
   };
 
-  wrangleImage = (item: Item): Image => {
+  wrangleImage = async (item: Item): Promise<Image> => {
     const meta = item.getMeta();
-    const modifiedTime = meta.mtime;
-    delete meta.mtime;
+    const content = await item.getContent(Etebase.OutputFormat.String);
 
     return {
-      ...meta,
-      modifiedTime,
       type: "gliff.image",
       uid: item.uid,
+      ...meta,
+      content,
     } as Image;
   };
 
@@ -137,8 +136,7 @@ export class DominateEtebase {
     const collection = await collectionManager.fetch(collectionUid);
     const itemManager = collectionManager.getItemManager(collection);
     const items = await itemManager.list();
-
-    return items.data.map(this.wrangleImage);
+    return Promise.all(items.data.map(this.wrangleImage));
   };
 
   getCollectionsMeta = async (type = "gliff.gallery"): Promise<Gallery[]> => {
