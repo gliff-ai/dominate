@@ -177,23 +177,25 @@ export class DominateEtebase {
     imageMeta: ImageMeta,
     imageContent: string | Uint8Array
   ): Promise<void> => {
-    const createdTime = new Date().getTime();
-    // Retrieve itemManager
-    await this.getItemManager(collectionUid)
-      .then(async (itemManager) => {
-        // Create new image item and add it to the collection
-        const item = await itemManager.create(
-          {
-            type: "gliff.image",
-            createdTime,
-            modifiedTime: createdTime,
-            meta: imageMeta,
-          },
-          imageContent
-        );
-        await itemManager.batch([item]);
-      })
-      .catch((e) => console.log(e));
+    try {
+      const createdTime = new Date().getTime();
+      // Retrieve itemManager
+      const itemManager = await this.getItemManager(collectionUid);
+
+      // Create new image item and add it to the collection
+      const item = await itemManager.create(
+        {
+          type: "gliff.image",
+          createdTime,
+          modifiedTime: createdTime,
+          meta: imageMeta,
+        },
+        imageContent
+      );
+      await itemManager.batch([item]);
+    } catch (e) {
+      console.error(e);
+    }
   };
 }
 
