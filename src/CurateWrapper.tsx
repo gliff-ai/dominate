@@ -19,7 +19,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [galleryItems, setGalleryItems] = useState<Gallery[]>([]);
   const [imageItems, setImageItems] = useState<Image[]>([]);
   const { id: galleryUid } = useParams();
-  const [galleryCount, setGalleryCount] = useState(0);
 
   const fetchImageItems = (): void => {
     props.etebaseInstance
@@ -48,12 +47,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const createGalleryCollection = (): void => {
     // Create new gallery collection.
     props.etebaseInstance
-      .createCollection(`gallery${galleryCount}`)
+      .createCollection(`gallery-${galleryItems.length + 1}`)
       .then((uid) => console.log(uid))
       .catch((e) => console.log(e));
-
-    // Update gallery count
-    setGalleryCount((prevCount) => prevCount + 1);
   };
 
   const addImageToGallery = (
