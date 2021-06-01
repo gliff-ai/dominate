@@ -10,20 +10,19 @@ function getImageMetaFromImageFileInfo(
     size: imageFileInfo.size,
     num_channels: imageFileInfo.num_channels,
     num_slices: imageFileInfo.num_slices,
+    resolution_x: imageFileInfo.resolution_x,
+    resolution_y: imageFileInfo.resolution_y,
+    resolution_z: imageFileInfo.resolution_z,
   };
 }
 
 function getImageFileInfoFromImageMeta(
-  imageName: string,
+  imageUid: string,
   imageMeta: ImageMeta
 ): ImageFileInfo {
   return new ImageFileInfo({
-    fileName: imageName,
-    width: imageMeta.width,
-    height: imageMeta.height,
-    size: imageMeta.size,
-    num_channels: imageMeta.num_channels,
-    num_slices: imageMeta.num_slices,
+    fileName: imageUid,
+    ...imageMeta,
   });
 }
 

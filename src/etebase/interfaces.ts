@@ -41,6 +41,9 @@ interface ImageMeta {
   width: number; // width of each slice
   height: number; // height of each slice
   size: number; // size of the image in bytes
+  resolution_x: number;
+  resolution_y: number;
+  resolution_z: number;
   format?: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
   customMeta?: string; // JSON of custom metadata
 }
