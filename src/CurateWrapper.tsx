@@ -56,22 +56,23 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     setGalleryCount((prevCount) => prevCount + 1);
   };
 
-  const addImageToGallery =
-    (collectionUid: string) =>
-    (imageFileInfo: ImageFileInfo, slicesData: Slices): void => {
-      // Stringify slices data and get image metadata
-      console.log(collectionUid);
-      const stringfiedSlices = stringifySlices(slicesData);
-      const imageMeta = getImageMetaFromImageFileInfo(imageFileInfo);
+  const addImageToGallery = (
+    imageFileInfo: ImageFileInfo,
+    slicesData: Slices
+  ): void => {
+    // Stringify slices data and get image metadata
+    const stringfiedSlices = stringifySlices(slicesData);
+    const imageMeta = getImageMetaFromImageFileInfo(imageFileInfo);
 
-      // Store slices and metadata inside gliff.image item and add it to gallery
-      props.etebaseInstance
-        .createImage(collectionUid, imageMeta, stringfiedSlices)
-        .then(() =>
-          console.log(`Added new image to collection ${collectionUid}.`)
-        )
-        .catch((e) => console.log(e));
-    };
+    // Store slices and metadata inside gliff.image item and add it to the selected gallery
+    props.etebaseInstance
+      .createImage(galleryUid, imageMeta, stringfiedSlices)
+      .then(() => console.log(`Added new image to gallery ${galleryUid}.`))
+      .catch((e) => console.log(e));
+
+    // Fetch new gallery items
+    fetchGalleryItems();
+  };
 
   useEffect(() => {
     fetchGalleryItems();
@@ -89,6 +90,11 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       <button onClick={createGalleryCollection} type="button">
         New Gallery
       </button>
+      <UploadImage
+        setUploadedImage={addImageToGallery}
+        spanElement={<span>Add image</span>}
+        multiple={false}
+      />
       <h3>Collections:</h3>
       {galleryItems
         ? galleryItems.map((item) => (
@@ -97,11 +103,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
                 <Link key={item.uid} to={`/curate/${item.uid}`}>
                   {item.name}
                 </Link>
-                <UploadImage
-                  setUploadedImage={addImageToGallery(item.uid)}
-                  spanElement={<span key={item.uid}>Add image</span>}
-                  multiple={false}
-                />
               </span>
               <br />
             </>
