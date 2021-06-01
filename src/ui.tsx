@@ -55,8 +55,6 @@ export class UserInterface extends Component<Props, State> {
     this.state = { collections: null };
   }
 
-  componentDidMount() {}
-
   selectThing = (type: string, thing: Collection | Item): void => {
     console.log(`you selected the ${type} thing`);
   };

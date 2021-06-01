@@ -1,12 +1,11 @@
-import React, { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { UploadImage, ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase, Gallery, Image } from "@/etebase";
 import { Slices } from "@/etebase/interfaces";
-// import { UserInterface as Curate } from "@gliff-ai/curate";
+
 import {
   stringifySlices,
-  parseStringifiedSlices,
   getImageMetaFromImageFileInfo,
 } from "@/imageConversions";
 
