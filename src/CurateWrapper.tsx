@@ -50,6 +50,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       .createCollection(`gallery-${galleryItems.length + 1}`)
       .then((uid) => console.log(uid))
       .catch((e) => console.log(e));
+
+    // Fetch gallery items
+    fetchGalleryItems();
   };
 
   const addImageToGallery = (
@@ -66,8 +69,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       .then(() => console.log(`Added new image to gallery ${galleryUid}.`))
       .catch((e) => console.log(e));
 
-    // Fetch new gallery items
-    fetchGalleryItems();
+    // Fetch image items
+    fetchImageItems();
   };
 
   useEffect(() => {
