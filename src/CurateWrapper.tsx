@@ -48,11 +48,12 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     // Create new gallery collection.
     props.etebaseInstance
       .createCollection(`gallery-${galleryItems.length + 1}`)
-      .then((uid) => console.log(uid))
+      .then((uid) => {
+        console.log(uid);
+        // Fetch gallery items
+        fetchGalleryItems();
+      })
       .catch((e) => console.log(e));
-
-    // Fetch gallery items
-    fetchGalleryItems();
   };
 
   const addImageToGallery = (
@@ -66,11 +67,12 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     // Store slices and metadata inside gliff.image item and add it to the selected gallery
     props.etebaseInstance
       .createImage(galleryUid, imageMeta, stringfiedSlices)
-      .then(() => console.log(`Added new image to gallery ${galleryUid}.`))
+      .then(() => {
+        console.log(`Added new image to gallery ${galleryUid}.`);
+        // Fetch image items
+        fetchImageItems();
+      })
       .catch((e) => console.log(e));
-
-    // Fetch image items
-    fetchImageItems();
   };
 
   useEffect(() => {
@@ -86,14 +88,20 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   return (
     <div>
-      <button onClick={createGalleryCollection} type="button">
-        New Gallery
-      </button>
-      <UploadImage
-        setUploadedImage={addImageToGallery}
-        spanElement={<span>Add image</span>}
-        multiple={false}
-      />
+      <div style={{ display: "flex" }}>
+        <button
+          onClick={createGalleryCollection}
+          type="button"
+          style={{ marginRight: 10 }}
+        >
+          New Gallery
+        </button>
+        <UploadImage
+          setUploadedImage={addImageToGallery}
+          spanElement={<span>Add image</span>}
+          multiple={false}
+        />
+      </div>
       <h3>Collections:</h3>
       {galleryItems
         ? galleryItems.map((item) => (
