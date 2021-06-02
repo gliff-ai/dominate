@@ -20,26 +20,32 @@ interface Annotation extends Omit<Thumbnail, "type"> {
   labels: string[];
 }
 
-type ImageBitmapBlob = string; // TMP
+type ImageBitmapBlob = ImageBitmap; // TMP
 type Channels = ImageBitmapBlob[];
 type Slices = Channels[];
 
 interface Image {
   uid: string;
   type: "gliff.image";
-  name: string; // human-readable gallery name, i.e. file name
+  name: string; // human-readable image name, i.e. file name
   createdTime: number; // time item was created in milliseconds since epoch
   modifiedTime: number; // time item was last modified in milliseconds since epoch
   description?: string; // long description for collection, i.e. project details
-  meta: {
-    slices: number; // number of z-slices
-    channels: number; // numbers colour channels
-    width: number; // width of each slice
-    height: number; // height of each slice
-    format: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
-    customMeta?: string; // JSON of custom metadata
-  };
-  content: Slices[];
+  meta: ImageMeta;
+  content: string;
 }
 
-export { Gallery, Image, Thumbnail, Annotation };
+interface ImageMeta {
+  num_slices: number; // number of z-slices
+  num_channels: number; // numbers colour channels
+  width: number; // width of each slice
+  height: number; // height of each slice
+  size: number; // size of the image in bytes
+  resolution_x: number;
+  resolution_y: number;
+  resolution_z: number;
+  format?: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
+  customMeta?: string; // JSON of custom metadata
+}
+
+export { Gallery, Image, Thumbnail, Annotation, Slices, ImageMeta };

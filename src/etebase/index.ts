@@ -1,8 +1,8 @@
 import * as Etebase from "etebase";
-import { Account, Collection, Item } from "etebase";
+import { Account, Collection, Item, ItemManager } from "etebase";
 import { User } from "@/services/user/interfaces";
 
-import { Gallery, Image } from "./interfaces";
+import { Gallery, Image, ImageMeta } from "./interfaces";
 
 declare const STORE_URL: string;
 const SERVER_URL = `${STORE_URL}etebase`;
@@ -116,32 +116,32 @@ export class DominateEtebase {
     } as Gallery;
   };
 
-  wrangleImage = (item: Item): Image => {
+  wrangleImage = async (item: Item): Promise<Image> => {
     const meta = item.getMeta();
-    const modifiedTime = meta.mtime;
-    delete meta.mtime;
+    const content = await item.getContent(Etebase.OutputFormat.String);
 
     return {
-      ...meta,
-      modifiedTime,
       type: "gliff.image",
       uid: item.uid,
+      ...meta,
+      content,
     } as Image;
   };
 
-  getImagesMeta = async (collectionId: string): Promise<Image[]> => {
+  getImagesMeta = async (collectionUid: string): Promise<Image[]> => {
     if (!this.etebaseInstance) throw new Error("No etebase instance");
+
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
-    const collection = await collectionManager.fetch(collectionId);
+    const collection = await collectionManager.fetch(collectionUid);
     const itemManager = collectionManager.getItemManager(collection);
-    const { data } = await itemManager.list();
-
-    return data.map(this.wrangleImage);
+    const items = await itemManager.list();
+    return Promise.all(items.data.map(this.wrangleImage));
   };
 
   getCollectionsMeta = async (type = "gliff.gallery"): Promise<Gallery[]> => {
     if (this.collections.length > 0) return this.collectionsMeta;
+    if (!this.etebaseInstance) throw new Error("No etebase instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
@@ -162,6 +162,40 @@ export class DominateEtebase {
       ""
     );
     await collectionManager.upload(collection);
+  };
+
+  getItemManager = async (collectionUid: string): Promise<ItemManager> => {
+    if (!this.etebaseInstance) throw new Error("No etebase instance");
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+
+    const collection = await collectionManager.fetch(collectionUid);
+    return collectionManager.getItemManager(collection);
+  };
+
+  createImage = async (
+    collectionUid: string,
+    imageMeta: ImageMeta,
+    imageContent: string | Uint8Array
+  ): Promise<void> => {
+    try {
+      const createdTime = new Date().getTime();
+      // Retrieve itemManager
+      const itemManager = await this.getItemManager(collectionUid);
+
+      // Create new image item and add it to the collection
+      const item = await itemManager.create(
+        {
+          type: "gliff.image",
+          createdTime,
+          modifiedTime: createdTime,
+          meta: imageMeta,
+        },
+        imageContent
+      );
+      await itemManager.batch([item]);
+    } catch (e) {
+      console.error(e);
+    }
   };
 }
 
