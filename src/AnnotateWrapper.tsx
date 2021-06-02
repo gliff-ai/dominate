@@ -1,6 +1,7 @@
 import { ReactElement, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { UserInterface as Annotate, Annotations } from "@gliff-ai/annotate";
+import { UserInterface as Annotate } from "@gliff-ai/annotate";
+import { Annotations } from "@gliff-ai/annotate/dist/src/annotation";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
 import { Annotation, Image } from "@/etebase/interfaces";
@@ -19,6 +20,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const { collectionId: collectionUid, imageId: imageUid } = useParams();
   const [annotationItems, setAnnotationItems] = useState<Annotation[]>([]);
   const [imageItem, setImageItem] = useState<Image | null>(null);
+  const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
 
   const getImage = (): void => {
     // Retrieve image item and set it as state
@@ -63,14 +65,15 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
 
   const getSlicesData = async (): Promise<ImageBitmap[][] | null> => {
     // Get image slices data.
-    if (imageItem) {
-      const slicesData = await parseStringifiedSlices(
+    try {
+      const newSlicesData = await parseStringifiedSlices(
         imageItem.content,
         imageItem.meta.width,
         imageItem.meta.height
       );
-      console.log(slicesData);
-      return slicesData;
+      setSlicesData(newSlicesData);
+    } catch (e) {
+      console.log(e);
     }
     return null;
   };
@@ -85,7 +88,9 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const getAnnotationsObject = (): Annotations | null => {
     // Get annotationsObject from annotation's content.
     if (annotationItems.length !== 0) {
-      const annotationsObject = JSON.parse(annotationItems[0].content);
+      const annotationsObject = JSON.parse(
+        annotationItems[0].content
+      ) as Annotations;
       console.log(annotationsObject);
       return annotationsObject;
     }
@@ -98,9 +103,13 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     getAnnotationItems();
   }, [collectionUid, imageUid]);
 
+  useEffect(() => {
+    getSlicesData().catch((e) => console.log(e));
+  }, [imageItem]);
+
   return (
     <Annotate
-      slicesData={getSlicesData()}
+      slicesData={slicesData}
       imageFileInfo={getImageFileInfo()}
       annotationsObject={getAnnotationsObject()}
       saveAnnotationsCallback={saveAnnotation}

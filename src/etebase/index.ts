@@ -1,6 +1,6 @@
 import * as Etebase from "etebase";
 import { Account, Collection, Item, ItemManager } from "etebase";
-import { Annotations } from "@gliff-ai/annotate";
+import { Annotations } from "@gliff-ai/annotate/dist/src/annotation";
 import { User } from "@/services/user/interfaces";
 import { Gallery, Image, ImageMeta, Annotation } from "./interfaces";
 
@@ -228,7 +228,7 @@ export class DominateEtebase {
   createAnnotation = async (
     collectionUid: string,
     imageUid: string,
-    annotationsObject: Annotation
+    annotationsObject: Annotations
   ): Promise<void> => {
     // Store annotations object in a new item.
 
