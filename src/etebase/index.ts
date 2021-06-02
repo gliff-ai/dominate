@@ -263,7 +263,10 @@ export class DominateEtebase {
 
     // Update item's content and modified time
     const modifiedTime = new Date().getTime();
-    item.setMeta({ ...item.getMeta(), modifiedTime });
+    const meta = item.getMeta() as Annotation;
+    delete meta.modifiedTime;
+
+    item.setMeta({ ...meta, modifiedTime });
     await item.setContent(JSON.stringify(annotationsObject));
 
     // Save changes
