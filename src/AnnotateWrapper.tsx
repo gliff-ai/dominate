@@ -71,7 +71,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         imageItem.meta.width,
         imageItem.meta.height
       );
-      setSlicesData(newSlicesData);
+      return newSlicesData;
     } catch (e) {
       console.log(e);
     }
@@ -99,20 +99,41 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
 
   useEffect(() => {
     console.log(`collectionUid: ${collectionUid}, imageUid: ${imageUid}`);
+    console.log(slicesData);
     getImage();
     getAnnotationItems();
   }, [collectionUid, imageUid]);
 
   useEffect(() => {
-    getSlicesData().catch((e) => console.log(e));
+    getSlicesData()
+      .then((newSlicesData) => {
+        if (!newSlicesData) {
+          // Fake slicesData
+          const width = 500;
+          const height = 500;
+          const imageData = new ImageData(
+            new Uint8ClampedArray(4 * width * height),
+            width,
+            height
+          );
+          createImageBitmap(imageData)
+            .then((imageBitmap) => {
+              setSlicesData([[imageBitmap]]);
+            })
+            .catch((e) => console.log(e));
+        } else {
+          setSlicesData(newSlicesData);
+        }
+      })
+      .catch((e) => console.log(e));
   }, [imageItem]);
 
-  return (
+  return slicesData ? (
     <Annotate
       slicesData={slicesData}
       imageFileInfo={getImageFileInfo()}
       annotationsObject={getAnnotationsObject()}
       saveAnnotationsCallback={saveAnnotation}
     />
-  );
+  ) : null;
 };
