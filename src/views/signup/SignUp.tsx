@@ -101,24 +101,6 @@ export const SignUp = () => {
 
     const isValid = validate();
 
-    if (isValid) {
-      setLoading(true);
-      auth
-        .signup(signUp.name, signUp.password)
-        .then(() => {
-          setLoading(false);
-          navigate("home");
-        })
-        .catch((err) => {
-          setOpen(true);
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          setEtebaseError(err.message);
-          setLoading(false);
-          setSignUp({ name: "", email: "", password: "", confirmPassword: "" });
-          setNameError("");
-          setPasswordError("");
-        });
-    }
     if (!isValid) {
       setLoading(false);
       return;
@@ -140,9 +122,7 @@ export const SignUp = () => {
 
       const response = await createCheckoutSession(tierId);
 
-      console.log(response);
       const session = response;
-      // console.log(session);
       // When the customer clicks on the button, redirect them to Checkout.
       const result = await stripe.redirectToCheckout({
         sessionId: session.id,
