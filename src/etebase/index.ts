@@ -136,7 +136,14 @@ export class DominateEtebase {
     const collection = await collectionManager.fetch(collectionUid);
     const itemManager = collectionManager.getItemManager(collection);
     const items = await itemManager.list();
-    return Promise.all(items.data.map(this.wrangleImage));
+    return Promise.all(
+      items.data
+        .filter((item) => {
+          const meta = item.getMeta() as Image;
+          return meta.type === "gliff.image";
+        })
+        .map(this.wrangleImage)
+    );
   };
 
   getCollectionsMeta = async (type = "gliff.gallery"): Promise<Gallery[]> => {

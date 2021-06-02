@@ -17,10 +17,14 @@ interface Props {
 export const AnnotateWrapper = (props: Props): ReactElement | null => {
   if (!props.etebaseInstance) return null;
 
-  const { collectionId: collectionUid, imageId: imageUid } = useParams();
+  const { collectionUid, imageUid } = useParams();
   const [annotationItems, setAnnotationItems] = useState<Annotation[]>([]);
   const [imageItem, setImageItem] = useState<Image | null>(null);
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
+  const [imageFileInfo, setImageFileInfo] =
+    useState<ImageFileInfo | null>(null);
+  const [annotationsObject, setAnnotationsObject] =
+    useState<Annotations | null>(null);
 
   const getImage = (): void => {
     // Retrieve image item and set it as state
@@ -44,12 +48,12 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       .catch((e) => console.log(e));
   };
 
-  const saveAnnotation = (annotationsObject: Annotations): void => {
+  const saveAnnotation = (newAnnotationsObject: Annotations): void => {
     // Save annotations data
     if (annotationItems.length === 0) {
       // If an annotation item for the given image does not exist, create one.
       props.etebaseInstance
-        .createAnnotation(collectionUid, imageUid, annotationsObject)
+        .createAnnotation(collectionUid, imageUid, newAnnotationsObject)
         .catch((e) => console.log(e));
     } else {
       // Otherwise update it.
@@ -57,82 +61,65 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .updateAnnotation(
           collectionUid,
           annotationItems[0].uid,
-          annotationsObject
+          newAnnotationsObject
         )
         .catch((e) => console.log(e));
     }
   };
 
-  const getSlicesData = async (): Promise<ImageBitmap[][] | null> => {
-    // Get image slices data.
-    try {
-      const newSlicesData = await parseStringifiedSlices(
-        imageItem.content,
-        imageItem.meta.width,
-        imageItem.meta.height
-      );
-      return newSlicesData;
-    } catch (e) {
-      console.log(e);
-    }
-    return null;
-  };
-
-  const getImageFileInfo = (): ImageFileInfo | null => {
-    if (imageItem) {
-      return getImageFileInfoFromImageMeta(imageItem.uid, imageItem.meta);
-    }
-    return null;
-  };
-
-  const getAnnotationsObject = (): Annotations | null => {
-    // Get annotationsObject from annotation's content.
-    if (annotationItems.length !== 0) {
-      const annotationsObject = JSON.parse(
-        annotationItems[0].content
-      ) as Annotations;
-      console.log(annotationsObject);
-      return annotationsObject;
-    }
-    return null;
+  const fakeSlicesData = () => {
+    const width = 500;
+    const height = 500;
+    const imageData = new ImageData(
+      new Uint8ClampedArray(4 * width * height),
+      width,
+      height
+    );
+    createImageBitmap(imageData)
+      .then((imageBitmap) => {
+        setSlicesData([[imageBitmap]]);
+      })
+      .catch((e) => console.log(e));
   };
 
   useEffect(() => {
     console.log(`collectionUid: ${collectionUid}, imageUid: ${imageUid}`);
-    console.log(slicesData);
+    fakeSlicesData();
     getImage();
     getAnnotationItems();
   }, [collectionUid, imageUid]);
 
   useEffect(() => {
-    getSlicesData()
-      .then((newSlicesData) => {
-        if (!newSlicesData) {
-          // Fake slicesData
-          const width = 500;
-          const height = 500;
-          const imageData = new ImageData(
-            new Uint8ClampedArray(4 * width * height),
-            width,
-            height
-          );
-          createImageBitmap(imageData)
-            .then((imageBitmap) => {
-              setSlicesData([[imageBitmap]]);
-            })
-            .catch((e) => console.log(e));
-        } else {
-          setSlicesData(newSlicesData);
-        }
-      })
-      .catch((e) => console.log(e));
+    if (imageItem) {
+      // Set slicesData
+      parseStringifiedSlices(
+        imageItem.content,
+        imageItem.meta.width,
+        imageItem.meta.height
+      )
+        .then((newSlicesData) => setSlicesData(newSlicesData))
+        .catch((e) => console.log(e));
+      // Set imageFileInfo
+      setImageFileInfo(
+        getImageFileInfoFromImageMeta(imageItem.uid, imageItem.meta)
+      );
+    }
   }, [imageItem]);
+
+  useEffect(() => {
+    // Set annotationsObject
+    if (annotationItems.length !== 0) {
+      const annotations = JSON.parse(annotationItems[0].content) as Annotations;
+      console.log(annotations);
+      setAnnotationsObject(annotations);
+    }
+  }, [annotationItems]);
 
   return slicesData ? (
     <Annotate
       slicesData={slicesData}
-      imageFileInfo={getImageFileInfo()}
-      annotationsObject={getAnnotationsObject()}
+      imageFileInfo={imageFileInfo}
+      annotationsObject={annotationsObject}
       saveAnnotationsCallback={saveAnnotation}
     />
   ) : null;

@@ -89,7 +89,7 @@ export class UserInterface extends Component<Props, State> {
             }
           />
           <Route
-            path="annotate/:collectionId/:imageId"
+            path="annotate/:collectionUid/:imageUid"
             element={
               <AnnotateWrapper etebaseInstance={this.props.etebaseInstance} />
             }
