@@ -16,11 +16,12 @@ interface Thumbnail {
 }
 
 interface Annotation extends Omit<Thumbnail, "type"> {
-  type: "gliff.thumbnail";
+  type: "gliff.annotation";
   labels: string[];
+  content: string; // stringified annotationsObject
 }
 
-type ImageBitmapBlob = ImageBitmap; // TMP
+type ImageBitmapBlob = ImageBitmap;
 type Channels = ImageBitmapBlob[];
 type Slices = Channels[];
 
