@@ -90,6 +90,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   }, [collectionUid, imageUid]);
 
   useEffect(() => {
+    console.log(imageItem);
     if (imageItem) {
       // Set slicesData
       parseStringifiedSlices(
@@ -97,12 +98,18 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         imageItem.meta.width,
         imageItem.meta.height
       )
-        .then((newSlicesData) => setSlicesData(newSlicesData))
+        .then((newSlicesData) => {
+          console.log(newSlicesData);
+          setSlicesData(newSlicesData);
+        })
         .catch((e) => console.log(e));
       // Set imageFileInfo
-      setImageFileInfo(
-        getImageFileInfoFromImageMeta(imageItem.uid, imageItem.meta)
+      const fileInfo = getImageFileInfoFromImageMeta(
+        imageItem.uid,
+        imageItem.meta
       );
+      console.log(fileInfo);
+      setImageFileInfo(fileInfo);
     }
   }, [imageItem]);
 
