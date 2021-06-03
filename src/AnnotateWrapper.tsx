@@ -4,7 +4,7 @@ import { UserInterface as Annotate } from "@gliff-ai/annotate";
 import { Annotations } from "@gliff-ai/annotate/dist/src/annotation";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
-import { Annotation, Image } from "@/etebase/interfaces";
+import { Annotation, Image, AnnotationData } from "@/etebase/interfaces";
 import {
   parseStringifiedSlices,
   getImageFileInfoFromImageMeta,
@@ -50,10 +50,15 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
 
   const saveAnnotation = (newAnnotationsObject: Annotations): void => {
     // Save annotations data
+    const annotationsData = {
+      data: newAnnotationsObject.getAllAnnotations(),
+      audit: newAnnotationsObject.getAuditObject(),
+    };
+
     if (annotationItems.length === 0) {
       // If an annotation item for the given image does not exist, create one.
       props.etebaseInstance
-        .createAnnotation(collectionUid, imageUid, newAnnotationsObject)
+        .createAnnotation(collectionUid, imageUid, annotationsData)
         .catch((e) => console.log(e));
     } else {
       // Otherwise update it.
@@ -61,7 +66,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .updateAnnotation(
           collectionUid,
           annotationItems[0].uid,
-          newAnnotationsObject
+          annotationsData
         )
         .catch((e) => console.log(e));
     }
@@ -116,9 +121,14 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   useEffect(() => {
     // Set annotationsObject
     if (annotationItems.length !== 0) {
-      const annotations = JSON.parse(annotationItems[0].content) as Annotations;
-      console.log(annotations);
-      setAnnotationsObject(annotations);
+      const annotations = JSON.parse(
+        annotationItems[0].content
+      ) as AnnotationData;
+      console.log(annotations.data);
+
+      setAnnotationsObject(
+        new Annotations(annotations.data, annotations.audit)
+      );
     }
   }, [annotationItems]);
 

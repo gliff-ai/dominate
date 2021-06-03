@@ -15,6 +15,8 @@ interface Thumbnail {
   modifiedTime: number; // "time item was last modified in milliseconds since epoch"
 }
 
+type AnnotationData = { data: any; audit: any };
+
 interface Annotation extends Omit<Thumbnail, "type"> {
   type: "gliff.annotation";
   labels: string[];
@@ -49,4 +51,12 @@ interface ImageMeta {
   customMeta?: string; // JSON of custom metadata
 }
 
-export { Gallery, Image, Thumbnail, Annotation, Slices, ImageMeta };
+export {
+  Gallery,
+  Image,
+  Thumbnail,
+  Annotation,
+  Slices,
+  ImageMeta,
+  AnnotationData,
+};

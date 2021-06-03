@@ -1,8 +1,13 @@
 import * as Etebase from "etebase";
 import { Account, Collection, Item, ItemManager } from "etebase";
-import { Annotations } from "@gliff-ai/annotate/dist/src/annotation";
 import { User } from "@/services/user/interfaces";
-import { Gallery, Image, ImageMeta, Annotation } from "./interfaces";
+import {
+  Gallery,
+  Image,
+  ImageMeta,
+  Annotation,
+  AnnotationData,
+} from "./interfaces";
 
 declare const STORE_URL: string;
 const SERVER_URL = `${STORE_URL}etebase`;
@@ -235,7 +240,7 @@ export class DominateEtebase {
   createAnnotation = async (
     collectionUid: string,
     imageUid: string,
-    annotationsObject: Annotations
+    annotationData: AnnotationData
   ): Promise<void> => {
     // Store annotations object in a new item.
 
@@ -252,7 +257,7 @@ export class DominateEtebase {
         modifiedTime: createdTime,
         labels: [],
       },
-      JSON.stringify(annotationsObject)
+      JSON.stringify(annotationData)
     );
 
     // Store item inside its own collection
@@ -262,7 +267,7 @@ export class DominateEtebase {
   updateAnnotation = async (
     collectionUid: string,
     annotationUid: string,
-    annotationsObject: Annotations
+    annotationData: AnnotationData
   ): Promise<void> => {
     // Retrieve itemManager
     const itemManager = await this.getItemManager(collectionUid);
@@ -274,7 +279,7 @@ export class DominateEtebase {
     delete meta.modifiedTime;
 
     item.setMeta({ ...meta, modifiedTime });
-    await item.setContent(JSON.stringify(annotationsObject));
+    await item.setContent(JSON.stringify(annotationData));
 
     // Save changes
     await itemManager.batch([item]);
