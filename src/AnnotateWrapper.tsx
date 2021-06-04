@@ -1,7 +1,6 @@
 import { ReactElement, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { UserInterface as Annotate } from "@gliff-ai/annotate";
-import { Annotations } from "@gliff-ai/annotate/dist/src/annotation";
+import { UserInterface as Annotate, Annotations } from "@gliff-ai/annotate";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
 import { Annotation, Image, AnnotationData } from "@/etebase/interfaces";
@@ -54,6 +53,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       data: newAnnotationsObject.getAllAnnotations(),
       audit: newAnnotationsObject.getAuditObject(),
     };
+    console.log(annotationsData);
 
     if (annotationItems.length === 0) {
       // If an annotation item for the given image does not exist, create one.
