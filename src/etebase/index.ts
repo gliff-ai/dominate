@@ -215,6 +215,7 @@ export class DominateEtebase {
     const content = await item.getContent(Etebase.OutputFormat.String);
     return {
       ...meta,
+      uid: item.uid,
       content,
     } as Annotation;
   };
