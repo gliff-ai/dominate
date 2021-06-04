@@ -53,7 +53,6 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       data: newAnnotationsObject.getAllAnnotations(),
       audit: newAnnotationsObject.getAuditObject(),
     };
-    console.log(annotationsData);
 
     if (annotationItems.length === 0) {
       // If an annotation item for the given image does not exist, create one.
@@ -121,14 +120,19 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   useEffect(() => {
     // Set annotationsObject
     if (annotationItems.length !== 0) {
-      const annotations = JSON.parse(
+      const annotationsData = JSON.parse(
         annotationItems[0].content
       ) as AnnotationData;
-      console.log(annotations.data);
 
-      setAnnotationsObject(
-        new Annotations(annotations.data, annotations.audit)
+      const annotations = new Annotations(
+        annotationsData.data,
+        annotationsData.audit
       );
+      //TODO: move line below to componenetDidUpdate of Annotate
+      // otherwise writes on the wrong active annotation
+      annotations.setActiveAnnotationID(0);
+
+      setAnnotationsObject(annotations);
     }
   }, [annotationItems]);
 
