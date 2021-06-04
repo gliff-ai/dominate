@@ -128,7 +128,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         annotationsData.data,
         annotationsData.audit
       );
-      //TODO: move line below to componenetDidUpdate of Annotate
+
+      // TODO: move line below to componenetDidUpdate of Annotate
       // otherwise writes on the wrong active annotation
       annotations.setActiveAnnotationID(0);
 
