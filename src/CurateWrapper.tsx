@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { UploadImage, ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase, Gallery, Image } from "@/etebase";
@@ -104,28 +104,26 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       <h3>Collections:</h3>
       {galleryItems
         ? galleryItems.map((item) => (
-            <>
-              <span key={item.uid}>
-                <Link key={item.uid} to={`/curate/${item.uid}`}>
-                  {item.name}
-                </Link>
+            <React.Fragment key={item.uid}>
+              <span>
+                <Link to={`/curate/${item.uid}`}>{item.name}</Link>
               </span>
               <br />
-            </>
+            </React.Fragment>
           ))
         : null}
 
       <h3>Items</h3>
       {imageItems
         ? imageItems.map((item) => (
-            <>
-              <span key={item.uid}>
-                <Link key={item.uid} to={`/annotate/${galleryUid}/${item.uid}`}>
+            <React.Fragment key={item.uid}>
+              <span>
+                <Link to={`/annotate/${galleryUid}/${item.uid}`}>
                   {item.uid}
                 </Link>
               </span>
               <br />
-            </>
+            </React.Fragment>
           ))
         : null}
     </div>

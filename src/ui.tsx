@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-curly-newline */
-import { Component, ReactNode } from "react";
+import React, { Component, ReactNode } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { Collection, DominateEtebase, Item } from "@/etebase";

@@ -1,4 +1,4 @@
-import { ReactElement, useState, useEffect } from "react";
+import React, { ReactElement, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import { UserInterface as Annotate, Annotations } from "@gliff-ai/annotate";
 import { ImageFileInfo } from "@gliff-ai/upload";
@@ -20,8 +20,9 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [annotationItems, setAnnotationItems] = useState<Annotation[]>([]);
   const [imageItem, setImageItem] = useState<Image | null>(null);
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
-  const [imageFileInfo, setImageFileInfo] =
-    useState<ImageFileInfo | null>(null);
+  const [imageFileInfo, setImageFileInfo] = useState<ImageFileInfo | null>(
+    null
+  );
   const [annotationsObject, setAnnotationsObject] =
     useState<Annotations | null>(null);
 

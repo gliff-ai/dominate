@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import React, { ReactElement } from "react";
 import { UserInterface as Manage, ProvideAuth } from "@gliff-ai/manage";
 import { DominateEtebase } from "@/etebase";
 import { useAuth } from "@/hooks/use-auth";
