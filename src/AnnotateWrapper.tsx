@@ -20,9 +20,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [annotationItems, setAnnotationItems] = useState<Annotation[]>([]);
   const [imageItem, setImageItem] = useState<Image | null>(null);
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
-  const [imageFileInfo, setImageFileInfo] = useState<ImageFileInfo | null>(
-    null
-  );
+  const [imageFileInfo, setImageFileInfo] =
+    useState<ImageFileInfo | null>(null);
   const [annotationsObject, setAnnotationsObject] =
     useState<Annotations | null>(null);
 
@@ -70,23 +69,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     }
   };
 
-  const fakeSlicesData = () => {
-    const width = 500;
-    const height = 500;
-    const imageData = new ImageData(
-      new Uint8ClampedArray(4 * width * height),
-      width,
-      height
-    );
-    createImageBitmap(imageData)
-      .then((imageBitmap) => {
-        setSlicesData([[imageBitmap]]);
-      })
-      .catch((e) => console.log(e));
-  };
-
   useEffect(() => {
-    fakeSlicesData();
     getImage();
     getAnnotationItems();
   }, [collectionUid, imageUid]);
