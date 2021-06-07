@@ -23,7 +23,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.etebaseInstance
       .getImagesMeta(galleryUid)
       .then((items) => {
-        console.log(items);
         setImageItems(items);
       })
       .catch((err) => {
@@ -35,7 +34,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.etebaseInstance
       .getCollectionsMeta("gliff.gallery")
       .then((items) => {
-        console.log(items);
         setGalleryItems(items);
       })
       .catch((err) => {
@@ -48,7 +46,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.etebaseInstance
       .createCollection(`gallery-${galleryItems.length + 1}`)
       .then((uid) => {
-        console.log(uid);
         // Fetch gallery items
         fetchGalleryItems();
       })
@@ -67,7 +64,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.etebaseInstance
       .createImage(galleryUid, imageMeta, stringfiedSlices)
       .then(() => {
-        console.log(`Added new image to gallery ${galleryUid}.`);
         // Fetch image items
         fetchImageItems();
       })
@@ -79,7 +75,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   }, [props.etebaseInstance]);
 
   useEffect(() => {
-    console.log(galleryUid);
     if (galleryUid) {
       fetchImageItems();
     }

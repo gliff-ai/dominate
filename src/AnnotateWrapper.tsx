@@ -31,7 +31,6 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     props.etebaseInstance
       .getImage(collectionUid, imageUid)
       .then((image) => {
-        console.log(image);
         setImageItem(image);
       })
       .catch((e) => console.log(e));
@@ -42,7 +41,6 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     props.etebaseInstance
       .getAnnotations(collectionUid, imageUid)
       .then((annotation) => {
-        console.log(annotation);
         setAnnotationItems(annotation);
       })
       .catch((e) => console.log(e));
@@ -88,14 +86,12 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   };
 
   useEffect(() => {
-    console.log(`collectionUid: ${collectionUid}, imageUid: ${imageUid}`);
     fakeSlicesData();
     getImage();
     getAnnotationItems();
   }, [collectionUid, imageUid]);
 
   useEffect(() => {
-    console.log(imageItem);
     if (imageItem) {
       // Set slicesData
       parseStringifiedSlices(
@@ -104,7 +100,6 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         imageItem.meta.height
       )
         .then((newSlicesData) => {
-          console.log(newSlicesData);
           setSlicesData(newSlicesData);
         })
         .catch((e) => console.log(e));
@@ -113,7 +108,6 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         imageItem.uid,
         imageItem.meta
       );
-      console.log(fileInfo);
       setImageFileInfo(fileInfo);
     }
   }, [imageItem]);
