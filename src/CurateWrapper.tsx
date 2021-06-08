@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from "react";
+import React, { ReactElement, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { UploadImage, ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase, Gallery, Image } from "@/etebase";
@@ -23,7 +23,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.etebaseInstance
       .getImagesMeta(galleryUid)
       .then((items) => {
-        console.log(items);
         setImageItems(items);
       })
       .catch((err) => {
@@ -35,7 +34,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.etebaseInstance
       .getCollectionsMeta("gliff.gallery")
       .then((items) => {
-        console.log(items);
         setGalleryItems(items);
       })
       .catch((err) => {
@@ -48,7 +46,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.etebaseInstance
       .createCollection(`gallery-${galleryItems.length + 1}`)
       .then((uid) => {
-        console.log(uid);
         // Fetch gallery items
         fetchGalleryItems();
       })
@@ -67,7 +64,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.etebaseInstance
       .createImage(galleryUid, imageMeta, stringfiedSlices)
       .then(() => {
-        console.log(`Added new image to gallery ${galleryUid}.`);
         // Fetch image items
         fetchImageItems();
       })
@@ -79,7 +75,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   }, [props.etebaseInstance]);
 
   useEffect(() => {
-    console.log(galleryUid);
     if (galleryUid) {
       fetchImageItems();
     }
@@ -104,28 +99,26 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       <h3>Collections:</h3>
       {galleryItems
         ? galleryItems.map((item) => (
-            <>
-              <span key={item.uid}>
-                <Link key={item.uid} to={`/curate/${item.uid}`}>
-                  {item.name}
-                </Link>
+            <React.Fragment key={item.uid}>
+              <span>
+                <Link to={`/curate/${item.uid}`}>{item.name}</Link>
               </span>
               <br />
-            </>
+            </React.Fragment>
           ))
         : null}
 
       <h3>Items</h3>
       {imageItems
         ? imageItems.map((item) => (
-            <>
-              <span key={item.uid}>
-                <Link key={item.uid} to={`/annotate/${galleryUid}/${item.uid}`}>
+            <React.Fragment key={item.uid}>
+              <span>
+                <Link to={`/annotate/${galleryUid}/${item.uid}`}>
                   {item.uid}
                 </Link>
               </span>
               <br />
-            </>
+            </React.Fragment>
           ))
         : null}
     </div>

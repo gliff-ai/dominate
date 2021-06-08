@@ -15,12 +15,15 @@ interface Thumbnail {
   modifiedTime: number; // "time item was last modified in milliseconds since epoch"
 }
 
+type AnnotationData = { data: any; audit: any };
+
 interface Annotation extends Omit<Thumbnail, "type"> {
-  type: "gliff.thumbnail";
+  type: "gliff.annotation";
   labels: string[];
+  content: string; // stringified annotationsObject
 }
 
-type ImageBitmapBlob = ImageBitmap; // TMP
+type ImageBitmapBlob = ImageBitmap;
 type Channels = ImageBitmapBlob[];
 type Slices = Channels[];
 
@@ -48,4 +51,12 @@ interface ImageMeta {
   customMeta?: string; // JSON of custom metadata
 }
 
-export { Gallery, Image, Thumbnail, Annotation, Slices, ImageMeta };
+export {
+  Gallery,
+  Image,
+  Thumbnail,
+  Annotation,
+  Slices,
+  ImageMeta,
+  AnnotationData,
+};

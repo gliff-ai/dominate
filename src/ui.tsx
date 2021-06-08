@@ -1,5 +1,5 @@
 /* eslint-disable react/jsx-curly-newline */
-import { Component, ReactNode } from "react";
+import React, { Component, ReactNode } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
 import { Collection, DominateEtebase, Item } from "@/etebase";
@@ -7,6 +7,7 @@ import { SignIn } from "@/views/SignIn";
 import { SignUp } from "@/views/signup/SignUp";
 import { Navbar } from "@/NavBar";
 import { ManageWrapper } from "@/ManageWrapper";
+import { AnnotateWrapper } from "@/AnnotateWrapper";
 import { Home } from "./Home";
 import { CurateWrapper } from "./CurateWrapper";
 
@@ -75,9 +76,6 @@ export class UserInterface extends Component<Props, State> {
           <Route path="/signup">
             <SignUp />
           </Route>
-          <Route path="/annotate">
-            <div>TODO</div>
-          </Route>
           <Route
             path="curate/:id"
             element={
@@ -91,12 +89,17 @@ export class UserInterface extends Component<Props, State> {
             }
           />
           <Route
+            path="annotate/:collectionUid/:imageUid"
+            element={
+              <AnnotateWrapper etebaseInstance={this.props.etebaseInstance} />
+            }
+          />
+          <Route
             path="manage/*"
             element={
               <ManageWrapper etebaseInstance={this.props.etebaseInstance} />
             }
           />
-
           <Route path="/">
             <Home />
           </Route>
