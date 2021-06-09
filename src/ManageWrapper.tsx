@@ -1,7 +1,8 @@
 import React, { ReactElement } from "react";
-import { UserInterface as Manage, ProvideAuth } from "@gliff-ai/manage";
+import { UserInterface as Manage, ProvideAuth, /* TODO export Services */} from "@gliff-ai/manage";
 import { DominateEtebase } from "@/etebase";
 import { useAuth } from "@/hooks/use-auth";
+import { inviteNewUser } from "@/services/user";
 
 interface Props {
   etebaseInstance: DominateEtebase;
@@ -24,11 +25,21 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return true; // Maybe not always true...
   };
 
+  const inviteUser = async ({ email }) => {
+    // Invite them to create a gliff account
+    const result = await inviteNewUser(email);
+
+    return true;
+    // Share collections with them?
+  }
+
   const services = {
     queryTeam: "GET /team",
     loginUser: "POST /user/login", // Not used, we pass an authd user down
     getProjects,
+    getProject: "GET /project", // TODO
     createProject,
+    inviteUser,
   };
 
   const user = { email: auth.user.username, authToken: auth.user.authToken };

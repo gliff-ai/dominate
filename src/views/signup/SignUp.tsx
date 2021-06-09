@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, {useEffect, useState} from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import {
   Avatar,
@@ -16,12 +16,11 @@ import {
 } from "@material-ui/core";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import CloseIcon from "@material-ui/icons/Close";
-import { useAuth } from "@/hooks/use-auth";
-
 import { useNavigate } from "react-router-dom";
 
+import { useAuth } from "@/hooks/use-auth";
 import { API_URL } from "@/etebase";
-import { createCheckoutSession } from "@/services/user";
+import { createCheckoutSession, getInvite } from "@/services/user";
 
 const stripePromise = loadStripe(
   "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
@@ -65,9 +64,28 @@ export const SignUp = () => {
     email: "",
     password: "",
     confirmPassword: "",
+    teamId: null as number,
+    inviteId: null as string,
   });
 
-  const tierId = query.get("tier_id") || "0";
+  const tierId = query.get("tier_id") || null;
+  const inviteId = query.get("invite_id") || null;
+
+  useEffect(() => {
+    if (inviteId) {
+      // We have an invite, so we know their email, add this to the request
+      void getInvite(inviteId).then(({email, team_id}) => {
+        setSignUp({
+          teamId: team_id,
+          email,
+          inviteId,
+          name: "",
+          password: "",
+          confirmPassword: "",
+        });
+      });
+    }
+  }, []);
 
   const validate = () => {
     if (signUp.password !== signUp.confirmPassword) {
@@ -109,13 +127,14 @@ export const SignUp = () => {
     try {
       const user = await auth.signup(signUp.email, signUp.password);
 
-      const profile = await auth.createProfile(signUp.name);
+      const profile = await auth.createProfile(signUp.name, signUp.teamId, signUp.inviteId);
 
       // Create and update their profile
       setLoading(false);
 
-      if (!tierId) {
-        navigate("home"); // It's the free plan so don't bill them
+      if (!tierId || inviteId) {
+        navigate("home"); // It's the free plan or an invite so don't bill them
+        return;
       }
 
       const stripe = await stripePromise;
@@ -136,7 +155,7 @@ export const SignUp = () => {
     } catch (e) {
       setOpen(true);
       setLoading(false);
-      setSignUp({ name: "", email: "", password: "", confirmPassword: "" });
+      setSignUp({...signUp, name: "", password: "", confirmPassword: "" });
       setEmailError("");
       setNameError("");
       setPasswordError("");
