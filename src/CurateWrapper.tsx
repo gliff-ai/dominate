@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 import { UploadImage, ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase, Gallery, Image } from "@/etebase";
 import { Slices } from "@/etebase/interfaces";
+import Curate from "@gliff-ai/curate";
 
 import {
   stringifySlices,
@@ -80,8 +81,10 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     }
   }, [galleryUid]);
 
-  return (
-    <div>
+  return galleryUid ? (
+    <Curate saveImageCallback={addImageToGallery} />
+  ) : (
+    <>
       <div style={{ display: "flex" }}>
         <button
           onClick={createGalleryCollection}
@@ -121,6 +124,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             </React.Fragment>
           ))
         : null}
-    </div>
+    </>
   );
 };
