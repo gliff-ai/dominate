@@ -167,11 +167,11 @@ export class DominateEtebase {
 
     // Create, encrypt and upload a new collection
     const collection = await collectionManager.create(
-      "gliff.gallery",
+      "gliff.gallery", // type
       {
         name,
-      },
-      ""
+      }, // metadata
+      "" // content
     );
     await collectionManager.upload(collection);
   };

@@ -15,11 +15,12 @@ interface Props {
 
 export const CurateWrapper = (props: Props): ReactElement | null => {
   if (!props.etebaseInstance) return null;
-  const [galleryItems, setGalleryItems] = useState<Gallery[]>([]);
-  const [imageItems, setImageItems] = useState<Image[]>([]);
-  const { id: galleryUid } = useParams();
+  const [galleryItems, setGalleryItems] = useState<Gallery[]>([]); // the objects we list under "Collections"
+  const [imageItems, setImageItems] = useState<Image[]>([]); // the objects we list under "Items"
+  const { id: galleryUid } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
 
   const fetchImageItems = (): void => {
+    // fetches images via DominateEtebase, and assigns them to imageItems state
     props.etebaseInstance
       .getImagesMeta(galleryUid)
       .then((items) => {
@@ -31,6 +32,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   const fetchGalleryItems = (): void => {
+    // fetches galleries via DominateEtebase, and assigns them to galleryItems state
     props.etebaseInstance
       .getCollectionsMeta("gliff.gallery")
       .then((items) => {
@@ -70,6 +72,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       .catch((e) => console.log(e));
   };
 
+  // runs once on page load, would have been a componentDidMount if this were a class component:
   useEffect(() => {
     fetchGalleryItems();
   }, [props.etebaseInstance]);
