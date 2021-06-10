@@ -38,7 +38,17 @@ interface Image {
   content: string;
 }
 
+// not an etebase collection or item. Gallery content is an array of these objects
+interface GalleryTile {
+  metadata: ImageMeta;
+  thumbnail: string; // base64
+  imageUID: string;
+  annotationUID: string;
+  auditUID: string;
+}
+
 interface ImageMeta {
+  // the stuff in ImageFileInfo
   num_slices: number; // number of z-slices
   num_channels: number; // numbers colour channels
   width: number; // width of each slice
