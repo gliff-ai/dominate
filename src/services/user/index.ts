@@ -8,8 +8,16 @@ export const createCheckoutSession = (
     tier_id,
   });
 
-export const createUserProfile = (name: string, teamId: number = null, inviteId: string = null): Promise<UserProfile> =>
-  apiRequest<UserProfile>("/user/", "POST", { name, team_id: teamId, invite_id: inviteId });
+export const createUserProfile = (
+  name: string,
+  teamId: number = null,
+  inviteId: string = null
+): Promise<UserProfile> =>
+  apiRequest<UserProfile>("/user/", "POST", {
+    name,
+    team_id: teamId,
+    invite_id: inviteId,
+  });
 
 export const inviteNewUser = (email: string): Promise<unknown> =>
   apiRequest<unknown>("/user/invite", "POST", { email });

@@ -14,7 +14,11 @@ interface Context {
   signin: (username: string, password: string) => Promise<User>;
   signout: () => Promise<boolean>;
   signup: (username: string, password: string) => Promise<User>;
-  createProfile: (name: string, teamId?: number, inviteId?: string) => Promise<UserProfile>; // TODO add return type
+  createProfile: (
+    name: string,
+    teamId?: number,
+    inviteId?: string
+  ) => Promise<UserProfile>; // TODO add return type
 }
 
 const authContext = createContext<Context>(null);

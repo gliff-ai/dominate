@@ -1,5 +1,8 @@
 import React, { ReactElement } from "react";
-import { UserInterface as Manage, ProvideAuth, /* TODO export Services */} from "@gliff-ai/manage";
+import {
+  UserInterface as Manage,
+  ProvideAuth /* TODO export Services */,
+} from "@gliff-ai/manage";
 import { DominateEtebase } from "@/etebase";
 import { useAuth } from "@/hooks/use-auth";
 import { inviteNewUser } from "@/services/user";
@@ -31,7 +34,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
 
     return true;
     // Share collections with them?
-  }
+  };
 
   const services = {
     queryTeam: "GET /team",

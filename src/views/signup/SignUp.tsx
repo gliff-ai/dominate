@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from "react";
+import React, { useEffect, useState } from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import {
   Avatar,
@@ -74,7 +74,7 @@ export const SignUp = () => {
   useEffect(() => {
     if (inviteId) {
       // We have an invite, so we know their email, add this to the request
-      void getInvite(inviteId).then(({email, team_id}) => {
+      void getInvite(inviteId).then(({ email, team_id }) => {
         setSignUp({
           teamId: team_id,
           email,
@@ -127,7 +127,11 @@ export const SignUp = () => {
     try {
       const user = await auth.signup(signUp.email, signUp.password);
 
-      const profile = await auth.createProfile(signUp.name, signUp.teamId, signUp.inviteId);
+      const profile = await auth.createProfile(
+        signUp.name,
+        signUp.teamId,
+        signUp.inviteId
+      );
 
       // Create and update their profile
       setLoading(false);
@@ -155,7 +159,7 @@ export const SignUp = () => {
     } catch (e) {
       setOpen(true);
       setLoading(false);
-      setSignUp({...signUp, name: "", password: "", confirmPassword: "" });
+      setSignUp({ ...signUp, name: "", password: "", confirmPassword: "" });
       setEmailError("");
       setNameError("");
       setPasswordError("");
