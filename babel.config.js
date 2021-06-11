@@ -10,5 +10,5 @@ module.exports = {
     ],
     "@babel/preset-typescript",
   ],
-  plugins: ["@babel/proposal-class-properties"],
+  plugins: ["@babel/proposal-class-properties", "add-react-displayname"],
 };

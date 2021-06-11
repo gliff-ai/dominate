@@ -13,6 +13,10 @@ module.exports = merge(common, {
   plugins: [
     new webpack.DefinePlugin({
       STORE_URL: JSON.stringify("https://store.gliff.app/"),
+      IS_MONITORED: true,
+      SENTRY_ENVIRONMENT: "production",
+      IS_SENTRY_DEBUG: false,
+      VERSION: version,
     }),
   ],
 });

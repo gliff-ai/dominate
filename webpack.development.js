@@ -18,6 +18,10 @@ module.exports = merge(common, {
       STORE_URL: JSON.stringify(
         process.env.API_URL || "http://localhost:8000/"
       ),
+      IS_MONITORED: false,
+      SENTRY_ENVIRONMENT: "development",
+      IS_SENTRY_DEBUG: true,
+      VERSION: version,
     }),
   ],
 });
