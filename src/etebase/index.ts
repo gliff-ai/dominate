@@ -2,7 +2,7 @@ import * as Etebase from "etebase";
 import { Account, Collection, Item, ItemManager } from "etebase";
 import { User } from "@/services/user/interfaces";
 import {
-  Gallery,
+  GalleryMeta,
   GalleryTile,
   Image,
   ImageMeta,
@@ -19,7 +19,7 @@ export class DominateEtebase {
 
   collections: Collection[];
 
-  collectionsMeta: Gallery[];
+  collectionsMeta: GalleryMeta[];
 
   public isLoggedIn: boolean;
 
@@ -109,7 +109,7 @@ export class DominateEtebase {
     return true;
   };
 
-  wrangleGallery = (col: Collection): Gallery => {
+  wrangleGallery = (col: Collection): GalleryMeta => {
     const meta = col.getMeta();
     const modifiedTime = meta.mtime;
     delete meta.mtime;
@@ -119,7 +119,7 @@ export class DominateEtebase {
       modifiedTime,
       type: "gliff.gallery",
       uid: col.uid,
-    } as Gallery;
+    } as GalleryMeta;
   };
 
   getImagesMeta = async (collectionUid: string): Promise<GalleryTile[]> => {
@@ -131,7 +131,9 @@ export class DominateEtebase {
     return JSON.parse(await collection.getContent(Etebase.OutputFormat.String));
   };
 
-  getCollectionsMeta = async (type = "gliff.gallery"): Promise<Gallery[]> => {
+  getCollectionsMeta = async (
+    type = "gliff.gallery"
+  ): Promise<GalleryMeta[]> => {
     if (this.collections.length > 0) return this.collectionsMeta;
     if (!this.etebaseInstance) throw new Error("No etebase instance");
 
@@ -150,8 +152,11 @@ export class DominateEtebase {
       "gliff.gallery", // type
       {
         name,
+        createdTime: Date.now(),
+        modifiedTime: Date.now(),
+        description: "",
       }, // metadata
-      "" // content
+      "[]" // content
     );
     await collectionManager.upload(collection);
   };
@@ -286,4 +291,4 @@ export class DominateEtebase {
   };
 }
 
-export { Collection, Item, Gallery, Image };
+export { Collection, Item, GalleryMeta, Image };

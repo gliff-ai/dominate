@@ -1,4 +1,4 @@
-interface Gallery {
+interface GalleryMeta {
   uid: string;
   type: "gliff.gallery";
   name: string; // "human-readable gallery name, i.e. folder name"
@@ -67,7 +67,7 @@ interface ImageMeta {
 }
 
 export {
-  Gallery,
+  GalleryMeta,
   GalleryTile,
   MetaItem,
   Image,

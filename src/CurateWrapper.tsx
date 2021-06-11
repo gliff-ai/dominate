@@ -1,8 +1,14 @@
 import React, { ReactElement, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { UploadImage, ImageFileInfo } from "@gliff-ai/upload";
-import { DominateEtebase, Gallery, Image } from "@/etebase";
-import { Slices, MetaItem, GalleryTile } from "@/etebase/interfaces";
+import { DominateEtebase } from "@/etebase";
+import {
+  Slices,
+  GalleryMeta,
+  Image,
+  MetaItem,
+  GalleryTile,
+} from "@/etebase/interfaces";
 import Curate from "@gliff-ai/curate";
 
 import {
@@ -16,7 +22,7 @@ interface Props {
 
 export const CurateWrapper = (props: Props): ReactElement | null => {
   if (!props.etebaseInstance) return null;
-  const [galleryItems, setGalleryItems] = useState<Gallery[]>([]); // the objects we list under "Collections"
+  const [galleryItems, setGalleryItems] = useState<GalleryMeta[]>([]); // the objects we list under "Collections"
   const [imageItems, setImageItems] = useState<Image[]>([]); // the objects we list under "Items"
   const [galleryTiles, setGalleryTiles] = useState<GalleryTile[]>([]); // the information a gallery stores about its contents
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
