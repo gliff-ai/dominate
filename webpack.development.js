@@ -22,7 +22,7 @@ module.exports = merge(common, {
       IS_MONITORED: false,
       SENTRY_ENVIRONMENT: "development",
       IS_SENTRY_DEBUG: true,
-      VERSION: version,
+      VERSION: JSON.stringify(version),
     }),
   ],
 });

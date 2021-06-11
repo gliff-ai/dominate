@@ -5,6 +5,7 @@ const common = require("./webpack.common.js");
 const { version } = require("./package.json");
 
 module.exports = merge(common, {
+  mode: "production",
   output: {
     filename: "main.js",
     path: path.resolve(__dirname, "dist"),
@@ -17,7 +18,7 @@ module.exports = merge(common, {
       IS_MONITORED: true,
       SENTRY_ENVIRONMENT: "staging",
       IS_SENTRY_DEBUG: true,
-      VERSION: version,
+      VERSION: JSON.stringify(version),
     }),
   ],
 });

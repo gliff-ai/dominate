@@ -14,6 +14,7 @@ declare const IS_MONITORED: boolean;
 declare const SENTRY_ENVIRONMENT: string;
 declare const IS_SENTRY_DEBUG: boolean;
 declare const VERSION: string;
+const version = VERSION;
 
 if (IS_MONITORED) {
   // setup Sentry
@@ -30,7 +31,7 @@ if (IS_MONITORED) {
       /* eslint-enable @typescript-eslint/no-unsafe-call */
     ],
 
-    release: `dominate@${VERSION}`,
+    release: `dominate@${version}`,
 
     // We recommend adjusting this value in production, or using tracesSampler
     // for finer control

@@ -8,7 +8,6 @@ function resolve(dir) {
 
 module.exports = {
   entry: "./src/index.tsx",
-  mode: "development",
   devtool: "source-map",
   module: {
     rules: [
