@@ -2,7 +2,7 @@ import React, { ReactElement, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { UploadImage, ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase, Gallery, Image } from "@/etebase";
-import { Slices } from "@/etebase/interfaces";
+import { Slices, MetaItem, GalleryTile } from "@/etebase/interfaces";
 import Curate from "@gliff-ai/curate";
 
 import {
@@ -18,14 +18,39 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   if (!props.etebaseInstance) return null;
   const [galleryItems, setGalleryItems] = useState<Gallery[]>([]); // the objects we list under "Collections"
   const [imageItems, setImageItems] = useState<Image[]>([]); // the objects we list under "Items"
+  const [galleryTiles, setGalleryTiles] = useState<GalleryTile[]>([]); // the information a gallery stores about its contents
+  const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
   const { id: galleryUid } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
 
   const fetchImageItems = (): void => {
     // fetches images via DominateEtebase, and assigns them to imageItems state
     props.etebaseInstance
       .getImagesMeta(galleryUid)
-      .then((items) => {
-        setImageItems(items);
+      .then(async (items) => {
+        // set galleryTiles so that etebase pointers are kept:
+        setGalleryTiles(items);
+
+        // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
+        const wrangled = items.map((item) => ({
+          thumbnail: item.thumbnail,
+          ...item.metadata,
+        }));
+
+        // convert base64 thumbnail strings into ImageBitmap:
+        const promises = wrangled.map((item) => {
+          const img = new Image();
+          img.src = item.thumbnail;
+          return createImageBitmap(img);
+        });
+        const thumbnails = await Promise.all(promises);
+
+        // merge thumbnails back into item metadata:
+        setCurateInput(
+          wrangled.map((item, i) => ({
+            ...item,
+            thumbnail: thumbnails[i],
+          }))
+        );
       })
       .catch((err) => {
         console.log(err);
@@ -85,7 +110,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   }, [galleryUid]);
 
   return galleryUid ? (
-    <Curate saveImageCallback={addImageToGallery} />
+    <Curate metadata={curateInput} saveImageCallback={addImageToGallery} />
   ) : (
     <>
       <div style={{ display: "flex" }}>

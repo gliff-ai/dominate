@@ -3,6 +3,7 @@ import { Account, Collection, Item, ItemManager } from "etebase";
 import { User } from "@/services/user/interfaces";
 import {
   Gallery,
+  GalleryTile,
   Image,
   ImageMeta,
   Annotation,
@@ -121,34 +122,13 @@ export class DominateEtebase {
     } as Gallery;
   };
 
-  wrangleImage = async (item: Item): Promise<Image> => {
-    const meta = item.getMeta();
-    const content = await item.getContent(Etebase.OutputFormat.String);
-
-    return {
-      type: "gliff.image",
-      uid: item.uid,
-      ...meta,
-      content,
-    } as Image;
-  };
-
-  getImagesMeta = async (collectionUid: string): Promise<Image[]> => {
+  getImagesMeta = async (collectionUid: string): Promise<GalleryTile[]> => {
     if (!this.etebaseInstance) throw new Error("No etebase instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     const collection = await collectionManager.fetch(collectionUid);
-    const itemManager = collectionManager.getItemManager(collection);
-    const items = await itemManager.list();
-    return Promise.all(
-      items.data
-        .filter((item) => {
-          const meta = item.getMeta() as Image;
-          return meta.type === "gliff.image";
-        })
-        .map(this.wrangleImage)
-    );
+    return JSON.parse(await collection.getContent(Etebase.OutputFormat.String));
   };
 
   getCollectionsMeta = async (type = "gliff.gallery"): Promise<Gallery[]> => {

@@ -7,6 +7,11 @@ interface Gallery {
   description?: string; // "long description for collection, i.e. project details"
 }
 
+interface MetaItem {
+  // as seen in CURATE
+  [index: string]: string | string[] | ImageBitmap | boolean | number;
+}
+
 interface Thumbnail {
   uid: string;
   type: "gliff.thumbnail";
@@ -63,6 +68,8 @@ interface ImageMeta {
 
 export {
   Gallery,
+  GalleryTile,
+  MetaItem,
   Image,
   Thumbnail,
   Annotation,
