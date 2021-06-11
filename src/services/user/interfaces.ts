@@ -21,3 +21,8 @@ export interface UserProfile {
   name: string;
   team: Team;
 }
+
+export interface Invite {
+  email: string;
+  team_id: number;
+}
