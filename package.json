@@ -57,7 +57,7 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
-    "@gliff-ai/annotate": "^0.10.8",
+    "@gliff-ai/annotate": "^0.10.10",
     "@gliff-ai/curate": "^0.7.1",
     "@gliff-ai/manage": "^0.2.32",
     "@gliff-ai/upload": "^0.1.13",
