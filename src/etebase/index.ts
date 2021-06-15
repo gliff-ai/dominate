@@ -128,7 +128,8 @@ export class DominateEtebase {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     const collection = await collectionManager.fetch(collectionUid);
-    return JSON.parse(await collection.getContent(Etebase.OutputFormat.String));
+    const json = await collection.getContent(Etebase.OutputFormat.String);
+    return JSON.parse(json) as GalleryTile[];
   };
 
   getCollectionsMeta = async (
@@ -154,7 +155,7 @@ export class DominateEtebase {
         name,
         createdTime: Date.now(),
         modifiedTime: Date.now(),
-        description: "",
+        description: "[]",
       }, // metadata
       "[]" // content
     );
@@ -172,9 +173,11 @@ export class DominateEtebase {
   createImage = async (
     collectionUid: string,
     imageMeta: ImageMeta,
+    thumbnail: string,
     imageContent: string | Uint8Array
   ): Promise<void> => {
     try {
+      // Create/upload new etebase item for the image:
       const createdTime = new Date().getTime();
       // Retrieve itemManager
       const itemManager = await this.getItemManager(collectionUid);
@@ -185,11 +188,29 @@ export class DominateEtebase {
           type: "gliff.image",
           createdTime,
           modifiedTime: createdTime,
-          meta: imageMeta,
         },
         imageContent
       );
       await itemManager.batch([item]);
+
+      // Add the image's metadata/thumbnail and a pointer to the image item to the gallery's content:
+      const collectionManager = this.etebaseInstance.getCollectionManager();
+      const collection = await collectionManager.fetch(collectionUid);
+      const oldContent = await collection.getContent(
+        Etebase.OutputFormat.String
+      );
+      const content = JSON.stringify(
+        (JSON.parse(oldContent) as GalleryTile[]).concat({
+          metadata: imageMeta,
+          imageLabels: [],
+          thumbnail,
+          imageUID: item.uid,
+          annotationUID: null,
+          auditUID: null,
+        })
+      );
+      await collection.setContent(content);
+      await collectionManager.upload(collection);
     } catch (e) {
       console.error(e);
     }

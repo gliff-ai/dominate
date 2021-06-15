@@ -7,9 +7,19 @@ interface GalleryMeta {
   description?: string; // "long description for collection, i.e. project details"
 }
 
+// Gallery collection content is an array of these objects
+interface GalleryTile {
+  metadata: ImageMeta;
+  imageLabels: string[];
+  thumbnail: string; // base64
+  imageUID: string;
+  annotationUID: string;
+  auditUID: string;
+}
+
 interface MetaItem {
   // as seen in CURATE
-  [index: string]: string | string[] | ImageBitmap | boolean | number;
+  [index: string]: string | string[] | boolean | number;
 }
 
 interface Thumbnail {
@@ -43,17 +53,9 @@ interface Image {
   content: string;
 }
 
-// not an etebase collection or item. Gallery content is an array of these objects
-interface GalleryTile {
-  metadata: ImageMeta;
-  thumbnail: string; // base64
-  imageUID: string;
-  annotationUID: string;
-  auditUID: string;
-}
-
 interface ImageMeta {
   // the stuff in ImageFileInfo
+  imageName: string;
   num_slices: number; // number of z-slices
   num_channels: number; // numbers colour channels
   width: number; // width of each slice

@@ -32,38 +32,25 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     // fetches images via DominateEtebase, and assigns them to imageItems state
     props.etebaseInstance
       .getImagesMeta(galleryUid)
-      .then(async (items) => {
+      .then((items) => {
         // set galleryTiles so that etebase pointers are kept:
         setGalleryTiles(items);
 
         // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
         const wrangled = items.map((item) => ({
           thumbnail: item.thumbnail,
+          imageLabels: item.imageLabels,
           ...item.metadata,
         }));
 
-        // convert base64 thumbnail strings into ImageBitmap:
-        const promises = wrangled.map((item) => {
-          const img = new Image();
-          img.src = item.thumbnail;
-          return createImageBitmap(img);
-        });
-        const thumbnails = await Promise.all(promises);
-
-        // merge thumbnails back into item metadata:
-        setCurateInput(
-          wrangled.map((item, i) => ({
-            ...item,
-            thumbnail: thumbnails[i],
-          }))
-        );
+        setCurateInput(wrangled);
       })
       .catch((err) => {
         console.log(err);
       });
   };
 
-  const fetchGalleryItems = (): void => {
+  const fetchGalleries = (): void => {
     // fetches galleries via DominateEtebase, and assigns them to galleryItems state
     props.etebaseInstance
       .getCollectionsMeta("gliff.gallery")
@@ -79,34 +66,43 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     // Create new gallery collection.
     props.etebaseInstance
       .createCollection(`gallery-${galleryItems.length + 1}`)
-      .then((uid) => {
+      .then(() => {
         // Fetch gallery items
-        fetchGalleryItems();
+        fetchGalleries();
       })
       .catch((e) => console.log(e));
   };
 
-  const addImageToGallery = (
+  const addImageToGallery = async (
     imageFileInfo: ImageFileInfo,
     slicesData: Slices
-  ): void => {
+  ): Promise<void> => {
     // Stringify slices data and get image metadata
     const stringfiedSlices = stringifySlices(slicesData);
     const imageMeta = getImageMetaFromImageFileInfo(imageFileInfo);
 
-    // Store slices and metadata inside gliff.image item and add it to the selected gallery
-    props.etebaseInstance
-      .createImage(galleryUid, imageMeta, stringfiedSlices)
-      .then(() => {
-        // Fetch image items
-        fetchImageItems();
-      })
-      .catch((e) => console.log(e));
+    // make thumbnail:
+    const canvas = document.createElement("canvas");
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(slicesData[0][0], 0, 0, 128, 128);
+    const thumbnailB64 = canvas.toDataURL();
+
+    // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
+    await props.etebaseInstance.createImage(
+      galleryUid,
+      imageMeta,
+      thumbnailB64,
+      stringfiedSlices
+    );
+
+    fetchImageItems();
   };
 
   // runs once on page load, would have been a componentDidMount if this were a class component:
   useEffect(() => {
-    fetchGalleryItems();
+    fetchGalleries();
   }, [props.etebaseInstance]);
 
   useEffect(() => {
