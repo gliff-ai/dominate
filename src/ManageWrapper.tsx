@@ -39,11 +39,14 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     // Share collections with them?
   };
 
-  const inviteToProject = async ({email, projectId}) => {
-    const result = await props.etebaseInstance.inviteUserToCollection(projectId, email);
+  const inviteToProject = async ({ email, projectId }) => {
+    const result = await props.etebaseInstance.inviteUserToCollection(
+      projectId,
+      email
+    );
 
     return true;
-  }
+  };
 
   const services = {
     queryTeam: "GET /team",

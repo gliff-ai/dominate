@@ -1,5 +1,5 @@
 import * as Etebase from "etebase";
-import {Account, Collection, Item, ItemManager} from "etebase";
+import { Account, Collection, Item, ItemManager } from "etebase";
 import { User } from "@/services/user/interfaces";
 import {
   Gallery,
@@ -178,7 +178,10 @@ export class DominateEtebase {
   };
 
   // TODO change this to return errors and display them when we do styling etc
-  inviteUserToCollection = async (collectionUid: string, userEmail: string): Promise<boolean> => {
+  inviteUserToCollection = async (
+    collectionUid: string,
+    userEmail: string
+  ): Promise<boolean> => {
     // You can in theory invite ANY user to a collection with this, but the UI currently limits it to team members
 
     if (!this.etebaseInstance) throw new Error("No etebase instance");
@@ -192,7 +195,7 @@ export class DominateEtebase {
     // Print the users and their access levels
     for (const member of members.data) {
       // Check if user already has access
-      if(member.username === userEmail) {
+      if (member.username === userEmail) {
         console.log("User already has access");
         return false;
       }
@@ -203,20 +206,26 @@ export class DominateEtebase {
     // Fetch their public key
     const user2 = await invitationManager.fetchUserProfile(userEmail);
 
-    if(!user2) {
+    if (!user2) {
       console.log("User doesn't exist");
     }
     // Verify user2.pubkey is indeed the pubkey you expect.!!!
 
     try {
       // Assuming the pubkey is as expected, send the invitation
-      const res = await invitationManager.invite(collection, userEmail, user2.pubkey,
-          Etebase.CollectionAccessLevel.ReadOnly);
+      const res = await invitationManager.invite(
+        collection,
+        userEmail,
+        user2.pubkey,
+        Etebase.CollectionAccessLevel.ReadOnly
+      );
 
       return true;
-    } catch(e: any) {
-      console.log(e)
-      if(e?.content?.code) {
+    } catch (e: any) {
+      console.log(e);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (e?.content?.code) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         console.error(e?.content?.code);
         return false;
       }
