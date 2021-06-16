@@ -20,7 +20,7 @@ module.exports = merge(common, {
         process.env.API_URL || "http://localhost:8000/"
       ),
       IS_MONITORED: false,
-      SENTRY_ENVIRONMENT: "development",
+      SENTRY_ENVIRONMENT: JSON.stringify("development"),
       IS_SENTRY_DEBUG: true,
       VERSION: JSON.stringify(version),
     }),
