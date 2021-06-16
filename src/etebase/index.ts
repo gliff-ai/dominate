@@ -50,6 +50,9 @@ export class DominateEtebase {
       this.ready = true;
 
       this.isLoggedIn = !!this.etebaseInstance?.user?.username;
+
+      void this.getPendingInvites().then(() => console.log("Checked invites"));
+
       return {
         username: this.etebaseInstance.user.username,
         authToken: this.etebaseInstance.authToken,
@@ -71,6 +74,8 @@ export class DominateEtebase {
       );
 
       this.ready = true;
+
+      void this.getPendingInvites().then(() => console.log("Checked invites"));
 
       const newSession = await this.etebaseInstance.save();
 
@@ -113,6 +118,18 @@ export class DominateEtebase {
     localStorage.removeItem("etebaseInstance");
     this.isLoggedIn = false;
     return true;
+  };
+
+  getPendingInvites = async (): Promise<void> => {
+    const invitationManager = this.etebaseInstance.getInvitationManager();
+
+    const invitations = await invitationManager.listIncoming();
+
+    for (const invite of invitations.data) {
+      void invitationManager
+        .accept(invite)
+        .then(() => console.log("Accepted Invite"));
+    }
   };
 
   wrangleGallery = (col: Collection): Gallery => {
