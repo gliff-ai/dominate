@@ -9,7 +9,7 @@ import {
   stringifySlices,
   getImageMetaFromImageFileInfo,
 } from "@/imageConversions";
-import {useAuth} from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
 
 interface Props {
   etebaseInstance: DominateEtebase;
@@ -34,10 +34,10 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   const fetchGalleryItems = (): void => {
-        console.log("use effect fetching gallery items")
-    console.log(props.etebaseInstance)
-    console.log(props.etebaseInstance.etebaseInstance)
-    console.log(!props.etebaseInstance.etebaseInstance)
+    console.log("use effect fetching gallery items");
+    console.log(props.etebaseInstance);
+    console.log(props.etebaseInstance.etebaseInstance);
+    console.log(!props.etebaseInstance.etebaseInstance);
 
     props.etebaseInstance
       .getCollectionsMeta("gliff.gallery")
@@ -79,7 +79,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   useEffect(() => {
-    if(props.etebaseInstance.ready) {
+    if (props.etebaseInstance.ready) {
       fetchGalleryItems();
     }
   }, [props.etebaseInstance.ready]);

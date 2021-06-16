@@ -28,7 +28,7 @@ export class DominateEtebase {
     this.collections = [];
     this.collectionsMeta = [];
     this.isLoggedIn = false;
-    this.ready= false;
+    this.ready = false;
   }
 
   getUser = (): null | User => {
