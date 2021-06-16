@@ -34,11 +34,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   const fetchGalleryItems = (): void => {
-    console.log("use effect fetching gallery items");
-    console.log(props.etebaseInstance);
-    console.log(props.etebaseInstance.etebaseInstance);
-    console.log(!props.etebaseInstance.etebaseInstance);
-
     props.etebaseInstance
       .getCollectionsMeta("gliff.gallery")
       .then((items) => {
