@@ -16,7 +16,7 @@ module.exports = merge(common, {
     new webpack.DefinePlugin({
       STORE_URL: JSON.stringify("https://store.gliff.app/"),
       IS_MONITORED: true,
-      SENTRY_ENVIRONMENT: "production",
+      SENTRY_ENVIRONMENT: JSON.stringify("production"),
       IS_SENTRY_DEBUG: false,
       VERSION: JSON.stringify(version),
     }),
