@@ -16,6 +16,8 @@ export const API_URL = `${STORE_URL}django/api`;
 export class DominateEtebase {
   etebaseInstance: Account;
 
+  ready: boolean;
+
   collections: Collection[];
 
   collectionsMeta: Gallery[];
@@ -26,6 +28,7 @@ export class DominateEtebase {
     this.collections = [];
     this.collectionsMeta = [];
     this.isLoggedIn = false;
+    this.ready= false;
   }
 
   getUser = (): null | User => {
@@ -43,6 +46,8 @@ export class DominateEtebase {
     const savedSession = localStorage.getItem("etebaseInstance");
     if (savedSession) {
       this.etebaseInstance = await Etebase.Account.restore(savedSession);
+
+      this.ready = true;
 
       this.isLoggedIn = !!this.etebaseInstance?.user?.username;
       return {
@@ -64,6 +69,8 @@ export class DominateEtebase {
         password,
         SERVER_URL
       );
+
+      this.ready = true;
 
       const newSession = await this.etebaseInstance.save();
 
