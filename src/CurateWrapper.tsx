@@ -9,13 +9,15 @@ import {
   stringifySlices,
   getImageMetaFromImageFileInfo,
 } from "@/imageConversions";
+import { useAuth } from "@/hooks/use-auth";
 
 interface Props {
   etebaseInstance: DominateEtebase;
 }
 
 export const CurateWrapper = (props: Props): ReactElement | null => {
-  if (!props.etebaseInstance) return null;
+  const auth = useAuth();
+
   const [galleryItems, setGalleryItems] = useState<Gallery[]>([]);
   const [imageItems, setImageItems] = useState<Image[]>([]);
   const { id: galleryUid } = useParams();
@@ -72,14 +74,18 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   useEffect(() => {
-    fetchGalleryItems();
-  }, [props.etebaseInstance]);
+    if (props.etebaseInstance.ready) {
+      fetchGalleryItems();
+    }
+  }, [props.etebaseInstance.ready]);
 
   useEffect(() => {
     if (galleryUid) {
       fetchImageItems();
     }
   }, [galleryUid]);
+
+  if (!props.etebaseInstance || !auth.user) return null;
 
   return galleryUid ? (
     <Curate saveImageCallback={addImageToGallery} />

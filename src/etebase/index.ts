@@ -16,6 +16,8 @@ export const API_URL = `${STORE_URL}django/api`;
 export class DominateEtebase {
   etebaseInstance: Account;
 
+  ready: boolean;
+
   collections: Collection[];
 
   collectionsMeta: Gallery[];
@@ -26,6 +28,7 @@ export class DominateEtebase {
     this.collections = [];
     this.collectionsMeta = [];
     this.isLoggedIn = false;
+    this.ready = false;
   }
 
   getUser = (): null | User => {
@@ -44,7 +47,12 @@ export class DominateEtebase {
     if (savedSession) {
       this.etebaseInstance = await Etebase.Account.restore(savedSession);
 
+      this.ready = true;
+
       this.isLoggedIn = !!this.etebaseInstance?.user?.username;
+
+      void this.getPendingInvites().then(() => console.log("Checked invites"));
+
       return {
         username: this.etebaseInstance.user.username,
         authToken: this.etebaseInstance.authToken,
@@ -64,6 +72,10 @@ export class DominateEtebase {
         password,
         SERVER_URL
       );
+
+      this.ready = true;
+
+      void this.getPendingInvites().then(() => console.log("Checked invites"));
 
       const newSession = await this.etebaseInstance.save();
 
@@ -106,6 +118,18 @@ export class DominateEtebase {
     localStorage.removeItem("etebaseInstance");
     this.isLoggedIn = false;
     return true;
+  };
+
+  getPendingInvites = async (): Promise<void> => {
+    const invitationManager = this.etebaseInstance.getInvitationManager();
+
+    const invitations = await invitationManager.listIncoming();
+
+    for (const invite of invitations.data) {
+      void invitationManager
+        .accept(invite)
+        .then(() => console.log("Accepted Invite"));
+    }
   };
 
   wrangleGallery = (col: Collection): Gallery => {
@@ -174,6 +198,64 @@ export class DominateEtebase {
       ""
     );
     await collectionManager.upload(collection);
+  };
+
+  // TODO change this to return errors and display them when we do styling etc
+  inviteUserToCollection = async (
+    collectionUid: string,
+    userEmail: string
+  ): Promise<boolean> => {
+    // You can in theory invite ANY user to a collection with this, but the UI currently limits it to team members
+
+    if (!this.etebaseInstance) throw new Error("No etebase instance");
+    const etebase = this.etebaseInstance;
+
+    const collectionManager = etebase.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const memberManager = collectionManager.getMemberManager(collection);
+    const members = await memberManager.list();
+
+    // Print the users and their access levels
+    for (const member of members.data) {
+      // Check if user already has access
+      if (member.username === userEmail) {
+        console.log("User already has access");
+        return false;
+      }
+    }
+
+    const invitationManager = etebase.getInvitationManager();
+
+    // Fetch their public key
+    const user2 = await invitationManager.fetchUserProfile(userEmail);
+
+    if (!user2) {
+      console.log("User doesn't exist");
+    }
+    // Verify user2.pubkey is indeed the pubkey you expect.!!!
+
+    try {
+      // Assuming the pubkey is as expected, send the invitation
+      const res = await invitationManager.invite(
+        collection,
+        userEmail,
+        user2.pubkey,
+        Etebase.CollectionAccessLevel.ReadOnly
+      );
+
+      return true;
+    } catch (e: any) {
+      console.log(e);
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+      if (e?.content?.code) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        console.error(e?.content?.code);
+        return false;
+      }
+
+      console.error("Unknown Invite Error");
+      return false;
+    }
   };
 
   getItemManager = async (collectionUid: string): Promise<ItemManager> => {
