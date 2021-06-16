@@ -12,7 +12,7 @@ module.exports = merge(common, {
     host: "localhost",
     port,
     historyApiFallback: true,
-    open: true,
+    open: false,
   },
   plugins: [
     new webpack.DefinePlugin({
