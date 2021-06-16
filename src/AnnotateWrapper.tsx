@@ -1,6 +1,6 @@
 import React, { ReactElement, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { UserInterface as Annotate, Annotations } from "@gliff-ai/annotate";
+import Annotate, { Annotations } from "@gliff-ai/annotate";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
 import { Annotation, Image, AnnotationData } from "@/etebase/interfaces";
