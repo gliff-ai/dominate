@@ -7,6 +7,9 @@ import { DominateEtebase } from "@/etebase";
 import { useAuth } from "@/hooks/use-auth";
 import { inviteNewUser } from "@/services/user";
 
+declare const STORE_URL: string;
+export const API_URL = `${STORE_URL}django/api`;
+
 interface Props {
   etebaseInstance: DominateEtebase;
 }
@@ -36,6 +39,12 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     // Share collections with them?
   };
 
+  const inviteToProject = async ({email, projectId}) => {
+    const result = await props.etebaseInstance.inviteUserToCollection(projectId, email);
+
+    return true;
+  }
+
   const services = {
     queryTeam: "GET /team",
     loginUser: "POST /user/login", // Not used, we pass an authd user down
@@ -43,13 +52,14 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     getProject: "GET /project", // TODO
     createProject,
     inviteUser,
+    inviteToProject,
   };
 
   const user = { email: auth.user.username, authToken: auth.user.authToken };
 
   return (
     <ProvideAuth>
-      <Manage user={user} services={services} />
+      <Manage user={user} services={services} apiUrl={API_URL} />
     </ProvideAuth>
   );
 };

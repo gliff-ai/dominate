@@ -1,5 +1,5 @@
 import * as Etebase from "etebase";
-import { Account, Collection, Item, ItemManager } from "etebase";
+import {Account, Collection, Item, ItemManager} from "etebase";
 import { User } from "@/services/user/interfaces";
 import {
   Gallery,
@@ -118,6 +118,7 @@ export class DominateEtebase {
       modifiedTime,
       type: "gliff.gallery",
       uid: col.uid,
+      id: col.uid, // Manage wants ID
     } as Gallery;
   };
 
@@ -174,6 +175,55 @@ export class DominateEtebase {
       ""
     );
     await collectionManager.upload(collection);
+  };
+
+  // TODO change this to return errors and display them when we do styling etc
+  inviteUserToCollection = async (collectionUid: string, userEmail: string): Promise<boolean> => {
+    // You can in theory invite ANY user to a collection with this, but the UI currently limits it to team members
+
+    if (!this.etebaseInstance) throw new Error("No etebase instance");
+    const etebase = this.etebaseInstance;
+
+    const collectionManager = etebase.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const memberManager = collectionManager.getMemberManager(collection);
+    const members = await memberManager.list();
+
+    // Print the users and their access levels
+    for (const member of members.data) {
+      // Check if user already has access
+      if(member.username === userEmail) {
+        console.log("User already has access");
+        return false;
+      }
+    }
+
+    const invitationManager = etebase.getInvitationManager();
+
+    // Fetch their public key
+    const user2 = await invitationManager.fetchUserProfile(userEmail);
+
+    if(!user2) {
+      console.log("User doesn't exist");
+    }
+    // Verify user2.pubkey is indeed the pubkey you expect.!!!
+
+    try {
+      // Assuming the pubkey is as expected, send the invitation
+      const res = await invitationManager.invite(collection, userEmail, user2.pubkey,
+          Etebase.CollectionAccessLevel.ReadOnly);
+
+      return true;
+    } catch(e: any) {
+      console.log(e)
+      if(e?.content?.code) {
+        console.error(e?.content?.code);
+        return false;
+      }
+
+      console.error("Unknown Invite Error");
+      return false;
+    }
   };
 
   getItemManager = async (collectionUid: string): Promise<ItemManager> => {
