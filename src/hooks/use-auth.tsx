@@ -14,7 +14,11 @@ interface Context {
   signin: (username: string, password: string) => Promise<User>;
   signout: () => Promise<boolean>;
   signup: (username: string, password: string) => Promise<User>;
-  createProfile: (name: string) => Promise<UserProfile>; // TODO add return type
+  createProfile: (
+    name: string,
+    teamId?: number,
+    inviteId?: string
+  ) => Promise<UserProfile>; // TODO add return type
 }
 
 const authContext = createContext<Context>(null);
@@ -55,11 +59,11 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
       return response;
     });
 
-  const createProfile = (name: string) => {
+  const createProfile = (name: string, teamId: number, inviteId: string) => {
     if (!etebaseInstance.getUser()) return null;
 
     // TODO: Handle creating recovery key here!
-    return createUserProfile(name);
+    return createUserProfile(name, teamId, inviteId);
   };
 
   // Login initially if we have a session
