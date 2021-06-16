@@ -59,7 +59,7 @@
   "dependencies": {
     "@gliff-ai/annotate": "^0.10.8",
     "@gliff-ai/curate": "^0.7.1",
-    "@gliff-ai/manage": "^0.2.27",
+    "@gliff-ai/manage": "^0.2.37",
     "@gliff-ai/upload": "^0.1.13",
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
