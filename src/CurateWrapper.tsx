@@ -40,6 +40,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         const wrangled = items.map((item) => ({
           thumbnail: item.thumbnail,
           imageLabels: item.imageLabels,
+          id: item.id,
           ...item.metadata,
         }));
 

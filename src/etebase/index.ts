@@ -204,6 +204,7 @@ export class DominateEtebase {
           metadata: imageMeta,
           imageLabels: [],
           thumbnail,
+          id: item.uid, // // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
           imageUID: item.uid,
           annotationUID: null,
           auditUID: null,

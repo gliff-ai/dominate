@@ -12,6 +12,7 @@ interface GalleryTile {
   metadata: ImageMeta;
   imageLabels: string[];
   thumbnail: string; // base64
+  id: string; // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
   imageUID: string;
   annotationUID: string;
   auditUID: string;
