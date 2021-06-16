@@ -15,6 +15,7 @@ import {
   stringifySlices,
   getImageMetaFromImageFileInfo,
 } from "@/imageConversions";
+import { useAuth } from "@/hooks/use-auth";
 
 interface Props {
   etebaseInstance: DominateEtebase;
@@ -27,6 +28,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [galleryTiles, setGalleryTiles] = useState<GalleryTile[]>([]); // the information a gallery stores about its contents
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
   const { id: galleryUid } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
+
+  const auth = useAuth();
 
   const fetchImageItems = (): void => {
     // fetches images via DominateEtebase, and assigns them to imageItems state
@@ -102,14 +105,18 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   // runs once on page load, would have been a componentDidMount if this were a class component:
   useEffect(() => {
-    fetchGalleries();
-  }, [props.etebaseInstance]);
+    if (props.etebaseInstance.ready) {
+      fetchGalleries();
+    }
+  }, [props.etebaseInstance.ready]);
 
   useEffect(() => {
     if (galleryUid) {
       fetchImageItems();
     }
   }, [galleryUid]);
+
+  if (!props.etebaseInstance || !auth.user) return null;
 
   return galleryUid ? (
     <Curate metadata={curateInput} saveImageCallback={addImageToGallery} />
