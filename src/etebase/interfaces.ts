@@ -1,6 +1,5 @@
 interface Gallery {
   uid: string;
-  id?: string;
   type: "gliff.gallery";
   name: string; // "human-readable gallery name, i.e. folder name"
   createdTime: number; // "time item was created in milliseconds since epoch"

@@ -118,7 +118,6 @@ export class DominateEtebase {
       modifiedTime,
       type: "gliff.gallery",
       uid: col.uid,
-      id: col.uid, // Manage wants ID
     } as Gallery;
   };
 
