@@ -5,6 +5,7 @@ function getImageMetaFromImageFileInfo(
   imageFileInfo: ImageFileInfo
 ): ImageMeta {
   return {
+    imageName: imageFileInfo.fileName,
     width: imageFileInfo.width,
     height: imageFileInfo.height,
     size: imageFileInfo.size,

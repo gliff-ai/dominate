@@ -2,7 +2,7 @@
 import React, { Component, ReactNode } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 
-import { Collection, DominateEtebase, Item } from "@/etebase";
+import { Collection, DominateEtebase } from "@/etebase";
 import { SignIn } from "@/views/SignIn";
 import { SignUp } from "@/views/signup/SignUp";
 import { Navbar } from "@/NavBar";

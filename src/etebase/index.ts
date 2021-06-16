@@ -2,7 +2,8 @@ import * as Etebase from "etebase";
 import { Account, Collection, Item, ItemManager } from "etebase";
 import { User } from "@/services/user/interfaces";
 import {
-  Gallery,
+  GalleryMeta,
+  GalleryTile,
   Image,
   ImageMeta,
   Annotation,
@@ -20,7 +21,7 @@ export class DominateEtebase {
 
   collections: Collection[];
 
-  collectionsMeta: Gallery[];
+  collectionsMeta: GalleryMeta[];
 
   public isLoggedIn: boolean;
 
@@ -132,7 +133,7 @@ export class DominateEtebase {
     }
   };
 
-  wrangleGallery = (col: Collection): Gallery => {
+  wrangleGallery = (col: Collection): GalleryMeta => {
     const meta = col.getMeta();
     const modifiedTime = meta.mtime;
     delete meta.mtime;
@@ -142,40 +143,22 @@ export class DominateEtebase {
       modifiedTime,
       type: "gliff.gallery",
       uid: col.uid,
-    } as Gallery;
+    } as GalleryMeta;
   };
 
-  wrangleImage = async (item: Item): Promise<Image> => {
-    const meta = item.getMeta();
-    const content = await item.getContent(Etebase.OutputFormat.String);
-
-    return {
-      type: "gliff.image",
-      uid: item.uid,
-      ...meta,
-      content,
-    } as Image;
-  };
-
-  getImagesMeta = async (collectionUid: string): Promise<Image[]> => {
+  getImagesMeta = async (collectionUid: string): Promise<GalleryTile[]> => {
     if (!this.etebaseInstance) throw new Error("No etebase instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     const collection = await collectionManager.fetch(collectionUid);
-    const itemManager = collectionManager.getItemManager(collection);
-    const items = await itemManager.list();
-    return Promise.all(
-      items.data
-        .filter((item) => {
-          const meta = item.getMeta() as Image;
-          return meta.type === "gliff.image";
-        })
-        .map(this.wrangleImage)
-    );
+    const json = await collection.getContent(Etebase.OutputFormat.String);
+    return JSON.parse(json) as GalleryTile[];
   };
 
-  getCollectionsMeta = async (type = "gliff.gallery"): Promise<Gallery[]> => {
+  getCollectionsMeta = async (
+    type = "gliff.gallery"
+  ): Promise<GalleryMeta[]> => {
     if (this.collections.length > 0) return this.collectionsMeta;
     if (!this.etebaseInstance) throw new Error("No etebase instance");
 
@@ -191,11 +174,14 @@ export class DominateEtebase {
 
     // Create, encrypt and upload a new collection
     const collection = await collectionManager.create(
-      "gliff.gallery",
+      "gliff.gallery", // type
       {
         name,
-      },
-      ""
+        createdTime: Date.now(),
+        modifiedTime: Date.now(),
+        description: "[]",
+      }, // metadata
+      "[]" // content
     );
     await collectionManager.upload(collection);
   };
@@ -269,9 +255,11 @@ export class DominateEtebase {
   createImage = async (
     collectionUid: string,
     imageMeta: ImageMeta,
+    thumbnail: string,
     imageContent: string | Uint8Array
   ): Promise<void> => {
     try {
+      // Create/upload new etebase item for the image:
       const createdTime = new Date().getTime();
       // Retrieve itemManager
       const itemManager = await this.getItemManager(collectionUid);
@@ -282,11 +270,30 @@ export class DominateEtebase {
           type: "gliff.image",
           createdTime,
           modifiedTime: createdTime,
-          meta: imageMeta,
         },
         imageContent
       );
       await itemManager.batch([item]);
+
+      // Add the image's metadata/thumbnail and a pointer to the image item to the gallery's content:
+      const collectionManager = this.etebaseInstance.getCollectionManager();
+      const collection = await collectionManager.fetch(collectionUid);
+      const oldContent = await collection.getContent(
+        Etebase.OutputFormat.String
+      );
+      const content = JSON.stringify(
+        (JSON.parse(oldContent) as GalleryTile[]).concat({
+          metadata: imageMeta,
+          imageLabels: [],
+          thumbnail,
+          id: item.uid, // // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
+          imageUID: item.uid,
+          annotationUID: null,
+          auditUID: null,
+        })
+      );
+      await collection.setContent(content);
+      await collectionManager.upload(collection);
     } catch (e) {
       console.error(e);
     }
@@ -388,4 +395,4 @@ export class DominateEtebase {
   };
 }
 
-export { Collection, Item, Gallery, Image };
+export { Collection, Item, GalleryMeta, Image };

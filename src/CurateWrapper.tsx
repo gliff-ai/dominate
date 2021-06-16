@@ -1,8 +1,14 @@
 import React, { ReactElement, useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
 import { UploadImage, ImageFileInfo } from "@gliff-ai/upload";
-import { DominateEtebase, Gallery, Image } from "@/etebase";
-import { Slices } from "@/etebase/interfaces";
+import { DominateEtebase } from "@/etebase";
+import {
+  Slices,
+  GalleryMeta,
+  Image,
+  MetaItem,
+  GalleryTile,
+} from "@/etebase/interfaces";
 import Curate from "@gliff-ai/curate";
 
 import {
@@ -16,24 +22,40 @@ interface Props {
 }
 
 export const CurateWrapper = (props: Props): ReactElement | null => {
+  if (!props.etebaseInstance) return null;
+  const [galleryItems, setGalleryItems] = useState<GalleryMeta[]>([]); // the objects we list under "Collections"
+  const [imageItems, setImageItems] = useState<Image[]>([]); // the objects we list under "Items"
+  const [galleryTiles, setGalleryTiles] = useState<GalleryTile[]>([]); // the information a gallery stores about its contents
+  const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
+  const { id: galleryUid } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
+
   const auth = useAuth();
 
-  const [galleryItems, setGalleryItems] = useState<Gallery[]>([]);
-  const [imageItems, setImageItems] = useState<Image[]>([]);
-  const { id: galleryUid } = useParams();
-
   const fetchImageItems = (): void => {
+    // fetches images via DominateEtebase, and assigns them to imageItems state
     props.etebaseInstance
       .getImagesMeta(galleryUid)
       .then((items) => {
-        setImageItems(items);
+        // set galleryTiles so that etebase pointers are kept:
+        setGalleryTiles(items);
+
+        // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
+        const wrangled = items.map((item) => ({
+          thumbnail: item.thumbnail,
+          imageLabels: item.imageLabels,
+          id: item.id,
+          ...item.metadata,
+        }));
+
+        setCurateInput(wrangled);
       })
       .catch((err) => {
         console.log(err);
       });
   };
 
-  const fetchGalleryItems = (): void => {
+  const fetchGalleries = (): void => {
+    // fetches galleries via DominateEtebase, and assigns them to galleryItems state
     props.etebaseInstance
       .getCollectionsMeta("gliff.gallery")
       .then((items) => {
@@ -48,34 +70,44 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     // Create new gallery collection.
     props.etebaseInstance
       .createCollection(`gallery-${galleryItems.length + 1}`)
-      .then((uid) => {
+      .then(() => {
         // Fetch gallery items
-        fetchGalleryItems();
+        fetchGalleries();
       })
       .catch((e) => console.log(e));
   };
 
-  const addImageToGallery = (
+  const addImageToGallery = async (
     imageFileInfo: ImageFileInfo,
     slicesData: Slices
-  ): void => {
+  ): Promise<void> => {
     // Stringify slices data and get image metadata
     const stringfiedSlices = stringifySlices(slicesData);
     const imageMeta = getImageMetaFromImageFileInfo(imageFileInfo);
 
-    // Store slices and metadata inside gliff.image item and add it to the selected gallery
-    props.etebaseInstance
-      .createImage(galleryUid, imageMeta, stringfiedSlices)
-      .then(() => {
-        // Fetch image items
-        fetchImageItems();
-      })
-      .catch((e) => console.log(e));
+    // make thumbnail:
+    const canvas = document.createElement("canvas");
+    canvas.width = 128;
+    canvas.height = 128;
+    const ctx = canvas.getContext("2d");
+    ctx.drawImage(slicesData[0][0], 0, 0, 128, 128);
+    const thumbnailB64 = canvas.toDataURL();
+
+    // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
+    await props.etebaseInstance.createImage(
+      galleryUid,
+      imageMeta,
+      thumbnailB64,
+      stringfiedSlices
+    );
+
+    fetchImageItems();
   };
 
+  // runs once on page load, would have been a componentDidMount if this were a class component:
   useEffect(() => {
     if (props.etebaseInstance.ready) {
-      fetchGalleryItems();
+      fetchGalleries();
     }
   }, [props.etebaseInstance.ready]);
 
@@ -88,7 +120,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   if (!props.etebaseInstance || !auth.user) return null;
 
   return galleryUid ? (
-    <Curate saveImageCallback={addImageToGallery} />
+    <Curate metadata={curateInput} saveImageCallback={addImageToGallery} />
   ) : (
     <>
       <div style={{ display: "flex" }}>
