@@ -139,7 +139,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       metadata={curateInput}
       saveImageCallback={addImageToGallery}
       saveLabelsCallback={saveLabelsCallback}
-      deleteImageCallback={deleteImageCallback}
+      deleteImagesCallback={deleteImageCallback}
     />
   ) : (
     <>
