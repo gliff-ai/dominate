@@ -310,10 +310,10 @@ export class DominateEtebase {
     const oldContent = await collection.getContent(Etebase.OutputFormat.String);
 
     // iterate through GalleryTile's, find the one whose imageUID matches imageUid, set its imageLabesl to newLabels:
-    let newContent: GalleryTile[] = JSON.parse(oldContent);
+    let newContent: GalleryTile[] = JSON.parse(oldContent) as GalleryTile[];
     newContent = newContent.map((item) => {
       if (item.imageUID === imageUid) {
-        item.imageLabels = newLabels;
+        return { ...item, imageLabels: newLabels };
       }
       return item;
     });
