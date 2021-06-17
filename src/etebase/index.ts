@@ -299,6 +299,30 @@ export class DominateEtebase {
     }
   };
 
+  setImageLabels = async (
+    collectionUid: string,
+    imageUid: string,
+    newLabels: string[]
+  ): Promise<void> => {
+    // get gallery items metadata from gallery collection:
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const oldContent = await collection.getContent(Etebase.OutputFormat.String);
+
+    // iterate through GalleryTile's, find the one whose imageUID matches imageUid, set its imageLabesl to newLabels:
+    let newContent: GalleryTile[] = JSON.parse(oldContent);
+    newContent = newContent.map((item) => {
+      if (item.imageUID === imageUid) {
+        item.imageLabels = newLabels;
+      }
+      return item;
+    });
+
+    // save updated metadata in etebase:
+    await collection.setContent(JSON.stringify(newContent));
+    await collectionManager.upload(collection);
+  };
+
   wrangleAnnotations = async (item: Item): Promise<Annotation> => {
     const meta = item.getMeta();
     const content = await item.getContent(Etebase.OutputFormat.String);

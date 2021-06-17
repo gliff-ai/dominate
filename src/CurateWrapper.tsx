@@ -104,6 +104,10 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     fetchImageItems();
   };
 
+  const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
+    props.etebaseInstance.setImageLabels(galleryUid, imageUid, newLabels);
+  };
+
   // runs once on page load, would have been a componentDidMount if this were a class component:
   useEffect(() => {
     if (props.etebaseInstance.ready) {
@@ -120,7 +124,11 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   if (!props.etebaseInstance || !auth.user) return null;
 
   return galleryUid ? (
-    <Curate metadata={curateInput} saveImageCallback={addImageToGallery} />
+    <Curate
+      metadata={curateInput}
+      saveImageCallback={addImageToGallery}
+      saveLabelsCallback={saveLabelsCallback}
+    />
   ) : (
     <>
       <div style={{ display: "flex" }}>
