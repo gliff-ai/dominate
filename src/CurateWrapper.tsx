@@ -105,7 +105,11 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
-    props.etebaseInstance.setImageLabels(galleryUid, imageUid, newLabels);
+    props.etebaseInstance
+      .setImageLabels(galleryUid, imageUid, newLabels)
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   // runs once on page load, would have been a componentDidMount if this were a class component:
