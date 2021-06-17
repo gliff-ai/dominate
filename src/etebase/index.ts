@@ -358,24 +358,30 @@ export class DominateEtebase {
 
     // delete image, annotation and audit items:
     const itemManager = collectionManager.getItemManager(collection);
-    const images: Etebase.Item[] = [];
-    const annotations: Etebase.Item[] = [];
-    const audits: Etebase.Item[] = [];
+    const imagePromises: Promise<Etebase.Item>[] = [];
+    const annotationPromises: Promise<Etebase.Item>[] = [];
+    const auditPromises: Promise<Etebase.Item>[] = [];
     for (let i = 0; i < imageUIDs.length; i += 1) {
-      const image = await itemManager.fetch(imageUIDs[i]);
-      image.delete();
-      images.push(image);
+      imagePromises.push(itemManager.fetch(imageUIDs[i]));
+
       if (annotationUIDs[i]) {
         // annotationUID and auditUID are initialised as null in createImage, and will still be null unless they've been set
-        const annotation = await itemManager.fetch(annotationUIDs[i]);
-        annotation.delete();
-        annotations.push(annotation);
+        annotationPromises.push(itemManager.fetch(annotationUIDs[i]));
       }
+
       if (auditUIDs[i]) {
-        const audit = await itemManager.fetch(auditUIDs[i]);
-        audit.delete();
-        audits.push(audit);
+        auditPromises.push(itemManager.fetch(auditUIDs[i]));
       }
+    }
+
+    const images = await Promise.all(imagePromises);
+    const annotations = await Promise.all(annotationPromises);
+    const audits = await Promise.all(auditPromises);
+
+    for (let i = 0; i < images.length; i += 1) {
+      images[i].delete();
+      annotations[i].delete();
+      audits[i].delete();
     }
 
     await itemManager.batch(images.concat(annotations).concat(audits));
