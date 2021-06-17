@@ -323,6 +323,64 @@ export class DominateEtebase {
     await collectionManager.upload(collection);
   };
 
+  deleteImages = async (
+    collectionUid: string,
+    imageUids: string[]
+  ): Promise<void> => {
+    // get gallery items metadata from gallery collection:
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const oldContentString = await collection.getContent(
+      Etebase.OutputFormat.String
+    );
+    const oldContent = JSON.parse(oldContentString) as GalleryTile[];
+
+    // cache UIDs of images, annotations and audits to be deleted:
+    const imageUIDs: string[] = [];
+    const annotationUIDs: string[] = [];
+    const auditUIDs: string[] = [];
+    oldContent
+      .filter((item) => imageUids.includes(item.imageUID))
+      .forEach((item) => {
+        imageUIDs.push(item.imageUID);
+        annotationUIDs.push(item.annotationUID);
+        auditUIDs.push(item.auditUID);
+      });
+
+    // remove GalleryTile's whose imageUID is in imageUids:
+    const newContent: GalleryTile[] = oldContent.filter(
+      (item) => !imageUids.includes(item.imageUID)
+    );
+
+    // save updated metadata in etebase:
+    await collection.setContent(JSON.stringify(newContent));
+    await collectionManager.upload(collection);
+
+    // delete image, annotation and audit items:
+    const itemManager = collectionManager.getItemManager(collection);
+    const images: Etebase.Item[] = [];
+    const annotations: Etebase.Item[] = [];
+    const audits: Etebase.Item[] = [];
+    for (let i = 0; i < imageUIDs.length; i += 1) {
+      const image = await itemManager.fetch(imageUIDs[i]);
+      image.delete();
+      images.push(image);
+      if (annotationUIDs[i]) {
+        // annotationUID and auditUID are initialised as null in createImage, and will still be null unless they've been set
+        const annotation = await itemManager.fetch(annotationUIDs[i]);
+        annotation.delete();
+        annotations.push(annotation);
+      }
+      if (auditUIDs[i]) {
+        const audit = await itemManager.fetch(auditUIDs[i]);
+        audit.delete();
+        audits.push(audit);
+      }
+    }
+
+    await itemManager.batch(images.concat(annotations).concat(audits));
+  };
+
   wrangleAnnotations = async (item: Item): Promise<Annotation> => {
     const meta = item.getMeta();
     const content = await item.getContent(Etebase.OutputFormat.String);

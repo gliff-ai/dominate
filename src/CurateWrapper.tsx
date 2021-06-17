@@ -112,6 +112,13 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       });
   };
 
+  const deleteImageCallback = (imageUids: string[]): void => {
+    console.log(imageUids);
+    props.etebaseInstance.deleteImages(galleryUid, imageUids).catch((error) => {
+      console.log(error);
+    });
+  };
+
   // runs once on page load, would have been a componentDidMount if this were a class component:
   useEffect(() => {
     if (props.etebaseInstance.ready) {
@@ -132,6 +139,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       metadata={curateInput}
       saveImageCallback={addImageToGallery}
       saveLabelsCallback={saveLabelsCallback}
+      deleteImageCallback={deleteImageCallback}
     />
   ) : (
     <>
