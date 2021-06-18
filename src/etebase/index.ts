@@ -270,6 +270,8 @@ export class DominateEtebase {
           type: "gliff.image",
           createdTime,
           modifiedTime: createdTime,
+          width: imageMeta.width,
+          height: imageMeta.height,
         },
         imageContent
       );
@@ -475,7 +477,7 @@ export class DominateEtebase {
     const item = await this.getItem(collectionUid, itemUid);
     const content = await item.getContent(Etebase.OutputFormat.String);
     return {
-      ...item.getMeta(),
+      meta: item.getMeta(),
       type: "gliff.image",
       uid: item.uid,
       content,
