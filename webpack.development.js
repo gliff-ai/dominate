@@ -7,7 +7,7 @@ const port = process.env.PORT || 3000;
 
 module.exports = merge(common, {
   mode: "development",
-  devtool: "inline-source-map",
+  devtool: "eval-source-map",
   devServer: {
     host: "localhost",
     port,
