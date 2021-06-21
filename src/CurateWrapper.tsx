@@ -120,13 +120,10 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     });
   };
 
-<<<<<<< HEAD
   const annotateCallback = (imageUid: string): void => {
     navigate(`/annotate/${galleryUid}/${imageUid}`);
   };
 
-=======
->>>>>>> 8b0a8c41d76c8f065bfc0e362ffaec24d19f88c6
   // runs once on page load, would have been a componentDidMount if this were a class component:
   useEffect(() => {
     if (props.etebaseInstance.ready) {
@@ -148,10 +145,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       saveImageCallback={addImageToGallery}
       saveLabelsCallback={saveLabelsCallback}
       deleteImagesCallback={deleteImageCallback}
-<<<<<<< HEAD
       annotateCallback={annotateCallback}
-=======
->>>>>>> 8b0a8c41d76c8f065bfc0e362ffaec24d19f88c6
     />
   ) : (
     <>

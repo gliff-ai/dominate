@@ -60,11 +60,7 @@
   },
   "dependencies": {
     "@gliff-ai/annotate": "^0.10.8",
-<<<<<<< HEAD
     "@gliff-ai/curate": "^0.11.2",
-=======
-    "@gliff-ai/curate": "^0.11.1",
->>>>>>> 8b0a8c41d76c8f065bfc0e362ffaec24d19f88c6
     "@gliff-ai/manage": "^0.2.37",
     "@gliff-ai/upload": "^0.1.13",
     "@material-ui/core": "^4.11.3",
