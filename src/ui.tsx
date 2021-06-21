@@ -1,104 +1,75 @@
-import React, { Component, ChangeEvent, ReactNode } from "react";
+/* eslint-disable react/jsx-curly-newline */
+import React, { Component, ReactNode } from "react";
+import { BrowserRouter, Route, Routes } from "react-router-dom";
 
-import { DominateEtebase } from "@/etebase";
-
-import { BrowserRouter as Router, Switch, Route, Link, Redirect } from "react-router-dom";
-import { Navbar } from "@/NavBar";
+import { Collection, DominateEtebase } from "@/etebase";
 import { SignIn } from "@/views/SignIn";
-import {useAuth} from "@/hooks/use-auth";
-
+import { SignUp } from "@/views/signup/SignUp";
+import { Navbar } from "@/NavBar";
+import { ManageWrapper } from "@/ManageWrapper";
+import { AnnotateWrapper } from "@/AnnotateWrapper";
 import { Home } from "./Home";
-import { Curate } from "./Curate";
-
+import { CurateWrapper } from "./CurateWrapper";
 
 interface Props {
   etebaseInstance: DominateEtebase;
+  // children?: Children;
 }
 
-// A wrapper for <Route> that redirects to the login
-// screen if you're not yet authenticated.
-function PrivateRoute({ children, ...rest }) {
-  const auth = useAuth();
-  return (
-    <Route
-      {...rest}
-      render={({ location }) =>
-        auth.user ? (
-          children
-        ) : (
-          <Redirect
-            to={{
-              pathname: "/signin",
-              state: { from: location }
-            }}
-          />
-        )
-      }
-    />
-  );
+interface State {
+  collections?: Collection[];
 }
 
-export class UserInterface extends Component<Props> {
-  state: {
-    collections?: any;
-    loading: boolean;
-  };
-
+export class UserInterface extends Component<Props, State> {
   constructor(props: Props) {
     super(props);
-    this.state = { loading: true };
-  }
-
-  selectThing = (type, thing) => {
-    console.log(`you selected the ${type} ${thing} thing`);
-  };
-
-  componentDidMount() {
+    this.state = { collections: null };
   }
 
   render = (): ReactNode => (
-    <Router>
+    <BrowserRouter>
       <div>
         <Navbar />
 
-        <br/><br/><br/>
+        <br />
+        <br />
+        <br />
 
-        <Switch>
+        <Routes>
           <Route path="/signin">
             <SignIn />
           </Route>
-
-          <PrivateRoute path="/annotate">
-            <div>TODO</div>
-          </PrivateRoute>
-
-
-          // TODO private routes
+          <Route path="/signup">
+            <SignUp />
+          </Route>
           <Route
-            path="/curate/:id"
-            render={({ match }: any) => (
-              <Curate
-                etebaseInstance={this.props.etebaseInstance}
-                selectedThing={this.selectThing}
-                match={match}
-              />
-            )}
+            path="curate/:id"
+            element={
+              <CurateWrapper etebaseInstance={this.props.etebaseInstance} />
+            }
           />
-
           <Route
-            path="/curate/"
-            render={({ match }: any) => (
-              <Curate
-                etebaseInstance={this.props.etebaseInstance}
-                selectedThing={this.selectThing}
-                match={match}
-              />
-            )}
+            path="curate/"
+            element={
+              <CurateWrapper etebaseInstance={this.props.etebaseInstance} />
+            }
+          />
+          <Route
+            path="annotate/:collectionUid/:imageUid"
+            element={
+              <AnnotateWrapper etebaseInstance={this.props.etebaseInstance} />
+            }
+          />
+          <Route
+            path="manage/*"
+            element={
+              <ManageWrapper etebaseInstance={this.props.etebaseInstance} />
+            }
           />
           <Route path="/">
             <Home />
           </Route>
-        </Switch>
+        </Routes>
       </div>
 
       <footer>
@@ -106,6 +77,6 @@ export class UserInterface extends Component<Props> {
           {this.state.collections?.map((col) => JSON.stringify(col.getMeta()))}
         </div>
       </footer>
-    </Router>
+    </BrowserRouter>
   );
 }
