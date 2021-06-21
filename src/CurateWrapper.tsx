@@ -1,5 +1,5 @@
 import React, { ReactElement, useEffect, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useNavigate } from "react-router-dom";
 import { UploadImage, ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
 import {
@@ -28,6 +28,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [galleryTiles, setGalleryTiles] = useState<GalleryTile[]>([]); // the information a gallery stores about its contents
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
   const { id: galleryUid } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
+  const navigate = useNavigate();
 
   const auth = useAuth();
 
@@ -119,6 +120,10 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     });
   };
 
+  const annotateCallback = (imageUid: string): void => {
+    navigate(`/annotate/${galleryUid}/${imageUid}`);
+  };
+
   // runs once on page load, would have been a componentDidMount if this were a class component:
   useEffect(() => {
     if (props.etebaseInstance.ready) {
@@ -140,6 +145,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       saveImageCallback={addImageToGallery}
       saveLabelsCallback={saveLabelsCallback}
       deleteImagesCallback={deleteImageCallback}
+      annotateCallback={annotateCallback}
     />
   ) : (
     <>
