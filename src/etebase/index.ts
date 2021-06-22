@@ -279,23 +279,31 @@ export class DominateEtebase {
 
       // Add the image's metadata/thumbnail and a pointer to the image item to the gallery's content:
       const collectionManager = this.etebaseInstance.getCollectionManager();
-      const collection = await collectionManager.fetch(collectionUid);
-      const oldContent = await collection.getContent(
-        Etebase.OutputFormat.String
-      );
-      const content = JSON.stringify(
-        (JSON.parse(oldContent) as GalleryTile[]).concat({
-          metadata: imageMeta,
-          imageLabels: [],
-          thumbnail,
-          id: item.uid, // // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
-          imageUID: item.uid,
-          annotationUID: null,
-          auditUID: null,
-        })
-      );
-      await collection.setContent(content);
-      await collectionManager.upload(collection);
+
+      while (true) {
+        const collection = await collectionManager.fetch(collectionUid);
+        const oldContent = await collection.getContent(
+          Etebase.OutputFormat.String
+        );
+        const content = JSON.stringify(
+          (JSON.parse(oldContent) as GalleryTile[]).concat({
+            metadata: imageMeta,
+            imageLabels: [],
+            thumbnail,
+            id: item.uid, // // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
+            imageUID: item.uid,
+            annotationUID: null,
+            auditUID: null,
+          })
+        );
+        await collection.setContent(content);
+        try {
+          await collectionManager.transaction(collection);
+          break;
+        } catch (err) {
+          console.log("Transaction conflict, retrying...");
+        }
+      }
     } catch (e) {
       console.error(e);
     }
