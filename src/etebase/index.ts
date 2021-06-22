@@ -382,8 +382,8 @@ export class DominateEtebase {
 
     for (let i = 0; i < images.length; i += 1) {
       images[i].delete();
-      annotations[i].delete();
-      audits[i].delete();
+      annotations[i]?.delete();
+      audits[i]?.delete();
     }
 
     await itemManager.batch(images.concat(annotations).concat(audits));
