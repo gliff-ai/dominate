@@ -11,6 +11,7 @@ interface Props {
 
 interface Context {
   user: User;
+  getInstance: () => DominateEtebase;
   signin: (username: string, password: string) => Promise<User>;
   signout: () => Promise<boolean>;
   signup: (username: string, password: string) => Promise<User>;
@@ -40,6 +41,8 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
 
     setUser(authedUser);
   };
+
+  const getInstance = (): DominateEtebase => etebaseInstance;
 
   const signin = (username, password): Promise<User> =>
     etebaseInstance.login(username, password).then((etebaseUser) => {
@@ -89,6 +92,7 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
     signout,
     signup,
     createProfile,
+    getInstance,
   };
 }
 
