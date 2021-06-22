@@ -126,8 +126,6 @@ export const SignUp = (): JSX.Element => {
     try {
       const user = await auth.signup(signUp.email, signUp.password);
 
-      console.log(user);
-
       const profile = await auth.createProfile(
         signUp.name,
         signUp.teamId,
