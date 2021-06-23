@@ -1,5 +1,11 @@
 import * as Etebase from "etebase";
-import { Account, Collection, Item, ItemManager } from "etebase";
+import {
+  Account,
+  Collection,
+  CollectionManager,
+  Item,
+  ItemManager,
+} from "etebase";
 import { User } from "@/services/user/interfaces";
 import {
   GalleryMeta,
@@ -252,6 +258,43 @@ export class DominateEtebase {
     return collectionManager.getItemManager(collection);
   };
 
+  updateCollection = async (
+    collectionManager: CollectionManager,
+    collectionUid: string,
+    item: Item,
+    imageMeta: ImageMeta,
+    thumbnail: string
+  ): Promise<void> => {
+    const collection = await collectionManager.fetch(collectionUid);
+    const oldContent = await collection.getContent(Etebase.OutputFormat.String);
+
+    const content = JSON.stringify(
+      (JSON.parse(oldContent) as GalleryTile[]).concat({
+        metadata: imageMeta,
+        imageLabels: [],
+        thumbnail,
+        id: item.uid, // // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
+        imageUID: item.uid,
+        annotationUID: null,
+        auditUID: null,
+      })
+    );
+
+    await collection.setContent(content);
+
+    return collectionManager.transaction(collection).catch((e) => {
+      // TODO: if it's not a conflict something bad had happened so maybe don't retry?, else
+      console.error(e);
+      return this.updateCollection(
+        collectionManager,
+        collectionUid,
+        item,
+        imageMeta,
+        thumbnail
+      );
+    });
+  };
+
   createImage = async (
     collectionUid: string,
     imageMeta: ImageMeta,
@@ -278,26 +321,15 @@ export class DominateEtebase {
       await itemManager.batch([item]);
 
       // Add the image's metadata/thumbnail and a pointer to the image item to the gallery's content:
-      const collectionManager = this.etebaseInstance.getCollectionManager();
-      const collection = await collectionManager.fetch(collectionUid);
-      const oldContent = await collection.getContent(
-        Etebase.OutputFormat.String
+      await this.updateCollection(
+        this.etebaseInstance.getCollectionManager(),
+        collectionUid,
+        item,
+        imageMeta,
+        thumbnail
       );
-      const content = JSON.stringify(
-        (JSON.parse(oldContent) as GalleryTile[]).concat({
-          metadata: imageMeta,
-          imageLabels: [],
-          thumbnail,
-          id: item.uid, // // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
-          imageUID: item.uid,
-          annotationUID: null,
-          auditUID: null,
-        })
-      );
-      await collection.setContent(content);
-      await collectionManager.upload(collection);
-    } catch (e) {
-      console.error(e);
+    } catch (err) {
+      console.error(err);
     }
   };
 
@@ -382,8 +414,8 @@ export class DominateEtebase {
 
     for (let i = 0; i < images.length; i += 1) {
       images[i].delete();
-      annotations[i].delete();
-      audits[i].delete();
+      annotations[i]?.delete();
+      audits[i]?.delete();
     }
 
     await itemManager.batch(images.concat(annotations).concat(audits));
