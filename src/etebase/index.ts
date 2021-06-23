@@ -264,7 +264,7 @@ export class DominateEtebase {
     item: Item,
     imageMeta: ImageMeta,
     thumbnail: string
-  ) => {
+  ): Promise<void> => {
     const collection = await collectionManager.fetch(collectionUid);
     const oldContent = await collection.getContent(Etebase.OutputFormat.String);
 
@@ -284,8 +284,7 @@ export class DominateEtebase {
 
     return collectionManager.transaction(collection).catch((e) => {
       // TODO: if it's not a conflict something bad had happened so maybe don't retry?, else
-      console.log("CATCH");
-      console.log(e);
+      console.error(e);
       return this.updateCollection(
         collectionManager,
         collectionUid,
