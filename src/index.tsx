@@ -20,7 +20,7 @@ if (IS_MONITORED) {
   // setup Sentry
   Sentry.init({
     dsn: "https://097ef1f6a3364e6895c2fcb95c88446a@o651808.ingest.sentry.io/5812330",
-    tunnel: `${STORE_URL}api/tunnel/`,
+    tunnel: `${STORE_URL}django/api/tunnel/`,
 
     integrations: [
       //   new Integrations.BrowserTracing(),
