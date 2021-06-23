@@ -264,7 +264,7 @@ export class DominateEtebase {
     item: Item,
     imageMeta: ImageMeta,
     thumbnail: string
-  ) => {
+  ): Promise<void> => {
     const collection = await collectionManager.fetch(collectionUid);
     const oldContent = await collection.getContent(Etebase.OutputFormat.String);
 
