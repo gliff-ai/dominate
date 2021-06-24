@@ -13,6 +13,7 @@ import {
   Snackbar,
   IconButton,
   InputAdornment,
+  Card,
 } from "@material-ui/core";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import CloseIcon from "@material-ui/icons/Close";
@@ -36,9 +37,28 @@ const useStyles = makeStyles(() => ({
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1),
   },
+
+  forgotPasswordText: {
+    marginBottom: "44px",
+    marginTop: "13px",
+    color: theme.palette.secondary.main,
+    textAlign: "right",
+  },
+  noAccountText: {
+    display: "inline",
+    marginRight: "20px",
+  },
+  collectionViewer: {
+    height: "53px",
+    backgroundColor: theme.palette.primary.light,
+    width: "61px",
+    top: "18px",
+    right: "15px",
+  },
   submit: {
-    margin: theme.spacing(3, 0, 2),
     color: theme.palette.text.primary,
+    marginBottom: "112px",
+    width: "169px",
   },
   svgSmall: {
     width: "22px",
@@ -111,13 +131,38 @@ export function SignIn() {
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
+        <Card
+          className={classes.collectionViewer}
+          style={{ position: "fixed" }}
+        >
+          <Button
+            style={{ marginTop: "9px" }}
+            aria-label="home"
+            component="span"
+          >
+            <img
+              src={require(`../assets/home.svg`) as string}
+              alt="Collection Viewer Icon"
+              className={classes.svgSmall}
+            />
+          </Button>
+        </Card>
+        <div
+          style={{
+            width: "fit-content",
+            marginRight: "auto",
+            marginLeft: "auto",
+            marginBottom: "187px",
+          }}
+        >
+          <img
+            src={require("../assets/gliff-web-master-black.svg") as string}
+            alt="gliff logo"
+            width="194px"
+            height="148px"
+          />
+        </div>
         <div className={classes.paper}>
-          <Avatar className={classes.avatar}>
-            <LockOutlinedIcon />
-          </Avatar>
-          <Typography component="h1" variant="h5">
-            Sign in
-          </Typography>
           <form className={classes.form} onSubmit={onFormSubmit}>
             <TextField
               variant="outlined"
@@ -168,19 +213,41 @@ export function SignIn() {
                 ),
               }}
             />
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              className={classes.submit}
+            <Typography className={classes.forgotPasswordText}>
+              Recover My Account
+            </Typography>
+
+            <div
+              style={{
+                width: "fit-content",
+                marginRight: "auto",
+                marginLeft: "auto",
+              }}
             >
-              {loading ? <CircularProgress color="inherit" /> : "Log In"}
-            </Button>
-            <Grid item xs>
-              <Link href="/signUp" variant="body2">
-                Don&apos;t have an account? Sign Up
+              <Button
+                type="submit"
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+              >
+                {loading ? <CircularProgress color="inherit" /> : "Log In"}
+              </Button>
+            </div>
+            <div
+              style={{
+                width: "fit-content",
+                marginRight: "auto",
+                marginLeft: "auto",
+                marginBottom: "187px",
+              }}
+            >
+              <Typography className={classes.noAccountText}>
+                Don&apos;t have an account?
+              </Typography>
+              <Link color="secondary" href="/signUp" variant="body2">
+                Sign Up
               </Link>
-            </Grid>
+            </div>
           </form>
           <Snackbar
             anchorOrigin={{
