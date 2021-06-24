@@ -19,7 +19,7 @@ interface Context {
     name: string,
     teamId?: number,
     inviteId?: string
-  ) => Promise<UserProfile>; // TODO add return type
+  ) => Promise<{ profile: UserProfile; recoveryKey: string[] }>;
 }
 
 const authContext = createContext<Context>(null);
@@ -62,11 +62,29 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
       return response;
     });
 
-  const createProfile = (name: string, teamId: number, inviteId: string) => {
+  const createProfile = async (
+    name: string,
+    teamId: number,
+    inviteId: string
+  ) => {
     if (!etebaseInstance.getUser()) return null;
 
-    // TODO: Handle creating recovery key here!
-    return createUserProfile(name, teamId, inviteId);
+    const { readable: recoveryKey, hashed } =
+      etebaseInstance.generateRecoveryKey();
+
+    const savedSession = await etebaseInstance.etebaseInstance.save(hashed);
+
+    const profile = await createUserProfile(
+      name,
+      teamId,
+      inviteId,
+      savedSession
+    );
+
+    return {
+      profile,
+      recoveryKey,
+    };
   };
 
   // Login initially if we have a session

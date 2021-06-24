@@ -126,11 +126,14 @@ export const SignUp = (): JSX.Element => {
     try {
       const user = await auth.signup(signUp.email, signUp.password);
 
-      const profile = await auth.createProfile(
+      const { profile, recoveryKey } = await auth.createProfile(
         signUp.name,
         signUp.teamId,
         signUp.inviteId
       );
+
+      // TODO show this somewhere
+      console.log(recoveryKey);
 
       const instance = auth.getInstance();
 
