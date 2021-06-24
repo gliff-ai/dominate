@@ -11,12 +11,14 @@ export const createCheckoutSession = (
 export const createUserProfile = (
   name: string,
   teamId: number = null,
-  inviteId: string = null
+  inviteId: string = null,
+  recovery: string
 ): Promise<UserProfile> =>
   apiRequest<UserProfile>("/user/", "POST", {
     name,
     team_id: teamId,
     invite_id: inviteId,
+    recovery_key: recovery,
   });
 
 export const inviteNewUser = (email: string): Promise<unknown> =>
