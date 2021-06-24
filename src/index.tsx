@@ -1,7 +1,7 @@
 import ReactDOM from "react-dom";
 
 import { ProvideAuth } from "@/hooks/use-auth";
-import { UserInterface } from "@/ui";
+import UserInterface from "@/ui";
 import { DominateEtebase } from "@/etebase";
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
