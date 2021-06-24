@@ -1,7 +1,6 @@
 import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import {
-  Avatar,
   Button,
   CssBaseline,
   TextField,
@@ -14,9 +13,11 @@ import {
   Snackbar,
   IconButton,
 } from "@material-ui/core";
-import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import CloseIcon from "@material-ui/icons/Close";
 import { useNavigate } from "react-router-dom";
+import { ThemeProvider, theme } from "@/theme";
+
+import SVG from "react-inlinesvg";
 
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
@@ -26,7 +27,7 @@ const stripePromise = loadStripe(
 );
 const query = new URLSearchParams(window.location.search);
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   paper: {
     marginTop: theme.spacing(8),
     display: "flex",
@@ -135,7 +136,6 @@ export const SignUp = (): JSX.Element => {
       const instance = auth.getInstance();
 
       const project = await instance.createCollection("Default Collection");
-
       // Create and update their profile
       setLoading(false);
 
@@ -173,119 +173,130 @@ export const SignUp = (): JSX.Element => {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign Up
-        </Typography>
-        <form className={classes.form} onSubmit={onSubmitForm}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="email"
-            label="Email Address"
-            name="email"
-            autoComplete="email"
-            autoFocus
-            type="email"
-            onChange={handleChange}
-            value={signUp.email}
-          />
-          <div style={{ color: "red", fontSize: 12 }}>{emailError}</div>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="name"
-            label="Name"
-            name="name"
-            autoComplete="full_name"
-            type="text"
-            onChange={handleChange}
-            value={signUp.name}
-          />
-          <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={signUp.password}
-            onChange={handleChange}
-          />
-
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="confirmPassword"
-            label="Confirm Password"
-            type="password"
-            id="confirmPassword"
-            autoComplete="current-password"
-            value={signUp.confirmPassword}
-            onChange={handleChange}
-          />
-          <div style={{ color: "red", fontSize: 12 }}>{passwordError}</div>
-
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            {loading ? <CircularProgress color="inherit" /> : "Sign Up"}
-          </Button>
-
-          <Grid container>
-            <Grid item xs>
-              <Link href="/signin" variant="body2">
-                Already have an account? Sign In
-              </Link>
-            </Grid>
-          </Grid>
-        </form>
-        <div>
-          <Snackbar
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "center",
-            }}
-            open={open}
-            autoHideDuration={6000}
-            onClose={handleClose}
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            message={`${etebaseError}`}
-            action={
-              // eslint-disable-next-line react/jsx-wrap-multilines
-              <>
-                <IconButton
-                  size="small"
-                  aria-label="close"
-                  color="inherit"
-                  onClick={handleClose}
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </>
-            }
+    <ThemeProvider theme={theme}>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <div
+          style={{
+            width: "fit-content",
+            marginRight: "auto",
+            marginLeft: "auto",
+            marginBottom: "187px",
+          }}
+        >
+          <img
+            src={require("../assets/gliff-web-master-black.svg") as string}
+            alt="gliff logo"
+            width="194px"
+            height="148px"
           />
         </div>
-      </div>
-    </Container>
+        <div className={classes.paper}>
+          <form className={classes.form} onSubmit={onSubmitForm}>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="email"
+              name="email"
+              autoComplete="email"
+              autoFocus
+              type="email"
+              onChange={handleChange}
+              value={signUp.email}
+              placeholder="E-mail"
+            />
+            <div style={{ color: "red", fontSize: 12 }}>{emailError}</div>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="name"
+              name="name"
+              autoComplete="full_name"
+              type="text"
+              onChange={handleChange}
+              value={signUp.name}
+              placeholder="Name"
+            />
+            <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              type="password"
+              id="password"
+              autoComplete="current-password"
+              value={signUp.password}
+              onChange={handleChange}
+              placeholder="Password"
+            />
+
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              name="confirmPassword"
+              type="password"
+              id="confirmPassword"
+              autoComplete="current-password"
+              value={signUp.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm Password"
+            />
+            <div style={{ color: "red", fontSize: 12 }}>{passwordError}</div>
+
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              {loading ? <CircularProgress color="inherit" /> : "Sign Up"}
+            </Button>
+
+            <Grid container>
+              <Grid item xs>
+                <Link href="/signin" variant="body2">
+                  Already have an account? Sign In
+                </Link>
+              </Grid>
+            </Grid>
+          </form>
+          <div>
+            <Snackbar
+              anchorOrigin={{
+                vertical: "top",
+                horizontal: "center",
+              }}
+              open={open}
+              autoHideDuration={6000}
+              onClose={handleClose}
+              // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
+              message={`${etebaseError}`}
+              action={
+                // eslint-disable-next-line react/jsx-wrap-multilines
+                <>
+                  <IconButton
+                    size="small"
+                    aria-label="close"
+                    color="inherit"
+                    onClick={handleClose}
+                  >
+                    <CloseIcon fontSize="small" />
+                  </IconButton>
+                </>
+              }
+            />
+          </div>
+        </div>
+      </Container>
+    </ThemeProvider>
   );
 };

@@ -1,11 +1,9 @@
 import React, { useState } from "react";
 import {
-  Avatar,
   Button,
   CssBaseline,
   TextField,
   Link,
-  Grid,
   Typography,
   makeStyles,
   Container,
@@ -15,7 +13,6 @@ import {
   InputAdornment,
   Card,
 } from "@material-ui/core";
-import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import CloseIcon from "@material-ui/icons/Close";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
@@ -48,12 +45,12 @@ const useStyles = makeStyles(() => ({
     display: "inline",
     marginRight: "20px",
   },
-  collectionViewer: {
+  home: {
     height: "53px",
     backgroundColor: theme.palette.primary.light,
     width: "61px",
-    top: "18px",
-    right: "15px",
+    top: "22px",
+    right: "20px",
   },
   submit: {
     color: theme.palette.text.primary,
@@ -131,10 +128,7 @@ export function SignIn() {
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
-        <Card
-          className={classes.collectionViewer}
-          style={{ position: "fixed" }}
-        >
+        <Card className={classes.home} style={{ position: "fixed" }}>
           <Button
             style={{ marginTop: "9px" }}
             aria-label="home"

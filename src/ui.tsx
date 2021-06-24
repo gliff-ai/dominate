@@ -5,7 +5,7 @@ import { WithStyles, withStyles } from "@material-ui/core";
 
 import { Collection, DominateEtebase } from "@/etebase";
 import { SignIn } from "@/views/SignIn";
-import { SignUp } from "@/views/signup/SignUp";
+import { SignUp } from "@/views/SignUp";
 import { Navbar } from "@/NavBar";
 import { ManageWrapper } from "@/ManageWrapper";
 import { AnnotateWrapper } from "@/AnnotateWrapper";
