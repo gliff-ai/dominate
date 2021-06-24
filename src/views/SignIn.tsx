@@ -26,6 +26,12 @@ const useStyles = makeStyles(() => ({
     flexDirection: "column",
     alignItems: "center",
   },
+  logo: {
+    width: "fit-content",
+    marginRight: "auto",
+    marginLeft: "auto",
+    marginBottom: "187px",
+  },
   avatar: {
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
@@ -41,6 +47,12 @@ const useStyles = makeStyles(() => ({
     color: theme.palette.secondary.main,
     textAlign: "right",
   },
+  noAccount: {
+    width: "fit-content",
+    marginRight: "auto",
+    marginLeft: "auto",
+    marginBottom: "187px",
+  },
   noAccountText: {
     display: "inline",
     marginRight: "20px",
@@ -51,6 +63,11 @@ const useStyles = makeStyles(() => ({
     width: "61px",
     top: "22px",
     right: "20px",
+  },
+  submitDiv: {
+    width: "fit-content",
+    marginRight: "auto",
+    marginLeft: "auto",
   },
   submit: {
     color: theme.palette.text.primary,
@@ -141,14 +158,7 @@ export function SignIn() {
             />
           </Button>
         </Card>
-        <div
-          style={{
-            width: "fit-content",
-            marginRight: "auto",
-            marginLeft: "auto",
-            marginBottom: "187px",
-          }}
-        >
+        <div className={classes.logo}>
           <img
             src={require("../assets/gliff-web-master-black.svg") as string}
             alt="gliff logo"
@@ -211,13 +221,7 @@ export function SignIn() {
               Recover My Account
             </Typography>
 
-            <div
-              style={{
-                width: "fit-content",
-                marginRight: "auto",
-                marginLeft: "auto",
-              }}
-            >
+            <div className={classes.submitDiv}>
               <Button
                 type="submit"
                 variant="contained"
@@ -227,14 +231,7 @@ export function SignIn() {
                 {loading ? <CircularProgress color="inherit" /> : "Log In"}
               </Button>
             </div>
-            <div
-              style={{
-                width: "fit-content",
-                marginRight: "auto",
-                marginLeft: "auto",
-                marginBottom: "187px",
-              }}
-            >
+            <div className={classes.noAccount}>
               <Typography className={classes.noAccountText}>
                 Don&apos;t have an account?
               </Typography>

@@ -34,6 +34,11 @@ const theme: Theme = createMuiTheme({
       },
     },
 
+    MuiOutlinedInput: {
+      root: {
+        height: "50px",
+      },
+    },
     MuiAccordionSummary: {
       root: {
         "&$expanded": {

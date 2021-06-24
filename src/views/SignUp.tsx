@@ -38,12 +38,36 @@ const useStyles = makeStyles(() => ({
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
   },
+  logo: {
+    width: "fit-content",
+    marginRight: "auto",
+    marginLeft: "auto",
+    marginBottom: "187px",
+  },
   form: {
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1),
   },
+  haveAccount: {
+    width: "fit-content",
+    marginRight: "auto",
+    marginLeft: "auto",
+    marginBottom: "187px",
+  },
+  haveAccountText: {
+    display: "inline",
+    marginRight: "20px",
+  },
+  submitDiv: {
+    width: "fit-content",
+    marginRight: "auto",
+    marginLeft: "auto",
+    marginTop: "86px",
+  },
   submit: {
-    margin: theme.spacing(3, 0, 2),
+    color: theme.palette.text.primary,
+    marginBottom: "60px",
+    width: "169px",
   },
 }));
 
@@ -179,14 +203,7 @@ export const SignUp = (): JSX.Element => {
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
-        <div
-          style={{
-            width: "fit-content",
-            marginRight: "auto",
-            marginLeft: "auto",
-            marginBottom: "187px",
-          }}
-        >
+        <div className={classes.logo}>
           <img
             src={require("../assets/gliff-web-master-black.svg") as string}
             alt="gliff logo"
@@ -208,7 +225,7 @@ export const SignUp = (): JSX.Element => {
               type="email"
               onChange={handleChange}
               value={signUp.email}
-              placeholder="E-mail"
+              placeholder="E-mail *"
             />
             <div style={{ color: "red", fontSize: 12 }}>{emailError}</div>
             <TextField
@@ -222,7 +239,7 @@ export const SignUp = (): JSX.Element => {
               type="text"
               onChange={handleChange}
               value={signUp.name}
-              placeholder="Name"
+              placeholder="Name *"
             />
             <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
             <TextField
@@ -236,7 +253,7 @@ export const SignUp = (): JSX.Element => {
               autoComplete="current-password"
               value={signUp.password}
               onChange={handleChange}
-              placeholder="Password"
+              placeholder="Password *"
             />
 
             <TextField
@@ -250,27 +267,29 @@ export const SignUp = (): JSX.Element => {
               autoComplete="current-password"
               value={signUp.confirmPassword}
               onChange={handleChange}
-              placeholder="Confirm Password"
+              placeholder="Confirm Password *"
             />
             <div style={{ color: "red", fontSize: 12 }}>{passwordError}</div>
+            <div className={classes.submitDiv}>
+              <Button
+                type="submit"
+                fullWidth
+                variant="contained"
+                color="primary"
+                className={classes.submit}
+              >
+                {loading ? <CircularProgress color="inherit" /> : "Sign Up"}
+              </Button>
+            </div>
 
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              {loading ? <CircularProgress color="inherit" /> : "Sign Up"}
-            </Button>
-
-            <Grid container>
-              <Grid item xs>
-                <Link href="/signin" variant="body2">
-                  Already have an account? Sign In
-                </Link>
-              </Grid>
-            </Grid>
+            <div className={classes.haveAccount}>
+              <Typography className={classes.haveAccountText}>
+                Already have an account?
+              </Typography>
+              <Link color="secondary" href="/signin" variant="body2">
+                Sign In
+              </Link>
+            </div>
           </form>
           <div>
             <Snackbar
