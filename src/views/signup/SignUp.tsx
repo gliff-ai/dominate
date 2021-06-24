@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import {
   Avatar,

@@ -12,13 +12,16 @@ import {
   CircularProgress,
   Snackbar,
   IconButton,
+  InputAdornment,
 } from "@material-ui/core";
 import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
 import CloseIcon from "@material-ui/icons/Close";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
+import { ThemeProvider, theme } from "@/theme";
+import SVG from "react-inlinesvg";
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   paper: {
     marginTop: theme.spacing(8),
     display: "flex",
@@ -35,6 +38,11 @@ const useStyles = makeStyles((theme) => ({
   },
   submit: {
     margin: theme.spacing(3, 0, 2),
+    color: theme.palette.text.primary,
+  },
+  svgSmall: {
+    width: "22px",
+    height: "100%",
   },
 }));
 
@@ -49,6 +57,7 @@ export function SignIn() {
   const [login, setLogin] = useState({
     name: "",
     password: "",
+    showPassword: false,
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -57,6 +66,10 @@ export function SignIn() {
       ...prevState,
       [id]: value,
     }));
+  };
+
+  const handleClickShowPassword = () => {
+    setLogin({ ...login, showPassword: !login.showPassword });
   };
 
   const handleClose = () => {
@@ -89,92 +102,111 @@ export function SignIn() {
         .catch((err) => {
           setOpen(true);
           setLoading(false);
-          setLogin({ name: "", password: "" });
+          setLogin({ name: "", password: "", showPassword: false });
         });
     }
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign in
-        </Typography>
-        <form className={classes.form} onSubmit={onFormSubmit}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="name"
-            label="Email Address"
-            name="name"
-            autoComplete="email"
-            autoFocus
-            type="text"
-            onChange={handleChange}
-            value={login.name}
-          />
-          <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
+    <ThemeProvider theme={theme}>
+      <Container component="main" maxWidth="xs">
+        <CssBaseline />
+        <div className={classes.paper}>
+          <Avatar className={classes.avatar}>
+            <LockOutlinedIcon />
+          </Avatar>
+          <Typography component="h1" variant="h5">
+            Sign in
+          </Typography>
+          <form className={classes.form} onSubmit={onFormSubmit}>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              id="name"
+              name="name"
+              autoComplete="email"
+              type="text"
+              onChange={handleChange}
+              value={login.name}
+              placeholder="E-mail"
+            />
+            <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
 
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={login.password}
-            onChange={handleChange}
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            {loading ? <CircularProgress color="inherit" /> : "Sign In"}
-          </Button>
-          <Grid container>
+            <TextField
+              variant="outlined"
+              margin="normal"
+              required
+              fullWidth
+              name="password"
+              type={login.showPassword ? "text" : "password"}
+              id="password"
+              autoComplete="current-password"
+              value={login.password}
+              onChange={handleChange}
+              placeholder="Password"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      edge="end"
+                    >
+                      <SVG
+                        src={
+                          require("../assets/show-or-hide-password.svg") as string
+                        }
+                        className={classes.svgSmall}
+                        fill={
+                          login.showPassword ? theme.palette.primary.main : null
+                        }
+                      />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
+            />
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              {loading ? <CircularProgress color="inherit" /> : "Log In"}
+            </Button>
             <Grid item xs>
               <Link href="/signUp" variant="body2">
                 Don&apos;t have an account? Sign Up
               </Link>
             </Grid>
-          </Grid>
-        </form>
-        <Snackbar
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "center",
-          }}
-          open={open}
-          autoHideDuration={6000}
-          onClose={handleClose}
-          message="Login Failed. Your username and/or password do not match"
-          action={
-            // eslint-disable-next-line react/jsx-wrap-multilines
-            <>
-              <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={handleClose}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </>
-          }
-        />
-      </div>
-    </Container>
+          </form>
+          <Snackbar
+            anchorOrigin={{
+              vertical: "top",
+              horizontal: "center",
+            }}
+            open={open}
+            autoHideDuration={6000}
+            onClose={handleClose}
+            message="Login Failed. Your username and/or password do not match"
+            action={
+              // eslint-disable-next-line react/jsx-wrap-multilines
+              <>
+                <IconButton
+                  size="small"
+                  aria-label="close"
+                  color="inherit"
+                  onClick={handleClose}
+                >
+                  <CloseIcon fontSize="small" />
+                </IconButton>
+              </>
+            }
+          />
+        </div>
+      </Container>
+    </ThemeProvider>
   );
 }
