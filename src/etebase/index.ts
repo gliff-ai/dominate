@@ -284,26 +284,20 @@ export class DominateEtebase {
     return collectionManager.getItemManager(collection);
   };
 
-  updateCollection = async (
+  appendGalleryTile = async (
     collectionManager: CollectionManager,
     collectionUid: string,
-    item: Item,
-    imageMeta: ImageMeta,
-    thumbnail: string
+    tile: GalleryTile
   ): Promise<void> => {
+    // adds a new GalleryTile object to the gallery collection's content JSON
+    // uses etebase transactions to prevent race conditions if multiple images are uploaded at once
+    // (if race conditions occur, it re-fetches and tries again until it works)
+
     const collection = await collectionManager.fetch(collectionUid);
     const oldContent = await collection.getContent(OutputFormat.String);
 
     const content = JSON.stringify(
-      (JSON.parse(oldContent) as GalleryTile[]).concat({
-        metadata: imageMeta,
-        imageLabels: [],
-        thumbnail,
-        id: item.uid, // // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
-        imageUID: item.uid,
-        annotationUID: null,
-        auditUID: null,
-      })
+      (JSON.parse(oldContent) as GalleryTile[]).concat(tile)
     );
 
     await collection.setContent(content);
@@ -311,13 +305,7 @@ export class DominateEtebase {
     return collectionManager.transaction(collection).catch((e) => {
       // TODO: if it's not a conflict something bad had happened so maybe don't retry?, else
       console.error(e);
-      return this.updateCollection(
-        collectionManager,
-        collectionUid,
-        item,
-        imageMeta,
-        thumbnail
-      );
+      return this.appendGalleryTile(collectionManager, collectionUid, tile);
     });
   };
 
@@ -334,7 +322,7 @@ export class DominateEtebase {
       const itemManager = await this.getItemManager(collectionUid);
 
       // Create new image item and add it to the collection
-      const item = await itemManager.create(
+      const newImageItem = await itemManager.create(
         {
           type: "gliff.image",
           createdTime,
@@ -344,15 +332,22 @@ export class DominateEtebase {
         },
         imageContent
       );
-      await itemManager.batch([item]);
+      await itemManager.batch([newImageItem]);
 
       // Add the image's metadata/thumbnail and a pointer to the image item to the gallery's content:
-      await this.updateCollection(
+      const newTile: GalleryTile = {
+        id: newImageItem.uid, // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
+        thumbnail,
+        imageLabels: [],
+        metadata: imageMeta,
+        imageUID: newImageItem.uid,
+        annotationUID: null,
+        auditUID: null,
+      };
+      await this.appendGalleryTile(
         this.etebaseInstance.getCollectionManager(),
         collectionUid,
-        item,
-        imageMeta,
-        thumbnail
+        newTile
       );
     } catch (err) {
       console.error(err);
