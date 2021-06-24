@@ -1,12 +1,16 @@
-import * as Etebase from "etebase";
+import sodium from "libsodium-wrappers";
 import {
   Account,
   Collection,
   CollectionManager,
   Item,
   ItemManager,
+  toBase64,
+  OutputFormat,
+  CollectionAccessLevel,
 } from "etebase";
 import { User } from "@/services/user/interfaces";
+import { wordlist } from "@/wordlist";
 import {
   GalleryMeta,
   GalleryTile,
@@ -15,6 +19,14 @@ import {
   Annotation,
   AnnotationData,
 } from "./interfaces";
+
+const getRandomValueFromArrayOrString = (
+  dictionary: string | string[],
+  count: number
+): string[] =>
+  Array.from(crypto.getRandomValues(new Uint32Array(count))).map(
+    (x) => dictionary[x % dictionary.length]
+  );
 
 declare const STORE_URL: string;
 const SERVER_URL = `${STORE_URL}etebase`;
@@ -52,7 +64,7 @@ export class DominateEtebase {
   init = async (): Promise<null | User> => {
     const savedSession = localStorage.getItem("etebaseInstance");
     if (savedSession) {
-      this.etebaseInstance = await Etebase.Account.restore(savedSession);
+      this.etebaseInstance = await Account.restore(savedSession);
 
       this.ready = true;
 
@@ -74,7 +86,7 @@ export class DominateEtebase {
     await this.init();
 
     if (!this.isLoggedIn) {
-      this.etebaseInstance = await Etebase.Account.login(
+      this.etebaseInstance = await Account.login(
         username,
         password,
         SERVER_URL
@@ -98,9 +110,9 @@ export class DominateEtebase {
   };
 
   signup = async (email: string, password: string): Promise<User> => {
-    this.etebaseInstance = await Etebase.Account.signup(
+    this.etebaseInstance = await Account.signup(
       {
-        username: Etebase.toBase64(email),
+        username: toBase64(email),
         email,
       },
       password,
@@ -125,6 +137,20 @@ export class DominateEtebase {
     localStorage.removeItem("etebaseInstance");
     this.isLoggedIn = false;
     return true;
+  };
+
+  generateRecoveryKey = (): {
+    readable: string[];
+    hashed: Uint8Array;
+  } => {
+    const readable = getRandomValueFromArrayOrString(wordlist, 6);
+
+    const hashed = sodium.crypto_generichash(
+      32,
+      sodium.from_string(readable.join(""))
+    );
+
+    return { readable, hashed };
   };
 
   getPendingInvites = async (): Promise<void> => {
@@ -158,7 +184,7 @@ export class DominateEtebase {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     const collection = await collectionManager.fetch(collectionUid);
-    const json = await collection.getContent(Etebase.OutputFormat.String);
+    const json = await collection.getContent(OutputFormat.String);
     return JSON.parse(json) as GalleryTile[];
   };
 
@@ -232,7 +258,7 @@ export class DominateEtebase {
         collection,
         userEmail,
         user2.pubkey,
-        Etebase.CollectionAccessLevel.ReadOnly
+        CollectionAccessLevel.ReadWrite
       );
 
       return true;
@@ -266,7 +292,7 @@ export class DominateEtebase {
     thumbnail: string
   ): Promise<void> => {
     const collection = await collectionManager.fetch(collectionUid);
-    const oldContent = await collection.getContent(Etebase.OutputFormat.String);
+    const oldContent = await collection.getContent(OutputFormat.String);
 
     const content = JSON.stringify(
       (JSON.parse(oldContent) as GalleryTile[]).concat({
@@ -341,7 +367,7 @@ export class DominateEtebase {
     // get gallery items metadata from gallery collection:
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
-    const oldContent = await collection.getContent(Etebase.OutputFormat.String);
+    const oldContent = await collection.getContent(OutputFormat.String);
 
     // iterate through GalleryTile's, find the one whose imageUID matches imageUid, set its imageLabesl to newLabels:
     let newContent: GalleryTile[] = JSON.parse(oldContent) as GalleryTile[];
@@ -364,9 +390,7 @@ export class DominateEtebase {
     // get gallery items metadata from gallery collection:
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
-    const oldContentString = await collection.getContent(
-      Etebase.OutputFormat.String
-    );
+    const oldContentString = await collection.getContent(OutputFormat.String);
     const oldContent = JSON.parse(oldContentString) as GalleryTile[];
 
     // cache UIDs of images, annotations and audits to be deleted:
@@ -392,9 +416,9 @@ export class DominateEtebase {
 
     // delete image, annotation and audit items:
     const itemManager = collectionManager.getItemManager(collection);
-    const imagePromises: Promise<Etebase.Item>[] = [];
-    const annotationPromises: Promise<Etebase.Item>[] = [];
-    const auditPromises: Promise<Etebase.Item>[] = [];
+    const imagePromises: Promise<Item>[] = [];
+    const annotationPromises: Promise<Item>[] = [];
+    const auditPromises: Promise<Item>[] = [];
     for (let i = 0; i < imageUIDs.length; i += 1) {
       imagePromises.push(itemManager.fetch(imageUIDs[i]));
 
@@ -423,7 +447,7 @@ export class DominateEtebase {
 
   wrangleAnnotations = async (item: Item): Promise<Annotation> => {
     const meta = item.getMeta();
-    const content = await item.getContent(Etebase.OutputFormat.String);
+    const content = await item.getContent(OutputFormat.String);
     return {
       ...meta,
       uid: item.uid,
@@ -507,7 +531,7 @@ export class DominateEtebase {
   getImage = async (collectionUid: string, itemUid: string): Promise<Image> => {
     // Retrieve image item from a collection.
     const item = await this.getItem(collectionUid, itemUid);
-    const content = await item.getContent(Etebase.OutputFormat.String);
+    const content = await item.getContent(OutputFormat.String);
     return {
       meta: item.getMeta(),
       type: "gliff.image",
