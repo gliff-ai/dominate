@@ -17,8 +17,6 @@ import CloseIcon from "@material-ui/icons/Close";
 import { useNavigate } from "react-router-dom";
 import { ThemeProvider, theme } from "@/theme";
 
-import SVG from "react-inlinesvg";
-
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 
