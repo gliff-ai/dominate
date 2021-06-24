@@ -143,7 +143,7 @@ export class DominateEtebase {
     readable: string[];
     hashed: Uint8Array;
   } => {
-    const readable = getRandomValueFromArrayOrString(wordlist, 6);
+    const readable = getRandomValueFromArrayOrString(wordlist, 9);
 
     const hashed = sodium.crypto_generichash(
       32,
