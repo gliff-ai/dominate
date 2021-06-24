@@ -46,6 +46,9 @@ const useStyles = makeStyles(() => ({
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1),
   },
+  textFieldBackground: {
+    background: theme.palette.primary.light,
+  },
   haveAccount: {
     width: "fit-content",
     marginRight: "auto",
@@ -229,6 +232,7 @@ export const SignUp = (): JSX.Element => {
             <TextField
               variant="outlined"
               margin="normal"
+              className={classes.textFieldBackground}
               required
               fullWidth
               id="name"
@@ -243,6 +247,7 @@ export const SignUp = (): JSX.Element => {
             <TextField
               variant="outlined"
               margin="normal"
+              className={classes.textFieldBackground}
               required
               fullWidth
               name="password"
@@ -257,6 +262,7 @@ export const SignUp = (): JSX.Element => {
             <TextField
               variant="outlined"
               margin="normal"
+              className={classes.textFieldBackground}
               required
               fullWidth
               name="confirmPassword"

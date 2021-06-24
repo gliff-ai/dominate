@@ -12,6 +12,7 @@ import {
   IconButton,
   InputAdornment,
   Card,
+  colors,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import { useAuth } from "@/hooks/use-auth";
@@ -68,6 +69,9 @@ const useStyles = makeStyles(() => ({
     width: "fit-content",
     marginRight: "auto",
     marginLeft: "auto",
+  },
+  textFieldBackground: {
+    background: theme.palette.primary.light,
   },
   submit: {
     color: theme.palette.text.primary,
@@ -171,6 +175,7 @@ export function SignIn() {
             <TextField
               variant="outlined"
               margin="normal"
+              className={classes.textFieldBackground}
               required
               fullWidth
               id="name"
@@ -188,6 +193,7 @@ export function SignIn() {
               margin="normal"
               required
               fullWidth
+              className={classes.textFieldBackground}
               name="password"
               type={login.showPassword ? "text" : "password"}
               id="password"
