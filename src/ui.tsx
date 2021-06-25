@@ -6,6 +6,7 @@ import { WithStyles, withStyles } from "@material-ui/core";
 import { Collection, DominateEtebase } from "@/etebase";
 import { SignIn } from "@/views/SignIn";
 import { SignUp } from "@/views/signup/SignUp";
+import { RecoverAccount } from "@/views/RecoverAccount";
 import { Navbar } from "@/NavBar";
 import { ManageWrapper } from "@/ManageWrapper";
 import { AnnotateWrapper } from "@/AnnotateWrapper";
@@ -71,6 +72,14 @@ class UserInterface extends Component<Props, State> {
                 <ManageWrapper etebaseInstance={this.props.etebaseInstance} />
               }
             />
+
+            <Route
+              path="recover/*"
+              element={
+                <RecoverAccount etebaseInstance={this.props.etebaseInstance} />
+              }
+            />
+
             <Route path="/">
               <Home />
             </Route>

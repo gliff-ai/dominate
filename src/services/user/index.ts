@@ -26,3 +26,8 @@ export const inviteNewUser = (email: string): Promise<unknown> =>
 
 export const getInvite = (inviteId: string): Promise<Invite> =>
   apiRequest<Invite>(`/user/invite?invite_id=${inviteId}`, "GET");
+
+export const getRecoverySession = (
+  uid: string
+): Promise<{ recovery_key: string }> =>
+  apiRequest<{ recovery_key: string }>(`/user/recover/${uid}`, "GET");
