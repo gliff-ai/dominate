@@ -41,8 +41,11 @@ module.exports = {
   },
   resolve: {
     extensions: [".tsx", ".ts", ".js"],
+    fallback: { crypto: false, path: require.resolve("path-browserify") },
     alias: {
       "@": path.resolve(__dirname, "src"),
+      react: path.resolve(__dirname, "./node_modules/react"),
+      reactDOM: path.resolve(__dirname, "./node_modules/reactDOM"),
     },
   },
   plugins: [

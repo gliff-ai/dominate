@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import {
   Avatar,
@@ -19,7 +19,6 @@ import CloseIcon from "@material-ui/icons/Close";
 import { useNavigate } from "react-router-dom";
 
 import { useAuth } from "@/hooks/use-auth";
-import { API_URL } from "@/etebase";
 import { createCheckoutSession, getInvite } from "@/services/user";
 
 const stripePromise = loadStripe(
@@ -47,7 +46,7 @@ const useStyles = makeStyles((theme) => ({
   },
 }));
 
-export const SignUp = () => {
+export const SignUp = (): JSX.Element => {
   const classes = useStyles();
   const auth = useAuth();
   const navigate = useNavigate();
@@ -96,7 +95,7 @@ export const SignUp = () => {
     return true;
   };
 
-  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { id, value } = event.target;
     setSignUp({
       ...signUp,
@@ -108,7 +107,7 @@ export const SignUp = () => {
     setOpen(false);
   };
 
-  const onSubmitForm = async (event: React.FormEvent<HTMLFormElement>) => {
+  const onSubmitForm = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     // Reset any errors
@@ -127,11 +126,18 @@ export const SignUp = () => {
     try {
       const user = await auth.signup(signUp.email, signUp.password);
 
-      const profile = await auth.createProfile(
+      const { profile, recoveryKey } = await auth.createProfile(
         signUp.name,
         signUp.teamId,
         signUp.inviteId
       );
+
+      // TODO show this somewhere
+      console.log(recoveryKey);
+
+      const instance = auth.getInstance();
+
+      const project = await instance.createCollection("Default Collection");
 
       // Create and update their profile
       setLoading(false);
@@ -143,12 +149,11 @@ export const SignUp = () => {
 
       const stripe = await stripePromise;
 
-      const response = await createCheckoutSession(tierId);
+      const { id: sessionId } = await createCheckoutSession(tierId);
 
-      const session = response;
       // When the customer clicks on the button, redirect them to Checkout.
       const result = await stripe.redirectToCheckout({
-        sessionId: session.id,
+        sessionId,
       });
 
       if (result.error) {

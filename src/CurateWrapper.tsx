@@ -1,14 +1,8 @@
-import React, { ReactElement, useEffect, useState } from "react";
-import { Link, useParams, useNavigate } from "react-router-dom";
-import { UploadImage, ImageFileInfo } from "@gliff-ai/upload";
+import { ReactElement, useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
-import {
-  Slices,
-  GalleryMeta,
-  Image,
-  MetaItem,
-  GalleryTile,
-} from "@/etebase/interfaces";
+import { Slices, MetaItem } from "@/etebase/interfaces";
 import Curate from "@gliff-ai/curate";
 
 import {
@@ -23,11 +17,11 @@ interface Props {
 
 export const CurateWrapper = (props: Props): ReactElement | null => {
   if (!props.etebaseInstance) return null;
-  const [galleryItems, setGalleryItems] = useState<GalleryMeta[]>([]); // the objects we list under "Collections"
-  const [imageItems, setImageItems] = useState<Image[]>([]); // the objects we list under "Items"
-  const [galleryTiles, setGalleryTiles] = useState<GalleryTile[]>([]); // the information a gallery stores about its contents
+
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
-  const { id: galleryUid } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
+  const { id: galleryUidParam } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
+  const [galleryUid, setGalleryUid] = useState<string>(galleryUidParam);
+
   const navigate = useNavigate();
 
   const auth = useAuth();
@@ -37,16 +31,15 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.etebaseInstance
       .getImagesMeta(galleryUid)
       .then((items) => {
-        // set galleryTiles so that etebase pointers are kept:
-        setGalleryTiles(items);
-
         // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
-        const wrangled = items.map((item) => ({
-          thumbnail: item.thumbnail,
-          imageLabels: item.imageLabels,
-          id: item.id,
-          ...item.metadata,
-        }));
+        const wrangled = items.map(
+          ({ thumbnail, imageLabels, id, metadata }) => ({
+            thumbnail,
+            imageLabels,
+            id,
+            ...metadata,
+          })
+        );
 
         setCurateInput(wrangled);
       })
@@ -60,22 +53,17 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.etebaseInstance
       .getCollectionsMeta("gliff.gallery")
       .then((items) => {
-        setGalleryItems(items);
+        // If galleryUid isn't set, use the first gallery
+        if (items.length > 0 && !galleryUid) {
+          setGalleryUid(items[0].uid);
+        } else {
+          // Create the user a default collection?
+          console.warn("User doesn't have any collections!");
+        }
       })
       .catch((err) => {
         console.log(err);
       });
-  };
-
-  const createGalleryCollection = (): void => {
-    // Create new gallery collection.
-    props.etebaseInstance
-      .createCollection(`gallery-${galleryItems.length + 1}`)
-      .then(() => {
-        // Fetch gallery items
-        fetchGalleries();
-      })
-      .catch((e) => console.log(e));
   };
 
   const addImageToGallery = async (
@@ -114,7 +102,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   const deleteImageCallback = (imageUids: string[]): void => {
-    console.log(imageUids);
     props.etebaseInstance.deleteImages(galleryUid, imageUids).catch((error) => {
       console.log(error);
     });
@@ -137,9 +124,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     }
   }, [galleryUid]);
 
-  if (!props.etebaseInstance || !auth.user) return null;
+  if (!props.etebaseInstance || !auth.user || !galleryUid) return null;
 
-  return galleryUid ? (
+  return (
     <Curate
       metadata={curateInput}
       saveImageCallback={addImageToGallery}
@@ -147,47 +134,5 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       deleteImagesCallback={deleteImageCallback}
       annotateCallback={annotateCallback}
     />
-  ) : (
-    <>
-      <div style={{ display: "flex" }}>
-        <button
-          onClick={createGalleryCollection}
-          type="button"
-          style={{ marginRight: 10 }}
-        >
-          New Gallery
-        </button>
-        <UploadImage
-          setUploadedImage={addImageToGallery}
-          spanElement={<span>Add image</span>}
-          multiple={false}
-        />
-      </div>
-      <h3>Collections:</h3>
-      {galleryItems
-        ? galleryItems.map((item) => (
-            <React.Fragment key={item.uid}>
-              <span>
-                <Link to={`/curate/${item.uid}`}>{item.name}</Link>
-              </span>
-              <br />
-            </React.Fragment>
-          ))
-        : null}
-
-      <h3>Items</h3>
-      {imageItems
-        ? imageItems.map((item) => (
-            <React.Fragment key={item.uid}>
-              <span>
-                <Link to={`/annotate/${galleryUid}/${item.uid}`}>
-                  {item.uid}
-                </Link>
-              </span>
-              <br />
-            </React.Fragment>
-          ))
-        : null}
-    </>
   );
 };
