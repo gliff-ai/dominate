@@ -75,6 +75,11 @@ const theme: Theme = createMuiTheme({
       },
     },
 
+    MuiContainer: {
+      root: {
+        marginTop: "25px",
+      },
+    },
     MuiCollapse: {
       container: {
         backgroundColor: "#ffffff",

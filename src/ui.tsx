@@ -29,7 +29,7 @@ const styles = {
     height: "53px",
     backgroundColor: theme.palette.primary.light,
     width: "61px",
-    top: "22px",
+    top: "100px",
     right: "20px",
   },
   svgSmall: {
@@ -80,27 +80,26 @@ class UserInterface extends Component<Props, State> {
     const { classes } = this.props;
     return (
       <BrowserRouter>
-        <Card className={classes.home} style={{ position: "fixed" }}>
-          <HtmlTooltip
-            title={<Typography>Return to Website</Typography>}
-            placement="bottom"
-          >
-            <Avatar className={classes.avatarSVG}>
-              <IconButton className={classes.iconButton}>
-                <SVG
-                  src={require(`./assets/home.svg`) as string}
-                  className={classes.svgSmall}
-                />
-              </IconButton>
-            </Avatar>
-          </HtmlTooltip>
-        </Card>
-
         <div className={classes.outerContainer}>
           <Navbar />
           <br />
           <br />
           <br />
+          <Card className={classes.home} style={{ position: "fixed" }}>
+            <HtmlTooltip
+              title={<Typography>Return to Website</Typography>}
+              placement="bottom"
+            >
+              <Avatar className={classes.avatarSVG}>
+                <IconButton className={classes.iconButton}>
+                  <SVG
+                    src={require(`./assets/home.svg`) as string}
+                    className={classes.svgSmall}
+                  />
+                </IconButton>
+              </Avatar>
+            </HtmlTooltip>
+          </Card>
           <Routes>
             <Route path="/signin">
               <SignIn />
