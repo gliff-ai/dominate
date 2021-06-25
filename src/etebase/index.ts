@@ -11,8 +11,8 @@ import {
 } from "etebase";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
-import { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
+import { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
 
 const getRandomValueFromArrayOrString = (
   dictionary: string | string[],
@@ -444,7 +444,7 @@ export class DominateEtebase {
     const collection = await collectionManager.fetch(collectionUid);
     const content = JSON.parse(
       await collection.getContent(OutputFormat.String)
-    );
+    ) as GalleryTile[];
     const galleryTile: GalleryTile = content.find(
       (item) => item.imageUID === imageUid
     );
@@ -490,7 +490,7 @@ export class DominateEtebase {
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const collectionContent = await collection.getContent(OutputFormat.String);
-    const galleryTiles = JSON.parse(collectionContent);
+    const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
     const tileIdx = galleryTiles.findIndex(
       (item) => item.imageUID === imageUid
     );
@@ -507,7 +507,7 @@ export class DominateEtebase {
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const collectionContent = await collection.getContent(OutputFormat.String);
-    const galleryTiles = JSON.parse(collectionContent);
+    const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
     const tile = galleryTiles.find((item) => item.imageUID === imageUid);
     const annotationUid = tile.annotationUID;
 
