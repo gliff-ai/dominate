@@ -1,7 +1,18 @@
 /* eslint-disable react/jsx-curly-newline */
 import React, { Component, ReactNode } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { WithStyles, withStyles } from "@material-ui/core";
+import {
+  Avatar,
+  Card,
+  IconButton,
+  Theme,
+  Tooltip,
+  Typography,
+  WithStyles,
+  withStyles,
+} from "@material-ui/core";
+import { theme } from "@/theme";
+import SVG from "react-inlinesvg";
 
 import { Collection, DominateEtebase } from "@/etebase";
 import { SignIn } from "@/views/SignIn";
@@ -14,7 +25,41 @@ import { CurateWrapper } from "./CurateWrapper";
 
 const styles = {
   outerContainer: { height: "100%" },
+  home: {
+    height: "53px",
+    backgroundColor: theme.palette.primary.light,
+    width: "61px",
+    top: "22px",
+    right: "20px",
+  },
+  svgSmall: {
+    width: "22px",
+    height: "100%",
+    marginLeft: "21px",
+  },
+
+  iconButton: {
+    marginLeft: "-20px",
+  },
+  avatarSVG: {
+    backgroundColor: theme.palette.primary.light,
+    marginLeft: "auto",
+    marginRight: "auto",
+    marginTop: "6px",
+    "&:hover": {
+      backgroundColor: theme.palette.primary.main,
+    },
+  },
 };
+
+const HtmlTooltip = withStyles((t: Theme) => ({
+  tooltip: {
+    backgroundColor: theme.palette.primary.light,
+    fontSize: t.typography.pxToRem(12),
+    border: "1px solid #dadde9",
+    color: theme.palette.text.primary,
+  },
+}))(Tooltip);
 
 interface Props extends WithStyles<typeof styles> {
   etebaseInstance: DominateEtebase;
@@ -35,6 +80,22 @@ class UserInterface extends Component<Props, State> {
     const { classes } = this.props;
     return (
       <BrowserRouter>
+        <Card className={classes.home} style={{ position: "fixed" }}>
+          <HtmlTooltip
+            title={<Typography>Return to Website</Typography>}
+            placement="bottom"
+          >
+            <Avatar className={classes.avatarSVG}>
+              <IconButton className={classes.iconButton}>
+                <SVG
+                  src={require(`./assets/home.svg`) as string}
+                  className={classes.svgSmall}
+                />
+              </IconButton>
+            </Avatar>
+          </HtmlTooltip>
+        </Card>
+
         <div className={classes.outerContainer}>
           <Navbar />
           <br />

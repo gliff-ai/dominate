@@ -12,7 +12,6 @@ import {
   IconButton,
   InputAdornment,
   Card,
-  colors,
 } from "@material-ui/core";
 import CloseIcon from "@material-ui/icons/Close";
 import { useAuth } from "@/hooks/use-auth";
@@ -77,6 +76,9 @@ const useStyles = makeStyles(() => ({
     color: theme.palette.text.primary,
     marginBottom: "112px",
     width: "169px",
+    "&:hover": {
+      backgroundColor: "transparent",
+    },
   },
   svgSmall: {
     width: "22px",
@@ -149,19 +151,7 @@ export function SignIn() {
     <ThemeProvider theme={theme}>
       <Container component="main" maxWidth="xs">
         <CssBaseline />
-        <Card className={classes.home} style={{ position: "fixed" }}>
-          <Button
-            style={{ marginTop: "9px" }}
-            aria-label="home"
-            component="span"
-          >
-            <img
-              src={require(`../assets/home.svg`) as string}
-              alt="Collection Viewer Icon"
-              className={classes.svgSmall}
-            />
-          </Button>
-        </Card>
+
         <div className={classes.logo}>
           <img
             src={require("../assets/gliff-web-master-black.svg") as string}

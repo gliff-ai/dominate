@@ -5,7 +5,6 @@ import {
   CssBaseline,
   TextField,
   Link,
-  Grid,
   Typography,
   makeStyles,
   Container,
@@ -217,6 +216,7 @@ export const SignUp = (): JSX.Element => {
             <TextField
               variant="outlined"
               margin="normal"
+              className={classes.textFieldBackground}
               required
               fullWidth
               id="email"
