@@ -11,14 +11,8 @@ import {
 } from "etebase";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
-import {
-  GalleryMeta,
-  GalleryTile,
-  Image,
-  ImageMeta,
-  Annotation,
-  AnnotationData,
-} from "./interfaces";
+import { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
+import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 
 const getRandomValueFromArrayOrString = (
   dictionary: string | string[],
@@ -396,7 +390,7 @@ export class DominateEtebase {
       .filter((item) => imageUids.includes(item.imageUID))
       .forEach((item) => {
         imageUIDs.push(item.imageUID);
-        annotationUIDs.push(item.annotationUID);
+        annotationUIDs.concat(item.annotationUID);
         auditUIDs.push(item.auditUID);
       });
 
@@ -440,38 +434,38 @@ export class DominateEtebase {
     await itemManager.batch(images.concat(annotations).concat(audits));
   };
 
-  wrangleAnnotations = async (item: Item): Promise<Annotation> => {
-    const meta = item.getMeta();
-    const content = await item.getContent(OutputFormat.String);
-    return {
-      ...meta,
-      uid: item.uid,
-      content,
-    } as Annotation;
-  };
-
-  getAnnotations = async (
+  getAnnotationsObject = async (
     collectionUid: string,
     imageUid: string
-  ): Promise<Annotation[]> => {
-    const itemManager = await this.getItemManager(collectionUid);
+  ): Promise<Annotations> => {
+    // retrieves the Annotations object for the specified image
 
-    const { data } = await itemManager.list();
-
-    return Promise.all(
-      data
-        .filter((item) => {
-          const meta = item.getMeta() as Annotation;
-          return meta.type === "gliff.annotation" && meta.imageUid === imageUid;
-        })
-        .map(this.wrangleAnnotations)
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const content = JSON.parse(
+      await collection.getContent(OutputFormat.String)
     );
+    const galleryTile: GalleryTile = content.find(
+      (item) => item.imageUID === imageUid
+    );
+
+    if (galleryTile.annotationUID === null) return null;
+
+    const itemManager = collectionManager.getItemManager(collection);
+    const annotationItem = await itemManager.fetch(galleryTile.annotationUID);
+    const annotationContent = await annotationItem.getContent(
+      OutputFormat.String
+    );
+
+    console.log(JSON.parse(annotationContent));
+
+    return new Annotations(JSON.parse(annotationContent));
   };
 
   createAnnotation = async (
     collectionUid: string,
     imageUid: string,
-    annotationData: AnnotationData
+    annotationData: Annotation[]
   ): Promise<void> => {
     // Store annotations object in a new item.
 
@@ -480,34 +474,51 @@ export class DominateEtebase {
 
     // Create new item
     const createdTime = new Date().getTime();
-    const item = await itemManager.create(
+    const annotationsItem = await itemManager.create(
       {
         type: "gliff.annotation",
-        imageUid,
+        mtime: createdTime,
         createdTime,
-        modifiedTime: createdTime,
-        labels: [],
       },
       JSON.stringify(annotationData)
     );
 
-    // Store item inside its own collection
-    await itemManager.batch([item]);
+    // Store annotationsItem inside its own collection
+    await itemManager.batch([annotationsItem]);
+
+    // Update collection content JSON:
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const collectionContent = await collection.getContent(OutputFormat.String);
+    const galleryTiles = JSON.parse(collectionContent);
+    const tileIdx = galleryTiles.findIndex(
+      (item) => item.imageUID === imageUid
+    );
+    galleryTiles[tileIdx].annotationUID = annotationsItem.uid;
+    await collection.setContent(JSON.stringify(galleryTiles));
+    await collectionManager.upload(collection);
   };
 
   updateAnnotation = async (
     collectionUid: string,
-    annotationUid: string,
-    annotationData: AnnotationData
+    imageUid: string,
+    annotationData: Annotation[]
   ): Promise<void> => {
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const collectionContent = await collection.getContent(OutputFormat.String);
+    const galleryTiles = JSON.parse(collectionContent);
+    const tile = galleryTiles.find((item) => item.imageUID === imageUid);
+    const annotationUid = tile.annotationUID;
+
     // Retrieve itemManager
     const itemManager = await this.getItemManager(collectionUid);
     const item = await itemManager.fetch(annotationUid);
 
     // Update item's content and modified time
     const modifiedTime = new Date().getTime();
-    const meta = item.getMeta() as Annotation;
-    delete meta.modifiedTime;
+    const meta = item.getMeta();
+    delete meta.mtime;
 
     item.setMeta({ ...meta, modifiedTime });
     await item.setContent(JSON.stringify(annotationData));

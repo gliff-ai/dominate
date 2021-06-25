@@ -31,14 +31,6 @@ interface Thumbnail {
   modifiedTime: number; // "time item was last modified in milliseconds since epoch"
 }
 
-type AnnotationData = { data: any; audit: any };
-
-interface Annotation extends Omit<Thumbnail, "type"> {
-  type: "gliff.annotation";
-  labels: string[];
-  content: string; // stringified annotationsObject
-}
-
 type ImageBitmapBlob = ImageBitmap;
 type Channels = ImageBitmapBlob[];
 type Slices = Channels[];
@@ -69,14 +61,21 @@ interface ImageMeta {
   customMeta?: string; // JSON of custom metadata
 }
 
+interface AnnotationItemMeta {
+  type?: string;
+  name?: string;
+  mtime?: number;
+  description?: string;
+  color?: string;
+  createdTime?: number;
+}
+
 export {
   GalleryMeta,
   GalleryTile,
   MetaItem,
   Image,
   Thumbnail,
-  Annotation,
   Slices,
   ImageMeta,
-  AnnotationData,
 };
