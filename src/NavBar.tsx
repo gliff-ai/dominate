@@ -32,7 +32,7 @@ export const Navbar = (): ReactElement => {
           <Grid container direction="row">
             <Grid item className={classes.logo}>
               <img
-                src={require(`./assets/gliff-master-black.svg`) as string}
+                src={require(`./assets/gliff-logo-black-(beta).svg`) as string}
                 width="79px"
                 height="60px"
                 alt="gliff logo"
