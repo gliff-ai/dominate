@@ -29,7 +29,7 @@ const styles = {
     height: "53px",
     backgroundColor: theme.palette.primary.light,
     width: "61px",
-    top: "100px",
+    top: "20px",
     right: "20px",
   },
   svgSmall: {
@@ -78,13 +78,10 @@ class UserInterface extends Component<Props, State> {
 
   render = (): ReactNode => {
     const { classes } = this.props;
+    console.log(window.location.pathname);
     return (
       <BrowserRouter>
         <div className={classes.outerContainer}>
-          <Navbar />
-          <br />
-          <br />
-          <br />
           <Card className={classes.home} style={{ position: "fixed" }}>
             <HtmlTooltip
               title={<Typography>Return to Website</Typography>}
@@ -101,6 +98,12 @@ class UserInterface extends Component<Props, State> {
             </HtmlTooltip>
           </Card>
           <Routes>
+            {window.location.pathname === "/signin" ||
+            window.location.pathname === "/signup" ? (
+              <></>
+            ) : (
+              <Navbar />
+            )}
             <Route path="/signin">
               <SignIn />
             </Route>

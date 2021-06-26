@@ -17,6 +17,18 @@ const useStyles = makeStyles(() => ({
     marginBottom: "5px",
     marginTop: "7px",
   },
+
+  navGrid: {
+      marginLeft: "auto",
+      alignItems: "center",
+      height: "90px",
+  },
+
+  navLinks: {
+    height: "100%",
+    alignItems: "center",
+    display: "flex",
+},
 }));
 
 export const Navbar = (): ReactElement => {
@@ -26,47 +38,49 @@ export const Navbar = (): ReactElement => {
   const classes = useStyles();
 
   return (
-    <div>
-      <AppBar position="fixed" className={classes.appBar} elevation={0}>
-        <Toolbar>
-          <Grid container direction="row">
-            <Grid item className={classes.logo}>
-              <img
-                src={require(`./assets/gliff-logo-black-(beta).svg`) as string}
-                width="79px"
-                height="60px"
-                alt="gliff logo"
-              />
-            </Grid>
+    <AppBar position="fixed" className={classes.appBar} elevation={0}>
+      <Toolbar>
+        <Grid container direction="row" alignContent='space-between'>
+          <Grid item className={classes.logo}>
+            <img
+              src={require(`./assets/gliff-web-master-black.svg`) as string}
+              width="79px"
+              height="60px"
+              alt="gliff logo"
+            />
           </Grid>
-        </Toolbar>
-      </AppBar>
-      <nav>
-        {auth.user ? (
-          <>
-            <Link to="/annotate">ANNOTATE</Link>
-            &nbsp;
-            <Link to="/curate">CURATE</Link>
-            &nbsp;
-            <Link to="/manage">MANAGE</Link>
-            &nbsp;
-            <Link to="/account">{auth.user.username}</Link>
-            &nbsp;
-            <button
-              type="button"
-              onClick={() => auth.signout().then(() => navigate("signin"))}
-            >
-              Sign Out
-            </button>
-          </>
-        ) : (
-          <>
-            <Link to="/signin">Sign In</Link>
-            &nbsp;
-            <Link to="/signup">Sign Up</Link>
-          </>
-        )}
-      </nav>
-    </div>
+          <Grid item className={classes.navGrid}>
+            <nav className={classes.navLinks}>
+              {auth.user ? (
+                <>
+                  <Link to="/annotate">ANNOTATE</Link>
+                  &nbsp;
+                  <Link to="/curate">CURATE</Link>
+                  &nbsp;
+                  <Link to="/manage">MANAGE</Link>
+                  &nbsp;
+                  <Link to="/account">{auth.user.username}</Link>
+                  &nbsp;
+                  <button
+                    type="button"
+                    onClick={() =>
+                      auth.signout().then(() => navigate("signin"))
+                    }
+                  >
+                    Sign Out
+                  </button>
+                </>
+              ) : (
+                <>
+                  <Link to="/signin">Sign In</Link>
+                  &nbsp;
+                  <Link to="/signup">Sign Up</Link>
+                </>
+              )}
+            </nav>
+          </Grid>
+        </Grid>
+      </Toolbar>
+    </AppBar>
   );
 };

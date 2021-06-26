@@ -231,7 +231,7 @@ export function SignIn() {
               <Typography className={classes.noAccountText}>
                 Don&apos;t have an account?
               </Typography>
-              <Link color="secondary" href="/signUp" variant="body2">
+              <Link color="secondary" href="/signup" variant="body2">
                 Sign Up
               </Link>
             </div>
