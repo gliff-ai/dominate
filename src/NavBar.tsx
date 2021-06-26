@@ -19,16 +19,16 @@ const useStyles = makeStyles(() => ({
   },
 
   navGrid: {
-      marginLeft: "auto",
-      alignItems: "center",
-      height: "90px",
+    marginLeft: "auto",
+    alignItems: "center",
+    height: "90px",
   },
 
   navLinks: {
     height: "100%",
     alignItems: "center",
     display: "flex",
-},
+  },
 }));
 
 export const Navbar = (): ReactElement => {
@@ -40,7 +40,7 @@ export const Navbar = (): ReactElement => {
   return (
     <AppBar position="fixed" className={classes.appBar} elevation={0}>
       <Toolbar>
-        <Grid container direction="row" alignContent='space-between'>
+        <Grid container direction="row" alignContent="space-between">
           <Grid item className={classes.logo}>
             <img
               src={require(`./assets/gliff-web-master-black.svg`) as string}

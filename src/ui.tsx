@@ -78,7 +78,6 @@ class UserInterface extends Component<Props, State> {
 
   render = (): ReactNode => {
     const { classes } = this.props;
-    console.log(window.location.pathname);
     return (
       <BrowserRouter>
         <div className={classes.outerContainer}>
