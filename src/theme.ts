@@ -1,6 +1,8 @@
 import { ThemeProvider, createMuiTheme, Theme } from "@material-ui/core";
 import type {} from "@material-ui/lab/themeAugmentation";
 
+const squiggles = require("./assets/squig-black.png") as string;
+
 const theme: Theme = createMuiTheme({
   palette: {
     primary: {
@@ -36,8 +38,7 @@ const theme: Theme = createMuiTheme({
     MuiCssBaseline: {
       "@global": {
         body: {
-          backgroundImage:
-            "url(src/assets/squig-black.png),url(src/assets/squig-black.png)",
+          backgroundImage: `url(${squiggles}),url(${squiggles})`,
           backgroundColor: "#F2F2F2",
           backgroundRepeat: "no-repeat",
           backgroundPosition: "-350px -320px, 1200px 650px",
