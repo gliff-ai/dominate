@@ -41,7 +41,7 @@ const theme: Theme = createMuiTheme({
           backgroundImage: `url(${squiggles}),url(${squiggles})`,
           backgroundColor: "#F2F2F2",
           backgroundRepeat: "no-repeat",
-          backgroundPosition: "-350px -320px, 1200px 650px",
+          backgroundPosition: "-350px -320px, 1400px 650px",
           overflow: "hidden",
         },
       },
