@@ -55,25 +55,28 @@ export class DominateEtebase {
     return null;
   };
 
-  init = async (): Promise<null | User> => {
+  init = async (account?: Account): Promise<null | User> => {
     const savedSession = localStorage.getItem("etebaseInstance");
-    if (savedSession) {
+
+    if (account) {
+      this.etebaseInstance = account;
+    } else if (savedSession) {
       this.etebaseInstance = await Account.restore(savedSession);
-
-      this.ready = true;
-
-      this.isLoggedIn = !!this.etebaseInstance?.user?.username;
-
-      void this.getPendingInvites().then(() => console.log("Checked invites"));
-
-      return {
-        username: this.etebaseInstance.user.username,
-        authToken: this.etebaseInstance.authToken,
-      };
+    } else {
+      this.isLoggedIn = false;
+      return null;
     }
 
-    this.isLoggedIn = false;
-    return null;
+    this.ready = true;
+
+    this.isLoggedIn = !!this.etebaseInstance?.user?.username;
+
+    void this.getPendingInvites().then(() => console.log("Checked invites"));
+
+    return {
+      username: this.etebaseInstance.user.username,
+      authToken: this.etebaseInstance.authToken,
+    };
   };
 
   login = async (username: string, password: string): Promise<User> => {
@@ -94,6 +97,8 @@ export class DominateEtebase {
 
       // TODO: encrypt this!
       localStorage.setItem("etebaseInstance", newSession);
+
+      await this.etebaseInstance.fetchToken();
     }
     this.isLoggedIn = true;
 
@@ -133,12 +138,37 @@ export class DominateEtebase {
     return true;
   };
 
+  #hashRecoveryPhrase = (phrase: string): Uint8Array =>
+    sodium.crypto_generichash(32, sodium.from_string(phrase.replace(/ /g, "")));
+
+  restoreSession = async (
+    session: string,
+    phrase: string,
+    newPassword: string
+  ): Promise<boolean> => {
+    try {
+      const key = this.#hashRecoveryPhrase(phrase);
+
+      const account = await Account.restore(session, key);
+
+      await account.fetchToken();
+
+      await account.changePassword(newPassword);
+
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
+  };
+
   generateRecoveryKey = (): {
     readable: string[];
     hashed: Uint8Array;
   } => {
     const readable = getRandomValueFromArrayOrString(wordlist, 9);
 
+    console.log(readable); // Remove when we show this in the UI
     const hashed = sodium.crypto_generichash(
       32,
       sodium.from_string(readable.join(""))
