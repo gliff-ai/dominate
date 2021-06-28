@@ -1,10 +1,4 @@
 import sodium from "libsodium-wrappers";
-import URI from "urijs";
-
-// import { Authenticator, deriveKey } from "etebase/dist/lib/OnlineManagers";
-// import { LoginCryptoManager } from "etebase/dist/lib/Crypto";
-// import { msgpackEncode } from "etebase/dist/lib/Helpers";
-
 import {
   Account,
   Collection,
@@ -14,7 +8,6 @@ import {
   toBase64,
   OutputFormat,
   CollectionAccessLevel,
-  getMainCryptoManager,
 } from "etebase";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";

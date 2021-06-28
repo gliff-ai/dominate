@@ -10,9 +10,9 @@ import { RecoverAccount } from "@/views/RecoverAccount";
 import { Navbar } from "@/NavBar";
 import { ManageWrapper } from "@/ManageWrapper";
 import { AnnotateWrapper } from "@/AnnotateWrapper";
+import { RequestRecoverAccount } from "@/views/RequestRecovery";
 import { Home } from "./Home";
 import { CurateWrapper } from "./CurateWrapper";
-import { RequestRecoverAccount } from "@/views/RequestRecovery";
 
 const styles = {
   outerContainer: { height: "100%" },
