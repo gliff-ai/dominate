@@ -1,4 +1,10 @@
 import sodium from "libsodium-wrappers";
+import URI from "urijs";
+
+// import { Authenticator, deriveKey } from "etebase/dist/lib/OnlineManagers";
+// import { LoginCryptoManager } from "etebase/dist/lib/Crypto";
+// import { msgpackEncode } from "etebase/dist/lib/Helpers";
+
 import {
   Account,
   Collection,
@@ -8,6 +14,7 @@ import {
   toBase64,
   OutputFormat,
   CollectionAccessLevel,
+  getMainCryptoManager,
 } from "etebase";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
@@ -103,6 +110,8 @@ export class DominateEtebase {
 
       // TODO: encrypt this!
       localStorage.setItem("etebaseInstance", newSession);
+
+      await this.etebaseInstance.fetchToken();
     }
     this.isLoggedIn = true;
 
@@ -142,20 +151,28 @@ export class DominateEtebase {
     return true;
   };
 
-  hashRecoveryPhrase = (phrase: string): Uint8Array =>
+  #hashRecoveryPhrase = (phrase: string): Uint8Array =>
     sodium.crypto_generichash(32, sodium.from_string(phrase.replace(/ /g, "")));
 
-  restoreSession = async (session: string, phrase: string): Promise<User> => {
-    const key = this.hashRecoveryPhrase(phrase);
+  restoreSession = async (
+    session: string,
+    phrase: string,
+    newPassword: string
+  ): Promise<boolean> => {
+    try {
+      const key = this.#hashRecoveryPhrase(phrase);
 
-    const account = await Account.restore(session, key);
+      const account = await Account.restore(session, key);
 
-    // We have restored the session, however the access token is liekly out of date. We have the keys
-    // tho so we can request a new one with the login_challenge etebase flow
+      await account.fetchToken();
 
-    // TODO
+      await account.changePassword(newPassword);
 
-    return this.init(account);
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
   };
 
   generateRecoveryKey = (): {
@@ -164,13 +181,11 @@ export class DominateEtebase {
   } => {
     const readable = getRandomValueFromArrayOrString(wordlist, 9);
 
-    console.log(readable);
+    console.log(readable); // Remove when we show this in the UI
     const hashed = sodium.crypto_generichash(
       32,
       sodium.from_string(readable.join(""))
     );
-
-    console.log(hashed);
 
     return { readable, hashed };
   };

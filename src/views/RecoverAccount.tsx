@@ -1,10 +1,8 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import sodium from "libsodium-wrappers";
 
 import { getRecoverySession } from "@/services/user";
 import { DominateEtebase } from "@/etebase";
-import { Account } from "etebase";
 
 const query = new URLSearchParams(window.location.search);
 
@@ -44,22 +42,21 @@ export const RecoverAccount = (props: Props): JSX.Element => {
     setLoading(true);
 
     // Reset any errors
+    setRecoveryError("");
 
     // Convert their input to the format we expect
     const restoredSession = await etebaseInstance.restoreSession(
       recoverySession,
-      recover.recoveryKey
+      recover.recoveryKey,
+      recover.newPassword
     );
 
-    console.log(restoredSession);
-
-    // await etebaseInstance.init(restoredSession);
-
-    // await etebaseInstance.etebaseInstance.changePassword(recover.newPassword);
-
-    setLoading(false);
-    navigate("/signin");
-    return;
+    if (restoredSession) {
+      setLoading(false);
+      navigate("/signin");
+    } else {
+      setRecoveryError("Couldn't recover account with those details");
+    }
   };
 
   if (!recoverySession) {
@@ -84,7 +81,7 @@ export const RecoverAccount = (props: Props): JSX.Element => {
           New Password:
           <input
             required
-            type="text"
+            type="password"
             name="newPassword"
             value={recover.newPassword}
             onChange={handleChange}

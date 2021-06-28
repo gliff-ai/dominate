@@ -12,6 +12,7 @@ import { ManageWrapper } from "@/ManageWrapper";
 import { AnnotateWrapper } from "@/AnnotateWrapper";
 import { Home } from "./Home";
 import { CurateWrapper } from "./CurateWrapper";
+import { RequestRecoverAccount } from "@/views/RequestRecovery";
 
 const styles = {
   outerContainer: { height: "100%" },
@@ -78,6 +79,11 @@ class UserInterface extends Component<Props, State> {
               element={
                 <RecoverAccount etebaseInstance={this.props.etebaseInstance} />
               }
+            />
+
+            <Route
+              path="request-recover/*"
+              element={<RequestRecoverAccount />}
             />
 
             <Route path="/">
