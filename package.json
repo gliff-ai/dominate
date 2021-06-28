@@ -67,7 +67,7 @@
     "@material-ui/icons": "^4.11.2",
     "@sentry/integrations": "^6.6.0",
     "@sentry/react": "^6.6.0",
-    "@sentry/tracing": "^6.6.0",
+    "@sentry/tracing": "^6.7.2",
     "@stripe/stripe-js": "^1.14.0",
     "@types/libsodium-wrappers": "^0.7.9",
     "axios": "^0.21.1",
