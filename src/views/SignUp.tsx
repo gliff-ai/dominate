@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
 import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import {
@@ -11,13 +12,19 @@ import {
   CircularProgress,
   Snackbar,
   IconButton,
+  SnackbarContent,
 } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
+import SVG from "react-inlinesvg";
+
+import Slide, { SlideProps } from "@material-ui/core/Slide";
+
 import { useNavigate } from "react-router-dom";
 import { ThemeProvider, theme } from "@/theme";
 
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
+
+type TransitionProps = Omit<SlideProps, "direction">;
 
 const stripePromise = loadStripe(
   "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
@@ -48,6 +55,37 @@ const useStyles = makeStyles(() => ({
   textFieldBackground: {
     background: theme.palette.primary.light,
   },
+  snackbar: {
+    background: theme.palette.warning.main,
+  },
+  svgSmall: {
+    width: "22px",
+    height: "100%",
+    marginLeft: "7px",
+    marginRight: "11px",
+    marginTop: "0px",
+    marginBottom: "-5px",
+    fill: theme.palette.primary.light,
+  },
+  svgSmallClose: {
+    width: "15px",
+    height: "100%",
+    marginLeft: "11px",
+    marginRight: "0px",
+    marginTop: "-3px",
+    marginBottom: "0px",
+    fill: theme.palette.primary.light,
+  },
+
+  message: {
+    display: "inline-block",
+    marginRight: "5px",
+    marginLeft: "5px",
+    fontSize: "16px",
+  },
+  iconButton: {
+    color: theme.palette.primary.light,
+  },
   haveAccount: {
     width: "fit-content",
     marginRight: "auto",
@@ -76,8 +114,11 @@ export const SignUp = (): JSX.Element => {
   const auth = useAuth();
   const navigate = useNavigate();
 
+  const [open, setOpen] = React.useState(false);
+  const [transition, setTransition] =
+    React.useState<React.ComponentType<TransitionProps> | undefined>(undefined);
+
   const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
@@ -91,6 +132,15 @@ export const SignUp = (): JSX.Element => {
     teamId: null as number,
     inviteId: null as string,
   });
+
+  function TransitionUp(props: TransitionProps) {
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    return <Slide {...props} direction="up" />;
+  }
+  const handleClick = (Transition: React.ComponentType<TransitionProps>) => {
+    setTransition(() => Transition);
+    setOpen(true);
+  };
 
   const tierId = query.get("tier_id") || null;
   const inviteId = query.get("invite_id") || null;
@@ -186,7 +236,7 @@ export const SignUp = (): JSX.Element => {
         // using `result.error.message`.
       }
     } catch (e) {
-      setOpen(true);
+      handleClick(TransitionUp);
       setLoading(false);
       setSignUp({ ...signUp, name: "", password: "", confirmPassword: "" });
       setEmailError("");
@@ -295,32 +345,43 @@ export const SignUp = (): JSX.Element => {
               </Link>
             </div>
           </form>
-          <div>
-            <Snackbar
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "center",
-              }}
-              open={open}
-              autoHideDuration={6000}
-              onClose={handleClose}
-              // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-              message={`${etebaseError}`}
-              action={
-                // eslint-disable-next-line react/jsx-wrap-multilines
-                <>
+
+          <Snackbar
+            open={open}
+            onClose={handleClose}
+            TransitionComponent={transition}
+          >
+            <SnackbarContent
+              className={classes.snackbar}
+              message={
+                <span>
+                  <SVG
+                    src={require(`../assets/warning.svg`) as string}
+                    className={classes.svgSmall}
+                  />
+
+                  <div className={classes.message}>
+                    {/* Looks like that account already exists, try another email! */}
+                    {String(etebaseError).includes("duplicate key")
+                      ? "Looks like that account already exists, try another email!"
+                      : "There was a problem creating an account"}
+                  </div>
+
                   <IconButton
                     size="small"
                     aria-label="close"
-                    color="inherit"
                     onClick={handleClose}
+                    className={classes.iconButton}
                   >
-                    <CloseIcon fontSize="small" />
+                    <SVG
+                      src={require(`../assets/close.svg`) as string}
+                      className={classes.svgSmallClose}
+                    />
                   </IconButton>
-                </>
+                </span>
               }
             />
-          </div>
+          </Snackbar>
         </div>
       </Container>
     </ThemeProvider>

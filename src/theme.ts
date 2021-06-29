@@ -17,6 +17,9 @@ const theme: Theme = createMuiTheme({
       primary: "#2B2F3A",
       secondary: "#A1A1A1",
     },
+    warning: {
+      main: "#00DBFF",
+    },
   },
   typography: {
     fontFamily: "Roboto",
