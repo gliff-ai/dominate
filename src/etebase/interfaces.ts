@@ -23,22 +23,6 @@ interface MetaItem {
   [index: string]: string | string[] | boolean | number;
 }
 
-interface Thumbnail {
-  uid: string;
-  type: "gliff.thumbnail";
-  imageUid: string; // The gliff.image that this is a thumbnail of
-  createdTime: number; // "time item was created in milliseconds since epoch"
-  modifiedTime: number; // "time item was last modified in milliseconds since epoch"
-}
-
-type AnnotationData = { data: any; audit: any };
-
-interface Annotation extends Omit<Thumbnail, "type"> {
-  type: "gliff.annotation";
-  labels: string[];
-  content: string; // stringified annotationsObject
-}
-
 type ImageBitmapBlob = ImageBitmap;
 type Channels = ImageBitmapBlob[];
 type Slices = Channels[];
@@ -69,14 +53,13 @@ interface ImageMeta {
   customMeta?: string; // JSON of custom metadata
 }
 
-export {
-  GalleryMeta,
-  GalleryTile,
-  MetaItem,
-  Image,
-  Thumbnail,
-  Annotation,
-  Slices,
-  ImageMeta,
-  AnnotationData,
-};
+interface AnnotationItemMeta {
+  type?: string;
+  name?: string;
+  mtime?: number;
+  description?: string;
+  color?: string;
+  createdTime?: number;
+}
+
+export { GalleryMeta, GalleryTile, MetaItem, Image, Slices, ImageMeta };
