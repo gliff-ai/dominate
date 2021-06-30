@@ -1,7 +1,18 @@
-import { AppBar, Grid, makeStyles, Toolbar } from "@material-ui/core";
+import {
+  AppBar,
+  Avatar,
+  Grid,
+  makeStyles,
+  Theme,
+  Toolbar,
+  Tooltip,
+  Typography,
+  withStyles,
+} from "@material-ui/core";
 import React, { ReactElement } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { ThemeProvider, theme } from "@/theme";
+import { theme } from "@/theme";
+import SVG from "react-inlinesvg";
 
 import { useAuth } from "./hooks/use-auth";
 
@@ -11,6 +22,21 @@ const useStyles = makeStyles(() => ({
     height: "90px",
     paddingTop: "9px",
     marginBottom: "30px",
+  },
+
+  svgMedium: {
+    width: "22px",
+    height: "100%",
+    marginLeft: "-1px",
+  },
+
+  avatar: {
+    width: "64px",
+    height: "64px",
+    backgroundColor: theme.palette.text.secondary,
+    "&:hover": {
+      backgroundColor: theme.palette.text.secondary,
+    },
   },
 
   logo: {
@@ -30,6 +56,15 @@ const useStyles = makeStyles(() => ({
     display: "flex",
   },
 }));
+
+const HtmlTooltip = withStyles((t: Theme) => ({
+  tooltip: {
+    backgroundColor: theme.palette.primary.light,
+    fontSize: t.typography.pxToRem(12),
+    border: "1px solid #dadde9",
+    color: theme.palette.text.primary,
+  },
+}))(Tooltip);
 
 export const Navbar = (): ReactElement => {
   // Get auth state and re-render anytime it changes
@@ -53,13 +88,51 @@ export const Navbar = (): ReactElement => {
             <nav className={classes.navLinks}>
               {auth.user ? (
                 <>
-                  <Link to="/annotate">ANNOTATE</Link>
+                  <Link to="/annotate">
+                    <HtmlTooltip
+                      title={<Typography color="inherit">ANNOTATE</Typography>}
+                      placement="top"
+                    >
+                      <Avatar variant="circular">
+                        <SVG
+                          src={require(`./assets/annotate.svg`) as string}
+                          className={classes.svgMedium}
+                        />
+                      </Avatar>
+                    </HtmlTooltip>
+                  </Link>
                   &nbsp;
-                  <Link to="/curate">CURATE</Link>
+                  <Link to="/curate">
+                    <HtmlTooltip
+                      title={<Typography color="inherit">CURATE</Typography>}
+                      placement="top"
+                    >
+                      <Avatar variant="circular">
+                        <SVG
+                          src={require(`./assets/curate.svg`) as string}
+                          className={classes.svgMedium}
+                        />
+                      </Avatar>
+                    </HtmlTooltip>
+                  </Link>
                   &nbsp;
-                  <Link to="/manage">MANAGE</Link>
+                  <Link to="/manage">
+                    {" "}
+                    <HtmlTooltip
+                      title={<Typography color="inherit">MANAGE</Typography>}
+                      placement="top"
+                    >
+                      <Avatar variant="circular">
+                        <SVG
+                          src={require(`./assets/manage.svg`) as string}
+                          className={classes.svgMedium}
+                        />
+                      </Avatar>
+                    </HtmlTooltip>
+                  </Link>
                   &nbsp;
-                  <Link to="/account">{auth.user.username}</Link>
+                  <Avatar className={classes.avatar}>H</Avatar>
+                  {/* <Link to="/account">{auth.user.username}</Link>
                   &nbsp;
                   <button
                     type="button"
@@ -68,7 +141,7 @@ export const Navbar = (): ReactElement => {
                     }
                   >
                     Sign Out
-                  </button>
+                  </button> */}
                 </>
               ) : (
                 <>

@@ -4,8 +4,10 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import {
   Avatar,
   Card,
+  CssBaseline,
   IconButton,
   Theme,
+  ThemeProvider,
   Tooltip,
   Typography,
   WithStyles,
@@ -71,62 +73,66 @@ class UserInterface extends Component<Props, State> {
   render = (): ReactNode => {
     const { classes } = this.props;
     return (
-      <BrowserRouter>
-        <div className={classes.outerContainer}>
-          <Routes>
-            {window.location.pathname === "/signin" ||
-            window.location.pathname === "/signup" ? (
-              <></>
-            ) : (
-              <Navbar />
-            )}
-            <Route path="/signin">
-              <SignIn />
-            </Route>
-            <Route path="/signup">
-              <SignUp />
-            </Route>
-            <Route
-              path="curate/:id"
-              element={
-                <CurateWrapper etebaseInstance={this.props.etebaseInstance} />
-              }
-            />
-            <Route
-              path="curate/"
-              element={
-                <CurateWrapper etebaseInstance={this.props.etebaseInstance} />
-              }
-            />
-            <Route
-              path="annotate/:collectionUid/:imageUid"
-              element={
-                <AnnotateWrapper etebaseInstance={this.props.etebaseInstance} />
-              }
-            />
-            <Route
-              path="manage/*"
-              element={
-                <ManageWrapper etebaseInstance={this.props.etebaseInstance} />
-              }
-            />
-            <Route path="/">
-              <Home />
-            </Route>
-            <Route path="/recoveraccount">
-              <RecoverAccount />
-            </Route>
-          </Routes>
-        </div>
-
-        <footer>
-          <div>
-            {this.state.collections?.map((col) =>
-              JSON.stringify(col.getMeta())
-            )}
+      <ThemeProvider theme={theme}>
+        <BrowserRouter>
+          <div className={classes.outerContainer}>
+            <Routes>
+              {window.location.pathname === "/signin" ||
+              window.location.pathname === "/signup" ? (
+                <></>
+              ) : (
+                <Navbar />
+              )}
+              <Route path="/signin">
+                <SignIn />
+              </Route>
+              <Route path="/signup">
+                <SignUp />
+              </Route>
+              <Route
+                path="curate/:id"
+                element={
+                  <CurateWrapper etebaseInstance={this.props.etebaseInstance} />
+                }
+              />
+              <Route
+                path="curate/"
+                element={
+                  <CurateWrapper etebaseInstance={this.props.etebaseInstance} />
+                }
+              />
+              <Route
+                path="annotate/:collectionUid/:imageUid"
+                element={
+                  <AnnotateWrapper
+                    etebaseInstance={this.props.etebaseInstance}
+                  />
+                }
+              />
+              <Route
+                path="manage/*"
+                element={
+                  <ManageWrapper etebaseInstance={this.props.etebaseInstance} />
+                }
+              />
+              <Route path="/">
+                <Home />
+              </Route>
+              <Route path="/recoveraccount">
+                <RecoverAccount />
+              </Route>
+            </Routes>
           </div>
-        </footer>
-      </BrowserRouter>
+
+          <footer>
+            <div>
+              {this.state.collections?.map((col) =>
+                JSON.stringify(col.getMeta())
+              )}
+            </div>
+          </footer>
+        </BrowserRouter>
+      </ThemeProvider>
     );
   };
 }
