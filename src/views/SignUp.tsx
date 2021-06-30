@@ -365,7 +365,7 @@ export const SignUp = (): JSX.Element => {
                     {/* Looks like that account already exists, try another email! */}
                     {String(etebaseError).includes("duplicate key")
                       ? "Looks like that account already exists, try another email!"
-                      : "There was a problem creating an account"}
+                      : "There was an error creating an account"}
                   </div>
 
                   <IconButton

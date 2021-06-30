@@ -301,11 +301,9 @@ export function SignIn() {
                   />
 
                   <div className={classes.message}>
-                    {String(etebaseError).includes("User not found") &&
-                      "We couldn't find an account with that email, try again!"}
-                    {String(etebaseError).includes(
-                      "Wrong password for user."
-                    ) && "Look's like that was the wrong password, try again!"}
+                    {String(etebaseError).includes("Wrong password for user.")
+                      ? "Login Failed. Your username and/or password do not match"
+                      : "There was an error logging you in. Please try again"}
                   </div>
 
                   <IconButton
