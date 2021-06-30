@@ -11,13 +11,16 @@ import {
   Snackbar,
   IconButton,
   InputAdornment,
-  Card,
+  SnackbarContent,
+  Slide,
+  SlideProps,
 } from "@material-ui/core";
-import CloseIcon from "@material-ui/icons/Close";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { ThemeProvider, theme } from "@/theme";
 import SVG from "react-inlinesvg";
+
+type TransitionProps = Omit<SlideProps, "direction">;
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -72,6 +75,31 @@ const useStyles = makeStyles(() => ({
   textFieldBackground: {
     background: theme.palette.primary.light,
   },
+  snackbar: {
+    background: theme.palette.warning.main,
+  },
+  svgSmall: {
+    width: "22px",
+    height: "100%",
+  },
+  svgSmallClose: {
+    width: "15px",
+    height: "100%",
+    marginLeft: "11px",
+    marginRight: "0px",
+    marginTop: "-3px",
+    marginBottom: "0px",
+    fill: theme.palette.primary.light,
+  },
+  message: {
+    display: "inline-block",
+    marginRight: "5px",
+    marginLeft: "5px",
+    fontSize: "16px",
+  },
+  iconButton: {
+    color: theme.palette.primary.light,
+  },
   submit: {
     color: theme.palette.text.primary,
     marginBottom: "112px",
@@ -80,20 +108,20 @@ const useStyles = makeStyles(() => ({
       backgroundColor: "transparent",
     },
   },
-  svgSmall: {
-    width: "22px",
-    height: "100%",
-  },
 }));
 
 export function SignIn() {
   const classes = useStyles();
   const auth = useAuth();
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+
+  const [transition, setTransition] =
+    React.useState<React.ComponentType<TransitionProps> | undefined>(undefined);
 
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState("");
-  const [open, setOpen] = useState(false);
+  const [etebaseError, setEtebaseError] = useState({});
   const [login, setLogin] = useState({
     name: "",
     password: "",
@@ -106,6 +134,16 @@ export function SignIn() {
       ...prevState,
       [id]: value,
     }));
+  };
+
+  const TransitionUp = (props: TransitionProps) => (
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <Slide {...props} direction="up" />
+  );
+
+  const handleSnackbar = (Transition: React.ComponentType<TransitionProps>) => {
+    setTransition(() => Transition);
+    setOpen(true);
   };
 
   const handleClickShowPassword = () => {
@@ -131,6 +169,7 @@ export function SignIn() {
   const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const isValid = validate();
+
     if (isValid) {
       setLoading(true);
       auth
@@ -139,10 +178,16 @@ export function SignIn() {
           setLoading(false);
           navigate("home");
         })
-        .catch((err) => {
-          setOpen(true);
+        .catch((e) => {
+          handleSnackbar(TransitionUp);
           setLoading(false);
           setLogin({ name: "", password: "", showPassword: false });
+
+          if (e instanceof Error) {
+            // eslint-disable-next-line no-console
+            console.log("hello");
+            setEtebaseError(e.message);
+          }
         });
     }
   };
@@ -236,29 +281,38 @@ export function SignIn() {
               </Link>
             </div>
           </form>
+
           <Snackbar
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "center",
-            }}
             open={open}
-            autoHideDuration={6000}
             onClose={handleClose}
-            message="Login Failed. Your username and/or password do not match"
-            action={
-              // eslint-disable-next-line react/jsx-wrap-multilines
-              <>
-                <IconButton
-                  size="small"
-                  aria-label="close"
-                  color="inherit"
-                  onClick={handleClose}
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </>
-            }
-          />
+            TransitionComponent={transition}
+          >
+            <SnackbarContent
+              className={classes.snackbar}
+              message={
+                <span>
+                  <SVG
+                    src={require(`../assets/warning.svg`) as string}
+                    className={classes.svgSmall}
+                  />
+
+                  <div className={classes.message}>{String(etebaseError)}</div>
+
+                  <IconButton
+                    size="small"
+                    aria-label="close"
+                    onClick={handleClose}
+                    className={classes.iconButton}
+                  >
+                    <SVG
+                      src={require(`../assets/close.svg`) as string}
+                      className={classes.svgSmallClose}
+                    />
+                  </IconButton>
+                </span>
+              }
+            />
+          </Snackbar>
         </div>
       </Container>
     </ThemeProvider>

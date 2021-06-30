@@ -133,11 +133,12 @@ export const SignUp = (): JSX.Element => {
     inviteId: null as string,
   });
 
-  function TransitionUp(props: TransitionProps) {
+  const TransitionUp = (props: TransitionProps) => (
     // eslint-disable-next-line react/jsx-props-no-spreading
-    return <Slide {...props} direction="up" />;
-  }
-  const handleClick = (Transition: React.ComponentType<TransitionProps>) => {
+    <Slide {...props} direction="up" />
+  );
+
+  const handleSnackbar = (Transition: React.ComponentType<TransitionProps>) => {
     setTransition(() => Transition);
     setOpen(true);
   };
@@ -236,7 +237,7 @@ export const SignUp = (): JSX.Element => {
         // using `result.error.message`.
       }
     } catch (e) {
-      handleClick(TransitionUp);
+      handleSnackbar(TransitionUp);
       setLoading(false);
       setSignUp({ ...signUp, name: "", password: "", confirmPassword: "" });
       setEmailError("");
