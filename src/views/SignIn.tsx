@@ -76,11 +76,16 @@ const useStyles = makeStyles(() => ({
     background: theme.palette.primary.light,
   },
   snackbar: {
-    background: theme.palette.warning.main,
+    background: theme.palette.warning.light,
   },
   svgSmall: {
     width: "22px",
     height: "100%",
+    marginLeft: "7px",
+    marginRight: "9px",
+    marginTop: "0px",
+    marginBottom: "-4px",
+    fill: theme.palette.primary.light,
   },
   svgSmallClose: {
     width: "15px",
@@ -185,7 +190,6 @@ export function SignIn() {
 
           if (e instanceof Error) {
             // eslint-disable-next-line no-console
-            console.log("hello");
             setEtebaseError(e.message);
           }
         });
@@ -296,7 +300,13 @@ export function SignIn() {
                     className={classes.svgSmall}
                   />
 
-                  <div className={classes.message}>{String(etebaseError)}</div>
+                  <div className={classes.message}>
+                    {String(etebaseError).includes("User not found") &&
+                      "We couldn't find an account with that email, try again!"}
+                    {String(etebaseError).includes(
+                      "Wrong password for user."
+                    ) && "Look's like that was the wrong password, try again!"}
+                  </div>
 
                   <IconButton
                     size="small"
