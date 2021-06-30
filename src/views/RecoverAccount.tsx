@@ -44,9 +44,9 @@ const useStyles = makeStyles(() => ({
   forgotPasswordText: {
     marginBottom: "44px",
     marginTop: "13px",
-    color: theme.palette.secondary.main,
-    textAlign: "right",
-    fontStyle: "italic",
+    color: theme.palette.text.secondary,
+    fontSize: 13,
+    width: "150%",
   },
   noAccount: {
     width: "200%",
@@ -56,7 +56,13 @@ const useStyles = makeStyles(() => ({
     display: "inline",
     marginRight: "10px",
   },
-
+  home: {
+    height: "53px",
+    backgroundColor: theme.palette.primary.light,
+    width: "61px",
+    top: "22px",
+    right: "20px",
+  },
   submitDiv: {
     width: "fit-content",
     marginRight: "auto",
@@ -116,22 +122,17 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export function SignIn() {
+export function RecoverAccount() {
   const classes = useStyles();
   const auth = useAuth();
   const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
-
-  const [transition, setTransition] =
-    React.useState<React.ComponentType<TransitionProps> | undefined>(undefined);
 
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState("");
   const [etebaseError, setEtebaseError] = useState({});
   const [login, setLogin] = useState({
     email: "",
-    password: "",
-    showPassword: false,
+    recoveryKey: "",
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -140,24 +141,6 @@ export function SignIn() {
       ...prevState,
       [id]: value,
     }));
-  };
-
-  const TransitionUp = (props: TransitionProps) => (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <Slide {...props} direction="up" />
-  );
-
-  const handleSnackbar = (Transition: React.ComponentType<TransitionProps>) => {
-    setTransition(() => Transition);
-    setOpen(true);
-  };
-
-  const handleClickShowPassword = () => {
-    setLogin({ ...login, showPassword: !login.showPassword });
-  };
-
-  const handleClose = () => {
-    setOpen(false);
   };
 
   const validate = () => {
@@ -179,15 +162,14 @@ export function SignIn() {
     if (isValid) {
       setLoading(true);
       auth
-        .signin(login.email, login.password)
+        .signin(login.email, login.recoveryKey)
         .then(() => {
           setLoading(false);
           navigate("home");
         })
         .catch((e) => {
-          handleSnackbar(TransitionUp);
           setLoading(false);
-          setLogin({ email: "", password: "", showPassword: false });
+          setLogin({ email: "", recoveryKey: "" });
 
           if (e instanceof Error) {
             // eslint-disable-next-line no-console
@@ -211,7 +193,9 @@ export function SignIn() {
           />
         </div>
         <div>
-          <Typography className={classes.typogragphyTitle}>Login</Typography>
+          <Typography className={classes.typogragphyTitle}>
+            Recover my Account
+          </Typography>
         </div>
         <div className={classes.paper}>
           <form className={classes.form} onSubmit={onFormSubmit}>
@@ -237,39 +221,15 @@ export function SignIn() {
               required
               fullWidth
               className={classes.textFieldBackground}
-              name="password"
-              type={login.showPassword ? "text" : "password"}
-              id="password"
+              name="recovery key"
+              id="recoveryKey"
               autoComplete="current-password"
-              value={login.password}
+              value={login.recoveryKey}
               onChange={handleChange}
-              placeholder="Password"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      edge="end"
-                    >
-                      <SVG
-                        src={
-                          require("../assets/show-or-hide-password.svg") as string
-                        }
-                        className={classes.svgSmall}
-                        fill={
-                          login.showPassword ? theme.palette.primary.main : null
-                        }
-                      />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
+              placeholder="Recovery Key"
             />
             <Typography className={classes.forgotPasswordText}>
-              <Link color="secondary" href="/recoveraccount">
-                Recover My Account
-              </Link>
+              * Your recovery key was provided to you when you first signed up
             </Typography>
 
             <div className={classes.submitDiv}>
@@ -286,47 +246,11 @@ export function SignIn() {
               <Typography className={classes.noAccountText}>
                 Don&apos;t have an account yet or been invited to a team?
               </Typography>
-              <Link color="secondary" href="/signup" variant="body2">
+              <Link color="secondary" href="/signup">
                 Sign Up
               </Link>
             </div>
           </form>
-
-          <Snackbar
-            open={open}
-            onClose={handleClose}
-            TransitionComponent={transition}
-          >
-            <SnackbarContent
-              className={classes.snackbar}
-              message={
-                <span>
-                  <SVG
-                    src={require(`../assets/warning.svg`) as string}
-                    className={classes.svgSmall}
-                  />
-
-                  <div className={classes.message}>
-                    {String(etebaseError).includes("Wrong password for user.")
-                      ? "Login Failed. Your username and/or password do not match"
-                      : "There was an error logging you in. Please try again"}
-                  </div>
-
-                  <IconButton
-                    size="small"
-                    aria-label="close"
-                    onClick={handleClose}
-                    className={classes.iconButton}
-                  >
-                    <SVG
-                      src={require(`../assets/close.svg`) as string}
-                      className={classes.svgSmallClose}
-                    />
-                  </IconButton>
-                </span>
-              }
-            />
-          </Snackbar>
         </div>
       </Container>
     </ThemeProvider>

@@ -18,6 +18,7 @@ import { Collection, DominateEtebase } from "@/etebase";
 import { SignIn } from "@/views/SignIn";
 import { SignUp } from "@/views/SignUp";
 import { Navbar } from "@/NavBar";
+import { RecoverAccount } from "@/views/RecoverAccount";
 import { ManageWrapper } from "@/ManageWrapper";
 import { AnnotateWrapper } from "@/AnnotateWrapper";
 import { Home } from "./Home";
@@ -52,15 +53,6 @@ const styles = {
   },
 };
 
-const HtmlTooltip = withStyles((t: Theme) => ({
-  tooltip: {
-    backgroundColor: theme.palette.primary.light,
-    fontSize: t.typography.pxToRem(12),
-    border: "1px solid #dadde9",
-    color: theme.palette.text.primary,
-  },
-}))(Tooltip);
-
 interface Props extends WithStyles<typeof styles> {
   etebaseInstance: DominateEtebase;
   // children?: Children;
@@ -81,21 +73,6 @@ class UserInterface extends Component<Props, State> {
     return (
       <BrowserRouter>
         <div className={classes.outerContainer}>
-          <Card className={classes.home} style={{ position: "fixed" }}>
-            <HtmlTooltip
-              title={<Typography>Return to Website</Typography>}
-              placement="bottom"
-            >
-              <Avatar className={classes.avatarSVG}>
-                <IconButton className={classes.iconButton}>
-                  <SVG
-                    src={require(`./assets/home.svg`) as string}
-                    className={classes.svgSmall}
-                  />
-                </IconButton>
-              </Avatar>
-            </HtmlTooltip>
-          </Card>
           <Routes>
             {window.location.pathname === "/signin" ||
             window.location.pathname === "/signup" ? (
@@ -135,6 +112,9 @@ class UserInterface extends Component<Props, State> {
             />
             <Route path="/">
               <Home />
+            </Route>
+            <Route path="/recoveraccount">
+              <RecoverAccount />
             </Route>
           </Routes>
         </div>

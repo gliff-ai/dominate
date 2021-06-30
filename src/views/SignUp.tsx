@@ -48,6 +48,14 @@ const useStyles = makeStyles(() => ({
     marginLeft: "auto",
     marginBottom: "187px",
   },
+  typogragphyTitle: {
+    width: "fit-content",
+    marginRight: "auto",
+    marginLeft: "auto",
+    marginBottom: "-40px",
+    fontSize: "34px",
+    fontWeight: 700,
+  },
   form: {
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1),
@@ -105,7 +113,10 @@ const useStyles = makeStyles(() => ({
   submit: {
     color: theme.palette.text.primary,
     marginBottom: "60px",
+    textTransform: "none",
     width: "169px",
+    fontWeight: 700,
+    fontSize: "15px",
   },
 }));
 
@@ -262,6 +273,11 @@ export const SignUp = (): JSX.Element => {
             height="148px"
           />
         </div>
+        <div>
+          <Typography className={classes.typogragphyTitle}>
+            Create an Account
+          </Typography>
+        </div>
         <div className={classes.paper}>
           <form className={classes.form} onSubmit={onSubmitForm}>
             <TextField
@@ -333,7 +349,7 @@ export const SignUp = (): JSX.Element => {
                 color="primary"
                 className={classes.submit}
               >
-                {loading ? <CircularProgress color="inherit" /> : "Sign Up"}
+                {loading ? <CircularProgress color="inherit" /> : "Next"}
               </Button>
             </div>
 
