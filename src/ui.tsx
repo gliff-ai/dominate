@@ -19,10 +19,11 @@ import SVG from "react-inlinesvg";
 import { Collection, DominateEtebase } from "@/etebase";
 import { SignIn } from "@/views/SignIn";
 import { SignUp } from "@/views/SignUp";
+import { RecoverAccount } from "@/views/RecoverAccounts";
 import { Navbar } from "@/NavBar";
-import { RecoverAccount } from "@/views/RecoverAccount";
 import { ManageWrapper } from "@/ManageWrapper";
 import { AnnotateWrapper } from "@/AnnotateWrapper";
+import { RequestRecoverAccount } from "@/views/RequestRecovery";
 import { Home } from "./Home";
 import { CurateWrapper } from "./CurateWrapper";
 import { RecoveryKey } from "./views/RecoveryKey";
@@ -116,6 +117,19 @@ class UserInterface extends Component<Props, State> {
                 element={
                   <ManageWrapper etebaseInstance={this.props.etebaseInstance} />
                 }
+              />
+              <Route
+                path="recover/*"
+                element={
+                  <RecoverAccount
+                    etebaseInstance={this.props.etebaseInstance}
+                  />
+                }
+              />
+
+              <Route
+                path="request-recover/*"
+                element={<RequestRecoverAccount />}
               />
               <Route path="/">
                 <Home />
