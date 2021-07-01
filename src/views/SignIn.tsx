@@ -74,7 +74,7 @@ const useStyles = makeStyles(() => ({
     background: theme.palette.primary.light,
   },
   snackbar: {
-    background: theme.palette.warning.light,
+    background: theme.palette.info.light,
   },
   svgSmall: {
     width: "22px",

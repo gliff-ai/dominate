@@ -34,11 +34,7 @@ const useStyles = makeStyles(() => ({
     marginBottom: "187px",
   },
 
-  form: {
-    width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
-  recoveryKeyParagraph: {
+  forgotPasswordText: {
     marginBottom: "44px",
     marginTop: "13px",
     color: theme.palette.text.secondary,
@@ -47,12 +43,7 @@ const useStyles = makeStyles(() => ({
     width: "519px",
   },
 
-  spanBold: {
-    fontWeight: "bold",
-    color: theme.palette.text.primary,
-  },
-
-  recoveryKeyText: {
+  typographyText: {
     marginBottom: "44px",
     marginTop: "13px",
     color: theme.palette.text.primary,
@@ -70,17 +61,22 @@ const useStyles = makeStyles(() => ({
     display: "inline",
     marginRight: "10px",
   },
-  home: {
-    height: "53px",
-    backgroundColor: theme.palette.primary.light,
-    width: "61px",
-    top: "22px",
-    right: "20px",
-  },
+
   submitDiv: {
     width: "fit-content",
     marginRight: "auto",
     marginLeft: "auto",
+  },
+  createATeamButton: {
+    backgroundColor: theme.palette.info.main,
+    marginBottom: "112px",
+    textTransform: "none",
+    fontWeight: 700,
+    fontSize: "15px",
+    width: "169px",
+    "&:hover": {
+      backgroundColor: "none",
+    },
   },
   typogragphyTitle: {
     width: "fit-content",
@@ -94,33 +90,7 @@ const useStyles = makeStyles(() => ({
   textFieldBackground: {
     background: theme.palette.primary.light,
   },
-  snackbar: {
-    background: theme.palette.info.light,
-  },
-  svgSmall: {
-    width: "22px",
-    height: "100%",
-    marginLeft: "7px",
-    marginRight: "9px",
-    marginTop: "0px",
-    marginBottom: "-4px",
-    fill: theme.palette.primary.light,
-  },
-  svgSmallClose: {
-    width: "15px",
-    height: "100%",
-    marginLeft: "11px",
-    marginRight: "0px",
-    marginTop: "-3px",
-    marginBottom: "0px",
-    fill: theme.palette.primary.light,
-  },
-  message: {
-    display: "inline-block",
-    marginRight: "5px",
-    marginLeft: "5px",
-    fontSize: "16px",
-  },
+
   haveAccount: {
     width: "fit-content",
     marginRight: "auto",
@@ -147,7 +117,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export function RecoveryKey() {
+export function TeamMembers() {
   const classes = useStyles();
 
   return (
@@ -164,36 +134,47 @@ export function RecoveryKey() {
       </div>
       <div>
         <Typography className={classes.typogragphyTitle}>
-          Recovery Key
+          Team Members
         </Typography>
       </div>
       <div className={classes.paper}>
+        <Typography className={classes.typographyText}>
+          Looks like someone has already invited you!{" "}
+        </Typography>
         <Card className={classes.card}>
           <Typography className={classes.cardTypography}>
             ghost-road-silver-3
           </Typography>
+          <Button style={{ backgroundColor: "white" }}>+</Button>
         </Card>
 
-        <Typography className={classes.recoveryKeyText}>
-          This is YOUR randomly generate recovery key.
-        </Typography>
-        <Typography className={classes.recoveryKeyParagraph}>
-          Please keep your recovery key stored in a safe place as this is the
-          <span className={classes.spanBold}> ONLY</span> time you will be
-          shown. We <span className={classes.spanBold}>DO NOT</span> store your
-          own recovery key, if you lose this we will be unable to recover your
-          data attached to the account.
+        <Typography className={classes.forgotPasswordText}>
+          Do you want to join their team? Just click the ADD button to accept
+          and you will automatically be connected to their team.
         </Typography>
 
-        <div className={classes.submitDiv}>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            I Understand
-          </Button>
+        <div style={{ display: "flex" }}>
+          <div className={classes.submitDiv}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              className={classes.createATeamButton}
+            >
+              Create a Team
+            </Button>
+          </div>
+
+          <div className={classes.submitDiv}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              Skip this Step
+            </Button>
+          </div>
         </div>
 
         <div className={classes.haveAccount}>

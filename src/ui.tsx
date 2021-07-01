@@ -26,6 +26,7 @@ import { AnnotateWrapper } from "@/AnnotateWrapper";
 import { Home } from "./Home";
 import { CurateWrapper } from "./CurateWrapper";
 import { RecoveryKey } from "./views/RecoveryKey";
+import { TeamMembers } from "./views/TeamMembers";
 
 const styles = {
   outerContainer: { height: "100%" },
@@ -124,6 +125,9 @@ class UserInterface extends Component<Props, State> {
               </Route>
               <Route path="/recoverykey">
                 <RecoveryKey />
+              </Route>
+              <Route path="/teammembers">
+                <TeamMembers />
               </Route>
             </Routes>
           </div>
