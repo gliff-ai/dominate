@@ -83,7 +83,6 @@ const useStyles = makeStyles(() => ({
     marginRight: "9px",
     marginTop: "0px",
     marginBottom: "-4px",
-    fill: theme.palette.primary.light,
   },
   svgSmallClose: {
     width: "15px",
@@ -267,7 +266,7 @@ export function SignIn() {
               }}
             />
             <Typography className={classes.forgotPasswordText}>
-              <Link color="secondary" href="/recoveraccount">
+              <Link color="secondary" href="/request-recover/*">
                 Recover My Account
               </Link>
             </Typography>

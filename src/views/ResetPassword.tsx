@@ -11,16 +11,11 @@ import {
   Snackbar,
   IconButton,
   InputAdornment,
-  SnackbarContent,
-  Slide,
-  SlideProps,
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { ThemeProvider, theme } from "@/theme";
 import SVG from "react-inlinesvg";
-
-type TransitionProps = Omit<SlideProps, "direction">;
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -44,11 +39,11 @@ const useStyles = makeStyles(() => ({
   forgotPasswordText: {
     marginBottom: "44px",
     marginTop: "13px",
-    color: theme.palette.text.secondary,
-    fontSize: 13,
-    width: "150%",
+    color: theme.palette.secondary.main,
+    textAlign: "right",
+    fontStyle: "italic",
   },
-  noAccount: {
+  noAccountDiv: {
     width: "200%",
     marginBottom: "187px",
   },
@@ -56,13 +51,7 @@ const useStyles = makeStyles(() => ({
     display: "inline",
     marginRight: "10px",
   },
-  home: {
-    height: "53px",
-    backgroundColor: theme.palette.primary.light,
-    width: "61px",
-    top: "22px",
-    right: "20px",
-  },
+
   submitDiv: {
     width: "fit-content",
     marginRight: "auto",
@@ -89,17 +78,8 @@ const useStyles = makeStyles(() => ({
     marginRight: "9px",
     marginTop: "0px",
     marginBottom: "-4px",
-    fill: theme.palette.primary.light,
   },
-  svgSmallClose: {
-    width: "15px",
-    height: "100%",
-    marginLeft: "11px",
-    marginRight: "0px",
-    marginTop: "-3px",
-    marginBottom: "0px",
-    fill: theme.palette.primary.light,
-  },
+
   message: {
     display: "inline-block",
     marginRight: "5px",
@@ -122,7 +102,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export function RecoverAccount() {
+export function ResetPassword() {
   const classes = useStyles();
   const auth = useAuth();
   const navigate = useNavigate();
@@ -130,23 +110,31 @@ export function RecoverAccount() {
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState("");
   const [etebaseError, setEtebaseError] = useState({});
-  const [login, setLogin] = useState({
-    email: "",
-    recoveryKey: "",
+  const [password, setPassword] = useState({
+    currentPassword: "",
+    newPassword: "",
+    showPassword: false,
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = event.target;
-    setLogin((prevState) => ({
+    setPassword((prevState) => ({
       ...prevState,
       [id]: value,
     }));
   };
 
+  const handleClickShowPassword = () => {
+    setPassword({
+      ...password,
+      showPassword: !password.showPassword,
+    });
+  };
+
   const validate = () => {
     let nameErrorMessage = "";
-    if (!login.email.includes("@")) {
-      nameErrorMessage = "Invalid email";
+    if (!password.currentPassword.includes("@")) {
+      nameErrorMessage = "Invalid currentPassword";
     }
     if (nameErrorMessage) {
       setNameError(nameErrorMessage);
@@ -162,14 +150,18 @@ export function RecoverAccount() {
     if (isValid) {
       setLoading(true);
       auth
-        .signin(login.email, login.recoveryKey)
+        .signin(password.currentPassword, password.newPassword)
         .then(() => {
           setLoading(false);
           navigate("home");
         })
         .catch((e) => {
           setLoading(false);
-          setLogin({ email: "", recoveryKey: "" });
+          setPassword({
+            currentPassword: "",
+            newPassword: "",
+            showPassword: false,
+          });
 
           if (e instanceof Error) {
             // eslint-disable-next-line no-console
@@ -194,7 +186,7 @@ export function RecoverAccount() {
         </div>
         <div>
           <Typography className={classes.typogragphyTitle}>
-            Recover my Account
+            Reset Password
           </Typography>
         </div>
         <div className={classes.paper}>
@@ -202,17 +194,40 @@ export function RecoverAccount() {
             <TextField
               variant="outlined"
               margin="normal"
-              className={classes.textFieldBackground}
               required
               fullWidth
-              id="email"
-              name="email"
-              autoComplete="email"
-              type="text"
+              className={classes.textFieldBackground}
+              name="currentPassword"
+              type={password.showPassword ? "text" : "password"}
+              id="currentPassword"
+              value={password.currentPassword}
               onChange={handleChange}
-              value={login.email}
-              placeholder="E-mail"
+              placeholder="New Password"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      edge="end"
+                    >
+                      <SVG
+                        src={
+                          require("../assets/show-or-hide-password.svg") as string
+                        }
+                        className={classes.svgSmall}
+                        fill={
+                          password.showPassword
+                            ? theme.palette.primary.main
+                            : null
+                        }
+                      />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
+
             <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
 
             <TextField
@@ -221,16 +236,36 @@ export function RecoverAccount() {
               required
               fullWidth
               className={classes.textFieldBackground}
-              name="recovery key"
-              id="recoveryKey"
-              autoComplete="current-password"
-              value={login.recoveryKey}
+              name="newPassword"
+              type={password.showPassword ? "text" : "password"}
+              id="newPassword"
+              value={password.newPassword}
               onChange={handleChange}
-              placeholder="Recovery Key"
+              placeholder="Confirm"
+              InputProps={{
+                endAdornment: (
+                  <InputAdornment position="end">
+                    <IconButton
+                      aria-label="toggle password visibility"
+                      onClick={handleClickShowPassword}
+                      edge="end"
+                    >
+                      <SVG
+                        src={
+                          require("../assets/show-or-hide-password.svg") as string
+                        }
+                        className={classes.svgSmall}
+                        fill={
+                          password.showPassword
+                            ? theme.palette.primary.main
+                            : null
+                        }
+                      />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+              }}
             />
-            <Typography className={classes.forgotPasswordText}>
-              * Your recovery key was provided to you when you first signed up
-            </Typography>
 
             <div className={classes.submitDiv}>
               <Button
@@ -239,14 +274,14 @@ export function RecoverAccount() {
                 color="primary"
                 className={classes.submit}
               >
-                {loading ? <CircularProgress color="inherit" /> : "Continue"}
+                Change Password
               </Button>
             </div>
-            <div className={classes.noAccount}>
+            <div className={classes.noAccountDiv}>
               <Typography className={classes.noAccountText}>
                 Don&apos;t have an account yet or been invited to a team?
               </Typography>
-              <Link color="secondary" href="/signup">
+              <Link color="secondary" href="/signup" variant="body2">
                 Sign Up
               </Link>
             </div>
