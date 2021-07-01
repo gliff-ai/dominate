@@ -19,7 +19,7 @@ import SVG from "react-inlinesvg";
 import { Collection, DominateEtebase } from "@/etebase";
 import { SignIn } from "@/views/SignIn";
 import { SignUp } from "@/views/SignUp";
-import { RecoverAccount } from "@/views/RecoverAccounts";
+import { RecoverAccount } from "@/views/RecoverAccount";
 import { Navbar } from "@/NavBar";
 import { ManageWrapper } from "@/ManageWrapper";
 import { AnnotateWrapper } from "@/AnnotateWrapper";
