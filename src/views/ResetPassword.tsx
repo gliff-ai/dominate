@@ -56,6 +56,7 @@ const useStyles = makeStyles(() => ({
     width: "fit-content",
     marginRight: "auto",
     marginLeft: "auto",
+    marginTop: "86px",
   },
   typogragphyTitle: {
     width: "fit-content",
@@ -68,9 +69,7 @@ const useStyles = makeStyles(() => ({
   textFieldBackground: {
     background: theme.palette.primary.light,
   },
-  snackbar: {
-    background: theme.palette.info.light,
-  },
+
   svgSmall: {
     width: "22px",
     height: "100%",
@@ -80,12 +79,6 @@ const useStyles = makeStyles(() => ({
     marginBottom: "-4px",
   },
 
-  message: {
-    display: "inline-block",
-    marginRight: "5px",
-    marginLeft: "5px",
-    fontSize: "16px",
-  },
   iconButton: {
     color: theme.palette.primary.light,
   },
@@ -108,7 +101,7 @@ export function ResetPassword() {
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
-  const [nameError, setNameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [etebaseError, setEtebaseError] = useState({});
   const [password, setPassword] = useState({
     currentPassword: "",
@@ -132,14 +125,11 @@ export function ResetPassword() {
   };
 
   const validate = () => {
-    let nameErrorMessage = "";
-    if (!password.currentPassword.includes("@")) {
-      nameErrorMessage = "Invalid currentPassword";
-    }
-    if (nameErrorMessage) {
-      setNameError(nameErrorMessage);
+    if (password.currentPassword !== password.newPassword) {
+      setPasswordError("Password do not match");
       return false;
     }
+
     return true;
   };
 
@@ -228,7 +218,7 @@ export function ResetPassword() {
               }}
             />
 
-            <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
+            <div style={{ color: "red", fontSize: 12 }}>{passwordError}</div>
 
             <TextField
               variant="outlined"
@@ -241,7 +231,7 @@ export function ResetPassword() {
               id="newPassword"
               value={password.newPassword}
               onChange={handleChange}
-              placeholder="Confirm"
+              placeholder="Confirm Password"
               InputProps={{
                 endAdornment: (
                   <InputAdornment position="end">
