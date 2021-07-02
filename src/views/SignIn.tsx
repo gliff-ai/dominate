@@ -197,137 +197,135 @@ export function SignIn() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
 
-        <div className={classes.logo}>
-          <img
-            src={require("../assets/gliff-web-master-black.svg") as string}
-            alt="gliff logo"
-            width="194px"
-            height="148px"
+      <div className={classes.logo}>
+        <img
+          src={require("../assets/gliff-web-master-black.svg") as string}
+          alt="gliff logo"
+          width="194px"
+          height="148px"
+        />
+      </div>
+      <div>
+        <Typography className={classes.typogragphyTitle}>Login</Typography>
+      </div>
+      <div className={classes.paper}>
+        <form className={classes.form} onSubmit={onFormSubmit}>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            className={classes.textFieldBackground}
+            required
+            fullWidth
+            id="email"
+            name="email"
+            autoComplete="email"
+            type="text"
+            onChange={handleChange}
+            value={login.email}
+            placeholder="E-mail"
           />
-        </div>
-        <div>
-          <Typography className={classes.typogragphyTitle}>Login</Typography>
-        </div>
-        <div className={classes.paper}>
-          <form className={classes.form} onSubmit={onFormSubmit}>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              className={classes.textFieldBackground}
-              required
-              fullWidth
-              id="email"
-              name="email"
-              autoComplete="email"
-              type="text"
-              onChange={handleChange}
-              value={login.email}
-              placeholder="E-mail"
-            />
-            <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
+          <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
 
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              className={classes.textFieldBackground}
-              name="password"
-              type={login.showPassword ? "text" : "password"}
-              id="password"
-              autoComplete="current-password"
-              value={login.password}
-              onChange={handleChange}
-              placeholder="Password"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      edge="end"
-                    >
-                      <SVG
-                        src={
-                          require("../assets/show-or-hide-password.svg") as string
-                        }
-                        className={classes.svgSmall}
-                        fill={
-                          login.showPassword ? theme.palette.primary.main : null
-                        }
-                      />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
-            <Typography className={classes.forgotPasswordText}>
-              <Link color="secondary" href="/request-recover/*">
-                Recover My Account
-              </Link>
-            </Typography>
-
-            <div className={classes.submitDiv}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-              >
-                {loading ? <CircularProgress color="inherit" /> : "Continue"}
-              </Button>
-            </div>
-            <div className={classes.noAccount}>
-              <Typography className={classes.noAccountText}>
-                Don&apos;t have an account yet or been invited to a team?
-              </Typography>
-              <Link color="secondary" href="/signup" variant="body2">
-                Sign Up
-              </Link>
-            </div>
-          </form>
-
-          <Snackbar
-            open={open}
-            onClose={handleClose}
-            TransitionComponent={transition}
-          >
-            <SnackbarContent
-              className={classes.snackbar}
-              message={
-                <span>
-                  <SVG
-                    src={require(`../assets/warning.svg`) as string}
-                    className={classes.svgSmall}
-                  />
-
-                  <div className={classes.message}>
-                    {String(etebaseError).includes("Wrong password for user.")
-                      ? "Login Failed. Your username and/or password do not match"
-                      : "There was an error logging you in. Please try again"}
-                  </div>
-
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            className={classes.textFieldBackground}
+            name="password"
+            type={login.showPassword ? "text" : "password"}
+            id="password"
+            autoComplete="current-password"
+            value={login.password}
+            onChange={handleChange}
+            placeholder="Password"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
                   <IconButton
-                    size="small"
-                    aria-label="close"
-                    onClick={handleClose}
-                    className={classes.iconButton}
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    edge="end"
                   >
                     <SVG
-                      src={require(`../assets/close.svg`) as string}
-                      className={classes.svgSmallClose}
+                      src={
+                        require("../assets/show-or-hide-password.svg") as string
+                      }
+                      className={classes.svgSmall}
+                      fill={
+                        login.showPassword ? theme.palette.primary.main : null
+                      }
                     />
                   </IconButton>
-                </span>
-              }
-            />
-          </Snackbar>
-        </div>
-      </Container>
-    </ThemeProvider>
+                </InputAdornment>
+              ),
+            }}
+          />
+          <Typography className={classes.forgotPasswordText}>
+            <Link color="secondary" href="/request-recover/*">
+              Recover My Account
+            </Link>
+          </Typography>
+
+          <div className={classes.submitDiv}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              {loading ? <CircularProgress color="inherit" /> : "Continue"}
+            </Button>
+          </div>
+          <div className={classes.noAccount}>
+            <Typography className={classes.noAccountText}>
+              Don&apos;t have an account yet or been invited to a team?
+            </Typography>
+            <Link color="secondary" href="/signup" variant="body2">
+              Sign Up
+            </Link>
+          </div>
+        </form>
+
+        <Snackbar
+          open={open}
+          onClose={handleClose}
+          TransitionComponent={transition}
+        >
+          <SnackbarContent
+            className={classes.snackbar}
+            message={
+              <span>
+                <SVG
+                  src={require(`../assets/warning.svg`) as string}
+                  className={classes.svgSmall}
+                />
+
+                <div className={classes.message}>
+                  {String(etebaseError).includes("Wrong password for user.")
+                    ? "Login Failed. Your username and/or password do not match"
+                    : "There was an error logging you in. Please try again"}
+                </div>
+
+                <IconButton
+                  size="small"
+                  aria-label="close"
+                  onClick={handleClose}
+                  className={classes.iconButton}
+                >
+                  <SVG
+                    src={require(`../assets/close.svg`) as string}
+                    className={classes.svgSmallClose}
+                  />
+                </IconButton>
+              </span>
+            }
+          />
+        </Snackbar>
+      </div>
+    </Container>
   );
 }

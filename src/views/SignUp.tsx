@@ -262,145 +262,143 @@ export const SignUp = (): JSX.Element => {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
-        <div className={classes.logo}>
-          <img
-            src={require("../assets/gliff-web-master-black.svg") as string}
-            alt="gliff logo"
-            width="194px"
-            height="148px"
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+      <div className={classes.logo}>
+        <img
+          src={require("../assets/gliff-web-master-black.svg") as string}
+          alt="gliff logo"
+          width="194px"
+          height="148px"
+        />
+      </div>
+      <div>
+        <Typography className={classes.typogragphyTitle}>
+          Create an Account
+        </Typography>
+      </div>
+      <div className={classes.paper}>
+        <form className={classes.form} onSubmit={onSubmitForm}>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            className={classes.textFieldBackground}
+            required
+            fullWidth
+            id="email"
+            name="email"
+            autoComplete="email"
+            autoFocus
+            type="email"
+            onChange={handleChange}
+            value={signUp.email}
+            placeholder="E-mail *"
           />
-        </div>
-        <div>
-          <Typography className={classes.typogragphyTitle}>
-            Create an Account
-          </Typography>
-        </div>
-        <div className={classes.paper}>
-          <form className={classes.form} onSubmit={onSubmitForm}>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              className={classes.textFieldBackground}
-              required
-              fullWidth
-              id="email"
-              name="email"
-              autoComplete="email"
-              autoFocus
-              type="email"
-              onChange={handleChange}
-              value={signUp.email}
-              placeholder="E-mail *"
-            />
-            <div style={{ color: "red", fontSize: 12 }}>{emailError}</div>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              className={classes.textFieldBackground}
-              required
-              fullWidth
-              id="name"
-              name="name"
-              autoComplete="full_name"
-              type="text"
-              onChange={handleChange}
-              value={signUp.name}
-              placeholder="Name *"
-            />
-            <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              className={classes.textFieldBackground}
-              required
-              fullWidth
-              name="password"
-              type="password"
-              id="password"
-              autoComplete="current-password"
-              value={signUp.password}
-              onChange={handleChange}
-              placeholder="Password *"
-            />
+          <div style={{ color: "red", fontSize: 12 }}>{emailError}</div>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            className={classes.textFieldBackground}
+            required
+            fullWidth
+            id="name"
+            name="name"
+            autoComplete="full_name"
+            type="text"
+            onChange={handleChange}
+            value={signUp.name}
+            placeholder="Name *"
+          />
+          <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            className={classes.textFieldBackground}
+            required
+            fullWidth
+            name="password"
+            type="password"
+            id="password"
+            autoComplete="current-password"
+            value={signUp.password}
+            onChange={handleChange}
+            placeholder="Password *"
+          />
 
-            <TextField
-              variant="outlined"
-              margin="normal"
-              className={classes.textFieldBackground}
-              required
+          <TextField
+            variant="outlined"
+            margin="normal"
+            className={classes.textFieldBackground}
+            required
+            fullWidth
+            name="confirmPassword"
+            type="password"
+            id="confirmPassword"
+            autoComplete="current-password"
+            value={signUp.confirmPassword}
+            onChange={handleChange}
+            placeholder="Confirm Password *"
+          />
+          <div style={{ color: "red", fontSize: 12 }}>{passwordError}</div>
+          <div className={classes.submitDiv}>
+            <Button
+              type="submit"
               fullWidth
-              name="confirmPassword"
-              type="password"
-              id="confirmPassword"
-              autoComplete="current-password"
-              value={signUp.confirmPassword}
-              onChange={handleChange}
-              placeholder="Confirm Password *"
-            />
-            <div style={{ color: "red", fontSize: 12 }}>{passwordError}</div>
-            <div className={classes.submitDiv}>
-              <Button
-                type="submit"
-                fullWidth
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-              >
-                {loading ? <CircularProgress color="inherit" /> : "Next"}
-              </Button>
-            </div>
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              {loading ? <CircularProgress color="inherit" /> : "Next"}
+            </Button>
+          </div>
 
-            <div className={classes.haveAccount}>
-              <Typography className={classes.haveAccountText}>
-                Already have an account?
-              </Typography>
-              <Link color="secondary" href="/signin" variant="body2">
-                Sign In
-              </Link>
-            </div>
-          </form>
+          <div className={classes.haveAccount}>
+            <Typography className={classes.haveAccountText}>
+              Already have an account?
+            </Typography>
+            <Link color="secondary" href="/signin" variant="body2">
+              Sign In
+            </Link>
+          </div>
+        </form>
 
-          <Snackbar
-            open={open}
-            onClose={handleClose}
-            TransitionComponent={transition}
-          >
-            <SnackbarContent
-              className={classes.snackbar}
-              message={
-                <span>
+        <Snackbar
+          open={open}
+          onClose={handleClose}
+          TransitionComponent={transition}
+        >
+          <SnackbarContent
+            className={classes.snackbar}
+            message={
+              <span>
+                <SVG
+                  src={require(`../assets/warning.svg`) as string}
+                  className={classes.svgSmall}
+                />
+
+                <div className={classes.message}>
+                  {/* Looks like that account already exists, try another email! */}
+                  {String(etebaseError).includes("duplicate key")
+                    ? "Looks like that account already exists, try another email!"
+                    : "There was an error creating an account"}
+                </div>
+
+                <IconButton
+                  size="small"
+                  aria-label="close"
+                  onClick={handleClose}
+                  className={classes.iconButton}
+                >
                   <SVG
-                    src={require(`../assets/warning.svg`) as string}
-                    className={classes.svgSmall}
+                    src={require(`../assets/close.svg`) as string}
+                    className={classes.svgSmallClose}
                   />
-
-                  <div className={classes.message}>
-                    {/* Looks like that account already exists, try another email! */}
-                    {String(etebaseError).includes("duplicate key")
-                      ? "Looks like that account already exists, try another email!"
-                      : "There was an error creating an account"}
-                  </div>
-
-                  <IconButton
-                    size="small"
-                    aria-label="close"
-                    onClick={handleClose}
-                    className={classes.iconButton}
-                  >
-                    <SVG
-                      src={require(`../assets/close.svg`) as string}
-                      className={classes.svgSmallClose}
-                    />
-                  </IconButton>
-                </span>
-              }
-            />
-          </Snackbar>
-        </div>
-      </Container>
-    </ThemeProvider>
+                </IconButton>
+              </span>
+            }
+          />
+        </Snackbar>
+      </div>
+    </Container>
   );
 };

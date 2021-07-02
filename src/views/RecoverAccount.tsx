@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { getRecoverySession } from "@/services/user";
 import { DominateEtebase } from "@/etebase";
-import { ThemeProvider, theme } from "@/theme";
+import { theme } from "@/theme";
 
 import {
   Button,
@@ -14,12 +14,6 @@ import {
   makeStyles,
   Container,
   CircularProgress,
-  Snackbar,
-  IconButton,
-  InputAdornment,
-  SnackbarContent,
-  Slide,
-  SlideProps,
 } from "@material-ui/core";
 
 const useStyles = makeStyles(() => ({
@@ -184,78 +178,76 @@ export const RecoverAccount = (props: Props): JSX.Element => {
   }
 
   return (
-    <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
 
-        <div className={classes.logo}>
-          <img
-            src={require("../assets/gliff-web-master-black.svg") as string}
-            alt="gliff logo"
-            width="194px"
-            height="148px"
+      <div className={classes.logo}>
+        <img
+          src={require("../assets/gliff-web-master-black.svg") as string}
+          alt="gliff logo"
+          width="194px"
+          height="148px"
+        />
+      </div>
+
+      <div>
+        <Typography className={classes.typogragphyTitle}>
+          Recover my Account
+        </Typography>
+      </div>
+
+      <div className={classes.paper}>
+        <form className={classes.form} onSubmit={onSubmitForm}>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            className={classes.textFieldBackground}
+            required
+            fullWidth
+            name="recoveryKey"
+            type="text"
+            onChange={handleChange}
+            value={recover.recoveryKey}
+            placeholder="Recovery Key"
           />
-        </div>
-
-        <div>
-          <Typography className={classes.typogragphyTitle}>
-            Recover my Account
+          <TextField
+            variant="outlined"
+            margin="normal"
+            type="password"
+            required
+            fullWidth
+            className={classes.textFieldBackground}
+            name="recovery key"
+            id="recoveryKey"
+            autoComplete="current-password"
+            value={recover.newPassword}
+            onChange={handleChange}
+            placeholder="New Password"
+          />
+          <Typography className={classes.forgotPasswordText}>
+            * Your recovery key was provided to you when you first signed up
           </Typography>
-        </div>
-
-        <div className={classes.paper}>
-          <form className={classes.form} onSubmit={onSubmitForm}>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              className={classes.textFieldBackground}
-              required
-              fullWidth
-              name="recoveryKey"
-              type="text"
-              onChange={handleChange}
-              value={recover.recoveryKey}
-              placeholder="Recovery Key"
-            />
-            <TextField
-              variant="outlined"
-              margin="normal"
-              type="password"
-              required
-              fullWidth
-              className={classes.textFieldBackground}
-              name="recovery key"
-              id="recoveryKey"
-              autoComplete="current-password"
-              value={recover.newPassword}
-              onChange={handleChange}
-              placeholder="New Password"
-            />
-            <Typography className={classes.forgotPasswordText}>
-              * Your recovery key was provided to you when you first signed up
+          <div className={classes.submitDiv}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              {loading ? <CircularProgress color="inherit" /> : "Continue"}
+            </Button>
+            <div style={{ color: "red", fontSize: 12 }}>{recoveryError}</div>
+          </div>
+          <div className={classes.noAccount}>
+            <Typography className={classes.noAccountText}>
+              Don&apos;t have an account yet or been invited to a team?
             </Typography>
-            <div className={classes.submitDiv}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-              >
-                {loading ? <CircularProgress color="inherit" /> : "Continue"}
-              </Button>
-              <div style={{ color: "red", fontSize: 12 }}>{recoveryError}</div>
-            </div>
-            <div className={classes.noAccount}>
-              <Typography className={classes.noAccountText}>
-                Don&apos;t have an account yet or been invited to a team?
-              </Typography>
-              <Link color="secondary" href="/signup">
-                Sign Up
-              </Link>
-            </div>
-          </form>
-        </div>
-      </Container>
-    </ThemeProvider>
+            <Link color="secondary" href="/signup">
+              Sign Up
+            </Link>
+          </div>
+        </form>
+      </div>
+    </Container>
   );
 };
