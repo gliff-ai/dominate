@@ -7,8 +7,11 @@ import {
   makeStyles,
   Container,
   Card,
+  IconButton,
+  Avatar,
 } from "@material-ui/core";
 import { theme } from "@/theme";
+import SVG from "react-inlinesvg";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -21,11 +24,13 @@ const useStyles = makeStyles(() => ({
     width: "519px",
     height: "67px",
     border: "4px solid white",
+    display: "flex",
   },
 
   cardTypography: {
     textAlign: "center",
     padding: "19px 0",
+    width: "60%",
   },
   logo: {
     width: "fit-content",
@@ -35,12 +40,23 @@ const useStyles = makeStyles(() => ({
   },
 
   forgotPasswordText: {
-    marginBottom: "44px",
-    marginTop: "13px",
+    marginTop: "38px",
     color: theme.palette.text.secondary,
     fontSize: 13,
     textAlign: "center",
     width: "519px",
+  },
+
+  buttons: {
+    display: "flex",
+    gap: "25px",
+  },
+
+  text: {
+    marginBottom: "26px",
+    marginTop: "26px",
+    color: theme.palette.text.secondary,
+    fontSize: 13,
   },
 
   typographyText: {
@@ -115,6 +131,12 @@ const useStyles = makeStyles(() => ({
       backgroundColor: "none",
     },
   },
+  svgMedium: {
+    width: "22px",
+    height: "100%",
+    marginLeft: "-1px",
+    backgroundColor: theme.palette.primary.light,
+  },
 }));
 
 export function TeamMembers() {
@@ -145,15 +167,21 @@ export function TeamMembers() {
           <Typography className={classes.cardTypography}>
             ghost-road-silver-3
           </Typography>
-          <Button style={{ backgroundColor: "white" }}>+</Button>
+          <IconButton className={classes.iconButton}>
+            <Avatar variant="circular">
+              <SVG
+                src={require(`../assets/add.svg`) as string}
+                className={classes.svgMedium}
+              />
+            </Avatar>
+          </IconButton>
         </Card>
-
         <Typography className={classes.forgotPasswordText}>
           Do you want to join their team? Just click the ADD button to accept
           and you will automatically be connected to their team.
         </Typography>
-
-        <div style={{ display: "flex" }}>
+        <Typography className={classes.text}>- or -</Typography>
+        <div className={classes.buttons}>
           <div className={classes.submitDiv}>
             <Button
               type="submit"
@@ -176,7 +204,6 @@ export function TeamMembers() {
             </Button>
           </div>
         </div>
-
         <div className={classes.haveAccount}>
           <Typography className={classes.haveAccountText}>
             Already have an account?
