@@ -8,13 +8,12 @@ import {
   makeStyles,
   Container,
   CircularProgress,
-  Snackbar,
   IconButton,
   InputAdornment,
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
-import { ThemeProvider, theme } from "@/theme";
+import { theme } from "@/theme";
 import SVG from "react-inlinesvg";
 
 const useStyles = makeStyles(() => ({
@@ -105,8 +104,9 @@ export function ResetPassword() {
   const [etebaseError, setEtebaseError] = useState({});
   const [password, setPassword] = useState({
     currentPassword: "",
-    newPassword: "",
-    showPassword: false,
+    confirmPassword: "",
+    showCurrentPassword: false,
+    showConfirmPassword: false,
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -117,15 +117,24 @@ export function ResetPassword() {
     }));
   };
 
-  const handleClickShowPassword = () => {
-    setPassword({
-      ...password,
-      showPassword: !password.showPassword,
-    });
+  const handleClickShowPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    if (event.currentTarget.id === "currentPassword") {
+      setPassword({
+        ...password,
+        showCurrentPassword: !password.showCurrentPassword,
+      });
+    } else {
+      setPassword({
+        ...password,
+        showConfirmPassword: !password.showConfirmPassword,
+      });
+    }
   };
 
   const validate = () => {
-    if (password.currentPassword !== password.newPassword) {
+    if (password.currentPassword !== password.confirmPassword) {
       setPasswordError("Password do not match");
       return false;
     }
@@ -140,7 +149,7 @@ export function ResetPassword() {
     if (isValid) {
       setLoading(true);
       auth
-        .signin(password.currentPassword, password.newPassword)
+        .signin(password.currentPassword, password.confirmPassword)
         .then(() => {
           setLoading(false);
           navigate("home");
@@ -149,8 +158,9 @@ export function ResetPassword() {
           setLoading(false);
           setPassword({
             currentPassword: "",
-            newPassword: "",
-            showPassword: false,
+            confirmPassword: "",
+            showCurrentPassword: false,
+            showConfirmPassword: false,
           });
 
           if (e instanceof Error) {
@@ -162,122 +172,123 @@ export function ResetPassword() {
   };
 
   return (
-    <ThemeProvider theme={theme}>
-      <Container component="main" maxWidth="xs">
-        <CssBaseline />
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
 
-        <div className={classes.logo}>
-          <img
-            src={require("../assets/gliff-web-master-black.svg") as string}
-            alt="gliff logo"
-            width="194px"
-            height="148px"
+      <div className={classes.logo}>
+        <img
+          src={require("../assets/gliff-web-master-black.svg") as string}
+          alt="gliff logo"
+          width="194px"
+          height="148px"
+        />
+      </div>
+      <div>
+        <Typography className={classes.typogragphyTitle}>
+          Reset Password
+        </Typography>
+      </div>
+      <div className={classes.paper}>
+        <form className={classes.form} onSubmit={onFormSubmit}>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            className={classes.textFieldBackground}
+            name="currentPassword"
+            type={password.showCurrentPassword ? "text" : "password"}
+            id="currentPassword"
+            value={password.currentPassword}
+            onChange={handleChange}
+            placeholder="New Password"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                    id="currentPassword"
+                  >
+                    <SVG
+                      src={
+                        require("../assets/show-or-hide-password.svg") as string
+                      }
+                      className={classes.svgSmall}
+                      id="currentPassword"
+                      fill={
+                        password.showCurrentPassword
+                          ? theme.palette.primary.main
+                          : null
+                      }
+                    />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
-        </div>
-        <div>
-          <Typography className={classes.typogragphyTitle}>
-            Reset Password
-          </Typography>
-        </div>
-        <div className={classes.paper}>
-          <form className={classes.form} onSubmit={onFormSubmit}>
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              className={classes.textFieldBackground}
-              name="currentPassword"
-              type={password.showPassword ? "text" : "password"}
-              id="currentPassword"
-              value={password.currentPassword}
-              onChange={handleChange}
-              placeholder="New Password"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      edge="end"
-                    >
-                      <SVG
-                        src={
-                          require("../assets/show-or-hide-password.svg") as string
-                        }
-                        className={classes.svgSmall}
-                        fill={
-                          password.showPassword
-                            ? theme.palette.primary.main
-                            : null
-                        }
-                      />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
 
-            <div style={{ color: "red", fontSize: 12 }}>{passwordError}</div>
+          <div style={{ color: "red", fontSize: 12 }}>{passwordError}</div>
 
-            <TextField
-              variant="outlined"
-              margin="normal"
-              required
-              fullWidth
-              className={classes.textFieldBackground}
-              name="newPassword"
-              type={password.showPassword ? "text" : "password"}
-              id="newPassword"
-              value={password.newPassword}
-              onChange={handleChange}
-              placeholder="Confirm Password"
-              InputProps={{
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton
-                      aria-label="toggle password visibility"
-                      onClick={handleClickShowPassword}
-                      edge="end"
-                    >
-                      <SVG
-                        src={
-                          require("../assets/show-or-hide-password.svg") as string
-                        }
-                        className={classes.svgSmall}
-                        fill={
-                          password.showPassword
-                            ? theme.palette.primary.main
-                            : null
-                        }
-                      />
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              }}
-            />
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            className={classes.textFieldBackground}
+            name="confirmPassword"
+            type={password.showConfirmPassword ? "text" : "password"}
+            id="confirmPassword"
+            value={password.confirmPassword}
+            onChange={handleChange}
+            placeholder="Confirm Password"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                  >
+                    <SVG
+                      src={
+                        require("../assets/show-or-hide-password.svg") as string
+                      }
+                      className={classes.svgSmall}
+                      id="confirmPassword"
+                      fill={
+                        password.showConfirmPassword
+                          ? theme.palette.primary.main
+                          : null
+                      }
+                    />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
+          />
 
-            <div className={classes.submitDiv}>
-              <Button
-                type="submit"
-                variant="contained"
-                color="primary"
-                className={classes.submit}
-              >
-                Change Password
-              </Button>
-            </div>
-            <div className={classes.noAccountDiv}>
-              <Typography className={classes.noAccountText}>
-                Don&apos;t have an account yet or been invited to a team?
-              </Typography>
-              <Link color="secondary" href="/signup" variant="body2">
-                Sign Up
-              </Link>
-            </div>
-          </form>
-        </div>
-      </Container>
-    </ThemeProvider>
+          <div className={classes.submitDiv}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              Change Password
+            </Button>
+          </div>
+          <div className={classes.noAccountDiv}>
+            <Typography className={classes.noAccountText}>
+              Don&apos;t have an account yet or been invited to a team?
+            </Typography>
+            <Link color="secondary" href="/signup" variant="body2">
+              Sign Up
+            </Link>
+          </div>
+        </form>
+      </div>
+    </Container>
   );
 }
