@@ -1,7 +1,6 @@
 import {
   AppBar,
   Avatar,
-  Card,
   Grid,
   IconButton,
   makeStyles,
@@ -144,7 +143,7 @@ export const Navbar = (): ReactElement => {
                     </HtmlTooltip>
                   </Link>
                   &nbsp;
-                  <Link to="/manage">
+                  <Link to="/manage/projects">
                     <HtmlTooltip
                       title={<Typography color="inherit">MANAGE</Typography>}
                       placement="top"
@@ -193,7 +192,6 @@ export const Navbar = (): ReactElement => {
                         className={classes.svgMedium}
                       />
                       Account Settings
-                      {/* {auth.user.username} */}
                     </MenuItem>
                     <MenuItem
                       className={classes.menuItem}

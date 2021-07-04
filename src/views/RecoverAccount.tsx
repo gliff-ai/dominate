@@ -217,9 +217,9 @@ export const RecoverAccount = (props: Props): JSX.Element => {
             required
             fullWidth
             className={classes.textFieldBackground}
-            name="recovery key"
-            id="recoveryKey"
-            autoComplete="current-password"
+            name="newPassword"
+            id="newPassword"
+            autoComplete="new-password"
             value={recover.newPassword}
             onChange={handleChange}
             placeholder="New Password"
