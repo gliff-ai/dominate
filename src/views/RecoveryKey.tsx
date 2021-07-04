@@ -147,7 +147,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export function RecoveryKey() {
+export function RecoveryKey(): JSX.Element {
   const classes = useStyles();
 
   return (

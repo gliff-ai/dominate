@@ -115,7 +115,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export function SignIn() {
+export function SignIn(): JSX.Element {
   const classes = useStyles();
   const auth = useAuth();
   const navigate = useNavigate();

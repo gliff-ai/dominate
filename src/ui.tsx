@@ -28,6 +28,8 @@ import { Home } from "./Home";
 import { CurateWrapper } from "./CurateWrapper";
 import { RecoveryKey } from "./views/RecoveryKey";
 import { TeamMembers } from "./views/TeamMembers";
+import { Account } from "./views/Account";
+
 import { ResetPassword } from "./views/ResetPassword";
 
 const styles = {
@@ -149,7 +151,7 @@ class UserInterface extends Component<Props, State> {
               </Route>
 
               <Route path="/account">
-                <ResetPassword />
+                <Account />
               </Route>
             </Routes>
           </div>

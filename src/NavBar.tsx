@@ -180,6 +180,7 @@ export const Navbar = (): ReactElement => {
                     <Paper className={classes.paper}>
                       <Avatar className={classes.avatar}>H</Avatar>
                       {auth.user.username}
+                      <Link to="/account">{auth.user.username}</Link>
                     </Paper>
                     <MenuItem
                       className={classes.menuItem}
