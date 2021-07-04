@@ -116,7 +116,7 @@ export const Navbar = (): ReactElement => {
                     </HtmlTooltip>
                   </Link>
                   &nbsp;
-                  <Link to="/manage">
+                  <Link to="/manage/projects">
                     {" "}
                     <HtmlTooltip
                       title={<Typography color="inherit">MANAGE</Typography>}
