@@ -1,8 +1,13 @@
 import {
   AppBar,
   Avatar,
+  Card,
   Grid,
+  IconButton,
   makeStyles,
+  Menu,
+  MenuItem,
+  Paper,
   Theme,
   Toolbar,
   Tooltip,
@@ -30,12 +35,26 @@ const useStyles = makeStyles(() => ({
     marginLeft: "-1px",
   },
 
+  paper: {
+    borderRadius: 0,
+    border: "none",
+    boxShadow: "none",
+    display: "inline-flex",
+  },
+
   avatar: {
     width: "64px",
     height: "64px",
     backgroundColor: theme.palette.text.secondary,
     "&:hover": {
       backgroundColor: theme.palette.text.secondary,
+    },
+  },
+
+  menuItem: {
+    opacity: "1",
+    "&:hover": {
+      background: theme.palette.primary.main,
     },
   },
 
@@ -71,6 +90,15 @@ export const Navbar = (): ReactElement => {
   const auth = useAuth();
   const navigate = useNavigate();
   const classes = useStyles();
+
+  const [anchorElement, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+    setAnchorEl(event.currentTarget);
+  };
+
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
 
   return (
     <AppBar position="fixed" className={classes.appBar} elevation={0}>
@@ -117,7 +145,6 @@ export const Navbar = (): ReactElement => {
                   </Link>
                   &nbsp;
                   <Link to="/manage">
-                    {" "}
                     <HtmlTooltip
                       title={<Typography color="inherit">MANAGE</Typography>}
                       placement="top"
@@ -131,7 +158,56 @@ export const Navbar = (): ReactElement => {
                     </HtmlTooltip>
                   </Link>
                   &nbsp;
-                  <Avatar className={classes.avatar}>H</Avatar>
+                  <IconButton onClick={handleClick} aria-controls="menu">
+                    <HtmlTooltip
+                      title={<Typography color="inherit">Account</Typography>}
+                      placement="top"
+                    >
+                      <Avatar className={classes.avatar}>H</Avatar>
+                    </HtmlTooltip>
+                  </IconButton>
+                  <Menu
+                    anchorEl={anchorElement}
+                    keepMounted
+                    open={Boolean(anchorElement)}
+                    onClose={handleClose}
+                    id="menu"
+                    style={{ marginTop: "80px" }}
+                    transformOrigin={{
+                      vertical: "top",
+                      horizontal: "right",
+                    }}
+                  >
+                    <Paper className={classes.paper}>
+                      <Avatar className={classes.avatar}>H</Avatar>
+                      {auth.user.username}
+                    </Paper>
+                    <MenuItem
+                      className={classes.menuItem}
+                      onClick={() => {
+                        <Link to="/account" />;
+                      }}
+                    >
+                      <SVG
+                        src={require(`./assets/account-settings.svg`) as string}
+                        className={classes.svgMedium}
+                      />
+                      Account Settings
+                      {/* {auth.user.username} */}
+                    </MenuItem>
+                    <MenuItem
+                      className={classes.menuItem}
+                      onClick={() =>
+                        auth.signout().then(() => navigate("signin"))
+                      }
+                    >
+                      <SVG
+                        src={require(`./assets/log-out.svg`) as string}
+                        className={classes.svgMedium}
+                      />
+                      Log out
+                    </MenuItem>
+                  </Menu>
                   {/* <Link to="/account">{auth.user.username}</Link>
                   &nbsp;
                   <button

@@ -39,6 +39,14 @@ const theme: Theme = createMuiTheme({
         },
       },
     },
+
+    MuiPaper: {
+      root: {
+        backgroundColor: "#FFFFFF",
+        width: "313px",
+      },
+    },
+
     MuiCssBaseline: {
       "@global": {
         body: {
@@ -88,12 +96,6 @@ const theme: Theme = createMuiTheme({
     MuiCollapse: {
       container: {
         backgroundColor: "#ffffff",
-      },
-    },
-
-    MuiPaper: {
-      root: {
-        backgroundColor: "transparent",
       },
     },
 

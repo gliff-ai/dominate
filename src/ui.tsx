@@ -87,6 +87,7 @@ class UserInterface extends Component<Props, State> {
               ) : (
                 <Navbar />
               )}
+              <Navbar />
               <Route path="/signin">
                 <SignIn />
               </Route>
@@ -144,6 +145,10 @@ class UserInterface extends Component<Props, State> {
               </Route>
 
               <Route path="/resetpassword">
+                <ResetPassword />
+              </Route>
+
+              <Route path="/account">
                 <ResetPassword />
               </Route>
             </Routes>
