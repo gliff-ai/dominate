@@ -62,9 +62,9 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
-    "@gliff-ai/annotate": "^0.13.0",
-    "@gliff-ai/curate": "^0.11.2",
-    "@gliff-ai/manage": "^0.2.37",
+    "@gliff-ai/annotate": "^0.13.10",
+    "@gliff-ai/curate": "^0.11.15",
+    "@gliff-ai/manage": "^0.2.43",
     "@gliff-ai/upload": "^0.1.13",
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
