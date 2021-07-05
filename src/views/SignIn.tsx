@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Button,
   CssBaseline,
@@ -122,7 +122,7 @@ export function SignIn(): JSX.Element {
   const [open, setOpen] = useState(false);
 
   const [transition, setTransition] =
-    React.useState<React.ComponentType<TransitionProps> | undefined>(undefined);
+    useState<React.ComponentType<TransitionProps> | undefined>(undefined);
 
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState("");

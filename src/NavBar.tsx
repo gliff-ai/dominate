@@ -14,7 +14,7 @@ import {
   Typography,
   withStyles,
 } from "@material-ui/core";
-import React, { ReactElement } from "react";
+import { ReactElement, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { theme } from "@/theme";
 import SVG from "react-inlinesvg";
@@ -97,7 +97,7 @@ export const Navbar = (): ReactElement => {
   const navigate = useNavigate();
   const classes = useStyles();
 
-  const [anchorElement, setAnchorEl] = React.useState<null | HTMLElement>(null);
+  const [anchorElement, setAnchorEl] = useState<null | HTMLElement>(null);
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };

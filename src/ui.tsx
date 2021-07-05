@@ -1,4 +1,4 @@
-import React, { Component, ReactElement, ReactNode } from "react";
+import { Component, ReactElement, ReactNode } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ThemeProvider, WithStyles, withStyles } from "@material-ui/core";
 import { theme } from "@/theme";
