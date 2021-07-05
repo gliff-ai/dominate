@@ -143,8 +143,6 @@ export const SignUp = (): JSX.Element => {
   const [etebaseError, setEtebaseError] = useState({});
   const [recoveryKey, setRecoveryKey] = useState<string[] | null>(null);
 
-  // const [redirect, setRedirect] = useState(false);
-
   const [signUp, setSignUp] = useState({
     name: "",
     email: "",
@@ -204,13 +202,7 @@ export const SignUp = (): JSX.Element => {
     setOpen(false);
   };
 
-  // useEffect(() => {
-  //   if (redirect) {
-  //     redirectUser();
-  //   }
-  // }, [redirect]);
-
-  const redirectUser = async () => {
+  const redirectUser = async (): Promise<void> => {
     try {
       const instance = auth.getInstance();
 
