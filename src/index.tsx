@@ -1,5 +1,4 @@
 import ReactDOM from "react-dom";
-import React from "react";
 
 import { ProvideAuth } from "@/hooks/use-auth";
 import UserInterface from "@/ui";

@@ -13,7 +13,7 @@ import {
   Typography,
   withStyles,
 } from "@material-ui/core";
-import React, { ReactElement } from "react";
+import { ReactElement } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { theme } from "@/theme";
 import SVG from "react-inlinesvg";
