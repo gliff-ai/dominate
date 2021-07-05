@@ -1,9 +1,11 @@
-import React, { useState } from "react";
+import React, { ReactElement, useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+import SVG from "react-inlinesvg";
+
 import {
   Button,
   CssBaseline,
   TextField,
-  Link,
   Typography,
   makeStyles,
   Container,
@@ -12,9 +14,8 @@ import {
   InputAdornment,
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
-import { useNavigate } from "react-router-dom";
 import { theme } from "@/theme";
-import SVG from "react-inlinesvg";
+import { DominateEtebase } from "@/etebase";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -94,18 +95,23 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export function ResetPassword() {
+interface Props {
+  etebaseInstance: DominateEtebase;
+}
+
+export const ResetPassword = (props: Props): ReactElement => {
   const classes = useStyles();
   const auth = useAuth();
+
   const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [etebaseError, setEtebaseError] = useState({});
   const [password, setPassword] = useState({
-    currentPassword: "",
+    newPassword: "",
     confirmPassword: "",
-    showCurrentPassword: false,
+    showNewPassword: false,
     showConfirmPassword: false,
   });
 
@@ -120,10 +126,10 @@ export function ResetPassword() {
   const handleClickShowPassword = (
     event: React.MouseEvent<HTMLButtonElement>
   ) => {
-    if (event.currentTarget.id === "currentPassword") {
+    if (event.currentTarget.id === "newPassword") {
       setPassword({
         ...password,
-        showCurrentPassword: !password.showCurrentPassword,
+        showNewPassword: !password.showNewPassword,
       });
     } else {
       setPassword({
@@ -134,8 +140,8 @@ export function ResetPassword() {
   };
 
   const validate = () => {
-    if (password.currentPassword !== password.confirmPassword) {
-      setPasswordError("Password do not match");
+    if (password.newPassword !== password.confirmPassword) {
+      setPasswordError("Passwords do not match");
       return false;
     }
 
@@ -149,27 +155,31 @@ export function ResetPassword() {
     if (isValid) {
       setLoading(true);
       auth
-        .signin(password.currentPassword, password.confirmPassword)
+        .changePassword(password.newPassword)
         .then(() => {
           setLoading(false);
-          navigate("home");
+          // TODO: toast to say success!
+          setTimeout(() => navigate("/signin"), 3000);
         })
         .catch((e) => {
           setLoading(false);
           setPassword({
-            currentPassword: "",
+            newPassword: "",
             confirmPassword: "",
-            showCurrentPassword: false,
+            showNewPassword: false,
             showConfirmPassword: false,
           });
 
           if (e instanceof Error) {
-            // eslint-disable-next-line no-console
             setEtebaseError(e.message);
           }
         });
     }
   };
+
+  if (!props.etebaseInstance || !auth.user) {
+    return <Navigate to="/signin" />;
+  }
 
   return (
     <Container component="main" maxWidth="xs">
@@ -185,7 +195,7 @@ export function ResetPassword() {
       </div>
       <div>
         <Typography className={classes.typogragphyTitle}>
-          Reset Password
+          Change Password
         </Typography>
       </div>
       <div className={classes.paper}>
@@ -196,10 +206,10 @@ export function ResetPassword() {
             required
             fullWidth
             className={classes.textFieldBackground}
-            name="currentPassword"
-            type={password.showCurrentPassword ? "text" : "password"}
-            id="currentPassword"
-            value={password.currentPassword}
+            name="newPassword"
+            type={password.showNewPassword ? "text" : "password"}
+            id="newPassword"
+            value={password.newPassword}
             onChange={handleChange}
             placeholder="New Password"
             InputProps={{
@@ -209,16 +219,16 @@ export function ResetPassword() {
                     aria-label="toggle password visibility"
                     onClick={handleClickShowPassword}
                     edge="end"
-                    id="currentPassword"
+                    id="newPassword"
                   >
                     <SVG
                       src={
                         require("../assets/show-or-hide-password.svg") as string
                       }
                       className={classes.svgSmall}
-                      id="currentPassword"
+                      id="newPassword"
                       fill={
-                        password.showCurrentPassword
+                        password.showNewPassword
                           ? theme.palette.primary.main
                           : null
                       }
@@ -276,19 +286,15 @@ export function ResetPassword() {
               color="primary"
               className={classes.submit}
             >
-              Change Password
+              {loading ? (
+                <CircularProgress color="inherit" />
+              ) : (
+                "Change Password"
+              )}
             </Button>
-          </div>
-          <div className={classes.noAccountDiv}>
-            <Typography className={classes.noAccountText}>
-              Don&apos;t have an account yet or been invited to a team?
-            </Typography>
-            <Link color="secondary" href="/signup" variant="body2">
-              Sign Up
-            </Link>
           </div>
         </form>
       </div>
     </Container>
   );
-}
+};
