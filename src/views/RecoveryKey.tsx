@@ -1,7 +1,7 @@
+import { ReactElement } from "react";
 import {
   Button,
   CssBaseline,
-  Link,
   Typography,
   makeStyles,
   Container,
@@ -146,7 +146,12 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export function RecoveryKey(): JSX.Element {
+interface Props {
+  recoveryKey: string[];
+  callback: () => void;
+}
+
+export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
   const classes = useStyles();
 
   return (
@@ -169,7 +174,7 @@ export function RecoveryKey(): JSX.Element {
       <div className={classes.paper}>
         <Card className={classes.card}>
           <Typography className={classes.cardTypography}>
-            ghost-road-silver-3
+            {recoveryKey.join(" ")}
           </Typography>
         </Card>
 
@@ -186,10 +191,11 @@ export function RecoveryKey(): JSX.Element {
 
         <div className={classes.submitDiv}>
           <Button
-            type="submit"
+            type="button"
             variant="contained"
             color="primary"
             className={classes.submit}
+            onClick={callback}
           >
             I Understand
           </Button>
