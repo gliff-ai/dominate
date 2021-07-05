@@ -174,7 +174,7 @@ export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
       <div className={classes.paper}>
         <Card className={classes.card}>
           <Typography className={classes.cardTypography}>
-            {recoveryKey.join("-")}
+            {recoveryKey.join(" ")}
           </Typography>
         </Card>
 
