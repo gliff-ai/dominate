@@ -10,7 +10,9 @@ import {
   Tooltip,
   Typography,
   withStyles,
+  Box,
 } from "@material-ui/core";
+import { useAuth } from "@/hooks/use-auth";
 import { theme } from "@/theme";
 import SVG from "react-inlinesvg";
 
@@ -31,23 +33,29 @@ const useStyles = makeStyles(() => ({
     border: "none",
     boxShadow: "none",
     display: "inline-flex",
+    padding: "16px 14px",
   },
-  closeAvatar: {
+  editAvatar: {
     display: "inline-flex",
     width: "30px",
     height: "30px",
-    marginLeft: "360px",
+    marginLeft: "50%",
   },
   card: {
     backgroundColor: theme.palette.primary.light,
     width: "50%",
+    marginTop: "150px",
   },
   typographyHeader: {
     display: "inline",
     marginLeft: "18px",
     fontWeight: 500,
   },
-  svgSmall: { width: "12px", height: "100%" },
+  boxTypography: {
+    color: theme.palette.text.secondary,
+    marginRight: "20px",
+  },
+  svgSmall: { width: "22px", height: "100%" },
 }));
 
 const HtmlTooltip = withStyles((t: Theme) => ({
@@ -62,6 +70,7 @@ const HtmlTooltip = withStyles((t: Theme) => ({
 export function Account(): JSX.Element {
   const classes = useStyles();
   const [hover, sethover] = useState(false);
+  const auth = useAuth();
 
   return (
     <Grid>
@@ -76,7 +85,7 @@ export function Account(): JSX.Element {
           >
             <Avatar
               variant="circle"
-              className={classes.closeAvatar}
+              className={classes.editAvatar}
               onMouseOut={() => {
                 sethover(false);
               }}
@@ -98,9 +107,26 @@ export function Account(): JSX.Element {
             </Avatar>
           </HtmlTooltip>
         </Paper>
-        <Paper>
-          <Avatar className={classes.avatar}>H</Avatar>
-        </Paper>
+        <div style={{ display: "flex" }}>
+          <Box>
+            <Avatar className={classes.avatar}>
+              <Typography style={{ fontSize: "50px" }}>H</Typography>
+            </Avatar>
+          </Box>
+
+          <Box style={{ marginTop: "30px" }}>
+            <Typography>
+              <span className={classes.boxTypography}>Name:</span> John
+            </Typography>
+            <Typography>
+              <span className={classes.boxTypography}>E-mail Address:</span>
+              {auth.user && auth.user.username}
+            </Typography>
+            <Typography>
+              <span className={classes.boxTypography}>Password:</span> *********
+            </Typography>
+          </Box>
+        </div>
       </Card>
     </Grid>
   );
