@@ -1,5 +1,11 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useState,
+  ComponentType,
+} from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import {
   Button,
@@ -19,10 +25,11 @@ import SVG from "react-inlinesvg";
 import Slide, { SlideProps } from "@material-ui/core/Slide";
 
 import { useNavigate } from "react-router-dom";
-import { ThemeProvider, theme } from "@/theme";
+import { theme } from "@/theme";
 
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
+import { RecoveryKey } from "@/views/RecoveryKey";
 
 type TransitionProps = Omit<SlideProps, "direction">;
 
@@ -127,13 +134,14 @@ export const SignUp = (): JSX.Element => {
 
   const [open, setOpen] = useState(false);
   const [transition, setTransition] =
-    useState<React.ComponentType<TransitionProps> | undefined>(undefined);
+    useState<ComponentType<TransitionProps> | undefined>(undefined);
 
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [etebaseError, setEtebaseError] = useState({});
+  const [recoveryKey, setRecoveryKey] = useState<string[] | null>(null);
 
   const [signUp, setSignUp] = useState({
     name: "",
@@ -149,7 +157,7 @@ export const SignUp = (): JSX.Element => {
     <Slide {...props} direction="up" />
   );
 
-  const handleSnackbar = (Transition: React.ComponentType<TransitionProps>) => {
+  const handleSnackbar = (Transition: ComponentType<TransitionProps>) => {
     setTransition(() => Transition);
     setOpen(true);
   };
@@ -194,34 +202,8 @@ export const SignUp = (): JSX.Element => {
     setOpen(false);
   };
 
-  const onSubmitForm = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    // Reset any errors
-    setEmailError("");
-    setPasswordError("");
-    setNameError("");
-    setLoading(true);
-
-    const isValid = validate();
-
-    if (!isValid) {
-      setLoading(false);
-      return;
-    }
-
+  const redirectUser = async (): Promise<void> => {
     try {
-      const user = await auth.signup(signUp.email, signUp.password);
-
-      const { profile, recoveryKey } = await auth.createProfile(
-        signUp.name,
-        signUp.teamId,
-        signUp.inviteId
-      );
-
-      // TODO show this somewhere
-      console.log(recoveryKey);
-
       const instance = auth.getInstance();
 
       const project = await instance.createCollection("Default Collection");
@@ -248,9 +230,48 @@ export const SignUp = (): JSX.Element => {
         // using `result.error.message`.
       }
     } catch (e) {
+      setRecoveryKey(null);
+
+      if (e instanceof Error) {
+        setEtebaseError(e.message);
+      }
+    }
+  };
+
+  const onSubmitForm = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    // Reset any errors
+    setEmailError("");
+    setPasswordError("");
+    setNameError("");
+    setLoading(true);
+
+    const isValid = validate();
+
+    if (!isValid) {
+      setLoading(false);
+      return;
+    }
+
+    try {
+      const user = await auth.signup(signUp.email, signUp.password);
+
+      const { profile, recoveryKey: keys } = await auth.createProfile(
+        signUp.name,
+        signUp.teamId,
+        signUp.inviteId
+      );
+      setRecoveryKey(keys);
+    } catch (e) {
       handleSnackbar(TransitionUp);
       setLoading(false);
-      setSignUp({ ...signUp, name: "", password: "", confirmPassword: "" });
+      setSignUp({
+        ...signUp,
+        name: "",
+        password: "",
+        confirmPassword: "",
+      });
       setEmailError("");
       setNameError("");
       setPasswordError("");
@@ -261,7 +282,9 @@ export const SignUp = (): JSX.Element => {
     }
   };
 
-  return (
+  return recoveryKey ? (
+    <RecoveryKey recoveryKey={recoveryKey} callback={redirectUser} />
+  ) : (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
       <div className={classes.logo}>
