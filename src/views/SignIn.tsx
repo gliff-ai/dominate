@@ -277,7 +277,11 @@ export function SignIn(): JSX.Element {
               color="primary"
               className={classes.submit}
             >
-              {loading ? <CircularProgress size="1.5rem" color="inherit" /> : "Continue"}
+              {loading ? (
+                <CircularProgress size="1.5rem" color="inherit" />
+              ) : (
+                "Continue"
+              )}
             </Button>
           </div>
           <div className={classes.noAccount}>
