@@ -348,7 +348,7 @@ export const SignUp = (): JSX.Element => {
               color="primary"
               className={classes.submit}
             >
-              {loading ? <CircularProgress color="inherit" /> : "Next"}
+              {loading ? <CircularProgress size="1.5rem" color="inherit" /> : "Next"}
             </Button>
           </div>
 
