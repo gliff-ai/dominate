@@ -1,6 +1,7 @@
 import {
   AppBar,
   Avatar,
+  colors,
   Grid,
   IconButton,
   makeStyles,
@@ -26,6 +27,12 @@ const useStyles = makeStyles(() => ({
     height: "90px",
     paddingTop: "9px",
     marginBottom: "30px",
+  },
+
+  link: {
+    textDecoration: "none",
+    marginRight: "10px",
+    color: theme.palette.secondary.main,
   },
 
   svgMedium: {
@@ -220,9 +227,13 @@ export const Navbar = (): ReactElement => {
                 </>
               ) : (
                 <>
-                  <Link to="/signin">Sign In</Link>
+                  <Link color="secondary" to="/signin" className={classes.link}>
+                    Sign In
+                  </Link>
                   &nbsp;
-                  <Link to="/signup">Sign Up</Link>
+                  <Link color="secondary" to="/signup" className={classes.link}>
+                    Sign Up
+                  </Link>
                 </>
               )}
             </nav>
