@@ -57,14 +57,13 @@ const UserInterface = (props: Props): ReactElement | null => {
     <ThemeProvider theme={theme}>
       <BrowserRouter>
         <div className={classes.outerContainer}>
-          <Routes>
-            {window.location.pathname === "/signin" ||
-            window.location.pathname === "/signup" ? (
-              <></>
-            ) : (
-              <Navbar />
-            )}
+          {window.location.pathname === "/signin" ||
+          window.location.pathname === "/signup" ? (
+            <></>
+          ) : (
             <Navbar />
+          )}
+          <Routes>
             <Route path="/signin">
               <SignIn />
             </Route>

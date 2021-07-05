@@ -1,7 +1,6 @@
 import {
   AppBar,
   Avatar,
-  colors,
   Grid,
   IconButton,
   makeStyles,

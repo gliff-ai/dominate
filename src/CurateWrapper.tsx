@@ -10,6 +10,7 @@ import {
   getImageMetaFromImageFileInfo,
 } from "@/imageConversions";
 import { useAuth } from "@/hooks/use-auth";
+import { Navbar } from "./NavBar";
 
 interface Props {
   etebaseInstance: DominateEtebase;
@@ -127,12 +128,15 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   if (!props.etebaseInstance || !auth.user || !galleryUid) return null;
 
   return (
-    <Curate
-      metadata={curateInput}
-      saveImageCallback={addImageToGallery}
-      saveLabelsCallback={saveLabelsCallback}
-      deleteImagesCallback={deleteImageCallback}
-      annotateCallback={annotateCallback}
-    />
+    <>
+      <Curate
+        metadata={curateInput}
+        saveImageCallback={addImageToGallery}
+        saveLabelsCallback={saveLabelsCallback}
+        deleteImagesCallback={deleteImageCallback}
+        annotateCallback={annotateCallback}
+        showAppBar={false}
+      />
+    </>
   );
 };
