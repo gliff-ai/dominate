@@ -107,9 +107,10 @@ const UserInterface = (props: Props): ReactElement | null => {
               <TeamMembers />
             </Route>
 
-            <Route path="/reset-password">
-              <ResetPassword />
-            </Route>
+            <Route
+              path="/reset-password"
+              element={<ResetPassword etebaseInstance={etebaseInstance} />}
+            />
 
             <Route path="/account">
               <Account />
