@@ -240,7 +240,7 @@ export const RecoverAccount = (props: Props): JSX.Element => {
           </div>
           <div className={classes.noAccount}>
             <Typography className={classes.noAccountText}>
-              Don&apos;t have an account yet or been invited to a team?
+              Don&apos;t have an account yet?
             </Typography>
             <Link color="secondary" href="/signup">
               Sign Up
