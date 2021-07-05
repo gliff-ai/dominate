@@ -181,7 +181,7 @@ export function SignIn(): JSX.Element {
         .signin(login.email, login.password)
         .then(() => {
           setLoading(false);
-          navigate("home");
+          navigate("/");
         })
         .catch((e) => {
           handleSnackbar(TransitionUp);
@@ -277,7 +277,11 @@ export function SignIn(): JSX.Element {
               color="primary"
               className={classes.submit}
             >
-              {loading ? <CircularProgress color="inherit" /> : "Continue"}
+              {loading ? (
+                <CircularProgress size="1.5rem" color="inherit" />
+              ) : (
+                "Continue"
+              )}
             </Button>
           </div>
           <div className={classes.noAccount}>

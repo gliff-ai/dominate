@@ -234,7 +234,11 @@ export const RecoverAccount = (props: Props): JSX.Element => {
               color="primary"
               className={classes.submit}
             >
-              {loading ? <CircularProgress color="inherit" /> : "Continue"}
+              {loading ? (
+                <CircularProgress size="1.5rem" color="inherit" />
+              ) : (
+                "Continue"
+              )}
             </Button>
             <div style={{ color: "red", fontSize: 12 }}>{recoveryError}</div>
           </div>

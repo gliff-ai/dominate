@@ -184,10 +184,19 @@ export const Navbar = (): ReactElement => {
                       horizontal: "right",
                     }}
                   >
-                    <Paper className={classes.paper}>
-                      <Avatar className={classes.avatar}>H</Avatar>
-                      {auth.user.username}
-                      <Link to="/account">{auth.user.username}</Link>
+                    <Paper
+                      className={classes.paper}
+                      style={{ display: "flex", alignItems: "center" }}
+                    >
+                      <Avatar
+                        className={classes.avatar}
+                        style={{ margin: "12px" }}
+                      >
+                        H
+                      </Avatar>
+                      <Typography>
+                        <Link to="/account">{auth.user.username}</Link>
+                      </Typography>
                     </Paper>
                     <MenuItem
                       className={classes.menuItem}
@@ -198,6 +207,7 @@ export const Navbar = (): ReactElement => {
                       <SVG
                         src={require(`./assets/account-settings.svg`) as string}
                         className={classes.svgMedium}
+                        style={{ marginRight: "12px" }}
                       />
                       Account Settings
                     </MenuItem>
@@ -210,6 +220,7 @@ export const Navbar = (): ReactElement => {
                       <SVG
                         src={require(`./assets/log-out.svg`) as string}
                         className={classes.svgMedium}
+                        style={{ marginRight: "12px" }}
                       />
                       Log out
                     </MenuItem>
@@ -226,15 +237,11 @@ export const Navbar = (): ReactElement => {
                   </button> */}
                 </>
               ) : (
-                <>
-                  <Link color="secondary" to="/signin" className={classes.link}>
-                    Sign In
-                  </Link>
+                <Typography>
+                  <Link to="/signin">Sign In</Link>
                   &nbsp;
-                  <Link color="secondary" to="/signup" className={classes.link}>
-                    Sign Up
-                  </Link>
-                </>
+                  <Link to="/signup">Sign Up</Link>
+                </Typography>
               )}
             </nav>
           </Grid>
