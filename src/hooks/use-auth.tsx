@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useEffect, useContext, createContext } from "react";
+import { useState, useEffect, useContext, createContext } from "react";
 import { DominateEtebase } from "@/etebase";
 import { User, UserProfile } from "@/services/user/interfaces";
 import { createUserProfile } from "@/services/user";

@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import React, { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import {
   Button,
@@ -125,9 +125,9 @@ export const SignUp = (): JSX.Element => {
   const auth = useAuth();
   const navigate = useNavigate();
 
-  const [open, setOpen] = React.useState(false);
+  const [open, setOpen] = useState(false);
   const [transition, setTransition] =
-    React.useState<React.ComponentType<TransitionProps> | undefined>(undefined);
+    useState<React.ComponentType<TransitionProps> | undefined>(undefined);
 
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
