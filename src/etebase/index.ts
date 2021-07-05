@@ -138,6 +138,9 @@ export class DominateEtebase {
     return true;
   };
 
+  changePassword = async (newPassword: string): Promise<void> =>
+    this.etebaseInstance.changePassword(newPassword);
+
   #hashRecoveryPhrase = (phrase: string): Uint8Array =>
     sodium.crypto_generichash(32, sodium.from_string(phrase.replace(/ /g, "")));
 

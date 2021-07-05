@@ -181,7 +181,7 @@ export function SignIn(): JSX.Element {
         .signin(login.email, login.password)
         .then(() => {
           setLoading(false);
-          navigate("home");
+          navigate("/");
         })
         .catch((e) => {
           handleSnackbar(TransitionUp);

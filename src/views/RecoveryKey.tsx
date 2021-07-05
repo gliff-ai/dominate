@@ -195,15 +195,6 @@ export function RecoveryKey(): JSX.Element {
             I Understand
           </Button>
         </div>
-
-        <div className={classes.haveAccount}>
-          <Typography className={classes.haveAccountText}>
-            Already have an account?
-          </Typography>
-          <Link color="secondary" href="/signin" variant="body2">
-            Sign In
-          </Link>
-        </div>
       </div>
     </Container>
   );
