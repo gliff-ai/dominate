@@ -99,10 +99,6 @@ const UserInterface = (props: Props): ReactElement | null => {
               <Home />
             </Route>
 
-            <Route path="/recoverykey">
-              <RecoveryKey />
-            </Route>
-
             <Route path="/teammembers">
               <TeamMembers />
             </Route>
