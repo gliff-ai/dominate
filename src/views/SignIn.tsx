@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, ComponentType } from "react";
 import {
   Button,
   CssBaseline,
@@ -8,10 +8,8 @@ import {
   makeStyles,
   Container,
   CircularProgress,
-  Snackbar,
   IconButton,
   InputAdornment,
-  SnackbarContent,
   Slide,
   SlideProps,
 } from "@material-ui/core";
@@ -19,9 +17,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { theme } from "@/theme";
 import SVG from "react-inlinesvg";
-import { Message } from "@/Message";
-
-type TransitionProps = Omit<SlideProps, "direction">;
+import { Message, BaseSnackbar, TransitionProps } from "@/Message";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -74,9 +70,6 @@ const useStyles = makeStyles(() => ({
   textFieldBackground: {
     background: theme.palette.primary.light,
   },
-  snackbar: {
-    background: theme.palette.info.light,
-  },
   svgSmall: {
     width: "22px",
     height: "100%",
@@ -84,24 +77,6 @@ const useStyles = makeStyles(() => ({
     marginRight: "9px",
     marginTop: "0px",
     marginBottom: "-4px",
-  },
-  svgSmallClose: {
-    width: "15px",
-    height: "100%",
-    marginLeft: "11px",
-    marginRight: "0px",
-    marginTop: "-3px",
-    marginBottom: "0px",
-    fill: theme.palette.primary.light,
-  },
-  message: {
-    display: "inline-block",
-    marginRight: "5px",
-    marginLeft: "5px",
-    fontSize: "16px",
-  },
-  iconButton: {
-    color: theme.palette.primary.light,
   },
   submit: {
     color: theme.palette.text.primary,
@@ -123,7 +98,7 @@ export function SignIn(): JSX.Element {
   const [open, setOpen] = useState(false);
 
   const [transition, setTransition] =
-    useState<React.ComponentType<TransitionProps> | undefined>(undefined);
+    useState<ComponentType<TransitionProps> | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState("");
@@ -295,40 +270,16 @@ export function SignIn(): JSX.Element {
           </div>
         </form>
 
-        <Snackbar
+        <BaseSnackbar
           open={open}
-          onClose={handleClose}
-          TransitionComponent={transition}
-        >
-          <SnackbarContent
-            className={classes.snackbar}
-            message={
-              <span>
-                <SVG
-                  src={require(`../assets/warning.svg`) as string}
-                  className={classes.svgSmall}
-                />
-
-                <div className={classes.message}>
-                  {String(etebaseError).includes("Wrong password for user.")
-                    ? "Login Failed. Your username and/or password do not match"
-                    : "There was an error logging you in. Please try again"}
-                </div>
-                <IconButton
-                  size="small"
-                  aria-label="close"
-                  onClick={handleClose}
-                  className={classes.iconButton}
-                >
-                  <SVG
-                    src={require(`../assets/close.svg`) as string}
-                    className={classes.svgSmallClose}
-                  />
-                </IconButton>
-              </span>
-            }
-          />
-        </Snackbar>
+          handleClose={handleClose}
+          transition={transition}
+          message={
+            String(etebaseError).includes("Wrong password for user.")
+              ? "Login Failed. Your username and/or password do not match"
+              : "There was an error logging you in. Please try again"
+          }
+        />
       </div>
     </Container>
   );
