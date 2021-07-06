@@ -30,6 +30,7 @@ import { theme } from "@/theme";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
+import { Message } from "@/Message";
 
 type TransitionProps = Omit<SlideProps, "direction">;
 
@@ -317,7 +318,7 @@ export const SignUp = (): JSX.Element => {
             value={signUp.email}
             placeholder="E-mail *"
           />
-          <div style={{ color: "red", fontSize: 12 }}>{emailError}</div>
+          <Message severity="error" message={emailError} />
           <TextField
             variant="outlined"
             margin="normal"
@@ -332,7 +333,7 @@ export const SignUp = (): JSX.Element => {
             value={signUp.name}
             placeholder="Name *"
           />
-          <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
+          <Message severity="error" message={nameError} />
           <TextField
             variant="outlined"
             margin="normal"
@@ -362,7 +363,8 @@ export const SignUp = (): JSX.Element => {
             onChange={handleChange}
             placeholder="Confirm Password *"
           />
-          <div style={{ color: "red", fontSize: 12 }}>{passwordError}</div>
+          <Message severity="error" message={passwordError} />
+
           <div className={classes.submitDiv}>
             <Button
               type="submit"
@@ -402,14 +404,12 @@ export const SignUp = (): JSX.Element => {
                   src={require(`../assets/warning.svg`) as string}
                   className={classes.svgSmall}
                 />
-
                 <div className={classes.message}>
                   {/* Looks like that account already exists, try another email! */}
                   {String(etebaseError).includes("duplicate key")
                     ? "Looks like that account already exists, try another email!"
                     : "There was an error creating an account"}
                 </div>
-
                 <IconButton
                   size="small"
                   aria-label="close"

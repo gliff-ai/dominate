@@ -17,8 +17,9 @@ import {
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
-import { ThemeProvider, theme } from "@/theme";
+import { theme } from "@/theme";
 import SVG from "react-inlinesvg";
+import { Message } from "@/Message";
 
 type TransitionProps = Omit<SlideProps, "direction">;
 
@@ -227,7 +228,7 @@ export function SignIn(): JSX.Element {
             value={login.email}
             placeholder="E-mail"
           />
-          <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
+          <Message severity="error" message={nameError} />
 
           <TextField
             variant="outlined"
@@ -313,7 +314,6 @@ export function SignIn(): JSX.Element {
                     ? "Login Failed. Your username and/or password do not match"
                     : "There was an error logging you in. Please try again"}
                 </div>
-
                 <IconButton
                   size="small"
                   aria-label="close"
