@@ -30,8 +30,7 @@ import { theme } from "@/theme";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
-
-type TransitionProps = Omit<SlideProps, "direction">;
+import { Message, BaseSnackbar, TransitionProps } from "@/Message";
 
 const stripePromise = loadStripe(
   "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
@@ -70,37 +69,6 @@ const useStyles = makeStyles(() => ({
   textFieldBackground: {
     background: theme.palette.primary.light,
   },
-  snackbar: {
-    background: theme.palette.info.main,
-  },
-  svgSmall: {
-    width: "22px",
-    height: "100%",
-    marginLeft: "7px",
-    marginRight: "11px",
-    marginTop: "0px",
-    marginBottom: "-5px",
-    fill: theme.palette.primary.light,
-  },
-  svgSmallClose: {
-    width: "15px",
-    height: "100%",
-    marginLeft: "11px",
-    marginRight: "0px",
-    marginTop: "-3px",
-    marginBottom: "0px",
-    fill: theme.palette.primary.light,
-  },
-
-  message: {
-    display: "inline-block",
-    marginRight: "5px",
-    marginLeft: "5px",
-    fontSize: "16px",
-  },
-  iconButton: {
-    color: theme.palette.primary.light,
-  },
   haveAccount: {
     width: "fit-content",
     marginRight: "auto",
@@ -134,7 +102,7 @@ export const SignUp = (): JSX.Element => {
 
   const [open, setOpen] = useState(false);
   const [transition, setTransition] =
-    useState<ComponentType<TransitionProps> | undefined>(undefined);
+    useState<ComponentType<TransitionProps> | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
@@ -317,7 +285,7 @@ export const SignUp = (): JSX.Element => {
             value={signUp.email}
             placeholder="E-mail *"
           />
-          <div style={{ color: "red", fontSize: 12 }}>{emailError}</div>
+          <Message severity="error" message={emailError} />
           <TextField
             variant="outlined"
             margin="normal"
@@ -332,7 +300,7 @@ export const SignUp = (): JSX.Element => {
             value={signUp.name}
             placeholder="Name *"
           />
-          <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
+          <Message severity="error" message={nameError} />
           <TextField
             variant="outlined"
             margin="normal"
@@ -362,7 +330,8 @@ export const SignUp = (): JSX.Element => {
             onChange={handleChange}
             placeholder="Confirm Password *"
           />
-          <div style={{ color: "red", fontSize: 12 }}>{passwordError}</div>
+          <Message severity="error" message={passwordError} />
+
           <div className={classes.submitDiv}>
             <Button
               type="submit"
@@ -389,42 +358,17 @@ export const SignUp = (): JSX.Element => {
           </div>
         </form>
 
-        <Snackbar
+        {/* Looks like that account already exists, try another email! */}
+        <BaseSnackbar
           open={open}
-          onClose={handleClose}
-          TransitionComponent={transition}
-        >
-          <SnackbarContent
-            className={classes.snackbar}
-            message={
-              <span>
-                <SVG
-                  src={require(`../assets/warning.svg`) as string}
-                  className={classes.svgSmall}
-                />
-
-                <div className={classes.message}>
-                  {/* Looks like that account already exists, try another email! */}
-                  {String(etebaseError).includes("duplicate key")
-                    ? "Looks like that account already exists, try another email!"
-                    : "There was an error creating an account"}
-                </div>
-
-                <IconButton
-                  size="small"
-                  aria-label="close"
-                  onClick={handleClose}
-                  className={classes.iconButton}
-                >
-                  <SVG
-                    src={require(`../assets/close.svg`) as string}
-                    className={classes.svgSmallClose}
-                  />
-                </IconButton>
-              </span>
-            }
-          />
-        </Snackbar>
+          handleClose={handleClose}
+          transition={transition}
+          message={
+            String(etebaseError).includes("duplicate key")
+              ? "Looks like that account already exists, try another email!"
+              : "There was an error creating an account"
+          }
+        />
       </div>
     </Container>
   );

@@ -1,19 +1,16 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 
 import { apiRequest } from "@/api";
-
 import {
   Button,
   CssBaseline,
   TextField,
-  Link,
   Typography,
   makeStyles,
   Container,
-  CircularProgress,
 } from "@material-ui/core";
-
 import { theme } from "@/theme";
+import { Message } from "@/Message";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -49,7 +46,11 @@ const useStyles = makeStyles(() => ({
     display: "inline",
     marginRight: "10px",
   },
-
+  text: {
+    fontSize: "20px",
+    fontWeight: 400,
+    textAlign: "center",
+  },
   submitDiv: {
     width: "fit-content",
     marginRight: "auto",
@@ -65,6 +66,7 @@ const useStyles = makeStyles(() => ({
   },
   textFieldBackground: {
     background: theme.palette.primary.light,
+    marginTop: "50px",
   },
   snackbar: {
     background: theme.palette.info.light,
@@ -97,7 +99,7 @@ const useStyles = makeStyles(() => ({
   },
   submit: {
     color: theme.palette.text.primary,
-    marginBottom: "112px",
+    marginTop: "45px",
     textTransform: "none",
     fontWeight: 700,
     fontSize: "15px",
@@ -161,10 +163,10 @@ export const RequestRecoverAccount = (): JSX.Element => {
       </div>
 
       <div className={classes.paper}>
-        <h1>
+        <div className={classes.text}>
           Enter your email address to request a recovery link. You will need
-          your recovery key to compelete the process
-        </h1>
+          your recovery key to compelete the process.
+        </div>
 
         <form onSubmit={onSubmitForm}>
           <TextField
@@ -180,8 +182,7 @@ export const RequestRecoverAccount = (): JSX.Element => {
             value={recoveryEmail}
             placeholder="E-mail"
           />
-          <div style={{ color: "red", fontSize: 12 }}>{successBanner}</div>
-
+          <Message severity="success" message={successBanner} />
           <div className={classes.submitDiv}>
             <Button
               type="submit"
@@ -192,8 +193,7 @@ export const RequestRecoverAccount = (): JSX.Element => {
               Request Recovery
             </Button>
           </div>
-
-          <div style={{ color: "red", fontSize: 12 }}>{recoveryError}</div>
+          <Message severity="error" message={recoveryError} />
         </form>
       </div>
     </Container>

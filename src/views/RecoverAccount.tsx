@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import { getRecoverySession } from "@/services/user";
 import { DominateEtebase } from "@/etebase";
 import { theme } from "@/theme";
-
 import {
   Button,
   CssBaseline,
@@ -15,6 +14,7 @@ import {
   Container,
   CircularProgress,
 } from "@material-ui/core";
+import { Message } from "@/Message";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -240,7 +240,7 @@ export const RecoverAccount = (props: Props): JSX.Element => {
                 "Continue"
               )}
             </Button>
-            <div style={{ color: "red", fontSize: 12 }}>{recoveryError}</div>
+            <Message severity="error" message={recoveryError} />
           </div>
           <div className={classes.noAccount}>
             <Typography className={classes.noAccountText}>
