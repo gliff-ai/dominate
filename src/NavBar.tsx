@@ -1,6 +1,7 @@
 import {
   AppBar,
   Avatar,
+  colors,
   Grid,
   IconButton,
   makeStyles,
@@ -45,6 +46,7 @@ const useStyles = makeStyles(() => ({
     border: "none",
     boxShadow: "none",
     display: "inline-flex",
+    width: "270px",
   },
 
   avatar: {
@@ -193,15 +195,11 @@ export const Navbar = (): ReactElement => {
                       >
                         H
                       </Avatar>
-                      <Typography>
-                        <Link to="/account">{auth.user.username}</Link>
-                      </Typography>
                     </Paper>
                     <MenuItem
+                      component="a"
+                      href="/account"
                       className={classes.menuItem}
-                      onClick={() => {
-                        <Link to="/account" />;
-                      }}
                     >
                       <SVG
                         src={require(`./assets/account-settings.svg`) as string}
@@ -224,16 +222,6 @@ export const Navbar = (): ReactElement => {
                       Log out
                     </MenuItem>
                   </Menu>
-                  {/* <Link to="/account">{auth.user.username}</Link>
-                  &nbsp;
-                  <button
-                    type="button"
-                    onClick={() =>
-                      auth.signout().then(() => navigate("signin"))
-                    }
-                  >
-                    Sign Out
-                  </button> */}
                 </>
               ) : (
                 <Typography>

@@ -40,13 +40,6 @@ const theme: Theme = createMuiTheme({
       },
     },
 
-    MuiPaper: {
-      root: {
-        backgroundColor: "#FFFFFF",
-        width: "313px",
-      },
-    },
-
     MuiCssBaseline: {
       "@global": {
         body: {
@@ -177,7 +170,7 @@ const theme: Theme = createMuiTheme({
         },
       },
       circle: {
-        backgroundColor: "transparent",
+        backgroundColor: "#02FFAD",
         "&:hover": {
           backgroundColor: "#fff",
         },
