@@ -172,7 +172,7 @@ const theme: Theme = createMuiTheme({
       circle: {
         backgroundColor: "#02FFAD",
         "&:hover": {
-          backgroundColor: "#fff",
+          backgroundColor: "#ffffff",
         },
       },
     },

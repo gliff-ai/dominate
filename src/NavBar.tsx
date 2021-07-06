@@ -16,66 +16,58 @@ import {
 } from "@material-ui/core";
 import { ReactElement, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { theme } from "@/theme";
 import SVG from "react-inlinesvg";
 
 import { useAuth } from "./hooks/use-auth";
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
-    backgroundColor: theme.palette.secondary.light,
+    backgroundColor: `${theme.palette.secondary.light} !important`,
     height: "90px",
     paddingTop: "9px",
     marginBottom: "30px",
   },
-
   link: {
     textDecoration: "none",
     marginRight: "10px",
     color: theme.palette.secondary.main,
   },
-
   svgMedium: {
     width: "22px",
     height: "100%",
     marginLeft: "-1px",
   },
-
   paper: {
     borderRadius: 0,
     border: "none",
     boxShadow: "none",
     display: "inline-flex",
-    width: "270px",
+    backgroundColor: "#FFFFFF",
+    width: "313px",
   },
-
-  avatar: {
-    width: "64px",
-    height: "64px",
-    backgroundColor: theme.palette.text.secondary,
+  avatarUser: {
+    width: "64px !important",
+    height: "64px !important",
+    backgroundColor: `${theme.palette.text.secondary} !important`,
     "&:hover": {
-      backgroundColor: theme.palette.text.secondary,
+      backgroundColor: `${theme.palette.text.secondary} !important`,
     },
   },
-
   menuItem: {
     opacity: "1",
     "&:hover": {
       background: theme.palette.primary.main,
     },
   },
-
   logo: {
     marginBottom: "5px",
     marginTop: "7px",
   },
-
   navGrid: {
     marginLeft: "auto",
     alignItems: "center",
     height: "90px",
   },
-
   navLinks: {
     height: "100%",
     alignItems: "center",
@@ -83,10 +75,10 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const HtmlTooltip = withStyles((t: Theme) => ({
+const HtmlTooltip = withStyles((theme: Theme) => ({
   tooltip: {
     backgroundColor: theme.palette.primary.light,
-    fontSize: t.typography.pxToRem(12),
+    fontSize: theme.typography.pxToRem(12),
     border: "1px solid #dadde9",
     color: theme.palette.text.primary,
   },
@@ -107,11 +99,17 @@ export const Navbar = (): ReactElement => {
     setAnchorEl(null);
   };
 
-  return (
+  const hasNavbar = () =>
+    // TODO: Add path for all pages that should not have a navbar
+    !["/signin", "/signup", "/reset-password", "/request-recover/*"].includes(
+      window.location.pathname
+    );
+
+  return hasNavbar() ? (
     <AppBar position="fixed" className={classes.appBar} elevation={0}>
       <Toolbar>
         <Grid container direction="row" alignContent="space-between">
-          <Grid item className={classes.logo}>
+          <Grid className={classes.logo}>
             <img
               src={require(`./assets/gliff-web-master-black.svg`) as string}
               width="79px"
@@ -119,24 +117,10 @@ export const Navbar = (): ReactElement => {
               alt="gliff logo"
             />
           </Grid>
-          <Grid item className={classes.navGrid}>
+          <Grid className={classes.navGrid}>
             <nav className={classes.navLinks}>
               {auth.user ? (
                 <>
-                  <Link to="/annotate">
-                    <HtmlTooltip
-                      title={<Typography color="inherit">ANNOTATE</Typography>}
-                      placement="top"
-                    >
-                      <Avatar variant="circular">
-                        <SVG
-                          src={require(`./assets/annotate.svg`) as string}
-                          className={classes.svgMedium}
-                        />
-                      </Avatar>
-                    </HtmlTooltip>
-                  </Link>
-                  &nbsp;
                   <Link to="/curate">
                     <HtmlTooltip
                       title={<Typography color="inherit">CURATE</Typography>}
@@ -145,6 +129,20 @@ export const Navbar = (): ReactElement => {
                       <Avatar variant="circular">
                         <SVG
                           src={require(`./assets/curate.svg`) as string}
+                          className={classes.svgMedium}
+                        />
+                      </Avatar>
+                    </HtmlTooltip>
+                  </Link>
+                  &nbsp;
+                  <Link to="/annotate">
+                    <HtmlTooltip
+                      title={<Typography color="inherit">ANNOTATE</Typography>}
+                      placement="top"
+                    >
+                      <Avatar variant="circular">
+                        <SVG
+                          src={require(`./assets/annotate.svg`) as string}
                           className={classes.svgMedium}
                         />
                       </Avatar>
@@ -167,10 +165,12 @@ export const Navbar = (): ReactElement => {
                   &nbsp;
                   <IconButton onClick={handleClick} aria-controls="menu">
                     <HtmlTooltip
-                      title={<Typography color="inherit">Account</Typography>}
+                      title={<Typography>Account</Typography>}
                       placement="top"
                     >
-                      <Avatar className={classes.avatar}>H</Avatar>
+                      <Avatar variant="circular" className={classes.avatarUser}>
+                        H
+                      </Avatar>
                     </HtmlTooltip>
                   </IconButton>
                   <Menu
@@ -190,7 +190,7 @@ export const Navbar = (): ReactElement => {
                       style={{ display: "flex", alignItems: "center" }}
                     >
                       <Avatar
-                        className={classes.avatar}
+                        className={classes.avatarUser}
                         style={{ margin: "12px" }}
                       >
                         H
@@ -235,5 +235,5 @@ export const Navbar = (): ReactElement => {
         </Grid>
       </Toolbar>
     </AppBar>
-  );
+  ) : null;
 };
