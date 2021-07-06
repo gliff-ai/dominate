@@ -1,4 +1,4 @@
-import { Component, ReactElement, ReactNode } from "react";
+import { ReactElement } from "react";
 import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { ThemeProvider, WithStyles, withStyles } from "@material-ui/core";
 import { theme } from "@/theme";
@@ -13,7 +13,6 @@ import { AnnotateWrapper } from "@/AnnotateWrapper";
 import { RequestRecoverAccount } from "@/views/RequestRecovery";
 import { Home } from "./Home";
 import { CurateWrapper } from "./CurateWrapper";
-import { RecoveryKey } from "./views/RecoveryKey";
 import { TeamMembers } from "./views/TeamMembers";
 import { Account } from "./views/Account";
 import { ResetPassword } from "./views/ResetPassword";
@@ -57,12 +56,6 @@ const UserInterface = (props: Props): ReactElement | null => {
     <ThemeProvider theme={theme}>
       <BrowserRouter>
         <div className={classes.outerContainer}>
-          {window.location.pathname === "/signin" ||
-          window.location.pathname === "/signup" ? (
-            <></>
-          ) : (
-            <Navbar />
-          )}
           <Routes>
             <Route path="/signin">
               <SignIn />
@@ -97,20 +90,18 @@ const UserInterface = (props: Props): ReactElement | null => {
             <Route path="/">
               <Home />
             </Route>
-
             <Route path="/teammembers">
               <TeamMembers />
             </Route>
-
             <Route
               path="/reset-password"
               element={<ResetPassword etebaseInstance={etebaseInstance} />}
             />
-
             <Route path="/account">
               <Account />
             </Route>
           </Routes>
+          <Navbar />
         </div>
       </BrowserRouter>
     </ThemeProvider>
