@@ -120,20 +120,6 @@ export const Navbar = (): ReactElement => {
             <nav className={classes.navLinks}>
               {auth.user ? (
                 <>
-                  <Link to="/annotate">
-                    <HtmlTooltip
-                      title={<Typography color="inherit">ANNOTATE</Typography>}
-                      placement="top"
-                    >
-                      <Avatar variant="circular">
-                        <SVG
-                          src={require(`./assets/annotate.svg`) as string}
-                          className={classes.svgMedium}
-                        />
-                      </Avatar>
-                    </HtmlTooltip>
-                  </Link>
-                  &nbsp;
                   <Link to="/curate">
                     <HtmlTooltip
                       title={<Typography color="inherit">CURATE</Typography>}
@@ -142,6 +128,20 @@ export const Navbar = (): ReactElement => {
                       <Avatar variant="circular">
                         <SVG
                           src={require(`./assets/curate.svg`) as string}
+                          className={classes.svgMedium}
+                        />
+                      </Avatar>
+                    </HtmlTooltip>
+                  </Link>
+                  &nbsp;
+                  <Link to="/annotate">
+                    <HtmlTooltip
+                      title={<Typography color="inherit">ANNOTATE</Typography>}
+                      placement="top"
+                    >
+                      <Avatar variant="circular">
+                        <SVG
+                          src={require(`./assets/annotate.svg`) as string}
                           className={classes.svgMedium}
                         />
                       </Avatar>
