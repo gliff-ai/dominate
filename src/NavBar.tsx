@@ -15,31 +15,27 @@ import {
 } from "@material-ui/core";
 import { ReactElement, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { theme } from "@/theme";
 import SVG from "react-inlinesvg";
 
 import { useAuth } from "./hooks/use-auth";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
-    backgroundColor: theme.palette.secondary.light,
+    backgroundColor: `${theme.palette.secondary.light} !important`,
     height: "90px",
     paddingTop: "9px",
     marginBottom: "30px",
   },
-
   link: {
     textDecoration: "none",
     marginRight: "10px",
     color: theme.palette.secondary.main,
   },
-
   svgMedium: {
     width: "22px",
     height: "100%",
     marginLeft: "-1px",
   },
-
   paper: {
     borderRadius: 0,
     border: "none",
@@ -48,23 +44,20 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: "#FFFFFF",
     width: "313px",
   },
-
-  avatar: {
-    width: "64px",
-    height: "64px",
-    backgroundColor: theme.palette.text.secondary,
+  avatarUser: {
+    width: "64px !important",
+    height: "64px !important",
+    backgroundColor: `${theme.palette.text.secondary} !important`,
     "&:hover": {
-      backgroundColor: theme.palette.text.secondary,
+      backgroundColor: `${theme.palette.text.secondary} !important`,
     },
   },
-
   menuItem: {
     opacity: "1",
     "&:hover": {
       background: theme.palette.primary.main,
     },
   },
-
   logo: {
     marginBottom: "5px",
     marginTop: "7px",
@@ -81,10 +74,10 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-const HtmlTooltip = withStyles((t: Theme) => ({
+const HtmlTooltip = withStyles((theme: Theme) => ({
   tooltip: {
     backgroundColor: theme.palette.primary.light,
-    fontSize: t.typography.pxToRem(12),
+    fontSize: theme.typography.pxToRem(12),
     border: "1px solid #dadde9",
     color: theme.palette.text.primary,
   },
@@ -171,10 +164,12 @@ export const Navbar = (): ReactElement => {
                   &nbsp;
                   <IconButton onClick={handleClick} aria-controls="menu">
                     <HtmlTooltip
-                      title={<Typography color="inherit">Account</Typography>}
+                      title={<Typography>Account</Typography>}
                       placement="top"
                     >
-                      <Avatar className={classes.avatar}>H</Avatar>
+                      <Avatar variant="circular" className={classes.avatarUser}>
+                        H
+                      </Avatar>
                     </HtmlTooltip>
                   </IconButton>
                   <Menu
@@ -194,7 +189,7 @@ export const Navbar = (): ReactElement => {
                       style={{ display: "flex", alignItems: "center" }}
                     >
                       <Avatar
-                        className={classes.avatar}
+                        className={classes.avatarUser}
                         style={{ margin: "12px" }}
                       >
                         H
