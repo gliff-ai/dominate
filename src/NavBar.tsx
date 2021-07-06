@@ -45,6 +45,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     border: "none",
     boxShadow: "none",
     display: "inline-flex",
+    backgroundColor: "#FFFFFF",
+    width: "313px",
   },
 
   avatar: {
@@ -104,8 +106,10 @@ export const Navbar = (): ReactElement => {
   };
 
   const hasNavbar = () =>
-    window.location.pathname !== "/signin" &&
-    window.location.pathname !== "/signup";
+    // TODO: Add path for all pages that should not have a navbar
+    !["/signin", "/signup", "/reset-password", "/request-recover/*"].includes(
+      window.location.pathname
+    );
 
   return hasNavbar() ? (
     <AppBar position="fixed" className={classes.appBar} elevation={0}>
