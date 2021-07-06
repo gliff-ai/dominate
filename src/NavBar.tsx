@@ -20,7 +20,7 @@ import SVG from "react-inlinesvg";
 
 import { useAuth } from "./hooks/use-auth";
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
     backgroundColor: theme.palette.secondary.light,
     height: "90px",
@@ -67,13 +67,11 @@ const useStyles = makeStyles(() => ({
     marginBottom: "5px",
     marginTop: "7px",
   },
-
   navGrid: {
     marginLeft: "auto",
     alignItems: "center",
     height: "90px",
   },
-
   navLinks: {
     height: "100%",
     alignItems: "center",
@@ -105,11 +103,15 @@ export const Navbar = (): ReactElement => {
     setAnchorEl(null);
   };
 
-  return (
+  const hasNavbar = () =>
+    window.location.pathname !== "/signin" &&
+    window.location.pathname !== "/signup";
+
+  return hasNavbar() ? (
     <AppBar position="fixed" className={classes.appBar} elevation={0}>
       <Toolbar>
         <Grid container direction="row" alignContent="space-between">
-          <Grid item className={classes.logo}>
+          <Grid className={classes.logo}>
             <img
               src={require(`./assets/gliff-web-master-black.svg`) as string}
               width="79px"
@@ -117,7 +119,7 @@ export const Navbar = (): ReactElement => {
               alt="gliff logo"
             />
           </Grid>
-          <Grid item className={classes.navGrid}>
+          <Grid className={classes.navGrid}>
             <nav className={classes.navLinks}>
               {auth.user ? (
                 <>
@@ -247,5 +249,5 @@ export const Navbar = (): ReactElement => {
         </Grid>
       </Toolbar>
     </AppBar>
-  );
+  ) : null;
 };
