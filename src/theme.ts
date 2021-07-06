@@ -40,12 +40,12 @@ const theme: Theme = createMuiTheme({
       },
     },
 
-    MuiPaper: {
-      root: {
-        backgroundColor: "#FFFFFF",
-        width: "313px",
-      },
-    },
+    // MuiPaper: {
+    //   root: {
+    //     backgroundColor: "#FFFFFF",
+    //     width: "313px",
+    //   },
+    // },
 
     MuiCssBaseline: {
       "@global": {
