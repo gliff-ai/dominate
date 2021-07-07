@@ -61,66 +61,59 @@ const UserInterface = (props: Props): ReactElement | null => {
   const { etebaseInstance } = props;
   const classes = useStyles();
 
-  const generateClassName = createGenerateClassName({
-    seed: "dominate",
-    disableGlobal: true,
-  });
-
   return (
-    <StylesProvider generateClassName={generateClassName}>
-      <ThemeProvider theme={theme}>
-        <BrowserRouter>
-          <div className={classes.outerContainer}>
-            <Routes>
-              <Route path="/signin">
-                <SignIn />
-              </Route>
-              <Route path="/signup">
-                <SignUp />
-              </Route>
-              <Route
-                path="curate/:id"
-                element={<CurateWrapper etebaseInstance={etebaseInstance} />}
-              />
-              <Route
-                path="curate/"
-                element={<CurateWrapper etebaseInstance={etebaseInstance} />}
-              />
-              <Route
-                path="annotate/:collectionUid/:imageUid"
-                element={<AnnotateWrapper etebaseInstance={etebaseInstance} />}
-              />
-              <Route
-                path="manage/*"
-                element={<ManageWrapper etebaseInstance={etebaseInstance} />}
-              />
-              <Route
-                path="recover/*"
-                element={<RecoverAccount etebaseInstance={etebaseInstance} />}
-              />
-              <Route
-                path="request-recover/*"
-                element={<RequestRecoverAccount />}
-              />
-              <Route path="/">
-                <Home />
-              </Route>
-              <Route path="/teammembers">
-                <TeamMembers />
-              </Route>
-              <Route
-                path="/reset-password"
-                element={<ResetPassword etebaseInstance={etebaseInstance} />}
-              />
-              <Route path="/account">
-                <Account />
-              </Route>
-            </Routes>
-            <Navbar />
-          </div>
-        </BrowserRouter>
-      </ThemeProvider>
-    </StylesProvider>
+    <ThemeProvider theme={theme}>
+      <BrowserRouter>
+        <div className={classes.outerContainer}>
+          <Routes>
+            <Route path="/signin">
+              <SignIn />
+            </Route>
+            <Route path="/signup">
+              <SignUp />
+            </Route>
+            <Route
+              path="curate/:id"
+              element={<CurateWrapper etebaseInstance={etebaseInstance} />}
+            />
+            <Route
+              path="curate/"
+              element={<CurateWrapper etebaseInstance={etebaseInstance} />}
+            />
+            <Route
+              path="annotate/:collectionUid/:imageUid"
+              element={<AnnotateWrapper etebaseInstance={etebaseInstance} />}
+            />
+            <Route
+              path="manage/*"
+              element={<ManageWrapper etebaseInstance={etebaseInstance} />}
+            />
+            <Route
+              path="recover/*"
+              element={<RecoverAccount etebaseInstance={etebaseInstance} />}
+            />
+            <Route
+              path="request-recover/*"
+              element={<RequestRecoverAccount />}
+            />
+            <Route path="/">
+              <Home />
+            </Route>
+            <Route path="/teammembers">
+              <TeamMembers />
+            </Route>
+            <Route
+              path="/reset-password"
+              element={<ResetPassword etebaseInstance={etebaseInstance} />}
+            />
+            <Route path="/account">
+              <Account />
+            </Route>
+          </Routes>
+          <Navbar />
+        </div>
+      </BrowserRouter>
+    </ThemeProvider>
   );
 };
 
