@@ -1,23 +1,22 @@
-import { useState, ComponentType } from "react";
+import { ReactElement, useState } from "react";
+import { useNavigate, Navigate } from "react-router-dom";
+import SVG from "react-inlinesvg";
+
 import {
   Button,
   CssBaseline,
   TextField,
-  Link,
   Typography,
   makeStyles,
   Container,
   CircularProgress,
   IconButton,
   InputAdornment,
-  Slide,
-  SlideProps,
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
-import { useNavigate } from "react-router-dom";
 import { theme } from "@/theme";
-import SVG from "react-inlinesvg";
-import { Message, BaseSnackbar, TransitionProps } from "@/Message";
+import { DominateEtebase } from "@/etebase";
+import { Message } from "@/Message";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -45,7 +44,7 @@ const useStyles = makeStyles(() => ({
     textAlign: "right",
     fontStyle: "italic",
   },
-  noAccount: {
+  noAccountDiv: {
     width: "200%",
     marginBottom: "187px",
   },
@@ -58,6 +57,7 @@ const useStyles = makeStyles(() => ({
     width: "fit-content",
     marginRight: "auto",
     marginLeft: "auto",
+    marginTop: "86px",
   },
   typogragphyTitle: {
     width: "fit-content",
@@ -70,6 +70,7 @@ const useStyles = makeStyles(() => ({
   textFieldBackground: {
     background: theme.palette.primary.light,
   },
+
   svgSmall: {
     width: "22px",
     height: "100%",
@@ -77,6 +78,10 @@ const useStyles = makeStyles(() => ({
     marginRight: "9px",
     marginTop: "0px",
     marginBottom: "-4px",
+  },
+
+  iconButton: {
+    color: theme.palette.primary.light,
   },
   submit: {
     color: theme.palette.text.primary,
@@ -91,59 +96,56 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export function SignIn(): JSX.Element {
+interface Props {
+  etebaseInstance: DominateEtebase;
+}
+
+export const ResetPassword = (props: Props): ReactElement => {
   const classes = useStyles();
   const auth = useAuth();
-  const navigate = useNavigate();
-  const [open, setOpen] = useState(false);
 
-  const [transition, setTransition] =
-    useState<ComponentType<TransitionProps> | null>(null);
+  const navigate = useNavigate();
 
   const [loading, setLoading] = useState(false);
-  const [nameError, setNameError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
   const [etebaseError, setEtebaseError] = useState({});
-  const [login, setLogin] = useState({
-    email: "",
-    password: "",
-    showPassword: false,
+  const [password, setPassword] = useState({
+    newPassword: "",
+    confirmPassword: "",
+    showNewPassword: false,
+    showConfirmPassword: false,
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = event.target;
-    setLogin((prevState) => ({
+    setPassword((prevState) => ({
       ...prevState,
       [id]: value,
     }));
   };
 
-  const TransitionUp = (props: TransitionProps) => (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <Slide {...props} direction="up" />
-  );
-
-  const handleSnackbar = (Transition: React.ComponentType<TransitionProps>) => {
-    setTransition(() => Transition);
-    setOpen(true);
-  };
-
-  const handleClickShowPassword = () => {
-    setLogin({ ...login, showPassword: !login.showPassword });
-  };
-
-  const handleClose = () => {
-    setOpen(false);
+  const handleClickShowPassword = (
+    event: React.MouseEvent<HTMLButtonElement>
+  ) => {
+    if (event.currentTarget.id === "newPassword") {
+      setPassword({
+        ...password,
+        showNewPassword: !password.showNewPassword,
+      });
+    } else {
+      setPassword({
+        ...password,
+        showConfirmPassword: !password.showConfirmPassword,
+      });
+    }
   };
 
   const validate = () => {
-    let nameErrorMessage = "";
-    if (!login.email.includes("@")) {
-      nameErrorMessage = "Invalid email";
-    }
-    if (nameErrorMessage) {
-      setNameError(nameErrorMessage);
+    if (password.newPassword !== password.confirmPassword) {
+      setPasswordError("Passwords do not match");
       return false;
     }
+
     return true;
   };
 
@@ -154,23 +156,31 @@ export function SignIn(): JSX.Element {
     if (isValid) {
       setLoading(true);
       auth
-        .signin(login.email, login.password)
+        .changePassword(password.newPassword)
         .then(() => {
           setLoading(false);
-          navigate("/");
+          // TODO: toast to say success!
+          setTimeout(() => navigate("/signin"), 3000);
         })
         .catch((e) => {
-          handleSnackbar(TransitionUp);
           setLoading(false);
-          setLogin({ email: "", password: "", showPassword: false });
+          setPassword({
+            newPassword: "",
+            confirmPassword: "",
+            showNewPassword: false,
+            showConfirmPassword: false,
+          });
 
           if (e instanceof Error) {
-            // eslint-disable-next-line no-console
             setEtebaseError(e.message);
           }
         });
     }
   };
+
+  if (!props.etebaseInstance || !auth.user) {
+    return <Navigate to="/signin" />;
+  }
 
   return (
     <Container component="main" maxWidth="xs">
@@ -185,25 +195,51 @@ export function SignIn(): JSX.Element {
         />
       </div>
       <div>
-        <Typography className={classes.typogragphyTitle}>Login</Typography>
+        <Typography className={classes.typogragphyTitle}>
+          Change Password
+        </Typography>
       </div>
       <div className={classes.paper}>
         <form className={classes.form} onSubmit={onFormSubmit}>
           <TextField
             variant="outlined"
             margin="normal"
-            className={classes.textFieldBackground}
             required
             fullWidth
-            id="email"
-            name="email"
-            autoComplete="email"
-            type="text"
+            className={classes.textFieldBackground}
+            name="newPassword"
+            type={password.showNewPassword ? "text" : "password"}
+            id="newPassword"
+            value={password.newPassword}
             onChange={handleChange}
-            value={login.email}
-            placeholder="E-mail"
+            placeholder="New Password"
+            InputProps={{
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    aria-label="toggle password visibility"
+                    onClick={handleClickShowPassword}
+                    edge="end"
+                    id="newPassword"
+                  >
+                    <SVG
+                      src={
+                        require("../assets/show-or-hide-password.svg") as string
+                      }
+                      className={classes.svgSmall}
+                      id="newPassword"
+                      fill={
+                        password.showNewPassword
+                          ? theme.palette.primary.main
+                          : null
+                      }
+                    />
+                  </IconButton>
+                </InputAdornment>
+              ),
+            }}
           />
-          <Message severity="error" message={nameError} />
+          <Message severity="error" message={passwordError} />
 
           <TextField
             variant="outlined"
@@ -211,13 +247,12 @@ export function SignIn(): JSX.Element {
             required
             fullWidth
             className={classes.textFieldBackground}
-            name="password"
-            type={login.showPassword ? "text" : "password"}
-            id="password"
-            autoComplete="current-password"
-            value={login.password}
+            name="confirmPassword"
+            type={password.showConfirmPassword ? "text" : "password"}
+            id="confirmPassword"
+            value={password.confirmPassword}
             onChange={handleChange}
-            placeholder="Password"
+            placeholder="Confirm Password"
             InputProps={{
               endAdornment: (
                 <InputAdornment position="end">
@@ -231,8 +266,11 @@ export function SignIn(): JSX.Element {
                         require("../assets/show-or-hide-password.svg") as string
                       }
                       className={classes.svgSmall}
+                      id="confirmPassword"
                       fill={
-                        login.showPassword ? theme.palette.primary.main : null
+                        password.showConfirmPassword
+                          ? theme.palette.primary.main
+                          : null
                       }
                     />
                   </IconButton>
@@ -240,11 +278,6 @@ export function SignIn(): JSX.Element {
               ),
             }}
           />
-          <Typography className={classes.forgotPasswordText}>
-            <Link color="secondary" href="/request-recover/*">
-              Recover My Account
-            </Link>
-          </Typography>
 
           <div className={classes.submitDiv}>
             <Button
@@ -254,33 +287,14 @@ export function SignIn(): JSX.Element {
               className={classes.submit}
             >
               {loading ? (
-                <CircularProgress size="1.5rem" color="inherit" />
+                <CircularProgress color="inherit" />
               ) : (
-                "Continue"
+                "Change Password"
               )}
             </Button>
           </div>
-          <div className={classes.noAccount}>
-            <Typography className={classes.noAccountText}>
-              Don&apos;t have an account yet or been invited to a team?
-            </Typography>
-            <Link color="secondary" href="/signup" variant="body2">
-              Sign Up
-            </Link>
-          </div>
         </form>
-
-        <BaseSnackbar
-          open={open}
-          handleClose={handleClose}
-          transition={transition}
-          message={
-            String(etebaseError).includes("Wrong password for user.")
-              ? "Login Failed. Your username and/or password do not match"
-              : "There was an error logging you in. Please try again"
-          }
-        />
       </div>
     </Container>
   );
-}
+};

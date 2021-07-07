@@ -1,4 +1,5 @@
-import React, { ReactElement } from "react";
+import { ReactElement } from "react";
+import { makeStyles } from "@material-ui/core";
 import {
   UserInterface as Manage,
   ProvideAuth /* TODO export Services */,
@@ -10,12 +11,19 @@ import { inviteNewUser } from "@/services/user";
 declare const STORE_URL: string;
 export const API_URL = `${STORE_URL}django/api`;
 
+const useStyle = makeStyles({
+  containerDir: {
+    marginTop: "120px",
+  },
+});
+
 interface Props {
   etebaseInstance: DominateEtebase;
 }
 
 export const ManageWrapper = (props: Props): ReactElement | null => {
   const auth = useAuth();
+  const classes = useStyle();
 
   if (!props.etebaseInstance || !auth.user) return null;
 
@@ -61,8 +69,10 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   const user = { email: auth.user.username, authToken: auth.user.authToken };
 
   return (
-    <ProvideAuth>
-      <Manage user={user} services={services} apiUrl={API_URL} />
-    </ProvideAuth>
+    <div className={classes.containerDir}>
+      <ProvideAuth>
+        <Manage user={user} services={services} apiUrl={API_URL} />
+      </ProvideAuth>
+    </div>
   );
 };
