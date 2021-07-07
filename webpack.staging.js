@@ -20,10 +20,4 @@ module.exports = merge(common, {
       VERSION: JSON.stringify(version),
     }),
   ],
-  devServer: {
-    host: "127.0.0.1",
-    port: 8002,
-    historyApiFallback: true,
-    open: false,
-  },
 });
