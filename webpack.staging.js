@@ -5,7 +5,7 @@ const common = require("./webpack.common.js");
 const { version } = require("./package.json");
 
 module.exports = merge(common, {
-  mode: "production",
+  mode: "development",
   output: {
     filename: "main.js",
     path: path.resolve(__dirname, "dist"),
