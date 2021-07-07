@@ -1,13 +1,6 @@
 import { ReactElement } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import {
-  createGenerateClassName,
-  makeStyles,
-  StylesProvider,
-  ThemeProvider,
-  WithStyles,
-  withStyles,
-} from "@material-ui/core";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { makeStyles, ThemeProvider } from "@material-ui/core";
 import { theme } from "@/theme";
 
 import { DominateEtebase } from "@/etebase";
@@ -18,7 +11,6 @@ import { Navbar } from "@/NavBar";
 import { ManageWrapper } from "@/ManageWrapper";
 import { AnnotateWrapper } from "@/AnnotateWrapper";
 import { RequestRecoverAccount } from "@/views/RequestRecovery";
-import { Home } from "./Home";
 import { CurateWrapper } from "./CurateWrapper";
 import { TeamMembers } from "./views/TeamMembers";
 import { Account } from "./views/Account";
@@ -97,7 +89,7 @@ const UserInterface = (props: Props): ReactElement | null => {
               element={<RequestRecoverAccount />}
             />
             <Route path="/">
-              <Home />
+              <Navigate to="/curate" />
             </Route>
             <Route path="/teammembers">
               <TeamMembers />
