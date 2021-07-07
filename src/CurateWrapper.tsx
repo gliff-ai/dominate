@@ -1,6 +1,11 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { makeStyles, Theme } from "@material-ui/core";
+import {
+  createGenerateClassName,
+  makeStyles,
+  StylesProvider,
+  Theme,
+} from "@material-ui/core";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
 import { Slices, MetaItem } from "@/etebase/interfaces";
@@ -133,16 +138,23 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   if (!props.etebaseInstance || !auth.user || !galleryUid) return null;
 
+  const generateClassName = createGenerateClassName({
+    seed: "curate",
+    disableGlobal: true,
+  });
+
   return (
-    <div className={classes.containerDir}>
-      <Curate
-        metadata={curateInput}
-        saveImageCallback={addImageToGallery}
-        saveLabelsCallback={saveLabelsCallback}
-        deleteImagesCallback={deleteImageCallback}
-        annotateCallback={annotateCallback}
-        showAppBar={false}
-      />
-    </div>
+    <StylesProvider generateClassName={generateClassName}>
+      <div className={classes.containerDir}>
+        <Curate
+          metadata={curateInput}
+          saveImageCallback={addImageToGallery}
+          saveLabelsCallback={saveLabelsCallback}
+          deleteImagesCallback={deleteImageCallback}
+          annotateCallback={annotateCallback}
+          showAppBar={false}
+        />
+      </div>
+    </StylesProvider>
   );
 };
