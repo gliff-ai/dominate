@@ -3,6 +3,118 @@ import { useNavigate } from "react-router-dom";
 
 import { getRecoverySession } from "@/services/user";
 import { DominateEtebase } from "@/etebase";
+import { theme } from "@/theme";
+import {
+  Button,
+  CssBaseline,
+  TextField,
+  Link,
+  Typography,
+  makeStyles,
+  Container,
+  CircularProgress,
+} from "@material-ui/core";
+import { Message } from "@/Message";
+
+const useStyles = makeStyles(() => ({
+  paper: {
+    marginTop: theme.spacing(8),
+    display: "flex",
+    flexDirection: "column",
+    alignItems: "center",
+  },
+  logo: {
+    width: "fit-content",
+    marginRight: "auto",
+    marginLeft: "auto",
+    marginBottom: "187px",
+  },
+
+  form: {
+    width: "100%", // Fix IE 11 issue.
+    marginTop: theme.spacing(1),
+  },
+
+  forgotPasswordText: {
+    marginBottom: "44px",
+    marginTop: "13px",
+    color: theme.palette.text.secondary,
+    fontSize: 13,
+    width: "150%",
+  },
+  noAccount: {
+    width: "200%",
+    marginBottom: "187px",
+  },
+  noAccountText: {
+    display: "inline",
+    marginRight: "10px",
+  },
+  home: {
+    height: "53px",
+    backgroundColor: theme.palette.primary.light,
+    width: "61px",
+    top: "22px",
+    right: "20px",
+  },
+  submitDiv: {
+    width: "fit-content",
+    marginRight: "auto",
+    marginLeft: "auto",
+  },
+  typogragphyTitle: {
+    width: "fit-content",
+    marginRight: "auto",
+    marginLeft: "auto",
+    marginBottom: "-40px",
+    fontSize: "34px",
+    fontWeight: 700,
+  },
+  textFieldBackground: {
+    background: theme.palette.primary.light,
+  },
+  snackbar: {
+    background: theme.palette.info.light,
+  },
+  svgSmall: {
+    width: "22px",
+    height: "100%",
+    marginLeft: "7px",
+    marginRight: "9px",
+    marginTop: "0px",
+    marginBottom: "-4px",
+    fill: theme.palette.primary.light,
+  },
+  svgSmallClose: {
+    width: "15px",
+    height: "100%",
+    marginLeft: "11px",
+    marginRight: "0px",
+    marginTop: "-3px",
+    marginBottom: "0px",
+    fill: theme.palette.primary.light,
+  },
+  message: {
+    display: "inline-block",
+    marginRight: "5px",
+    marginLeft: "5px",
+    fontSize: "16px",
+  },
+  iconButton: {
+    color: theme.palette.primary.light,
+  },
+  submit: {
+    color: theme.palette.text.primary,
+    marginBottom: "112px",
+    textTransform: "none",
+    fontWeight: 700,
+    fontSize: "15px",
+    width: "169px",
+    "&:hover": {
+      backgroundColor: "none",
+    },
+  },
+}));
 
 const query = new URLSearchParams(window.location.search);
 
@@ -11,6 +123,7 @@ interface Props {
 }
 
 export const RecoverAccount = (props: Props): JSX.Element => {
+  const classes = useStyles();
   const { etebaseInstance } = props;
   const navigate = useNavigate();
   const [recoverySession, setRecoverySession] = useState("");
@@ -45,6 +158,7 @@ export const RecoverAccount = (props: Props): JSX.Element => {
     setRecoveryError("");
 
     // Convert their input to the format we expect
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const restoredSession = await etebaseInstance.restoreSession(
       recoverySession,
       recover.recoveryKey,
@@ -64,33 +178,80 @@ export const RecoverAccount = (props: Props): JSX.Element => {
   }
 
   return (
-    <div>
-      <h1>Recover account here!</h1>
-      <form onSubmit={onSubmitForm}>
-        <label htmlFor="recoveryKey">
-          Recovery Key:
-          <input
+    <Container component="main" maxWidth="xs">
+      <CssBaseline />
+
+      <div className={classes.logo}>
+        <img
+          src={require("../assets/gliff-web-master-black.svg") as string}
+          alt="gliff logo"
+          width="194px"
+          height="148px"
+        />
+      </div>
+
+      <div>
+        <Typography className={classes.typogragphyTitle}>
+          Recover my Account
+        </Typography>
+      </div>
+
+      <div className={classes.paper}>
+        <form className={classes.form} onSubmit={onSubmitForm}>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            className={classes.textFieldBackground}
             required
-            type="text"
+            fullWidth
             name="recoveryKey"
-            value={recover.recoveryKey}
+            type="text"
             onChange={handleChange}
+            value={recover.recoveryKey}
+            placeholder="Recovery Key"
           />
-        </label>
-        <label htmlFor="newPassword">
-          New Password:
-          <input
-            required
+          <TextField
+            variant="outlined"
+            margin="normal"
             type="password"
+            required
+            fullWidth
+            className={classes.textFieldBackground}
             name="newPassword"
+            id="newPassword"
+            autoComplete="new-password"
             value={recover.newPassword}
             onChange={handleChange}
+            placeholder="New Password"
           />
-        </label>
-        <button type="submit">Reset</button>
-
-        <div style={{ color: "red", fontSize: 12 }}>{recoveryError}</div>
-      </form>
-    </div>
+          <Typography className={classes.forgotPasswordText}>
+            * Your recovery key was provided to you when you first signed up
+          </Typography>
+          <div className={classes.submitDiv}>
+            <Button
+              type="submit"
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              {loading ? (
+                <CircularProgress size="1.5rem" color="inherit" />
+              ) : (
+                "Continue"
+              )}
+            </Button>
+            <Message severity="error" message={recoveryError} />
+          </div>
+          <div className={classes.noAccount}>
+            <Typography className={classes.noAccountText}>
+              Don&apos;t have an account yet?
+            </Typography>
+            <Link color="secondary" href="/signup">
+              Sign Up
+            </Link>
+          </div>
+        </form>
+      </div>
+    </Container>
   );
 };

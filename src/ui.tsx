@@ -1,47 +1,62 @@
-/* eslint-disable react/jsx-curly-newline */
-import React, { Component, ReactNode } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { WithStyles, withStyles } from "@material-ui/core";
+import { ReactElement } from "react";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { makeStyles, ThemeProvider } from "@material-ui/core";
+import { theme } from "@/theme";
 
-import { Collection, DominateEtebase } from "@/etebase";
+import { DominateEtebase } from "@/etebase";
 import { SignIn } from "@/views/SignIn";
-import { SignUp } from "@/views/signup/SignUp";
+import { SignUp } from "@/views/SignUp";
 import { RecoverAccount } from "@/views/RecoverAccount";
 import { Navbar } from "@/NavBar";
 import { ManageWrapper } from "@/ManageWrapper";
 import { AnnotateWrapper } from "@/AnnotateWrapper";
 import { RequestRecoverAccount } from "@/views/RequestRecovery";
-import { Home } from "./Home";
 import { CurateWrapper } from "./CurateWrapper";
+import { TeamMembers } from "./views/TeamMembers";
+import { Account } from "./views/Account";
+import { ResetPassword } from "./views/ResetPassword";
 
-const styles = {
+const useStyles = makeStyles({
   outerContainer: { height: "100%" },
-};
+  home: {
+    height: "53px",
+    backgroundColor: theme.palette.primary.light,
+    width: "61px",
+    top: "20px",
+    right: "20px",
+  },
+  svgSmall: {
+    width: "22px",
+    height: "100%",
+    marginLeft: "21px",
+  },
 
-interface Props extends WithStyles<typeof styles> {
+  iconButton: {
+    marginLeft: "-20px",
+  },
+  avatarSVG: {
+    backgroundColor: theme.palette.primary.light,
+    marginLeft: "auto",
+    marginRight: "auto",
+    marginTop: "6px",
+    "&:hover": {
+      backgroundColor: theme.palette.primary.main,
+    },
+  },
+});
+
+interface Props {
   etebaseInstance: DominateEtebase;
-  // children?: Children;
 }
 
-interface State {
-  collections?: Collection[];
-}
+const UserInterface = (props: Props): ReactElement | null => {
+  const { etebaseInstance } = props;
+  const classes = useStyles();
 
-class UserInterface extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { collections: null };
-  }
-
-  render = (): ReactNode => {
-    const { classes } = this.props;
-    return (
+  return (
+    <ThemeProvider theme={theme}>
       <BrowserRouter>
         <div className={classes.outerContainer}>
-          <Navbar />
-          <br />
-          <br />
-          <br />
           <Routes>
             <Route path="/signin">
               <SignIn />
@@ -51,57 +66,47 @@ class UserInterface extends Component<Props, State> {
             </Route>
             <Route
               path="curate/:id"
-              element={
-                <CurateWrapper etebaseInstance={this.props.etebaseInstance} />
-              }
+              element={<CurateWrapper etebaseInstance={etebaseInstance} />}
             />
             <Route
               path="curate/"
-              element={
-                <CurateWrapper etebaseInstance={this.props.etebaseInstance} />
-              }
+              element={<CurateWrapper etebaseInstance={etebaseInstance} />}
             />
             <Route
               path="annotate/:collectionUid/:imageUid"
-              element={
-                <AnnotateWrapper etebaseInstance={this.props.etebaseInstance} />
-              }
+              element={<AnnotateWrapper etebaseInstance={etebaseInstance} />}
             />
             <Route
               path="manage/*"
-              element={
-                <ManageWrapper etebaseInstance={this.props.etebaseInstance} />
-              }
+              element={<ManageWrapper etebaseInstance={etebaseInstance} />}
             />
-
             <Route
               path="recover/*"
-              element={
-                <RecoverAccount etebaseInstance={this.props.etebaseInstance} />
-              }
+              element={<RecoverAccount etebaseInstance={etebaseInstance} />}
             />
-
             <Route
               path="request-recover/*"
               element={<RequestRecoverAccount />}
             />
-
             <Route path="/">
-              <Home />
+              <Navigate to="/curate" />
+            </Route>
+            <Route path="/teammembers">
+              <TeamMembers />
+            </Route>
+            <Route
+              path="/reset-password"
+              element={<ResetPassword etebaseInstance={etebaseInstance} />}
+            />
+            <Route path="/account">
+              <Account />
             </Route>
           </Routes>
+          <Navbar />
         </div>
-
-        <footer>
-          <div>
-            {this.state.collections?.map((col) =>
-              JSON.stringify(col.getMeta())
-            )}
-          </div>
-        </footer>
       </BrowserRouter>
-    );
-  };
-}
+    </ThemeProvider>
+  );
+};
 
-export default withStyles(styles)(UserInterface);
+export default UserInterface;

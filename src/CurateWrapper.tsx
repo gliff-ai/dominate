@@ -1,5 +1,11 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import {
+  createGenerateClassName,
+  makeStyles,
+  StylesProvider,
+  Theme,
+} from "@material-ui/core";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
 import { Slices, MetaItem } from "@/etebase/interfaces";
@@ -11,13 +17,19 @@ import {
 } from "@/imageConversions";
 import { useAuth } from "@/hooks/use-auth";
 
+const useStyle = makeStyles({
+  containerDir: {
+    marginTop: "120px",
+  },
+});
+
 interface Props {
   etebaseInstance: DominateEtebase;
 }
 
 export const CurateWrapper = (props: Props): ReactElement | null => {
   if (!props.etebaseInstance) return null;
-
+  const classes = useStyle();
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
   const { id: galleryUidParam } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
   const [galleryUid, setGalleryUid] = useState<string>(galleryUidParam);
@@ -126,13 +138,23 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   if (!props.etebaseInstance || !auth.user || !galleryUid) return null;
 
+  const generateClassName = createGenerateClassName({
+    seed: "curate",
+    disableGlobal: true,
+  });
+
   return (
-    <Curate
-      metadata={curateInput}
-      saveImageCallback={addImageToGallery}
-      saveLabelsCallback={saveLabelsCallback}
-      deleteImagesCallback={deleteImageCallback}
-      annotateCallback={annotateCallback}
-    />
+    <StylesProvider generateClassName={generateClassName}>
+      <div className={classes.containerDir}>
+        <Curate
+          metadata={curateInput}
+          saveImageCallback={addImageToGallery}
+          saveLabelsCallback={saveLabelsCallback}
+          deleteImagesCallback={deleteImageCallback}
+          annotateCallback={annotateCallback}
+          showAppBar={false}
+        />
+      </div>
+    </StylesProvider>
   );
 };

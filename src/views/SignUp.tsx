@@ -1,32 +1,43 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+/* eslint-disable @typescript-eslint/restrict-template-expressions */
+import {
+  ChangeEvent,
+  FormEvent,
+  useEffect,
+  useState,
+  ComponentType,
+} from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
 import {
-  Avatar,
   Button,
   CssBaseline,
   TextField,
   Link,
-  Grid,
   Typography,
   makeStyles,
   Container,
   CircularProgress,
   Snackbar,
   IconButton,
+  SnackbarContent,
 } from "@material-ui/core";
-import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-import CloseIcon from "@material-ui/icons/Close";
+import SVG from "react-inlinesvg";
+
+import Slide, { SlideProps } from "@material-ui/core/Slide";
+
 import { useNavigate } from "react-router-dom";
+import { theme } from "@/theme";
 
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
+import { RecoveryKey } from "@/views/RecoveryKey";
+import { Message, BaseSnackbar, TransitionProps } from "@/Message";
 
 const stripePromise = loadStripe(
   "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
 );
 const query = new URLSearchParams(window.location.search);
 
-const useStyles = makeStyles((theme) => ({
+const useStyles = makeStyles(() => ({
   paper: {
     marginTop: theme.spacing(8),
     display: "flex",
@@ -37,12 +48,50 @@ const useStyles = makeStyles((theme) => ({
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
   },
+  logo: {
+    width: "fit-content",
+    marginRight: "auto",
+    marginLeft: "auto",
+    marginBottom: "187px",
+  },
+  typogragphyTitle: {
+    width: "fit-content",
+    marginRight: "auto",
+    marginLeft: "auto",
+    marginBottom: "-40px",
+    fontSize: "34px",
+    fontWeight: 700,
+  },
   form: {
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1),
   },
+  textFieldBackground: {
+    background: theme.palette.primary.light,
+  },
+  haveAccount: {
+    width: "fit-content",
+    marginRight: "auto",
+    marginLeft: "auto",
+    marginBottom: "187px",
+  },
+  haveAccountText: {
+    display: "inline",
+    marginRight: "20px",
+  },
+  submitDiv: {
+    width: "fit-content",
+    marginRight: "auto",
+    marginLeft: "auto",
+    marginTop: "86px",
+  },
   submit: {
-    margin: theme.spacing(3, 0, 2),
+    color: theme.palette.text.primary,
+    marginBottom: "60px",
+    textTransform: "none",
+    width: "169px",
+    fontWeight: 700,
+    fontSize: "15px",
   },
 }));
 
@@ -51,12 +100,16 @@ export const SignUp = (): JSX.Element => {
   const auth = useAuth();
   const navigate = useNavigate();
 
-  const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [transition, setTransition] =
+    useState<ComponentType<TransitionProps> | null>(null);
+
+  const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [etebaseError, setEtebaseError] = useState({});
+  const [recoveryKey, setRecoveryKey] = useState<string[] | null>(null);
 
   const [signUp, setSignUp] = useState({
     name: "",
@@ -66,6 +119,16 @@ export const SignUp = (): JSX.Element => {
     teamId: null as number,
     inviteId: null as string,
   });
+
+  const TransitionUp = (props: TransitionProps) => (
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <Slide {...props} direction="up" />
+  );
+
+  const handleSnackbar = (Transition: ComponentType<TransitionProps>) => {
+    setTransition(() => Transition);
+    setOpen(true);
+  };
 
   const tierId = query.get("tier_id") || null;
   const inviteId = query.get("invite_id") || null;
@@ -107,38 +170,11 @@ export const SignUp = (): JSX.Element => {
     setOpen(false);
   };
 
-  const onSubmitForm = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-
-    // Reset any errors
-    setEmailError("");
-    setPasswordError("");
-    setNameError("");
-    setLoading(true);
-
-    const isValid = validate();
-
-    if (!isValid) {
-      setLoading(false);
-      return;
-    }
-
+  const redirectUser = async (): Promise<void> => {
     try {
-      const user = await auth.signup(signUp.email, signUp.password);
-
-      const { profile, recoveryKey } = await auth.createProfile(
-        signUp.name,
-        signUp.teamId,
-        signUp.inviteId
-      );
-
-      // TODO show this somewhere
-      console.log(recoveryKey);
-
       const instance = auth.getInstance();
 
       const project = await instance.createCollection("Default Collection");
-
       // Create and update their profile
       setLoading(false);
 
@@ -162,9 +198,48 @@ export const SignUp = (): JSX.Element => {
         // using `result.error.message`.
       }
     } catch (e) {
-      setOpen(true);
+      setRecoveryKey(null);
+
+      if (e instanceof Error) {
+        setEtebaseError(e.message);
+      }
+    }
+  };
+
+  const onSubmitForm = async (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+
+    // Reset any errors
+    setEmailError("");
+    setPasswordError("");
+    setNameError("");
+    setLoading(true);
+
+    const isValid = validate();
+
+    if (!isValid) {
       setLoading(false);
-      setSignUp({ ...signUp, name: "", password: "", confirmPassword: "" });
+      return;
+    }
+
+    try {
+      const user = await auth.signup(signUp.email, signUp.password);
+
+      const { profile, recoveryKey: keys } = await auth.createProfile(
+        signUp.name,
+        signUp.teamId,
+        signUp.inviteId
+      );
+      setRecoveryKey(keys);
+    } catch (e) {
+      handleSnackbar(TransitionUp);
+      setLoading(false);
+      setSignUp({
+        ...signUp,
+        name: "",
+        password: "",
+        confirmPassword: "",
+      });
       setEmailError("");
       setNameError("");
       setPasswordError("");
@@ -175,119 +250,125 @@ export const SignUp = (): JSX.Element => {
     }
   };
 
-  return (
+  return recoveryKey ? (
+    <RecoveryKey recoveryKey={recoveryKey} callback={redirectUser} />
+  ) : (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign Up
+      <div className={classes.logo}>
+        <img
+          src={require("../assets/gliff-web-master-black.svg") as string}
+          alt="gliff logo"
+          width="194px"
+          height="148px"
+        />
+      </div>
+      <div>
+        <Typography className={classes.typogragphyTitle}>
+          Create an Account
         </Typography>
+      </div>
+      <div className={classes.paper}>
         <form className={classes.form} onSubmit={onSubmitForm}>
           <TextField
             variant="outlined"
             margin="normal"
+            className={classes.textFieldBackground}
             required
             fullWidth
             id="email"
-            label="Email Address"
             name="email"
             autoComplete="email"
             autoFocus
             type="email"
             onChange={handleChange}
             value={signUp.email}
+            placeholder="E-mail *"
           />
-          <div style={{ color: "red", fontSize: 12 }}>{emailError}</div>
+          <Message severity="error" message={emailError} />
           <TextField
             variant="outlined"
             margin="normal"
+            className={classes.textFieldBackground}
             required
             fullWidth
             id="name"
-            label="Name"
             name="name"
             autoComplete="full_name"
             type="text"
             onChange={handleChange}
             value={signUp.name}
+            placeholder="Name *"
           />
-          <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
+          <Message severity="error" message={nameError} />
           <TextField
             variant="outlined"
             margin="normal"
+            className={classes.textFieldBackground}
             required
             fullWidth
             name="password"
-            label="Password"
             type="password"
             id="password"
             autoComplete="current-password"
             value={signUp.password}
             onChange={handleChange}
+            placeholder="Password *"
           />
 
           <TextField
             variant="outlined"
             margin="normal"
+            className={classes.textFieldBackground}
             required
             fullWidth
             name="confirmPassword"
-            label="Confirm Password"
             type="password"
             id="confirmPassword"
             autoComplete="current-password"
             value={signUp.confirmPassword}
             onChange={handleChange}
+            placeholder="Confirm Password *"
           />
-          <div style={{ color: "red", fontSize: 12 }}>{passwordError}</div>
+          <Message severity="error" message={passwordError} />
 
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            {loading ? <CircularProgress color="inherit" /> : "Sign Up"}
-          </Button>
+          <div className={classes.submitDiv}>
+            <Button
+              type="submit"
+              fullWidth
+              variant="contained"
+              color="primary"
+              className={classes.submit}
+            >
+              {loading ? (
+                <CircularProgress size="1.5rem" color="inherit" />
+              ) : (
+                "Next"
+              )}
+            </Button>
+          </div>
 
-          <Grid container>
-            <Grid item xs>
-              <Link href="/signin" variant="body2">
-                Already have an account? Sign In
-              </Link>
-            </Grid>
-          </Grid>
+          <div className={classes.haveAccount}>
+            <Typography className={classes.haveAccountText}>
+              Already have an account?
+            </Typography>
+            <Link color="secondary" href="/signin" variant="body2">
+              Sign In
+            </Link>
+          </div>
         </form>
-        <div>
-          <Snackbar
-            anchorOrigin={{
-              vertical: "top",
-              horizontal: "center",
-            }}
-            open={open}
-            autoHideDuration={6000}
-            onClose={handleClose}
-            // eslint-disable-next-line @typescript-eslint/restrict-template-expressions
-            message={`${etebaseError}`}
-            action={
-              // eslint-disable-next-line react/jsx-wrap-multilines
-              <>
-                <IconButton
-                  size="small"
-                  aria-label="close"
-                  color="inherit"
-                  onClick={handleClose}
-                >
-                  <CloseIcon fontSize="small" />
-                </IconButton>
-              </>
-            }
-          />
-        </div>
+
+        {/* Looks like that account already exists, try another email! */}
+        <BaseSnackbar
+          open={open}
+          handleClose={handleClose}
+          transition={transition}
+          message={
+            String(etebaseError).includes("duplicate key")
+              ? "Looks like that account already exists, try another email!"
+              : "There was an error creating an account"
+          }
+        />
       </div>
     </Container>
   );

@@ -8,6 +8,7 @@ import { Integrations } from "@sentry/tracing";
 import { CaptureConsole } from "@sentry/integrations";
 import LogRocket from "logrocket";
 import setupLogRocketReact from "logrocket-react";
+import { createGenerateClassName, StylesProvider } from "@material-ui/core";
 
 declare const STORE_URL: string;
 declare const IS_MONITORED: boolean;
@@ -63,10 +64,17 @@ if (IS_MONITORED) {
 
 const etebaseInstance = new DominateEtebase();
 
+const generateClassName = createGenerateClassName({
+  seed: "dominate",
+  disableGlobal: true,
+});
+
 ReactDOM.render(
   <Sentry.ErrorBoundary fallback="An error has occurred" showDialog>
     <ProvideAuth etebaseInstance={etebaseInstance}>
-      <UserInterface etebaseInstance={etebaseInstance} />
+      <StylesProvider generateClassName={generateClassName}>
+        <UserInterface etebaseInstance={etebaseInstance} />
+      </StylesProvider>
     </ProvideAuth>
   </Sentry.ErrorBoundary>,
   document.getElementById("react-container")
