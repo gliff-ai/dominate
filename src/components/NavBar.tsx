@@ -106,7 +106,7 @@ export const NavBar = (): ReactElement => {
 
   const internalLinks = ["annotate", "curate", "manage"].map((tool) => (
     <>
-      <Link to={`/${tool}`}>
+      <Link to={`/${tool}`} key={tool}>
         <HtmlTooltip
           title={
             <Typography color="inherit" className={classes.linkTooltip}>
@@ -126,7 +126,6 @@ export const NavBar = (): ReactElement => {
 
   const accountMenu = (
     <>
-      {" "}
       <IconButton onClick={handleClick} aria-controls="menu">
         <HtmlTooltip title={<Typography>Account</Typography>} placement="top">
           <Avatar variant="circular" className={classes.avatarUser}>
@@ -170,7 +169,7 @@ export const NavBar = (): ReactElement => {
   );
 
   return (
-    <AppBar position="fixed" className={classes.appBar} elevation={0}>
+    <AppBar position="sticky" className={classes.appBar} elevation={0}>
       <Toolbar>
         <Grid container direction="row" alignContent="space-between">
           <Grid className={classes.logo}>

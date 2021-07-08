@@ -1,7 +1,18 @@
 import { Container, makeStyles, Typography } from "@material-ui/core";
-import { imgSrc, theme } from "@/theme";
+import { imgSrc, theme, lightGrey } from "@/theme";
+
+const squiggles = imgSrc("squig-black", "png");
 
 const useStyles = makeStyles(() => ({
+  "@global": {
+    body: {
+      backgroundImage: `url(${squiggles}),url(${squiggles})`,
+      backgroundColor: lightGrey,
+      backgroundRepeat: "no-repeat",
+      backgroundPosition: "-350px -320px, 1400px 650px",
+    },
+  },
+
   typogragphyTitle: {
     width: "100%",
     textAlign: "center",

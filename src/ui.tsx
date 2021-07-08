@@ -58,6 +58,7 @@ const UserInterface = (props: Props): ReactElement | null => {
       <CssBaseline />
       <BrowserRouter>
         <div className={classes.outerContainer}>
+          <NavBar />
           <Routes>
             <Route path="/signin">
               <BasicPage view={<SignIn />} title={<>Login</>} />
@@ -112,7 +113,6 @@ const UserInterface = (props: Props): ReactElement | null => {
               <Account />
             </Route>
           </Routes>
-          <NavBar />
         </div>
       </BrowserRouter>
     </ThemeProvider>
