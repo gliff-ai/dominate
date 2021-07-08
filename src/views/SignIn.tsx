@@ -1,43 +1,26 @@
 import { useState, ComponentType } from "react";
 import {
   Button,
-  CssBaseline,
   TextField,
   Link,
   Typography,
   makeStyles,
-  Container,
   CircularProgress,
   IconButton,
   InputAdornment,
   Slide,
-  SlideProps,
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
-import { theme } from "@/theme";
+import { imgSrc, theme } from "@/theme";
 import SVG from "react-inlinesvg";
 import { Message, BaseSnackbar, TransitionProps } from "@/components/Message";
 
 const useStyles = makeStyles(() => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  logo: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "187px",
-  },
-
   form: {
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1),
   },
-
   forgotPasswordText: {
     marginBottom: "44px",
     marginTop: "13px",
@@ -58,14 +41,6 @@ const useStyles = makeStyles(() => ({
     width: "fit-content",
     marginRight: "auto",
     marginLeft: "auto",
-  },
-  typogragphyTitle: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "-40px",
-    fontSize: "34px",
-    fontWeight: 700,
   },
   textFieldBackground: {
     background: theme.palette.primary.light,
@@ -173,114 +148,97 @@ export function SignIn(): JSX.Element {
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-
-      <div className={classes.logo}>
-        <img
-          src={require("../assets/gliff-web-master-black.svg") as string}
-          alt="gliff logo"
-          width="194px"
-          height="148px"
+    <>
+      <form className={classes.form} onSubmit={onFormSubmit}>
+        <TextField
+          variant="outlined"
+          margin="normal"
+          className={classes.textFieldBackground}
+          required
+          fullWidth
+          id="email"
+          name="email"
+          autoComplete="email"
+          type="text"
+          onChange={handleChange}
+          value={login.email}
+          placeholder="E-mail"
         />
-      </div>
-      <div>
-        <Typography className={classes.typogragphyTitle}>Login</Typography>
-      </div>
-      <div className={classes.paper}>
-        <form className={classes.form} onSubmit={onFormSubmit}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            className={classes.textFieldBackground}
-            required
-            fullWidth
-            id="email"
-            name="email"
-            autoComplete="email"
-            type="text"
-            onChange={handleChange}
-            value={login.email}
-            placeholder="E-mail"
-          />
-          <Message severity="error" message={nameError} />
+        <Message severity="error" message={nameError} />
 
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            className={classes.textFieldBackground}
-            name="password"
-            type={login.showPassword ? "text" : "password"}
-            id="password"
-            autoComplete="current-password"
-            value={login.password}
-            onChange={handleChange}
-            placeholder="Password"
-            InputProps={{
-              endAdornment: (
-                <InputAdornment position="end">
-                  <IconButton
-                    aria-label="toggle password visibility"
-                    onClick={handleClickShowPassword}
-                    edge="end"
-                  >
-                    <SVG
-                      src={
-                        require("../assets/show-or-hide-password.svg") as string
-                      }
-                      className={classes.svgSmall}
-                      fill={
-                        login.showPassword ? theme.palette.primary.main : null
-                      }
-                    />
-                  </IconButton>
-                </InputAdornment>
-              ),
-            }}
-          />
-          <Typography className={classes.forgotPasswordText}>
-            <Link color="secondary" href="/request-recover">
-              Recover My Account
-            </Link>
+        <TextField
+          variant="outlined"
+          margin="normal"
+          required
+          fullWidth
+          className={classes.textFieldBackground}
+          name="password"
+          type={login.showPassword ? "text" : "password"}
+          id="password"
+          autoComplete="current-password"
+          value={login.password}
+          onChange={handleChange}
+          placeholder="Password"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  edge="end"
+                >
+                  <SVG
+                    src={imgSrc("show-or-hide-password")}
+                    className={classes.svgSmall}
+                    fill={
+                      login.showPassword ? theme.palette.primary.main : null
+                    }
+                  />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+        <Typography className={classes.forgotPasswordText}>
+          <Link color="secondary" href="/request-recover">
+            Recover My Account
+          </Link>
+        </Typography>
+
+        <div className={classes.submitDiv}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+          >
+            {loading ? (
+              <CircularProgress size="1.5rem" color="inherit" />
+            ) : (
+              "Continue"
+            )}
+          </Button>
+        </div>
+        <div className={classes.noAccount}>
+          <Typography className={classes.noAccountText}>
+            Don&apos;t have an account yet or been invited to a team?
           </Typography>
+          <Link color="secondary" href="/signup" variant="body2">
+            Sign Up
+          </Link>
+        </div>
+      </form>
 
-          <div className={classes.submitDiv}>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              {loading ? (
-                <CircularProgress size="1.5rem" color="inherit" />
-              ) : (
-                "Continue"
-              )}
-            </Button>
-          </div>
-          <div className={classes.noAccount}>
-            <Typography className={classes.noAccountText}>
-              Don&apos;t have an account yet or been invited to a team?
-            </Typography>
-            <Link color="secondary" href="/signup" variant="body2">
-              Sign Up
-            </Link>
-          </div>
-        </form>
-
-        <BaseSnackbar
-          open={open}
-          handleClose={handleClose}
-          transition={transition}
-          message={
-            String(etebaseError).includes("Wrong password for user.")
-              ? "Login Failed. Your username and/or password do not match"
-              : "There was an error logging you in. Please try again"
-          }
-        />
-      </div>
-    </Container>
+      <BaseSnackbar
+        open={open}
+        handleClose={handleClose}
+        transition={transition}
+        message={
+          String(etebaseError).includes("Wrong password for user.")
+            ? "Login Failed. Your username and/or password do not match"
+            : "There was an error logging you in. Please try again"
+        }
+      />
+    </>
   );
 }

@@ -17,19 +17,6 @@ import {
 import { Message } from "@/components/Message";
 
 const useStyles = makeStyles(() => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  logo: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "187px",
-  },
-
   form: {
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1),
@@ -178,80 +165,61 @@ export const RecoverAccount = (props: Props): JSX.Element => {
   }
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-
-      <div className={classes.logo}>
-        <img
-          src={require("../assets/gliff-web-master-black.svg") as string}
-          alt="gliff logo"
-          width="194px"
-          height="148px"
+    <>
+      <form className={classes.form} onSubmit={onSubmitForm}>
+        <TextField
+          variant="outlined"
+          margin="normal"
+          className={classes.textFieldBackground}
+          required
+          fullWidth
+          name="recoveryKey"
+          type="text"
+          onChange={handleChange}
+          value={recover.recoveryKey}
+          placeholder="Recovery Key"
         />
-      </div>
-
-      <div>
-        <Typography className={classes.typogragphyTitle}>
-          Recover my Account
+        <TextField
+          variant="outlined"
+          margin="normal"
+          type="password"
+          required
+          fullWidth
+          className={classes.textFieldBackground}
+          name="newPassword"
+          id="newPassword"
+          autoComplete="new-password"
+          value={recover.newPassword}
+          onChange={handleChange}
+          placeholder="New Password"
+        />
+        <Typography className={classes.forgotPasswordText}>
+          * Your recovery key was provided to you when you first signed up
         </Typography>
-      </div>
-
-      <div className={classes.paper}>
-        <form className={classes.form} onSubmit={onSubmitForm}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            className={classes.textFieldBackground}
-            required
-            fullWidth
-            name="recoveryKey"
-            type="text"
-            onChange={handleChange}
-            value={recover.recoveryKey}
-            placeholder="Recovery Key"
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            type="password"
-            required
-            fullWidth
-            className={classes.textFieldBackground}
-            name="newPassword"
-            id="newPassword"
-            autoComplete="new-password"
-            value={recover.newPassword}
-            onChange={handleChange}
-            placeholder="New Password"
-          />
-          <Typography className={classes.forgotPasswordText}>
-            * Your recovery key was provided to you when you first signed up
+        <div className={classes.submitDiv}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+          >
+            {loading ? (
+              <CircularProgress size="1.5rem" color="inherit" />
+            ) : (
+              "Continue"
+            )}
+          </Button>
+          <Message severity="error" message={recoveryError} />
+        </div>
+        <div className={classes.noAccount}>
+          <Typography className={classes.noAccountText}>
+            Don&apos;t have an account yet?
           </Typography>
-          <div className={classes.submitDiv}>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              {loading ? (
-                <CircularProgress size="1.5rem" color="inherit" />
-              ) : (
-                "Continue"
-              )}
-            </Button>
-            <Message severity="error" message={recoveryError} />
-          </div>
-          <div className={classes.noAccount}>
-            <Typography className={classes.noAccountText}>
-              Don&apos;t have an account yet?
-            </Typography>
-            <Link color="secondary" href="/signup">
-              Sign Up
-            </Link>
-          </div>
-        </form>
-      </div>
-    </Container>
+          <Link color="secondary" href="/signup">
+            Sign Up
+          </Link>
+        </div>
+      </form>
+    </>
   );
 };

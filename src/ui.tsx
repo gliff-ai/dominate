@@ -14,6 +14,7 @@ import {
   SignUp,
 } from "@/views";
 import { NavBar } from "@/components";
+import { BasicPage } from "@/views/BasicPage";
 
 const useStyles = makeStyles({
   outerContainer: { height: "100%" },
@@ -58,10 +59,10 @@ const UserInterface = (props: Props): ReactElement | null => {
         <div className={classes.outerContainer}>
           <Routes>
             <Route path="/signin">
-              <SignIn />
+              <BasicPage view={<SignIn />} title={<>Login</>} />
             </Route>
             <Route path="/signup">
-              <SignUp />
+              <BasicPage view={<SignUp />} title={<>Create an Account</>} />
             </Route>
             <Route
               path="curate/:id"
@@ -81,15 +82,27 @@ const UserInterface = (props: Props): ReactElement | null => {
             />
             <Route
               path="recover/*"
-              element={<RecoverAccount etebaseInstance={etebaseInstance} />}
+              element={
+                <BasicPage
+                  view={<RecoverAccount etebaseInstance={etebaseInstance} />}
+                  title={<>Recover my Account</>}
+                />
+              }
             />
             <Route
               path="request-recover/*"
-              element={<RequestRecoverAccount />}
+              element={
+                <BasicPage
+                  view={<RequestRecoverAccount />}
+                  title={<>Request Recovery</>}
+                />
+              }
             />
+
             <Route path="/">
               <Navigate to="/curate" />
             </Route>
+
             <Route
               path="/reset-password"
               element={<ResetPassword etebaseInstance={etebaseInstance} />}

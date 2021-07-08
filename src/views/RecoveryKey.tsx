@@ -1,21 +1,8 @@
 import { ReactElement } from "react";
-import {
-  Button,
-  CssBaseline,
-  Typography,
-  makeStyles,
-  Container,
-  Card,
-} from "@material-ui/core";
+import { Button, Typography, makeStyles, Card } from "@material-ui/core";
 import { theme } from "@/theme";
 
 const useStyles = makeStyles(() => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
   card: {
     width: "519px",
     height: "67px",
@@ -25,12 +12,6 @@ const useStyles = makeStyles(() => ({
   cardTypography: {
     textAlign: "center",
     padding: "19px 0",
-  },
-  logo: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "187px",
   },
 
   form: {
@@ -80,15 +61,6 @@ const useStyles = makeStyles(() => ({
     width: "fit-content",
     marginRight: "auto",
     marginLeft: "auto",
-  },
-  typogragphyTitle: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "100px",
-    fontSize: "34px",
-    fontWeight: 700,
-    marginTop: "-60px",
   },
   textFieldBackground: {
     background: theme.palette.primary.light,
@@ -155,52 +127,35 @@ export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
   const classes = useStyles();
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-
-      <div className={classes.logo}>
-        <img
-          src={require("../assets/gliff-web-master-black.svg") as string}
-          alt="gliff logo"
-          width="194px"
-          height="148px"
-        />
-      </div>
-      <div>
-        <Typography className={classes.typogragphyTitle}>
-          Recovery Key
+    <>
+      <Card className={classes.card}>
+        <Typography className={classes.cardTypography}>
+          {recoveryKey.join(" ")}
         </Typography>
-      </div>
-      <div className={classes.paper}>
-        <Card className={classes.card}>
-          <Typography className={classes.cardTypography}>
-            {recoveryKey.join(" ")}
-          </Typography>
-        </Card>
+      </Card>
 
-        <Typography className={classes.recoveryKeyText}>
-          This is YOUR randomly generate recovery key.
-        </Typography>
-        <Typography className={classes.recoveryKeyParagraph}>
-          Please keep your recovery key stored in a safe place as this is the
-          <span className={classes.spanBold}> ONLY</span> time you will be
-          shown. We <span className={classes.spanBold}>DO NOT</span> store your
-          own recovery key, if you lose this we will be unable to recover your
-          data attached to the account.
-        </Typography>
+      <Typography className={classes.recoveryKeyText}>
+        This is YOUR randomly generate recovery key.
+      </Typography>
+      <Typography className={classes.recoveryKeyParagraph}>
+        Please keep your recovery key stored in a safe place as this is the
+        <span className={classes.spanBold}> ONLY</span> time you will be shown.
+        We <span className={classes.spanBold}>DO NOT</span> store your own
+        recovery key, if you lose this we will be unable to recover your data
+        attached to the account.
+      </Typography>
 
-        <div className={classes.submitDiv}>
-          <Button
-            type="button"
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-            onClick={callback}
-          >
-            I Understand
-          </Button>
-        </div>
+      <div className={classes.submitDiv}>
+        <Button
+          type="button"
+          variant="contained"
+          color="primary"
+          className={classes.submit}
+          onClick={callback}
+        >
+          I Understand
+        </Button>
       </div>
-    </Container>
+    </>
   );
 }

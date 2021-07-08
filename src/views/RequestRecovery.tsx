@@ -13,19 +13,6 @@ import { theme } from "@/theme";
 import { Message } from "@/components/Message";
 
 const useStyles = makeStyles(() => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  logo: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "187px",
-  },
-
   form: {
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1),
@@ -145,57 +132,39 @@ export const RequestRecoverAccount = (): JSX.Element => {
   const successBanner = success ? "Email sent" : "";
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.logo}>
-        <img
-          src={require("../assets/gliff-web-master-black.svg") as string}
-          alt="gliff logo"
-          width="194px"
-          height="148px"
+    <>
+      <div className={classes.text}>
+        Enter your email address to request a recovery link. You will need your
+        recovery key to compelete the process.
+      </div>
+
+      <form onSubmit={onSubmitForm}>
+        <TextField
+          variant="outlined"
+          margin="normal"
+          className={classes.textFieldBackground}
+          required
+          fullWidth
+          id="email"
+          name="recoveryEmail"
+          type="email"
+          onChange={handleChange}
+          value={recoveryEmail}
+          placeholder="E-mail"
         />
-      </div>
-
-      <div>
-        <Typography className={classes.typogragphyTitle}>
-          Request Recovery
-        </Typography>
-      </div>
-
-      <div className={classes.paper}>
-        <div className={classes.text}>
-          Enter your email address to request a recovery link. You will need
-          your recovery key to compelete the process.
+        <Message severity="success" message={successBanner} />
+        <div className={classes.submitDiv}>
+          <Button
+            type="submit"
+            variant="contained"
+            color="primary"
+            className={classes.submit}
+          >
+            Request Recovery
+          </Button>
         </div>
-
-        <form onSubmit={onSubmitForm}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            className={classes.textFieldBackground}
-            required
-            fullWidth
-            id="email"
-            name="recoveryEmail"
-            type="email"
-            onChange={handleChange}
-            value={recoveryEmail}
-            placeholder="E-mail"
-          />
-          <Message severity="success" message={successBanner} />
-          <div className={classes.submitDiv}>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              Request Recovery
-            </Button>
-          </div>
-          <Message severity="error" message={recoveryError} />
-        </form>
-      </div>
-    </Container>
+        <Message severity="error" message={recoveryError} />
+      </form>
+    </>
   );
 };
