@@ -1,25 +1,35 @@
-import { ThemeProvider, createMuiTheme, Theme } from "@material-ui/core";
+import { ThemeProvider, createTheme, Theme } from "@material-ui/core";
 import type {} from "@material-ui/lab/themeAugmentation";
 
 const squiggles = require("./assets/squig-black.png") as string;
 
-const theme: Theme = createMuiTheme({
+const backgroundWhite = "#F2F2F2";
+const lightGrey = "#FAFAFA";
+const middleGrey = "#A1A1A1";
+const darkGrey = "#2B2F3A";
+const mainGreen = "#02FFAD";
+const purple = "#AE79FF";
+const blue = "#00DBFF";
+const white = "#FFF";
+const black = "#000";
+
+const theme: Theme = createTheme({
   palette: {
     primary: {
-      main: "#02FFAD",
-      light: "#FFFFFF",
+      main: mainGreen,
+      light: white,
     },
     secondary: {
-      main: "#AE79FF",
-      light: "#fafafa",
+      main: purple,
+      light: lightGrey,
     },
     text: {
-      primary: "#2B2F3A",
-      secondary: "#A1A1A1",
+      primary: darkGrey,
+      secondary: middleGrey,
     },
     info: {
-      main: "#00DBFF",
-      light: "#AE79FF",
+      main: blue,
+      light: purple,
     },
   },
   typography: {
@@ -33,7 +43,7 @@ const theme: Theme = createMuiTheme({
   overrides: {
     MuiButton: {
       root: {
-        color: "#000000",
+        color: black,
         "&:hover": {
           backgroundColor: "transparent",
         },
@@ -44,7 +54,7 @@ const theme: Theme = createMuiTheme({
       "@global": {
         body: {
           backgroundImage: `url(${squiggles}),url(${squiggles})`,
-          backgroundColor: "#F2F2F2",
+          backgroundColor: backgroundWhite,
           backgroundRepeat: "no-repeat",
           backgroundPosition: "-350px -320px, 1400px 650px",
           overflow: "hidden",
@@ -76,7 +86,7 @@ const theme: Theme = createMuiTheme({
     MuiAutocomplete: {
       option: {
         '&[data-focus="true"]': {
-          backgroundColor: "#02FFAD",
+          backgroundColor: mainGreen,
         },
       },
     },
@@ -112,14 +122,14 @@ const theme: Theme = createMuiTheme({
     MuiList: {
       root: {
         "&:hover": {
-          backgroundColor: "#ffffff",
+          backgroundColor: white,
         },
       },
     },
 
     MuiSlider: {
       root: {
-        color: "#000000",
+        color: black,
         textAlign: "center",
       },
       vertical: {
@@ -138,7 +148,7 @@ const theme: Theme = createMuiTheme({
         border: "1px solid #dadde9",
         borderRadius: "9px",
         padding: "8px",
-        background: "#fafafa",
+        background: lightGrey,
         width: "63px",
       },
     },
@@ -161,13 +171,13 @@ const theme: Theme = createMuiTheme({
       circular: {
         backgroundColor: "transparent",
         "&:hover": {
-          backgroundColor: "#02FFAD",
+          backgroundColor: mainGreen,
         },
       },
       circle: {
-        backgroundColor: "#02FFAD",
+        backgroundColor: mainGreen,
         "&:hover": {
-          backgroundColor: "#ffffff",
+          backgroundColor: white,
         },
       },
     },
