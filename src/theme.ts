@@ -1,17 +1,17 @@
-import { ThemeProvider, createTheme, Theme } from "@material-ui/core";
-import type {} from "@material-ui/lab/themeAugmentation";
+import { ThemeProvider, createTheme, Theme } from "@material-ui/core/styles";
+import { imgSrc } from "@/helpers";
 
-const squiggles = require("./assets/squig-black.png") as string;
+const squiggles = imgSrc("squig-black", "png");
 
+const white = "#FFF";
 const backgroundWhite = "#F2F2F2";
 const lightGrey = "#FAFAFA";
 const middleGrey = "#A1A1A1";
 const darkGrey = "#2B2F3A";
+const black = "#000";
 const mainGreen = "#02FFAD";
 const purple = "#AE79FF";
 const blue = "#00DBFF";
-const white = "#FFF";
-const black = "#000";
 
 const theme: Theme = createTheme({
   palette: {
