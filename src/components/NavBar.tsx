@@ -94,10 +94,13 @@ export const NavBar = (): ReactElement => {
   };
 
   const hasNavbar = () =>
-    // TODO: Add path for all pages that should not have a navbar
-    !["/signin", "/signup", "/reset-password", "/request-recover"].includes(
-      window.location.pathname
-    );
+    ![
+      "/signin",
+      "/signup",
+      "/reset-password",
+      "/request-recover",
+      "/recover",
+    ].includes(window.location.pathname);
 
   if (!hasNavbar()) return null;
 

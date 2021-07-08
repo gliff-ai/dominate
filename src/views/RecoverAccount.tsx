@@ -161,7 +161,12 @@ export const RecoverAccount = (props: Props): JSX.Element => {
   };
 
   if (!recoverySession) {
-    return <h1>Invalid Recovery Token</h1>;
+    return (
+      <>
+        <h1>Invalid Recovery Token.</h1>
+        <div>It may have expired, try requesting another one.</div>
+      </>
+    );
   }
 
   return (
