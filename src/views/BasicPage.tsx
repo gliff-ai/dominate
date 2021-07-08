@@ -12,7 +12,6 @@ const useStyles = makeStyles(() => ({
       backgroundPosition: "-350px -320px, 1400px 650px",
     },
   },
-
   typogragphyTitle: {
     width: "100%",
     textAlign: "center",
@@ -31,10 +30,8 @@ const useStyles = makeStyles(() => ({
     marginTop: "75px",
     marginBottom: "75px",
   },
-
   mainBlock: {
     alignSelf: "center",
-    // alignItems: "center",
   },
 }));
 

@@ -7,7 +7,6 @@ import {
   makeStyles,
   Menu,
   MenuItem,
-  Paper,
   Theme,
   Toolbar,
   Typography,

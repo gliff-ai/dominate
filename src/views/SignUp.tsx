@@ -285,7 +285,7 @@ export const SignUp = (): JSX.Element => {
         />
         <Message severity="error" message={passwordError} />
 
-        <SubmitButton loading={loading} value={"Next"} />
+        <SubmitButton loading={loading} value="Next" />
 
         <div className={classes.haveAccount}>
           <Typography className={classes.haveAccountText}>

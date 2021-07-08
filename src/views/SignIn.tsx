@@ -188,7 +188,7 @@ export function SignIn(): JSX.Element {
           </Link>
         </Typography>
 
-        <SubmitButton loading={loading} value={"Continue"} />
+        <SubmitButton loading={loading} value="Continue" />
 
         <div className={classes.noAccount}>
           <Typography className={classes.noAccountText}>

@@ -123,7 +123,7 @@ export const RequestRecoverAccount = (): JSX.Element => {
         />
         <Message severity="success" message={successBanner} />
 
-        <SubmitButton loading={loading} value={"Request Recovery"} />
+        <SubmitButton loading={loading} value="Request Recovery" />
         <Message severity="error" message={recoveryError} />
       </form>
     </>

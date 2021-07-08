@@ -170,7 +170,7 @@ export const RecoverAccount = (props: Props): JSX.Element => {
           * Your recovery key was provided to you when you first signed up
         </Typography>
 
-        <SubmitButton loading={loading} value={"Continue"} />
+        <SubmitButton loading={loading} value="Continue" />
 
         <Message severity="error" message={recoveryError} />
 
