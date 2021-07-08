@@ -77,7 +77,7 @@ function BaseSnackbar({
         message={
           <span>
             <SVG
-              src={require(`./assets/warning.svg`) as string}
+              src={require(`@/assets/warning.svg`) as string}
               className={classes.svgSmall}
             />
 
@@ -89,7 +89,7 @@ function BaseSnackbar({
               className={classes.iconButton}
             >
               <SVG
-                src={require(`./assets/close.svg`) as string}
+                src={require(`@/assets/close.svg`) as string}
                 className={classes.svgSmallClose}
               />
             </IconButton>

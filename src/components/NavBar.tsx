@@ -18,7 +18,7 @@ import { ReactElement, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
 
-import { useAuth } from "./hooks/use-auth";
+import { useAuth } from "../hooks/use-auth";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -84,7 +84,7 @@ const HtmlTooltip = withStyles((theme: Theme) => ({
   },
 }))(Tooltip);
 
-export const Navbar = (): ReactElement => {
+export const NavBar = (): ReactElement => {
   // Get auth state and re-render anytime it changes
   const auth = useAuth();
   const navigate = useNavigate();
@@ -111,7 +111,7 @@ export const Navbar = (): ReactElement => {
         <Grid container direction="row" alignContent="space-between">
           <Grid className={classes.logo}>
             <img
-              src={require(`./assets/gliff-web-master-black.svg`) as string}
+              src={require(`@/assets/gliff-web-master-black.svg`) as string}
               width="79px"
               height="60px"
               alt="gliff logo"
@@ -128,7 +128,7 @@ export const Navbar = (): ReactElement => {
                     >
                       <Avatar variant="circular">
                         <SVG
-                          src={require(`./assets/curate.svg`) as string}
+                          src={require(`@/assets/curate.svg`) as string}
                           className={classes.svgMedium}
                         />
                       </Avatar>
@@ -142,7 +142,7 @@ export const Navbar = (): ReactElement => {
                     >
                       <Avatar variant="circular">
                         <SVG
-                          src={require(`./assets/annotate.svg`) as string}
+                          src={require(`@/assets/annotate.svg`) as string}
                           className={classes.svgMedium}
                         />
                       </Avatar>
@@ -156,7 +156,7 @@ export const Navbar = (): ReactElement => {
                     >
                       <Avatar variant="circular">
                         <SVG
-                          src={require(`./assets/manage.svg`) as string}
+                          src={require(`@/assets/manage.svg`) as string}
                           className={classes.svgMedium}
                         />
                       </Avatar>
@@ -202,7 +202,7 @@ export const Navbar = (): ReactElement => {
                       className={classes.menuItem}
                     >
                       <SVG
-                        src={require(`./assets/account-settings.svg`) as string}
+                        src={require(`@/assets/account-settings.svg`) as string}
                         className={classes.svgMedium}
                         style={{ marginRight: "12px" }}
                       />
@@ -215,7 +215,7 @@ export const Navbar = (): ReactElement => {
                       }
                     >
                       <SVG
-                        src={require(`./assets/log-out.svg`) as string}
+                        src={require(`@/assets/log-out.svg`) as string}
                         className={classes.svgMedium}
                         style={{ marginRight: "12px" }}
                       />

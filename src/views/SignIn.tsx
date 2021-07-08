@@ -17,7 +17,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { theme } from "@/theme";
 import SVG from "react-inlinesvg";
-import { Message, BaseSnackbar, TransitionProps } from "@/Message";
+import { Message, BaseSnackbar, TransitionProps } from "@/components/Message";
 
 const useStyles = makeStyles(() => ({
   paper: {

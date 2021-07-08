@@ -1,11 +1,14 @@
-import { ThemeProvider, createTheme, Theme } from "@material-ui/core/styles";
+export { ThemeProvider } from "@material-ui/core";
+import { createTheme } from "@material-ui/core/styles";
+import type {} from "@material-ui/lab/themeAugmentation"; // Required to add autocomplete to Theme until v5
 import { imgSrc } from "@/helpers";
 
 const squiggles = imgSrc("squig-black", "png");
 
 const white = "#FFF";
-const backgroundWhite = "#F2F2F2";
-const lightGrey = "#FAFAFA";
+const lightestGrey = "#FAFAFA";
+const lightGrey = "#F2F2F2";
+const veryLightBlue = "#DADDE9";
 const middleGrey = "#A1A1A1";
 const darkGrey = "#2B2F3A";
 const black = "#000";
@@ -13,7 +16,7 @@ const mainGreen = "#02FFAD";
 const purple = "#AE79FF";
 const blue = "#00DBFF";
 
-const theme: Theme = createTheme({
+export const theme = createTheme({
   palette: {
     primary: {
       main: mainGreen,
@@ -21,7 +24,7 @@ const theme: Theme = createTheme({
     },
     secondary: {
       main: purple,
-      light: lightGrey,
+      light: lightestGrey,
     },
     text: {
       primary: darkGrey,
@@ -54,7 +57,7 @@ const theme: Theme = createTheme({
       "@global": {
         body: {
           backgroundImage: `url(${squiggles}),url(${squiggles})`,
-          backgroundColor: backgroundWhite,
+          backgroundColor: lightGrey,
           backgroundRepeat: "no-repeat",
           backgroundPosition: "-350px -320px, 1400px 650px",
           overflow: "hidden",
@@ -145,10 +148,11 @@ const theme: Theme = createTheme({
 
     MuiButtonGroup: {
       root: {
-        border: "1px solid #dadde9",
+        border: "1px solid",
+        borderColor: veryLightBlue,
         borderRadius: "9px",
         padding: "8px",
-        background: lightGrey,
+        background: lightestGrey,
         width: "63px",
       },
     },
@@ -210,5 +214,3 @@ const theme: Theme = createTheme({
     },
   },
 });
-
-export { ThemeProvider, theme };

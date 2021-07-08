@@ -14,7 +14,7 @@ import {
   Container,
   CircularProgress,
 } from "@material-ui/core";
-import { Message } from "@/Message";
+import { Message } from "@/components/Message";
 
 const useStyles = makeStyles(() => ({
   paper: {

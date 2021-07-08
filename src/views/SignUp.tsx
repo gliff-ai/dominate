@@ -30,7 +30,7 @@ import { theme } from "@/theme";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
-import { Message, BaseSnackbar, TransitionProps } from "@/Message";
+import { Message, BaseSnackbar, TransitionProps } from "@/components/Message";
 
 const stripePromise = loadStripe(
   "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
