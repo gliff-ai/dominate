@@ -11,7 +11,7 @@ import {
   Box,
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
-import { theme } from "@/theme";
+import { imgSrc, theme } from "@/theme";
 
 import { HtmlTooltip } from "@/components/HtmlTooltip";
 
