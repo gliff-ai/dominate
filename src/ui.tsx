@@ -4,17 +4,16 @@ import { makeStyles, ThemeProvider } from "@material-ui/core";
 import { theme } from "@/theme";
 
 import { DominateEtebase } from "@/etebase";
-import { SignIn } from "@/views/SignIn";
-import { SignUp } from "@/views/SignUp";
-import { RecoverAccount } from "@/views/RecoverAccount";
-import { Navbar } from "@/NavBar";
-import { ManageWrapper } from "@/ManageWrapper";
-import { AnnotateWrapper } from "@/AnnotateWrapper";
-import { RequestRecoverAccount } from "@/views/RequestRecovery";
-import { CurateWrapper } from "./CurateWrapper";
-import { TeamMembers } from "./views/TeamMembers";
-import { Account } from "./views/Account";
-import { ResetPassword } from "./views/ResetPassword";
+import { Annotate, Curate, Manage } from "@/wrappers";
+import {
+  Account,
+  RecoverAccount,
+  RequestRecoverAccount,
+  ResetPassword,
+  SignIn,
+  SignUp,
+} from "@/views";
+import { NavBar } from "@/components";
 
 const useStyles = makeStyles({
   outerContainer: { height: "100%" },
@@ -66,19 +65,19 @@ const UserInterface = (props: Props): ReactElement | null => {
             </Route>
             <Route
               path="curate/:id"
-              element={<CurateWrapper etebaseInstance={etebaseInstance} />}
+              element={<Curate etebaseInstance={etebaseInstance} />}
             />
             <Route
               path="curate/"
-              element={<CurateWrapper etebaseInstance={etebaseInstance} />}
+              element={<Curate etebaseInstance={etebaseInstance} />}
             />
             <Route
               path="annotate/:collectionUid/:imageUid"
-              element={<AnnotateWrapper etebaseInstance={etebaseInstance} />}
+              element={<Annotate etebaseInstance={etebaseInstance} />}
             />
             <Route
               path="manage/*"
-              element={<ManageWrapper etebaseInstance={etebaseInstance} />}
+              element={<Manage etebaseInstance={etebaseInstance} />}
             />
             <Route
               path="recover/*"
@@ -91,9 +90,6 @@ const UserInterface = (props: Props): ReactElement | null => {
             <Route path="/">
               <Navigate to="/curate" />
             </Route>
-            <Route path="/teammembers">
-              <TeamMembers />
-            </Route>
             <Route
               path="/reset-password"
               element={<ResetPassword etebaseInstance={etebaseInstance} />}
@@ -102,7 +98,7 @@ const UserInterface = (props: Props): ReactElement | null => {
               <Account />
             </Route>
           </Routes>
-          <Navbar />
+          <NavBar />
         </div>
       </BrowserRouter>
     </ThemeProvider>
