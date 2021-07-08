@@ -17,7 +17,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { theme } from "@/theme";
 import SVG from "react-inlinesvg";
-import { Message, BaseSnackbar, TransitionProps } from "@/Message";
+import { Message, BaseSnackbar, TransitionProps } from "@/components/Message";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -241,7 +241,7 @@ export function SignIn(): JSX.Element {
             }}
           />
           <Typography className={classes.forgotPasswordText}>
-            <Link color="secondary" href="/request-recover/*">
+            <Link color="secondary" href="/request-recover">
               Recover My Account
             </Link>
           </Typography>

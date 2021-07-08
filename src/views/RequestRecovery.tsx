@@ -10,7 +10,7 @@ import {
   Container,
 } from "@material-ui/core";
 import { theme } from "@/theme";
-import { Message } from "@/Message";
+import { Message } from "@/components/Message";
 
 const useStyles = makeStyles(() => ({
   paper: {

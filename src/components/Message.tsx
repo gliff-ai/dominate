@@ -9,6 +9,7 @@ import {
   Theme,
   SlideProps,
 } from "@material-ui/core";
+import { imgSrc } from "@/theme";
 
 interface MessageProps {
   message: string;
@@ -76,10 +77,7 @@ function BaseSnackbar({
         className={classes.snackbar}
         message={
           <span>
-            <SVG
-              src={require(`./assets/warning.svg`) as string}
-              className={classes.svgSmall}
-            />
+            <SVG src={imgSrc("warning")} className={classes.svgSmall} />
 
             <div className={classes.message}>{message}</div>
             <IconButton
@@ -88,10 +86,7 @@ function BaseSnackbar({
               onClick={handleClose}
               className={classes.iconButton}
             >
-              <SVG
-                src={require(`./assets/close.svg`) as string}
-                className={classes.svgSmallClose}
-              />
+              <SVG src={imgSrc("close")} className={classes.svgSmallClose} />
             </IconButton>
           </span>
         }
