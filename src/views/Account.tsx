@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SVG from "react-inlinesvg";
 import {
   Avatar,
   Card,
@@ -11,7 +12,7 @@ import {
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
 import { theme } from "@/theme";
-import SVG from "react-inlinesvg";
+
 import { HtmlTooltip } from "@/components/HtmlTooltip";
 
 const useStyles = makeStyles(() => ({
