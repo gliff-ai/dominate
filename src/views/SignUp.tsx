@@ -31,6 +31,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
 import { Message, BaseSnackbar, TransitionProps } from "@/components/Message";
+import { SubmitButton } from "@/components";
 
 const stripePromise = loadStripe(
   "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
@@ -59,20 +60,6 @@ const useStyles = makeStyles(() => ({
   haveAccountText: {
     display: "inline",
     marginRight: "20px",
-  },
-  submitDiv: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginTop: "86px",
-  },
-  submit: {
-    color: theme.palette.text.primary,
-    marginBottom: "60px",
-    textTransform: "none",
-    width: "169px",
-    fontWeight: 700,
-    fontSize: "15px",
   },
 }));
 
@@ -298,21 +285,7 @@ export const SignUp = (): JSX.Element => {
         />
         <Message severity="error" message={passwordError} />
 
-        <div className={classes.submitDiv}>
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            {loading ? (
-              <CircularProgress size="1.5rem" color="inherit" />
-            ) : (
-              "Next"
-            )}
-          </Button>
-        </div>
+        <SubmitButton loading={loading} value={"Next"} />
 
         <div className={classes.haveAccount}>
           <Typography className={classes.haveAccountText}>

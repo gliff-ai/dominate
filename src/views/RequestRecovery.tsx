@@ -1,16 +1,9 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 
 import { apiRequest } from "@/api";
-import {
-  Button,
-  CssBaseline,
-  TextField,
-  Typography,
-  makeStyles,
-  Container,
-} from "@material-ui/core";
+import { TextField, makeStyles } from "@material-ui/core";
 import { theme } from "@/theme";
-import { Message } from "@/components/Message";
+import { Message, SubmitButton } from "@/components";
 
 const useStyles = makeStyles(() => ({
   form: {
@@ -37,19 +30,6 @@ const useStyles = makeStyles(() => ({
     fontSize: "20px",
     fontWeight: 400,
     textAlign: "center",
-  },
-  submitDiv: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-  },
-  typogragphyTitle: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "-40px",
-    fontSize: "34px",
-    fontWeight: 700,
   },
   textFieldBackground: {
     background: theme.palette.primary.light,
@@ -83,17 +63,6 @@ const useStyles = makeStyles(() => ({
   },
   iconButton: {
     color: theme.palette.primary.light,
-  },
-  submit: {
-    color: theme.palette.text.primary,
-    marginTop: "45px",
-    textTransform: "none",
-    fontWeight: 700,
-    fontSize: "15px",
-    width: "169px",
-    "&:hover": {
-      backgroundColor: "none",
-    },
   },
 }));
 
@@ -153,16 +122,8 @@ export const RequestRecoverAccount = (): JSX.Element => {
           placeholder="E-mail"
         />
         <Message severity="success" message={successBanner} />
-        <div className={classes.submitDiv}>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            Request Recovery
-          </Button>
-        </div>
+
+        <SubmitButton loading={loading} value={"Request Recovery"} />
         <Message severity="error" message={recoveryError} />
       </form>
     </>

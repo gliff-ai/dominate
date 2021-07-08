@@ -4,17 +4,8 @@ import { useNavigate } from "react-router-dom";
 import { getRecoverySession } from "@/services/user";
 import { DominateEtebase } from "@/etebase";
 import { theme } from "@/theme";
-import {
-  Button,
-  CssBaseline,
-  TextField,
-  Link,
-  Typography,
-  makeStyles,
-  Container,
-  CircularProgress,
-} from "@material-ui/core";
-import { Message } from "@/components/Message";
+import { TextField, Link, Typography, makeStyles } from "@material-ui/core";
+import { SubmitButton, Message } from "@/components";
 
 const useStyles = makeStyles(() => ({
   form: {
@@ -44,19 +35,7 @@ const useStyles = makeStyles(() => ({
     top: "22px",
     right: "20px",
   },
-  submitDiv: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-  },
-  typogragphyTitle: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "-40px",
-    fontSize: "34px",
-    fontWeight: 700,
-  },
+
   textFieldBackground: {
     background: theme.palette.primary.light,
   },
@@ -89,17 +68,6 @@ const useStyles = makeStyles(() => ({
   },
   iconButton: {
     color: theme.palette.primary.light,
-  },
-  submit: {
-    color: theme.palette.text.primary,
-    marginBottom: "112px",
-    textTransform: "none",
-    fontWeight: 700,
-    fontSize: "15px",
-    width: "169px",
-    "&:hover": {
-      backgroundColor: "none",
-    },
   },
 }));
 
@@ -201,21 +169,11 @@ export const RecoverAccount = (props: Props): JSX.Element => {
         <Typography className={classes.forgotPasswordText}>
           * Your recovery key was provided to you when you first signed up
         </Typography>
-        <div className={classes.submitDiv}>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            {loading ? (
-              <CircularProgress size="1.5rem" color="inherit" />
-            ) : (
-              "Continue"
-            )}
-          </Button>
-          <Message severity="error" message={recoveryError} />
-        </div>
+
+        <SubmitButton loading={loading} value={"Continue"} />
+
+        <Message severity="error" message={recoveryError} />
+
         <div className={classes.noAccount}>
           <Typography className={classes.noAccountText}>
             Don&apos;t have an account yet?

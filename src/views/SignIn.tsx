@@ -1,11 +1,9 @@
 import { useState, ComponentType } from "react";
 import {
-  Button,
   TextField,
   Link,
   Typography,
   makeStyles,
-  CircularProgress,
   IconButton,
   InputAdornment,
   Slide,
@@ -15,6 +13,7 @@ import { useNavigate } from "react-router-dom";
 import { imgSrc, theme } from "@/theme";
 import SVG from "react-inlinesvg";
 import { Message, BaseSnackbar, TransitionProps } from "@/components/Message";
+import { SubmitButton } from "@/components";
 
 const useStyles = makeStyles(() => ({
   form: {
@@ -37,11 +36,6 @@ const useStyles = makeStyles(() => ({
     marginRight: "10px",
   },
 
-  submitDiv: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-  },
   textFieldBackground: {
     background: theme.palette.primary.light,
   },
@@ -52,17 +46,6 @@ const useStyles = makeStyles(() => ({
     marginRight: "9px",
     marginTop: "0px",
     marginBottom: "-4px",
-  },
-  submit: {
-    color: theme.palette.text.primary,
-    marginBottom: "112px",
-    textTransform: "none",
-    fontWeight: 700,
-    fontSize: "15px",
-    width: "169px",
-    "&:hover": {
-      backgroundColor: "none",
-    },
   },
 }));
 
@@ -205,20 +188,8 @@ export function SignIn(): JSX.Element {
           </Link>
         </Typography>
 
-        <div className={classes.submitDiv}>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            {loading ? (
-              <CircularProgress size="1.5rem" color="inherit" />
-            ) : (
-              "Continue"
-            )}
-          </Button>
-        </div>
+        <SubmitButton loading={loading} value={"Continue"} />
+
         <div className={classes.noAccount}>
           <Typography className={classes.noAccountText}>
             Don&apos;t have an account yet or been invited to a team?
