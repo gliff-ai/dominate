@@ -1,4 +1,5 @@
 import { useState } from "react";
+import SVG from "react-inlinesvg";
 import {
   Avatar,
   Card,
@@ -6,15 +7,13 @@ import {
   IconButton,
   makeStyles,
   Paper,
-  Theme,
-  Tooltip,
   Typography,
-  withStyles,
   Box,
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
-import { theme } from "@/theme";
-import SVG from "react-inlinesvg";
+import { imgSrc, theme } from "@/theme";
+
+import { HtmlTooltip } from "@/components/HtmlTooltip";
 
 const useStyles = makeStyles(() => ({
   avatar: {
@@ -58,15 +57,6 @@ const useStyles = makeStyles(() => ({
   svgSmall: { width: "22px", height: "100%" },
 }));
 
-const HtmlTooltip = withStyles((t: Theme) => ({
-  tooltip: {
-    backgroundColor: theme.palette.primary.light,
-    fontSize: t.typography.pxToRem(12),
-    border: "1px solid #dadde9",
-    color: theme.palette.text.primary,
-  },
-}))(Tooltip);
-
 export function Account(): JSX.Element {
   const classes = useStyles();
   const [hover, sethover] = useState(false);
@@ -95,7 +85,7 @@ export function Account(): JSX.Element {
             >
               <IconButton>
                 <SVG
-                  src={require("../assets/edit-details.svg") as string}
+                  src={imgSrc("edit-details")}
                   className={classes.svgSmall}
                   fill={
                     hover
