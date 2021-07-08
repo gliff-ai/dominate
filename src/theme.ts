@@ -58,12 +58,15 @@ export const theme = createTheme({
 
     MuiCssBaseline: {
       "@global": {
+        html: {
+          height: "100%",
+        },
         body: {
           backgroundImage: `url(${squiggles}),url(${squiggles})`,
           backgroundColor: lightGrey,
           backgroundRepeat: "no-repeat",
           backgroundPosition: "-350px -320px, 1400px 650px",
-          overflow: "hidden",
+          height: "100%",
         },
       },
     },

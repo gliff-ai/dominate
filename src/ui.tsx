@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { makeStyles, ThemeProvider } from "@material-ui/core";
+import { CssBaseline, makeStyles, ThemeProvider } from "@material-ui/core";
 import { theme } from "@/theme";
 
 import { DominateEtebase } from "@/etebase";
@@ -55,6 +55,7 @@ const UserInterface = (props: Props): ReactElement | null => {
 
   return (
     <ThemeProvider theme={theme}>
+      <CssBaseline />
       <BrowserRouter>
         <div className={classes.outerContainer}>
           <Routes>

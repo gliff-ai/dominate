@@ -1,17 +1,10 @@
-import {
-  Container,
-  CssBaseline,
-  makeStyles,
-  Typography,
-} from "@material-ui/core";
+import { Container, makeStyles, Typography } from "@material-ui/core";
 import { imgSrc, theme } from "@/theme";
 
 const useStyles = makeStyles(() => ({
   typogragphyTitle: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "-40px",
+    width: "100%",
+    textAlign: "center",
     fontSize: "34px",
     fontWeight: 700,
   },
@@ -20,12 +13,17 @@ const useStyles = makeStyles(() => ({
     display: "flex",
     flexDirection: "column",
     alignItems: "center",
+    justifyContent: "center",
   },
   logo: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "187px",
+    textAlign: "center",
+    marginTop: "75px",
+    marginBottom: "75px",
+  },
+
+  mainBlock: {
+    alignSelf: "center",
+    // alignItems: "center",
   },
 }));
 
@@ -37,8 +35,11 @@ export const BasicPage = (props: Props): JSX.Element => {
   const classes = useStyles();
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
+    <Container
+      component="main"
+      maxWidth="xs"
+      style={{ display: "flex", flexDirection: "column", marginTop: 0 }}
+    >
       <div className={classes.logo}>
         <img
           src={imgSrc("gliff-web-master-black")}
@@ -47,13 +48,13 @@ export const BasicPage = (props: Props): JSX.Element => {
           height="148px"
         />
       </div>
-      <div>
+      <div className={classes.mainBlock}>
         <Typography className={classes.typogragphyTitle}>
           {props.title}
         </Typography>
-      </div>
 
-      <div className={classes.paper}>{props.view}</div>
+        <div className={classes.paper}>{props.view}</div>
+      </div>
     </Container>
   );
 };
