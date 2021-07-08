@@ -17,7 +17,9 @@ import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { theme } from "@/theme";
 import SVG from "react-inlinesvg";
-import { Message, BaseSnackbar, TransitionProps } from "@/Message";
+import { TransitionProps } from "@/components/BaseSnackbar";
+import { MessageAlert } from "@/components/message/MessageAlert";
+import { MessageSnackbar } from "@/components/message/MessageSnackbar";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -203,7 +205,7 @@ export function SignIn(): JSX.Element {
             value={login.email}
             placeholder="E-mail"
           />
-          <Message severity="error" message={nameError} />
+          <MessageAlert severity="error" message={nameError} />
 
           <TextField
             variant="outlined"
@@ -270,11 +272,11 @@ export function SignIn(): JSX.Element {
           </div>
         </form>
 
-        <BaseSnackbar
+        <MessageSnackbar
           open={open}
           handleClose={handleClose}
           transition={transition}
-          message={
+          messageText={
             String(etebaseError).includes("Wrong password for user.")
               ? "Login Failed. Your username and/or password do not match"
               : "There was an error logging you in. Please try again"

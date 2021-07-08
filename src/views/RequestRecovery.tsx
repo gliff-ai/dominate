@@ -10,7 +10,7 @@ import {
   Container,
 } from "@material-ui/core";
 import { theme } from "@/theme";
-import { Message } from "@/Message";
+import { MessageAlert } from "@/components/message/MessageAlert";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -182,7 +182,7 @@ export const RequestRecoverAccount = (): JSX.Element => {
             value={recoveryEmail}
             placeholder="E-mail"
           />
-          <Message severity="success" message={successBanner} />
+          <MessageAlert severity="success" message={successBanner} />
           <div className={classes.submitDiv}>
             <Button
               type="submit"
@@ -193,7 +193,7 @@ export const RequestRecoverAccount = (): JSX.Element => {
               Request Recovery
             </Button>
           </div>
-          <Message severity="error" message={recoveryError} />
+          <MessageAlert severity="error" message={recoveryError} />
         </form>
       </div>
     </Container>

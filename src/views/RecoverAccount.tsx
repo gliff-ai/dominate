@@ -14,7 +14,7 @@ import {
   Container,
   CircularProgress,
 } from "@material-ui/core";
-import { Message } from "@/Message";
+import { MessageAlert } from "@/components/message/MessageAlert";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -240,7 +240,7 @@ export const RecoverAccount = (props: Props): JSX.Element => {
                 "Continue"
               )}
             </Button>
-            <Message severity="error" message={recoveryError} />
+            <MessageAlert severity="error" message={recoveryError} />
           </div>
           <div className={classes.noAccount}>
             <Typography className={classes.noAccountText}>
