@@ -241,7 +241,7 @@ export function SignIn(): JSX.Element {
             }}
           />
           <Typography className={classes.forgotPasswordText}>
-            <Link color="secondary" href="/request-recover/*">
+            <Link color="secondary" href="/request-recover">
               Recover My Account
             </Link>
           </Typography>

@@ -1,7 +1,7 @@
+import { ReactElement, useState } from "react";
 import {
   AppBar,
   Avatar,
-  colors,
   Grid,
   IconButton,
   makeStyles,
@@ -10,15 +10,14 @@ import {
   Paper,
   Theme,
   Toolbar,
-  Tooltip,
   Typography,
-  withStyles,
 } from "@material-ui/core";
-import { ReactElement, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
 
-import { useAuth } from "../hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
+import { HtmlTooltip } from "@/components/HtmlTooltip";
+import { imgSrc } from "@/theme";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -73,16 +72,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: "center",
     display: "flex",
   },
-}));
-
-const HtmlTooltip = withStyles((theme: Theme) => ({
-  tooltip: {
-    backgroundColor: theme.palette.primary.light,
-    fontSize: theme.typography.pxToRem(12),
-    border: "1px solid #dadde9",
-    color: theme.palette.text.primary,
+  linkTooltip: {
+    textTransform: "uppercase",
   },
-}))(Tooltip);
+}));
 
 export const NavBar = (): ReactElement => {
   // Get auth state and re-render anytime it changes
@@ -91,6 +84,7 @@ export const NavBar = (): ReactElement => {
   const classes = useStyles();
 
   const [anchorElement, setAnchorEl] = useState<null | HTMLElement>(null);
+
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -101,17 +95,84 @@ export const NavBar = (): ReactElement => {
 
   const hasNavbar = () =>
     // TODO: Add path for all pages that should not have a navbar
-    !["/signin", "/signup", "/reset-password", "/request-recover/*"].includes(
+    !["/signin", "/signup", "/reset-password", "/request-recover"].includes(
       window.location.pathname
     );
 
-  return hasNavbar() ? (
+  if (!hasNavbar()) return null;
+
+  const internalLinks = ["annotate", "curate", "manage"].map((tool) => (
+    <>
+      <Link to={`/${tool}`}>
+        <HtmlTooltip
+          title={
+            <Typography color="inherit" className={classes.linkTooltip}>
+              {tool}
+            </Typography>
+          }
+          placement="top"
+        >
+          <Avatar variant="circular">
+            <SVG src={imgSrc(tool)} className={classes.svgMedium} />
+          </Avatar>
+        </HtmlTooltip>
+      </Link>
+      &nbsp;
+    </>
+  ));
+
+  const accountMenu = (
+    <>
+      {" "}
+      <IconButton onClick={handleClick} aria-controls="menu">
+        <HtmlTooltip title={<Typography>Account</Typography>} placement="top">
+          <Avatar variant="circular" className={classes.avatarUser}>
+            H
+          </Avatar>
+        </HtmlTooltip>
+      </IconButton>
+      <Menu
+        anchorEl={anchorElement}
+        keepMounted
+        open={Boolean(anchorElement)}
+        onClose={handleClose}
+        id="menu"
+        style={{ marginTop: "80px" }}
+        transformOrigin={{
+          vertical: "top",
+          horizontal: "right",
+        }}
+      >
+        <MenuItem component="a" href="/account" className={classes.menuItem}>
+          <SVG
+            src={imgSrc("account-settings")}
+            className={classes.svgMedium}
+            style={{ marginRight: "12px" }}
+          />
+          Account Settings
+        </MenuItem>
+        <MenuItem
+          className={classes.menuItem}
+          onClick={() => auth.signout().then(() => navigate("signin"))}
+        >
+          <SVG
+            src={imgSrc("log-out")}
+            className={classes.svgMedium}
+            style={{ marginRight: "12px" }}
+          />
+          Log out
+        </MenuItem>
+      </Menu>
+    </>
+  );
+
+  return (
     <AppBar position="fixed" className={classes.appBar} elevation={0}>
       <Toolbar>
         <Grid container direction="row" alignContent="space-between">
           <Grid className={classes.logo}>
             <img
-              src={require(`@/assets/gliff-web-master-black.svg`) as string}
+              src={imgSrc("gliff-web-master-black")}
               width="79px"
               height="60px"
               alt="gliff logo"
@@ -121,107 +182,9 @@ export const NavBar = (): ReactElement => {
             <nav className={classes.navLinks}>
               {auth.user ? (
                 <>
-                  <Link to="/curate">
-                    <HtmlTooltip
-                      title={<Typography color="inherit">CURATE</Typography>}
-                      placement="top"
-                    >
-                      <Avatar variant="circular">
-                        <SVG
-                          src={require(`@/assets/curate.svg`) as string}
-                          className={classes.svgMedium}
-                        />
-                      </Avatar>
-                    </HtmlTooltip>
-                  </Link>
-                  &nbsp;
-                  <Link to="/annotate">
-                    <HtmlTooltip
-                      title={<Typography color="inherit">ANNOTATE</Typography>}
-                      placement="top"
-                    >
-                      <Avatar variant="circular">
-                        <SVG
-                          src={require(`@/assets/annotate.svg`) as string}
-                          className={classes.svgMedium}
-                        />
-                      </Avatar>
-                    </HtmlTooltip>
-                  </Link>
-                  &nbsp;
-                  <Link to="/manage/projects">
-                    <HtmlTooltip
-                      title={<Typography color="inherit">MANAGE</Typography>}
-                      placement="top"
-                    >
-                      <Avatar variant="circular">
-                        <SVG
-                          src={require(`@/assets/manage.svg`) as string}
-                          className={classes.svgMedium}
-                        />
-                      </Avatar>
-                    </HtmlTooltip>
-                  </Link>
-                  &nbsp;
-                  <IconButton onClick={handleClick} aria-controls="menu">
-                    <HtmlTooltip
-                      title={<Typography>Account</Typography>}
-                      placement="top"
-                    >
-                      <Avatar variant="circular" className={classes.avatarUser}>
-                        H
-                      </Avatar>
-                    </HtmlTooltip>
-                  </IconButton>
-                  <Menu
-                    anchorEl={anchorElement}
-                    keepMounted
-                    open={Boolean(anchorElement)}
-                    onClose={handleClose}
-                    id="menu"
-                    style={{ marginTop: "80px" }}
-                    transformOrigin={{
-                      vertical: "top",
-                      horizontal: "right",
-                    }}
-                  >
-                    <Paper
-                      className={classes.paper}
-                      style={{ display: "flex", alignItems: "center" }}
-                    >
-                      <Avatar
-                        className={classes.avatarUser}
-                        style={{ margin: "12px" }}
-                      >
-                        H
-                      </Avatar>
-                    </Paper>
-                    <MenuItem
-                      component="a"
-                      href="/account"
-                      className={classes.menuItem}
-                    >
-                      <SVG
-                        src={require(`@/assets/account-settings.svg`) as string}
-                        className={classes.svgMedium}
-                        style={{ marginRight: "12px" }}
-                      />
-                      Account Settings
-                    </MenuItem>
-                    <MenuItem
-                      className={classes.menuItem}
-                      onClick={() =>
-                        auth.signout().then(() => navigate("signin"))
-                      }
-                    >
-                      <SVG
-                        src={require(`@/assets/log-out.svg`) as string}
-                        className={classes.svgMedium}
-                        style={{ marginRight: "12px" }}
-                      />
-                      Log out
-                    </MenuItem>
-                  </Menu>
+                  {internalLinks}
+
+                  {accountMenu}
                 </>
               ) : (
                 <Typography>
@@ -235,5 +198,5 @@ export const NavBar = (): ReactElement => {
         </Grid>
       </Toolbar>
     </AppBar>
-  ) : null;
+  );
 };

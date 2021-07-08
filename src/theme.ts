@@ -1,20 +1,23 @@
-export { ThemeProvider } from "@material-ui/core";
 import { createTheme } from "@material-ui/core/styles";
 import type {} from "@material-ui/lab/themeAugmentation"; // Required to add autocomplete to Theme until v5
-import { imgSrc } from "@/helpers";
+
+export { ThemeProvider } from "@material-ui/core";
+export const imgSrc = (src: string, type = "svg"): string =>
+  // eslint-disable-next-line import/no-dynamic-require
+  require(`@/assets/${src}.${type}`) as string;
 
 const squiggles = imgSrc("squig-black", "png");
 
-const white = "#FFF";
-const lightestGrey = "#FAFAFA";
-const lightGrey = "#F2F2F2";
-const veryLightBlue = "#DADDE9";
-const middleGrey = "#A1A1A1";
-const darkGrey = "#2B2F3A";
-const black = "#000";
-const mainGreen = "#02FFAD";
-const purple = "#AE79FF";
-const blue = "#00DBFF";
+export const white = "#FFF";
+export const lightestGrey = "#FAFAFA";
+export const lightGrey = "#F2F2F2";
+export const veryLightBlue = "#DADDE9";
+export const middleGrey = "#A1A1A1";
+export const darkGrey = "#2B2F3A";
+export const black = "#000";
+export const mainGreen = "#02FFAD";
+export const purple = "#AE79FF";
+export const blue = "#00DBFF";
 
 export const theme = createTheme({
   palette: {
