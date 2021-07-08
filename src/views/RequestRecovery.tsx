@@ -10,7 +10,7 @@ import {
   Container,
 } from "@material-ui/core";
 import { theme } from "@/theme";
-import { MessageAlert } from "@/components/message/MessageAlert";
+import { MessageAlert } from "@/components";
 
 const useStyles = makeStyles(() => ({
   paper: {

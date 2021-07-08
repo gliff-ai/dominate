@@ -16,7 +16,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { theme } from "@/theme";
 import { DominateEtebase } from "@/etebase";
-import { MessageAlert } from "@/components/message/MessageAlert";
+import { MessageAlert } from "@/components";
 
 const useStyles = makeStyles(() => ({
   paper: {
