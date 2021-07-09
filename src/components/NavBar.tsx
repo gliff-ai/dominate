@@ -7,7 +7,6 @@ import {
   makeStyles,
   Menu,
   MenuItem,
-  Paper,
   Theme,
   Toolbar,
   Typography,
@@ -24,7 +23,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: `${theme.palette.secondary.light} !important`,
     height: "90px",
     paddingTop: "9px",
-    marginBottom: "30px",
   },
   link: {
     textDecoration: "none",
@@ -94,36 +92,35 @@ export const NavBar = (): ReactElement => {
   };
 
   const hasNavbar = () =>
-    // TODO: Add path for all pages that should not have a navbar
-    !["/signin", "/signup", "/reset-password", "/request-recover"].includes(
-      window.location.pathname
-    );
+    ![
+      "/signin",
+      "/signup",
+      "/reset-password",
+      "/request-recover",
+      "/recover",
+    ].includes(window.location.pathname);
 
   if (!hasNavbar()) return null;
 
   const internalLinks = ["annotate", "curate", "manage"].map((tool) => (
-    <>
-      <Link to={`/${tool}`}>
-        <HtmlTooltip
-          title={
-            <Typography color="inherit" className={classes.linkTooltip}>
-              {tool}
-            </Typography>
-          }
-          placement="top"
-        >
-          <Avatar variant="circular">
-            <SVG src={imgSrc(tool)} className={classes.svgMedium} />
-          </Avatar>
-        </HtmlTooltip>
-      </Link>
-      &nbsp;
-    </>
+    <Link to={`/${tool}`} key={tool}>
+      <HtmlTooltip
+        title={
+          <Typography color="inherit" className={classes.linkTooltip}>
+            {tool}
+          </Typography>
+        }
+        placement="top"
+      >
+        <Avatar variant="circular">
+          <SVG src={imgSrc(tool)} className={classes.svgMedium} />
+        </Avatar>
+      </HtmlTooltip>
+    </Link>
   ));
 
   const accountMenu = (
     <>
-      {" "}
       <IconButton onClick={handleClick} aria-controls="menu">
         <HtmlTooltip title={<Typography>Account</Typography>} placement="top">
           <Avatar variant="circular" className={classes.avatarUser}>
@@ -167,7 +164,7 @@ export const NavBar = (): ReactElement => {
   );
 
   return (
-    <AppBar position="fixed" className={classes.appBar} elevation={0}>
+    <AppBar position="sticky" className={classes.appBar} elevation={0}>
       <Toolbar>
         <Grid container direction="row" alignContent="space-between">
           <Grid className={classes.logo}>

@@ -1,31 +1,11 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 
 import { apiRequest } from "@/api";
-import {
-  Button,
-  CssBaseline,
-  TextField,
-  Typography,
-  makeStyles,
-  Container,
-} from "@material-ui/core";
+import { TextField, makeStyles } from "@material-ui/core";
 import { theme } from "@/theme";
-import { MessageAlert } from "@/components";
+import { MessageAlert, SubmitButton } from "@/components";
 
 const useStyles = makeStyles(() => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  logo: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "187px",
-  },
-
   form: {
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1),
@@ -50,19 +30,6 @@ const useStyles = makeStyles(() => ({
     fontSize: "20px",
     fontWeight: 400,
     textAlign: "center",
-  },
-  submitDiv: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-  },
-  typogragphyTitle: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "-40px",
-    fontSize: "34px",
-    fontWeight: 700,
   },
   textFieldBackground: {
     background: theme.palette.primary.light,
@@ -96,17 +63,6 @@ const useStyles = makeStyles(() => ({
   },
   iconButton: {
     color: theme.palette.primary.light,
-  },
-  submit: {
-    color: theme.palette.text.primary,
-    marginTop: "45px",
-    textTransform: "none",
-    fontWeight: 700,
-    fontSize: "15px",
-    width: "169px",
-    "&:hover": {
-      backgroundColor: "none",
-    },
   },
 }));
 
@@ -145,57 +101,31 @@ export const RequestRecoverAccount = (): JSX.Element => {
   const successBanner = success ? "Email sent" : "";
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.logo}>
-        <img
-          src={require("../assets/gliff-web-master-black.svg") as string}
-          alt="gliff logo"
-          width="194px"
-          height="148px"
+    <>
+      <div className={classes.text}>
+        Enter your email address to request a recovery link. You will need your
+        recovery key to compelete the process.
+      </div>
+
+      <form onSubmit={onSubmitForm}>
+        <TextField
+          variant="outlined"
+          margin="normal"
+          className={classes.textFieldBackground}
+          required
+          fullWidth
+          id="email"
+          name="recoveryEmail"
+          type="email"
+          onChange={handleChange}
+          value={recoveryEmail}
+          placeholder="E-mail"
         />
-      </div>
+        <MessageAlert severity="success" message={successBanner} />
 
-      <div>
-        <Typography className={classes.typogragphyTitle}>
-          Request Recovery
-        </Typography>
-      </div>
-
-      <div className={classes.paper}>
-        <div className={classes.text}>
-          Enter your email address to request a recovery link. You will need
-          your recovery key to compelete the process.
-        </div>
-
-        <form onSubmit={onSubmitForm}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            className={classes.textFieldBackground}
-            required
-            fullWidth
-            id="email"
-            name="recoveryEmail"
-            type="email"
-            onChange={handleChange}
-            value={recoveryEmail}
-            placeholder="E-mail"
-          />
-          <MessageAlert severity="success" message={successBanner} />
-          <div className={classes.submitDiv}>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              Request Recovery
-            </Button>
-          </div>
-          <MessageAlert severity="error" message={recoveryError} />
-        </form>
-      </div>
-    </Container>
+        <SubmitButton loading={loading} value="Request Recovery" />
+        <MessageAlert severity="error" message={recoveryError} />
+      </form>
+    </>
   );
 };

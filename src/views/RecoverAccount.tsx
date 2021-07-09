@@ -4,32 +4,10 @@ import { useNavigate } from "react-router-dom";
 import { getRecoverySession } from "@/services/user";
 import { DominateEtebase } from "@/etebase";
 import { theme } from "@/theme";
-import {
-  Button,
-  CssBaseline,
-  TextField,
-  Link,
-  Typography,
-  makeStyles,
-  Container,
-  CircularProgress,
-} from "@material-ui/core";
-import { MessageAlert } from "@/components";
+import { TextField, Link, Typography, makeStyles } from "@material-ui/core";
+import { MessageAlert, SubmitButton } from "@/components";
 
 const useStyles = makeStyles(() => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  logo: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "187px",
-  },
-
   form: {
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1),
@@ -57,19 +35,7 @@ const useStyles = makeStyles(() => ({
     top: "22px",
     right: "20px",
   },
-  submitDiv: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-  },
-  typogragphyTitle: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "-40px",
-    fontSize: "34px",
-    fontWeight: 700,
-  },
+
   textFieldBackground: {
     background: theme.palette.primary.light,
   },
@@ -102,17 +68,6 @@ const useStyles = makeStyles(() => ({
   },
   iconButton: {
     color: theme.palette.primary.light,
-  },
-  submit: {
-    color: theme.palette.text.primary,
-    marginBottom: "112px",
-    textTransform: "none",
-    fontWeight: 700,
-    fontSize: "15px",
-    width: "169px",
-    "&:hover": {
-      backgroundColor: "none",
-    },
   },
 }));
 
@@ -174,84 +129,60 @@ export const RecoverAccount = (props: Props): JSX.Element => {
   };
 
   if (!recoverySession) {
-    return <h1>Invalid Recovery Token</h1>;
+    return (
+      <>
+        <h1>Invalid Recovery Token.</h1>
+        <div>It may have expired, try requesting another one.</div>
+      </>
+    );
   }
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-
-      <div className={classes.logo}>
-        <img
-          src={require("../assets/gliff-web-master-black.svg") as string}
-          alt="gliff logo"
-          width="194px"
-          height="148px"
+    <>
+      <form className={classes.form} onSubmit={onSubmitForm}>
+        <TextField
+          variant="outlined"
+          margin="normal"
+          className={classes.textFieldBackground}
+          required
+          fullWidth
+          name="recoveryKey"
+          type="text"
+          onChange={handleChange}
+          value={recover.recoveryKey}
+          placeholder="Recovery Key"
         />
-      </div>
-
-      <div>
-        <Typography className={classes.typogragphyTitle}>
-          Recover my Account
+        <TextField
+          variant="outlined"
+          margin="normal"
+          type="password"
+          required
+          fullWidth
+          className={classes.textFieldBackground}
+          name="newPassword"
+          id="newPassword"
+          autoComplete="new-password"
+          value={recover.newPassword}
+          onChange={handleChange}
+          placeholder="New Password"
+        />
+        <Typography className={classes.forgotPasswordText}>
+          * Your recovery key was provided to you when you first signed up
         </Typography>
-      </div>
 
-      <div className={classes.paper}>
-        <form className={classes.form} onSubmit={onSubmitForm}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            className={classes.textFieldBackground}
-            required
-            fullWidth
-            name="recoveryKey"
-            type="text"
-            onChange={handleChange}
-            value={recover.recoveryKey}
-            placeholder="Recovery Key"
-          />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            type="password"
-            required
-            fullWidth
-            className={classes.textFieldBackground}
-            name="newPassword"
-            id="newPassword"
-            autoComplete="new-password"
-            value={recover.newPassword}
-            onChange={handleChange}
-            placeholder="New Password"
-          />
-          <Typography className={classes.forgotPasswordText}>
-            * Your recovery key was provided to you when you first signed up
+        <SubmitButton loading={loading} value="Continue" />
+
+        <MessageAlert severity="error" message={recoveryError} />
+
+        <div className={classes.noAccount}>
+          <Typography className={classes.noAccountText}>
+            Don&apos;t have an account yet?
           </Typography>
-          <div className={classes.submitDiv}>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              {loading ? (
-                <CircularProgress size="1.5rem" color="inherit" />
-              ) : (
-                "Continue"
-              )}
-            </Button>
-            <MessageAlert severity="error" message={recoveryError} />
-          </div>
-          <div className={classes.noAccount}>
-            <Typography className={classes.noAccountText}>
-              Don&apos;t have an account yet?
-            </Typography>
-            <Link color="secondary" href="/signup">
-              Sign Up
-            </Link>
-          </div>
-        </form>
-      </div>
-    </Container>
+          <Link color="secondary" href="/signup">
+            Sign Up
+          </Link>
+        </div>
+      </form>
+    </>
   );
 };

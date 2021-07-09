@@ -91,6 +91,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
 
   return slicesData ? (
     <Annotate
+      showAppBar={false}
       slicesData={slicesData}
       imageFileInfo={imageFileInfo}
       annotationsObject={annotationsObject}
