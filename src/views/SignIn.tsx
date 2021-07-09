@@ -12,8 +12,12 @@ import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { imgSrc, theme } from "@/theme";
 import SVG from "react-inlinesvg";
-import { MessageSnackbar, MessageAlert, TransitionProps } from "@/components";
-import { SubmitButton } from "@/components";
+import {
+  MessageSnackbar,
+  MessageAlert,
+  TransitionProps,
+  SubmitButton,
+} from "@/components";
 
 const useStyles = makeStyles(() => ({
   form: {
