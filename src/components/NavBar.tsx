@@ -23,7 +23,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: `${theme.palette.secondary.light} !important`,
     height: "90px",
     paddingTop: "9px",
-    marginBottom: "30px",
   },
   link: {
     textDecoration: "none",
