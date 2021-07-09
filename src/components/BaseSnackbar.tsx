@@ -35,4 +35,8 @@ function BaseSnackbar(props: Props): ReactElement {
   );
 }
 
+BaseSnackbar.defaultProps = {
+  transition: null,
+};
+
 export { BaseSnackbar, Props as BaseSnackbarProps, TransitionProps };

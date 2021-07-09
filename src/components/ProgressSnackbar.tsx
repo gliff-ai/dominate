@@ -1,6 +1,6 @@
 import { CircularProgress, makeStyles } from "@material-ui/core";
-import { BaseSnackbar } from "./BaseSnackbar";
 import Slide from "@material-ui/core/Slide";
+import { BaseSnackbar } from "./BaseSnackbar";
 
 const useStyle = makeStyles({
   messageContainer: {
