@@ -1,7 +1,6 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-import { makeStyles } from "@material-ui/core";
 import Curate from "@gliff-ai/curate";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
@@ -13,19 +12,13 @@ import {
 } from "@/imageConversions";
 import { useAuth } from "@/hooks/use-auth";
 
-const useStyle = makeStyles({
-  containerDir: {
-    marginTop: "120px",
-  },
-});
-
 interface Props {
   etebaseInstance: DominateEtebase;
 }
 
 export const CurateWrapper = (props: Props): ReactElement | null => {
   if (!props.etebaseInstance) return null;
-  const classes = useStyle();
+
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
   const { id: galleryUidParam } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
   const [galleryUid, setGalleryUid] = useState<string>(galleryUidParam);
@@ -135,15 +128,13 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   if (!props.etebaseInstance || !auth.user || !galleryUid) return null;
 
   return (
-    <div className={classes.containerDir}>
-      <Curate
-        metadata={curateInput}
-        saveImageCallback={addImageToGallery}
-        saveLabelsCallback={saveLabelsCallback}
-        deleteImagesCallback={deleteImageCallback}
-        annotateCallback={annotateCallback}
-        showAppBar={false}
-      />
-    </div>
+    <Curate
+      metadata={curateInput}
+      saveImageCallback={addImageToGallery}
+      saveLabelsCallback={saveLabelsCallback}
+      deleteImagesCallback={deleteImageCallback}
+      annotateCallback={annotateCallback}
+      showAppBar={false}
+    />
   );
 };

@@ -6,8 +6,6 @@ export const imgSrc = (src: string, type = "svg"): string =>
   // eslint-disable-next-line import/no-dynamic-require
   require(`@/assets/${src}.${type}`) as string;
 
-const squiggles = imgSrc("squig-black", "png");
-
 export const white = "#FFF";
 export const lightestGrey = "#FAFAFA";
 export const lightGrey = "#F2F2F2";
@@ -58,12 +56,11 @@ export const theme = createTheme({
 
     MuiCssBaseline: {
       "@global": {
+        html: {
+          height: "100%",
+        },
         body: {
-          backgroundImage: `url(${squiggles}),url(${squiggles})`,
-          backgroundColor: lightGrey,
-          backgroundRepeat: "no-repeat",
-          backgroundPosition: "-350px -320px, 1400px 650px",
-          overflow: "hidden",
+          height: "100%",
         },
       },
     },

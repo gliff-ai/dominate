@@ -31,36 +31,18 @@ import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
 import { Message, BaseSnackbar, TransitionProps } from "@/components/Message";
+import { SubmitButton } from "@/components";
 
 const stripePromise = loadStripe(
   "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
 );
+
 const query = new URLSearchParams(window.location.search);
 
 const useStyles = makeStyles(() => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
   avatar: {
     margin: theme.spacing(1),
     backgroundColor: theme.palette.secondary.main,
-  },
-  logo: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "187px",
-  },
-  typogragphyTitle: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "-40px",
-    fontSize: "34px",
-    fontWeight: 700,
   },
   form: {
     width: "100%", // Fix IE 11 issue.
@@ -78,20 +60,6 @@ const useStyles = makeStyles(() => ({
   haveAccountText: {
     display: "inline",
     marginRight: "20px",
-  },
-  submitDiv: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginTop: "86px",
-  },
-  submit: {
-    color: theme.palette.text.primary,
-    marginBottom: "60px",
-    textTransform: "none",
-    width: "169px",
-    fontWeight: 700,
-    fontSize: "15px",
   },
 }));
 
@@ -253,123 +221,93 @@ export const SignUp = (): JSX.Element => {
   return recoveryKey ? (
     <RecoveryKey recoveryKey={recoveryKey} callback={redirectUser} />
   ) : (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.logo}>
-        <img
-          src={require("../assets/gliff-web-master-black.svg") as string}
-          alt="gliff logo"
-          width="194px"
-          height="148px"
+    <>
+      <form className={classes.form} onSubmit={onSubmitForm}>
+        <TextField
+          variant="outlined"
+          margin="normal"
+          className={classes.textFieldBackground}
+          required
+          fullWidth
+          id="email"
+          name="email"
+          autoComplete="email"
+          autoFocus
+          type="email"
+          onChange={handleChange}
+          value={signUp.email}
+          placeholder="E-mail *"
         />
-      </div>
-      <div>
-        <Typography className={classes.typogragphyTitle}>
-          Create an Account
-        </Typography>
-      </div>
-      <div className={classes.paper}>
-        <form className={classes.form} onSubmit={onSubmitForm}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            className={classes.textFieldBackground}
-            required
-            fullWidth
-            id="email"
-            name="email"
-            autoComplete="email"
-            autoFocus
-            type="email"
-            onChange={handleChange}
-            value={signUp.email}
-            placeholder="E-mail *"
-          />
-          <Message severity="error" message={emailError} />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            className={classes.textFieldBackground}
-            required
-            fullWidth
-            id="name"
-            name="name"
-            autoComplete="full_name"
-            type="text"
-            onChange={handleChange}
-            value={signUp.name}
-            placeholder="Name *"
-          />
-          <Message severity="error" message={nameError} />
-          <TextField
-            variant="outlined"
-            margin="normal"
-            className={classes.textFieldBackground}
-            required
-            fullWidth
-            name="password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={signUp.password}
-            onChange={handleChange}
-            placeholder="Password *"
-          />
-
-          <TextField
-            variant="outlined"
-            margin="normal"
-            className={classes.textFieldBackground}
-            required
-            fullWidth
-            name="confirmPassword"
-            type="password"
-            id="confirmPassword"
-            autoComplete="current-password"
-            value={signUp.confirmPassword}
-            onChange={handleChange}
-            placeholder="Confirm Password *"
-          />
-          <Message severity="error" message={passwordError} />
-
-          <div className={classes.submitDiv}>
-            <Button
-              type="submit"
-              fullWidth
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              {loading ? (
-                <CircularProgress size="1.5rem" color="inherit" />
-              ) : (
-                "Next"
-              )}
-            </Button>
-          </div>
-
-          <div className={classes.haveAccount}>
-            <Typography className={classes.haveAccountText}>
-              Already have an account?
-            </Typography>
-            <Link color="secondary" href="/signin" variant="body2">
-              Sign In
-            </Link>
-          </div>
-        </form>
-
-        {/* Looks like that account already exists, try another email! */}
-        <BaseSnackbar
-          open={open}
-          handleClose={handleClose}
-          transition={transition}
-          message={
-            String(etebaseError).includes("duplicate key")
-              ? "Looks like that account already exists, try another email!"
-              : "There was an error creating an account"
-          }
+        <Message severity="error" message={emailError} />
+        <TextField
+          variant="outlined"
+          margin="normal"
+          className={classes.textFieldBackground}
+          required
+          fullWidth
+          id="name"
+          name="name"
+          autoComplete="full_name"
+          type="text"
+          onChange={handleChange}
+          value={signUp.name}
+          placeholder="Name *"
         />
-      </div>
-    </Container>
+        <Message severity="error" message={nameError} />
+        <TextField
+          variant="outlined"
+          margin="normal"
+          className={classes.textFieldBackground}
+          required
+          fullWidth
+          name="password"
+          type="password"
+          id="password"
+          autoComplete="current-password"
+          value={signUp.password}
+          onChange={handleChange}
+          placeholder="Password *"
+        />
+
+        <TextField
+          variant="outlined"
+          margin="normal"
+          className={classes.textFieldBackground}
+          required
+          fullWidth
+          name="confirmPassword"
+          type="password"
+          id="confirmPassword"
+          autoComplete="current-password"
+          value={signUp.confirmPassword}
+          onChange={handleChange}
+          placeholder="Confirm Password *"
+        />
+        <Message severity="error" message={passwordError} />
+
+        <SubmitButton loading={loading} value="Next" />
+
+        <div className={classes.haveAccount}>
+          <Typography className={classes.haveAccountText}>
+            Already have an account?
+          </Typography>
+          <Link color="secondary" href="/signin" variant="body2">
+            Sign In
+          </Link>
+        </div>
+      </form>
+
+      {/* Looks like that account already exists, try another email! */}
+      <BaseSnackbar
+        open={open}
+        handleClose={handleClose}
+        transition={transition}
+        message={
+          String(etebaseError).includes("duplicate key")
+            ? "Looks like that account already exists, try another email!"
+            : "There was an error creating an account"
+        }
+      />
+    </>
   );
 };
