@@ -1,54 +1,70 @@
-import React, { useState } from "react";
+import { useState, ComponentType } from "react";
 import {
-  Avatar,
-  Button,
-  CssBaseline,
   TextField,
   Link,
-  Grid,
   Typography,
   makeStyles,
-  Container,
-  CircularProgress,
-  Snackbar,
   IconButton,
+  InputAdornment,
+  Slide,
 } from "@material-ui/core";
-import LockOutlinedIcon from "@material-ui/icons/LockOutlined";
-import CloseIcon from "@material-ui/icons/Close";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
+import { imgSrc, theme } from "@/theme";
+import SVG from "react-inlinesvg";
+import { Message, BaseSnackbar, TransitionProps } from "@/components/Message";
+import { SubmitButton } from "@/components";
 
-const useStyles = makeStyles((theme) => ({
-  paper: {
-    marginTop: theme.spacing(8),
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
+const useStyles = makeStyles(() => ({
   form: {
     width: "100%", // Fix IE 11 issue.
     marginTop: theme.spacing(1),
   },
-  submit: {
-    margin: theme.spacing(3, 0, 2),
+  forgotPasswordText: {
+    marginBottom: "44px",
+    marginTop: "13px",
+    color: theme.palette.secondary.main,
+    textAlign: "right",
+    fontStyle: "italic",
+  },
+  noAccount: {
+    width: "200%",
+    marginBottom: "187px",
+  },
+  noAccountText: {
+    display: "inline",
+    marginRight: "10px",
+  },
+
+  textFieldBackground: {
+    background: theme.palette.primary.light,
+  },
+  svgSmall: {
+    width: "22px",
+    height: "100%",
+    marginLeft: "7px",
+    marginRight: "9px",
+    marginTop: "0px",
+    marginBottom: "-4px",
   },
 }));
 
-export function SignIn() {
+export function SignIn(): JSX.Element {
   const classes = useStyles();
   const auth = useAuth();
   const navigate = useNavigate();
+  const [open, setOpen] = useState(false);
+
+  const [transition, setTransition] =
+    useState<ComponentType<TransitionProps> | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState("");
-  const [open, setOpen] = useState(false);
+  const [etebaseError, setEtebaseError] = useState({});
   const [login, setLogin] = useState({
-    name: "",
+    email: "",
     password: "",
+    showPassword: false,
   });
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -59,13 +75,27 @@ export function SignIn() {
     }));
   };
 
+  const TransitionUp = (props: TransitionProps) => (
+    // eslint-disable-next-line react/jsx-props-no-spreading
+    <Slide {...props} direction="up" />
+  );
+
+  const handleSnackbar = (Transition: React.ComponentType<TransitionProps>) => {
+    setTransition(() => Transition);
+    setOpen(true);
+  };
+
+  const handleClickShowPassword = () => {
+    setLogin({ ...login, showPassword: !login.showPassword });
+  };
+
   const handleClose = () => {
     setOpen(false);
   };
 
   const validate = () => {
     let nameErrorMessage = "";
-    if (!login.name.includes("@")) {
+    if (!login.email.includes("@")) {
       nameErrorMessage = "Invalid email";
     }
     if (nameErrorMessage) {
@@ -78,103 +108,108 @@ export function SignIn() {
   const onFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const isValid = validate();
+
     if (isValid) {
       setLoading(true);
       auth
-        .signin(login.name, login.password)
+        .signin(login.email, login.password)
         .then(() => {
           setLoading(false);
-          navigate("home");
+          navigate("/");
         })
-        .catch((err) => {
-          setOpen(true);
+        .catch((e) => {
+          handleSnackbar(TransitionUp);
           setLoading(false);
-          setLogin({ name: "", password: "" });
+          setLogin({ email: "", password: "", showPassword: false });
+
+          if (e instanceof Error) {
+            // eslint-disable-next-line no-console
+            setEtebaseError(e.message);
+          }
         });
     }
   };
 
   return (
-    <Container component="main" maxWidth="xs">
-      <CssBaseline />
-      <div className={classes.paper}>
-        <Avatar className={classes.avatar}>
-          <LockOutlinedIcon />
-        </Avatar>
-        <Typography component="h1" variant="h5">
-          Sign in
-        </Typography>
-        <form className={classes.form} onSubmit={onFormSubmit}>
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            id="name"
-            label="Email Address"
-            name="name"
-            autoComplete="email"
-            autoFocus
-            type="text"
-            onChange={handleChange}
-            value={login.name}
-          />
-          <div style={{ color: "red", fontSize: 12 }}>{nameError}</div>
-
-          <TextField
-            variant="outlined"
-            margin="normal"
-            required
-            fullWidth
-            name="password"
-            label="Password"
-            type="password"
-            id="password"
-            autoComplete="current-password"
-            value={login.password}
-            onChange={handleChange}
-          />
-          <Button
-            type="submit"
-            fullWidth
-            variant="contained"
-            color="primary"
-            className={classes.submit}
-          >
-            {loading ? <CircularProgress color="inherit" /> : "Sign In"}
-          </Button>
-          <Grid container>
-            <Grid item xs>
-              <Link href="/signUp" variant="body2">
-                Don&apos;t have an account? Sign Up
-              </Link>
-            </Grid>
-          </Grid>
-        </form>
-        <Snackbar
-          anchorOrigin={{
-            vertical: "top",
-            horizontal: "center",
-          }}
-          open={open}
-          autoHideDuration={6000}
-          onClose={handleClose}
-          message="Login Failed. Your username and/or password do not match"
-          action={
-            // eslint-disable-next-line react/jsx-wrap-multilines
-            <>
-              <IconButton
-                size="small"
-                aria-label="close"
-                color="inherit"
-                onClick={handleClose}
-              >
-                <CloseIcon fontSize="small" />
-              </IconButton>
-            </>
-          }
+    <>
+      <form className={classes.form} onSubmit={onFormSubmit}>
+        <TextField
+          variant="outlined"
+          margin="normal"
+          className={classes.textFieldBackground}
+          required
+          fullWidth
+          id="email"
+          name="email"
+          autoComplete="email"
+          type="text"
+          onChange={handleChange}
+          value={login.email}
+          placeholder="E-mail"
         />
-      </div>
-    </Container>
+        <Message severity="error" message={nameError} />
+
+        <TextField
+          variant="outlined"
+          margin="normal"
+          required
+          fullWidth
+          className={classes.textFieldBackground}
+          name="password"
+          type={login.showPassword ? "text" : "password"}
+          id="password"
+          autoComplete="current-password"
+          value={login.password}
+          onChange={handleChange}
+          placeholder="Password"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  edge="end"
+                >
+                  <SVG
+                    src={imgSrc("show-or-hide-password")}
+                    className={classes.svgSmall}
+                    fill={
+                      login.showPassword ? theme.palette.primary.main : null
+                    }
+                  />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+        <Typography className={classes.forgotPasswordText}>
+          <Link color="secondary" href="/request-recover">
+            Recover My Account
+          </Link>
+        </Typography>
+
+        <SubmitButton loading={loading} value="Continue" />
+
+        <div className={classes.noAccount}>
+          <Typography className={classes.noAccountText}>
+            Don&apos;t have an account yet or been invited to a team?
+          </Typography>
+          <Link color="secondary" href="/signup" variant="body2">
+            Sign Up
+          </Link>
+        </div>
+      </form>
+
+      <BaseSnackbar
+        open={open}
+        handleClose={handleClose}
+        transition={transition}
+        message={
+          String(etebaseError).includes("Wrong password for user.")
+            ? "Login Failed. Your username and/or password do not match"
+            : "There was an error logging you in. Please try again"
+        }
+      />
+    </>
   );
 }

@@ -1,5 +1,5 @@
 import axios from "axios";
-import React, { useState, useEffect, useContext, createContext } from "react";
+import { useState, useEffect, useContext, createContext } from "react";
 import { DominateEtebase } from "@/etebase";
 import { User, UserProfile } from "@/services/user/interfaces";
 import { createUserProfile } from "@/services/user";
@@ -12,6 +12,7 @@ interface Props {
 interface Context {
   user: User;
   getInstance: () => DominateEtebase;
+  changePassword: (newPassword: string) => Promise<boolean>;
   signin: (username: string, password: string) => Promise<User>;
   signout: () => Promise<boolean>;
   signup: (username: string, password: string) => Promise<User>;
@@ -62,6 +63,9 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
       return response;
     });
 
+  const changePassword = (newPassword: string): Promise<boolean> =>
+    etebaseInstance.changePassword(newPassword).then(signout);
+
   const createProfile = async (
     name: string,
     teamId: number,
@@ -111,6 +115,7 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
     signup,
     createProfile,
     getInstance,
+    changePassword,
   };
 }
 

@@ -1,9 +1,10 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+
+import Curate from "@gliff-ai/curate";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
 import { Slices, MetaItem } from "@/etebase/interfaces";
-import Curate from "@gliff-ai/curate";
 
 import {
   stringifySlices,
@@ -133,6 +134,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       saveLabelsCallback={saveLabelsCallback}
       deleteImagesCallback={deleteImageCallback}
       annotateCallback={annotateCallback}
+      showAppBar={false}
     />
   );
 };
