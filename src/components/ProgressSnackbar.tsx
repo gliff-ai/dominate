@@ -10,7 +10,7 @@ const useStyle = makeStyles({
     fontSize: "16px",
     fontWright: 500,
   },
-  progress: { marginLeft: "5px" },
+  progress: { marginLeft: "5px", color: "#ffffff" },
 });
 
 type Task = { isLoading: boolean; description: string };
@@ -35,11 +35,7 @@ function ProgressSnackbar({ task, setTask }: Props) {
       message={
         <div className={classes.messageContainer}>
           {`${task.description} in progress, please wait..`}
-          <CircularProgress
-            size="2rem"
-            color="primary"
-            className={classes.progress}
-          />
+          <CircularProgress size="2rem" className={classes.progress} />
         </div>
       }
     />
