@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ReactElement, useState } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { makeStyles, ThemeProvider } from "@material-ui/core";
 import { theme } from "@/theme";
@@ -13,7 +13,7 @@ import {
   SignIn,
   SignUp,
 } from "@/views";
-import { NavBar } from "@/components";
+import { NavBar, ProgressSnackbar, Task } from "@/components";
 
 const useStyles = makeStyles({
   outerContainer: { height: "100%" },
@@ -50,10 +50,15 @@ interface Props {
 
 const UserInterface = (props: Props): ReactElement | null => {
   const { etebaseInstance } = props;
+  const [task, setTask] = useState<Task>({
+    isLoading: false,
+    description: "",
+  });
   const classes = useStyles();
 
   return (
     <ThemeProvider theme={theme}>
+      <ProgressSnackbar task={task} setTask={setTask} />
       <BrowserRouter>
         <div className={classes.outerContainer}>
           <Routes>
@@ -65,11 +70,15 @@ const UserInterface = (props: Props): ReactElement | null => {
             </Route>
             <Route
               path="curate/:id"
-              element={<Curate etebaseInstance={etebaseInstance} />}
+              element={
+                <Curate etebaseInstance={etebaseInstance} setTask={setTask} />
+              }
             />
             <Route
               path="curate/"
-              element={<Curate etebaseInstance={etebaseInstance} />}
+              element={
+                <Curate etebaseInstance={etebaseInstance} setTask={setTask} />
+              }
             />
             <Route
               path="annotate/:collectionUid/:imageUid"
