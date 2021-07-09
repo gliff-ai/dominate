@@ -19,23 +19,18 @@ interface Props {
   open: boolean;
   handleClose: () => void;
   message: ReactElement;
-  transition: ComponentType<TransitionProps> | null;
+  transition?: ComponentType<TransitionProps> | null;
 }
 
-function BaseSnackbar({
-  open,
-  handleClose,
-  message,
-  transition,
-}: Props): ReactElement {
+function BaseSnackbar(props: Props): ReactElement {
   const classes = useStyle();
   return (
     <Snackbar
-      open={open}
-      onClose={handleClose}
-      TransitionComponent={transition}
+      open={props.open}
+      onClose={props.handleClose}
+      TransitionComponent={props?.transition}
     >
-      <SnackbarContent className={classes.snackbar} message={message} />
+      <SnackbarContent className={classes.snackbar} message={props.message} />
     </Snackbar>
   );
 }
