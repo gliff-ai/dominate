@@ -23,7 +23,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: `${theme.palette.secondary.light} !important`,
     height: "90px",
     paddingTop: "9px",
-    marginBottom: "30px",
   },
   link: {
     textDecoration: "none",
@@ -104,23 +103,20 @@ export const NavBar = (): ReactElement => {
   if (!hasNavbar()) return null;
 
   const internalLinks = ["annotate", "curate", "manage"].map((tool) => (
-    <>
-      <Link to={`/${tool}`} key={tool}>
-        <HtmlTooltip
-          title={
-            <Typography color="inherit" className={classes.linkTooltip}>
-              {tool}
-            </Typography>
-          }
-          placement="top"
-        >
-          <Avatar variant="circular">
-            <SVG src={imgSrc(tool)} className={classes.svgMedium} />
-          </Avatar>
-        </HtmlTooltip>
-      </Link>
-      &nbsp;
-    </>
+    <Link to={`/${tool}`} key={tool}>
+      <HtmlTooltip
+        title={
+          <Typography color="inherit" className={classes.linkTooltip}>
+            {tool}
+          </Typography>
+        }
+        placement="top"
+      >
+        <Avatar variant="circular">
+          <SVG src={imgSrc(tool)} className={classes.svgMedium} />
+        </Avatar>
+      </HtmlTooltip>
+    </Link>
   ));
 
   const accountMenu = (
