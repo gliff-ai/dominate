@@ -71,7 +71,7 @@
     "@material-ui/lab": "^4.0.0-alpha.58",
     "@sentry/integrations": "^6.6.0",
     "@sentry/react": "^6.6.0",
-    "@sentry/tracing": "^6.6.0",
+    "@sentry/tracing": "^6.9.0",
     "@stripe/stripe-js": "^1.14.0",
     "axios": "^0.21.1",
     "etebase": "^0.42.0",
