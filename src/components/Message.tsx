@@ -28,6 +28,7 @@ const useStyle = makeStyles((theme: Theme) => ({
     marginRight: "9px",
     marginTop: "0px",
     marginBottom: "-4px",
+    fill: theme.palette.primary.light,
   },
   snackbar: {
     background: theme.palette.info.light,
