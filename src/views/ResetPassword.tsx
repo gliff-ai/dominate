@@ -178,11 +178,13 @@ export const ResetPassword = (props: Props): ReactElement => {
     }
   };
 
-  if (!props.etebaseInstance || !auth.user) {
+  if (!props.etebaseInstance) {
     return <Navigate to="/signin" />;
   }
 
-  return (
+  return !auth.user ? (
+    <></>
+  ) : (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
 
