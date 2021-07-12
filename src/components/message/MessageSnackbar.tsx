@@ -1,5 +1,6 @@
 import SVG from "react-inlinesvg";
 import { IconButton, makeStyles, Theme } from "@material-ui/core";
+import { imgSrc } from "@/theme";
 import { BaseSnackbar, BaseSnackbarProps } from "../BaseSnackbar";
 
 const useStyle = makeStyles((theme: Theme) => ({
@@ -49,10 +50,7 @@ function MessageSnackbar({
       transition={transition}
       message={
         <span>
-          <SVG
-            src={require(`../../assets/warning.svg`) as string}
-            className={classes.svgSmall}
-          />
+          <SVG src={imgSrc("warning")} className={classes.svgSmall} />
 
           <div className={classes.message}>{messageText}</div>
           <IconButton
@@ -61,10 +59,7 @@ function MessageSnackbar({
             onClick={handleClose}
             className={classes.iconButton}
           >
-            <SVG
-              src={require(`../../assets/close.svg`) as string}
-              className={classes.svgSmallClose}
-            />
+            <SVG src={imgSrc("close")} className={classes.svgSmallClose} />
           </IconButton>
         </span>
       }
