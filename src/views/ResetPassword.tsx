@@ -17,6 +17,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { theme } from "@/theme";
 import { DominateEtebase } from "@/etebase";
 import { Message } from "@/components/Message";
+import { SubmitButton } from "@/components";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -281,20 +282,7 @@ export const ResetPassword = (props: Props): ReactElement => {
             }}
           />
 
-          <div className={classes.submitDiv}>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              {loading ? (
-                <CircularProgress color="inherit" />
-              ) : (
-                "Change Password"
-              )}
-            </Button>
-          </div>
+          <SubmitButton loading={loading} value="Change Password" />
         </form>
       </div>
     </Container>
