@@ -1,4 +1,5 @@
 import { ReactElement } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   UserInterface as Manage,
@@ -17,6 +18,7 @@ interface Props {
 
 export const ManageWrapper = (props: Props): ReactElement | null => {
   const auth = useAuth();
+  const navigate = useNavigate();
 
   if (!props.etebaseInstance || !auth.user) return null;
 
@@ -49,6 +51,10 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return true;
   };
 
+  const launchCurate = (projectUid: string): void =>
+    // Open the selected project in curate
+    navigate(`/curate/${projectUid}`);
+
   const services = {
     queryTeam: "GET /team",
     loginUser: "POST /user/login", // Not used, we pass an authd user down
@@ -63,7 +69,12 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
 
   return (
     <ProvideAuth>
-      <Manage user={user} services={services} apiUrl={API_URL} />
+      <Manage
+        user={user}
+        services={services}
+        apiUrl={API_URL}
+        launchCurateCallback={launchCurate}
+      />
     </ProvideAuth>
   );
 };
