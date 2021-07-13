@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
 import { makeStyles, Theme, CircularProgress } from "@material-ui/core";
+import { useAuth } from "@/hooks/use-auth";
 
 const useStyle = makeStyles((theme: Theme) => ({
   mainDiv: {
@@ -21,10 +22,12 @@ interface Props {
   isLoading: boolean;
 }
 
-function PageSpinner(props: Props): ReactElement {
+function PageSpinner(props: Props): ReactElement | null {
   const classes = useStyle();
+  const auth = useAuth();
+  if (!auth.user || !props.isLoading) return null;
 
-  return props.isLoading ? (
+  return (
     <div className={classes.mainDiv}>
       <CircularProgress
         size="6rem"
@@ -32,7 +35,7 @@ function PageSpinner(props: Props): ReactElement {
         className={classes.spinner}
       />
     </div>
-  ) : null;
+  );
 }
 
 export { PageSpinner };
