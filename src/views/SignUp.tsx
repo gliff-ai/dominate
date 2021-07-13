@@ -7,31 +7,19 @@ import {
   ComponentType,
 } from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
-import {
-  Button,
-  CssBaseline,
-  TextField,
-  Link,
-  Typography,
-  makeStyles,
-  Container,
-  CircularProgress,
-  Snackbar,
-  IconButton,
-  SnackbarContent,
-} from "@material-ui/core";
-import SVG from "react-inlinesvg";
-
-import Slide, { SlideProps } from "@material-ui/core/Slide";
-
+import { TextField, Link, Typography, makeStyles } from "@material-ui/core";
+import Slide from "@material-ui/core/Slide";
 import { useNavigate } from "react-router-dom";
 import { theme } from "@/theme";
-
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
-import { Message, BaseSnackbar, TransitionProps } from "@/components/Message";
-import { SubmitButton } from "@/components";
+import {
+  MessageSnackbar,
+  MessageAlert,
+  TransitionProps,
+  SubmitButton,
+} from "@/components";
 
 const stripePromise = loadStripe(
   "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
@@ -238,7 +226,7 @@ export const SignUp = (): JSX.Element => {
           value={signUp.email}
           placeholder="E-mail *"
         />
-        <Message severity="error" message={emailError} />
+        <MessageAlert severity="error" message={emailError} />
         <TextField
           variant="outlined"
           margin="normal"
@@ -253,7 +241,7 @@ export const SignUp = (): JSX.Element => {
           value={signUp.name}
           placeholder="Name *"
         />
-        <Message severity="error" message={nameError} />
+        <MessageAlert severity="error" message={nameError} />
         <TextField
           variant="outlined"
           margin="normal"
@@ -283,7 +271,7 @@ export const SignUp = (): JSX.Element => {
           onChange={handleChange}
           placeholder="Confirm Password *"
         />
-        <Message severity="error" message={passwordError} />
+        <MessageAlert severity="error" message={passwordError} />
 
         <SubmitButton loading={loading} value="Next" />
 
@@ -298,11 +286,11 @@ export const SignUp = (): JSX.Element => {
       </form>
 
       {/* Looks like that account already exists, try another email! */}
-      <BaseSnackbar
+      <MessageSnackbar
         open={open}
         handleClose={handleClose}
         transition={transition}
-        message={
+        messageText={
           String(etebaseError).includes("duplicate key")
             ? "Looks like that account already exists, try another email!"
             : "There was an error creating an account"

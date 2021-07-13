@@ -3,7 +3,7 @@ import { ChangeEvent, FormEvent, useState } from "react";
 import { apiRequest } from "@/api";
 import { TextField, makeStyles } from "@material-ui/core";
 import { theme } from "@/theme";
-import { Message, SubmitButton } from "@/components";
+import { MessageAlert, SubmitButton } from "@/components";
 
 const useStyles = makeStyles(() => ({
   form: {
@@ -121,10 +121,10 @@ export const RequestRecoverAccount = (): JSX.Element => {
           value={recoveryEmail}
           placeholder="E-mail"
         />
-        <Message severity="success" message={successBanner} />
+        <MessageAlert severity="success" message={successBanner} />
 
         <SubmitButton loading={loading} value="Request Recovery" />
-        <Message severity="error" message={recoveryError} />
+        <MessageAlert severity="error" message={recoveryError} />
       </form>
     </>
   );
