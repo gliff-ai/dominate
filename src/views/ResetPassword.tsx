@@ -16,7 +16,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { theme } from "@/theme";
 import { DominateEtebase } from "@/etebase";
-import { Message } from "@/components/Message";
+import { MessageAlert } from "@/components";
 import { SubmitButton } from "@/components";
 
 const useStyles = makeStyles(() => ({
@@ -242,7 +242,7 @@ export const ResetPassword = (props: Props): ReactElement => {
               ),
             }}
           />
-          <Message severity="error" message={passwordError} />
+          <MessageAlert severity="error" message={passwordError} />
 
           <TextField
             variant="outlined"
