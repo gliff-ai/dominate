@@ -12,6 +12,7 @@ import {
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
 import { imgSrc, theme } from "@/theme";
+import { Link } from "react-router-dom";
 
 import { HtmlTooltip } from "@/components/HtmlTooltip";
 
@@ -81,9 +82,11 @@ export function Account(): JSX.Element {
       placement="right"
     >
       <Avatar className={classes.editAvatar}>
-        <IconButton href="/reset-password">
-          <SVG src={imgSrc("edit-details")} className={classes.svgSmall} />
-        </IconButton>
+        <Link to="/reset-password">
+          <IconButton>
+            <SVG src={imgSrc("edit-details")} className={classes.svgSmall} />
+          </IconButton>
+        </Link>
       </Avatar>
     </HtmlTooltip>
   );
