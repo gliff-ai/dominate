@@ -5,6 +5,7 @@ import Curate from "@gliff-ai/curate";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
 import { Slices, MetaItem } from "@/etebase/interfaces";
+import { Task } from "@/components";
 
 import {
   stringifySlices,
@@ -15,6 +16,7 @@ import { useAuth } from "@/hooks/use-auth";
 interface Props {
   etebaseInstance: DominateEtebase;
   setIsLoading: (isLoading: boolean) => void;
+  setTask: (task: Task) => void;
 }
 
 export const CurateWrapper = (props: Props): ReactElement | null => {
@@ -139,6 +141,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       annotateCallback={annotateCallback}
       showAppBar={false}
       setIsLoading={props.setIsLoading}
+      setTask={props.setTask}
     />
   );
 };

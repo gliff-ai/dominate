@@ -13,7 +13,7 @@ import {
   SignIn,
   SignUp,
 } from "@/views";
-import { NavBar, PageSpinner } from "@/components";
+import { NavBar, PageSpinner, ProgressSnackbar, Task } from "@/components";
 import { BasicPage } from "@/views/BasicPage";
 
 const useStyles = makeStyles({
@@ -51,11 +51,16 @@ interface Props {
 
 const UserInterface = (props: Props): ReactElement | null => {
   const { etebaseInstance } = props;
+  const [task, setTask] = useState<Task>({
+    isLoading: false,
+    description: "",
+  });
   const classes = useStyles();
   const [isLoading, setIsLoading] = useState(false);
 
   return (
     <ThemeProvider theme={theme}>
+      <ProgressSnackbar task={task} setTask={setTask} />
       <CssBaseline />
       <BrowserRouter>
         <div className={classes.outerContainer}>
@@ -74,6 +79,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                 <Curate
                   etebaseInstance={etebaseInstance}
                   setIsLoading={setIsLoading}
+                  setTask={setTask}
                 />
               }
             />
@@ -83,6 +89,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                 <Curate
                   etebaseInstance={etebaseInstance}
                   setIsLoading={setIsLoading}
+                  setTask={setTask}
                 />
               }
             />

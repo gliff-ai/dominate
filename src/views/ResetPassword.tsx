@@ -16,7 +16,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { theme } from "@/theme";
 import { DominateEtebase } from "@/etebase";
-import { Message } from "@/components/Message";
+import { MessageAlert } from "@/components";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -178,11 +178,13 @@ export const ResetPassword = (props: Props): ReactElement => {
     }
   };
 
-  if (!props.etebaseInstance || !auth.user) {
+  if (!props.etebaseInstance) {
     return <Navigate to="/signin" />;
   }
 
-  return (
+  return !auth.user ? (
+    <></>
+  ) : (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
 
@@ -239,7 +241,7 @@ export const ResetPassword = (props: Props): ReactElement => {
               ),
             }}
           />
-          <Message severity="error" message={passwordError} />
+          <MessageAlert severity="error" message={passwordError} />
 
           <TextField
             variant="outlined"
