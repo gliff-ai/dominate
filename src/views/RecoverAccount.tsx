@@ -5,7 +5,7 @@ import { getRecoverySession } from "@/services/user";
 import { DominateEtebase } from "@/etebase";
 import { theme } from "@/theme";
 import { TextField, Link, Typography, makeStyles } from "@material-ui/core";
-import { SubmitButton, Message } from "@/components";
+import { MessageAlert, SubmitButton } from "@/components";
 
 const useStyles = makeStyles(() => ({
   form: {
@@ -172,7 +172,7 @@ export const RecoverAccount = (props: Props): JSX.Element => {
 
         <SubmitButton loading={loading} value="Continue" />
 
-        <Message severity="error" message={recoveryError} />
+        <MessageAlert severity="error" message={recoveryError} />
 
         <div className={classes.noAccount}>
           <Typography className={classes.noAccountText}>
