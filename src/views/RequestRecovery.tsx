@@ -4,6 +4,7 @@ import { apiRequest } from "@/api";
 import { TextField, makeStyles } from "@material-ui/core";
 import { theme } from "@/theme";
 import { MessageAlert, SubmitButton } from "@/components";
+import { useNavigate } from "react-router-dom";
 
 const useStyles = makeStyles(() => ({
   form: {
@@ -72,6 +73,7 @@ export const RequestRecoverAccount = (): JSX.Element => {
   const [success, setSuccess] = useState(false);
   const [recoveryError, setRecoveryError] = useState("");
   const [recoveryEmail, setRecoveryEmail] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     setRecoveryEmail(event.target.value);
@@ -84,6 +86,7 @@ export const RequestRecoverAccount = (): JSX.Element => {
 
       // Reset any errors
       setRecoveryError("");
+      setTimeout(() => navigate("/signin"), 3000);
 
       await apiRequest("/user/recover", "POST", {
         email: recoveryEmail,
