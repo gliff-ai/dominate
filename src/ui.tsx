@@ -13,7 +13,7 @@ import {
   SignIn,
   SignUp,
 } from "@/views";
-import { NavBar, ProgressSnackbar, Task } from "@/components";
+import { NavBar, PageSpinner, ProgressSnackbar, Task } from "@/components";
 import { BasicPage } from "@/views/BasicPage";
 
 const useStyles = makeStyles({
@@ -56,6 +56,7 @@ const UserInterface = (props: Props): ReactElement | null => {
     description: "",
   });
   const classes = useStyles();
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <ThemeProvider theme={theme}>
@@ -63,6 +64,7 @@ const UserInterface = (props: Props): ReactElement | null => {
       <CssBaseline />
       <BrowserRouter>
         <div className={classes.outerContainer}>
+          <PageSpinner isLoading={isLoading} />
           <NavBar />
           <Routes>
             <Route path="/signin">
@@ -74,18 +76,31 @@ const UserInterface = (props: Props): ReactElement | null => {
             <Route
               path="curate/:id"
               element={
-                <Curate etebaseInstance={etebaseInstance} setTask={setTask} />
+                <Curate
+                  etebaseInstance={etebaseInstance}
+                  setIsLoading={setIsLoading}
+                  setTask={setTask}
+                />
               }
             />
             <Route
               path="curate/"
               element={
-                <Curate etebaseInstance={etebaseInstance} setTask={setTask} />
+                <Curate
+                  etebaseInstance={etebaseInstance}
+                  setIsLoading={setIsLoading}
+                  setTask={setTask}
+                />
               }
             />
             <Route
               path="annotate/:collectionUid/:imageUid"
-              element={<Annotate etebaseInstance={etebaseInstance} />}
+              element={
+                <Annotate
+                  etebaseInstance={etebaseInstance}
+                  setIsLoading={setIsLoading}
+                />
+              }
             />
             <Route
               path="manage/*"
