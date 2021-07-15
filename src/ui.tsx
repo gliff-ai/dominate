@@ -76,29 +76,21 @@ const UserInterface = (props: Props): ReactElement | null => {
             <Route
               path="curate/:id"
               element={
-<<<<<<< HEAD
-                <Curate etebaseInstance={etebaseInstance} setTask={setTask} />
-=======
                 <Curate
                   etebaseInstance={etebaseInstance}
                   setIsLoading={setIsLoading}
                   setTask={setTask}
                 />
->>>>>>> a492174f7f65839bd8f89ecc1900c91e04d7bc43
               }
             />
             <Route
               path="curate/"
               element={
-<<<<<<< HEAD
-                <Curate etebaseInstance={etebaseInstance} setTask={setTask} />
-=======
                 <Curate
                   etebaseInstance={etebaseInstance}
                   setIsLoading={setIsLoading}
                   setTask={setTask}
                 />
->>>>>>> a492174f7f65839bd8f89ecc1900c91e04d7bc43
               }
             />
             <Route
