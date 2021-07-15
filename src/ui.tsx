@@ -126,7 +126,7 @@ const UserInterface = (props: Props): ReactElement | null => {
             />
 
             <Route path="/">
-              <Navigate to="/curate" />
+              <Navigate to="/manage" />
             </Route>
 
             <Route
