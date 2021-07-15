@@ -58,12 +58,12 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     // fetches galleries via DominateEtebase, and assigns them to galleryItems state
     props.etebaseInstance
       .getCollectionsMeta("gliff.gallery")
-      .then((items) => {
+      .then(async (items) => {
         // If galleryUid isn't set, use the first gallery
         if (items.length > 0 && !galleryUid) {
           setGalleryUid(items[0].uid);
         } else {
-          props.etebaseInstance.createCollection("Default Collection");
+          await props.etebaseInstance.createCollection("Default Collection");
           console.warn("No collections found, creating a default collection");
         }
       })
