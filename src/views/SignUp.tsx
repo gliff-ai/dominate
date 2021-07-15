@@ -10,7 +10,7 @@ import { loadStripe, Stripe } from "@stripe/stripe-js";
 import { TextField, Link, Typography, makeStyles } from "@material-ui/core";
 import Slide from "@material-ui/core/Slide";
 import { useNavigate } from "react-router-dom";
-import { theme } from "@/theme";
+import { theme } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";

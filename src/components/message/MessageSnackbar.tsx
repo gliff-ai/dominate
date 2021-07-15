@@ -1,6 +1,6 @@
 import SVG from "react-inlinesvg";
 import { IconButton, makeStyles, Theme } from "@material-ui/core";
-import { imgSrc } from "@/theme";
+import { imgSrc } from "@gliff-ai/style";
 import { BaseSnackbar, BaseSnackbarProps } from "../BaseSnackbar";
 
 const useStyle = makeStyles((theme: Theme) => ({

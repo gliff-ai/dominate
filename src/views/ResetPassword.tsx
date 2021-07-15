@@ -14,7 +14,7 @@ import {
   InputAdornment,
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
-import { theme } from "@/theme";
+import theme from "@gliff-ai/style";
 import { DominateEtebase } from "@/etebase";
 import { MessageAlert, SubmitButton } from "@/components";
 

@@ -1,8 +1,7 @@
 import { ReactElement, useState } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { CssBaseline, makeStyles, ThemeProvider } from "@material-ui/core";
-import { theme } from "@/theme";
-
+import { theme } from "@gliff-ai/style";
 import { DominateEtebase } from "@/etebase";
 import { Annotate, Curate, Manage } from "@/wrappers";
 import {

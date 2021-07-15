@@ -10,7 +10,7 @@ import {
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
-import { imgSrc, theme } from "@/theme";
+import { theme, imgSrc } from "@gliff-ai/style";
 import SVG from "react-inlinesvg";
 import {
   MessageSnackbar,

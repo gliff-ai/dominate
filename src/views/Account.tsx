@@ -11,10 +11,14 @@ import {
   Box,
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
-import { imgSrc, theme } from "@/theme";
+import { theme } from "@gliff-ai/style";
 import { Link } from "react-router-dom";
 
 import { HtmlTooltip } from "@/components/HtmlTooltip";
+
+const imgSrc = (src: string, type = "svg"): string =>
+  // eslint-disable-next-line import/no-dynamic-require
+  require(`@/assets/${src}.${type}`) as string;
 
 const useStyles = makeStyles(() => ({
   avatar: {

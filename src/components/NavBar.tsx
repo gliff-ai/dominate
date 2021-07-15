@@ -16,7 +16,10 @@ import SVG from "react-inlinesvg";
 
 import { useAuth } from "@/hooks/use-auth";
 import { HtmlTooltip } from "@/components/HtmlTooltip";
-import { imgSrc } from "@/theme";
+
+const imgSrc = (src: string, type = "svg"): string =>
+  // eslint-disable-next-line import/no-dynamic-require
+  require(`@/assets/${src}.${type}`) as string;
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -113,7 +116,11 @@ export const NavBar = (): ReactElement => {
         placement="top"
       >
         <Avatar variant="circular">
-          <SVG src={imgSrc(tool)} className={classes.svgMedium} />
+          <SVG
+            // eslint-disable-next-line import/no-dynamic-require
+            src={require(`@/assets/${tool}.svg`) as string}
+            className={classes.svgMedium}
+          />{" "}
         </Avatar>
       </HtmlTooltip>
     </Link>
