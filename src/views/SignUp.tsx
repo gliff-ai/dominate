@@ -132,7 +132,7 @@ export const SignUp = (): JSX.Element => {
       setLoading(false);
 
       if (!tierId || inviteId) {
-        navigate("home"); // It's the free plan or an invite so don't bill them
+        navigate("/"); // It's the free plan or an invite so don't bill them
         return;
       }
 
