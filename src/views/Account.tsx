@@ -12,6 +12,7 @@ import {
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
 import { imgSrc, theme } from "@/theme";
+import { Link } from "react-router-dom";
 
 import { HtmlTooltip } from "@/components/HtmlTooltip";
 
@@ -34,33 +35,61 @@ const useStyles = makeStyles(() => ({
     display: "inline-flex",
     padding: "16px 14px",
   },
+
   editAvatar: {
     display: "inline-flex",
     width: "30px",
     height: "30px",
-    marginLeft: "50%",
+    marginLeft: "70%",
+    top: "-25px",
   },
   card: {
     backgroundColor: theme.palette.primary.light,
-    width: "50%",
-    marginTop: "150px",
+    width: "fit-content",
+    margin: "150px 50px",
+  },
+  box: {
+    display: "flex",
+    flexWrap: "wrap",
   },
   typographyHeader: {
     display: "inline",
     marginLeft: "18px",
     fontWeight: 500,
   },
+  spanTypography: {
+    display: "inline",
+    fontWeight: 500,
+    marginLeft: "30px",
+    color: theme.palette.text.primary,
+  },
   boxTypography: {
     color: theme.palette.text.secondary,
     marginRight: "20px",
+    marginBottom: "30px",
+    marginTop: "20px",
   },
   svgSmall: { width: "22px", height: "100%" },
 }));
 
 export function Account(): JSX.Element {
   const classes = useStyles();
-  const [hover, sethover] = useState(false);
   const auth = useAuth();
+
+  const editpasswordButton = (
+    <HtmlTooltip
+      title={<Typography color="inherit">Edit Password</Typography>}
+      placement="right"
+    >
+      <Avatar className={classes.editAvatar}>
+        <Link to="/reset-password">
+          <IconButton>
+            <SVG src={imgSrc("edit-details")} className={classes.svgSmall} />
+          </IconButton>
+        </Link>
+      </Avatar>
+    </HtmlTooltip>
+  );
 
   return (
     <Grid>
@@ -69,54 +98,31 @@ export function Account(): JSX.Element {
           <Typography className={classes.typographyHeader}>
             John&apos;s Account Overview
           </Typography>
-          <HtmlTooltip
-            title={<Typography color="inherit">Account</Typography>}
-            placement="top"
-          >
-            <Avatar
-              variant="circle"
-              className={classes.editAvatar}
-              onMouseOut={() => {
-                sethover(false);
-              }}
-              onMouseOver={() => {
-                sethover(true);
-              }}
-            >
-              <IconButton>
-                <SVG
-                  src={imgSrc("edit-details")}
-                  className={classes.svgSmall}
-                  fill={
-                    hover
-                      ? theme.palette.primary.main
-                      : theme.palette.text.primary
-                  }
-                />
-              </IconButton>
-            </Avatar>
-          </HtmlTooltip>
         </Paper>
-        <div style={{ display: "flex" }}>
+        <Box className={classes.box}>
           <Box>
             <Avatar className={classes.avatar}>
               <Typography style={{ fontSize: "50px" }}>H</Typography>
             </Avatar>
           </Box>
 
-          <Box style={{ marginTop: "30px" }}>
-            <Typography>
-              <span className={classes.boxTypography}>Name:</span> John
+          <Box style={{ margin: "30px 30px" }}>
+            <Typography className={classes.boxTypography}>
+              Name: <span className={classes.spanTypography}>John</span>
             </Typography>
-            <Typography>
-              <span className={classes.boxTypography}>E-mail Address:</span>
-              {auth.user && auth.user.username}
+            <Typography className={classes.boxTypography}>
+              E-mail Address:
+              <span className={classes.spanTypography}>
+                {auth.user && auth.user.username}
+              </span>
             </Typography>
-            <Typography>
-              <span className={classes.boxTypography}>Password:</span> *********
+            <Typography component="span" className={classes.boxTypography}>
+              Password:
+              <span className={classes.spanTypography}>*********</span>
+              {editpasswordButton}
             </Typography>
           </Box>
-        </div>
+        </Box>
       </Card>
     </Grid>
   );

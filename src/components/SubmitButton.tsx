@@ -14,7 +14,7 @@ const useStyles = makeStyles(() => ({
     fontSize: "15px",
     width: "169px",
     "&:hover": {
-      backgroundColor: "none",
+      backgroundColor: theme.palette.primary.main,
     },
     marginBottom: "20px",
     marginTop: "20px",

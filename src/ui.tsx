@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ReactElement, useState } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { CssBaseline, makeStyles, ThemeProvider } from "@material-ui/core";
 import { theme } from "@/theme";
@@ -13,7 +13,7 @@ import {
   SignIn,
   SignUp,
 } from "@/views";
-import { NavBar } from "@/components";
+import { NavBar, PageSpinner, ProgressSnackbar, Task } from "@/components";
 import { BasicPage } from "@/views/BasicPage";
 
 const useStyles = makeStyles({
@@ -51,13 +51,20 @@ interface Props {
 
 const UserInterface = (props: Props): ReactElement | null => {
   const { etebaseInstance } = props;
+  const [task, setTask] = useState<Task>({
+    isLoading: false,
+    description: "",
+  });
   const classes = useStyles();
+  const [isLoading, setIsLoading] = useState(false);
 
   return (
     <ThemeProvider theme={theme}>
+      <ProgressSnackbar task={task} setTask={setTask} />
       <CssBaseline />
       <BrowserRouter>
         <div className={classes.outerContainer}>
+          <PageSpinner isLoading={isLoading} />
           <NavBar />
           <Routes>
             <Route path="/signin">
@@ -68,15 +75,32 @@ const UserInterface = (props: Props): ReactElement | null => {
             </Route>
             <Route
               path="curate/:id"
-              element={<Curate etebaseInstance={etebaseInstance} />}
+              element={
+                <Curate
+                  etebaseInstance={etebaseInstance}
+                  setIsLoading={setIsLoading}
+                  setTask={setTask}
+                />
+              }
             />
             <Route
               path="curate/"
-              element={<Curate etebaseInstance={etebaseInstance} />}
+              element={
+                <Curate
+                  etebaseInstance={etebaseInstance}
+                  setIsLoading={setIsLoading}
+                  setTask={setTask}
+                />
+              }
             />
             <Route
               path="annotate/:collectionUid/:imageUid"
-              element={<Annotate etebaseInstance={etebaseInstance} />}
+              element={
+                <Annotate
+                  etebaseInstance={etebaseInstance}
+                  setIsLoading={setIsLoading}
+                />
+              }
             />
             <Route
               path="manage/*"
@@ -102,7 +126,7 @@ const UserInterface = (props: Props): ReactElement | null => {
             />
 
             <Route path="/">
-              <Navigate to="/curate" />
+              <Navigate to="/manage" />
             </Route>
 
             <Route
