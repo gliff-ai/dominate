@@ -1,107 +1,146 @@
-/* eslint-disable react/jsx-curly-newline */
-import React, { Component, ReactNode } from "react";
-import { BrowserRouter, Route, Routes } from "react-router-dom";
-import { WithStyles, withStyles } from "@material-ui/core";
+import { ReactElement, useState } from "react";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { CssBaseline, makeStyles, ThemeProvider } from "@material-ui/core";
+import { theme } from "@/theme";
 
-import { Collection, DominateEtebase } from "@/etebase";
-import { SignIn } from "@/views/SignIn";
-import { SignUp } from "@/views/signup/SignUp";
-import { RecoverAccount } from "@/views/RecoverAccount";
-import { Navbar } from "@/NavBar";
-import { ManageWrapper } from "@/ManageWrapper";
-import { AnnotateWrapper } from "@/AnnotateWrapper";
-import { RequestRecoverAccount } from "@/views/RequestRecovery";
-import { Home } from "./Home";
-import { CurateWrapper } from "./CurateWrapper";
+import { DominateEtebase } from "@/etebase";
+import { Annotate, Curate, Manage } from "@/wrappers";
+import {
+  Account,
+  RecoverAccount,
+  RequestRecoverAccount,
+  ResetPassword,
+  SignIn,
+  SignUp,
+} from "@/views";
+import { NavBar, PageSpinner, ProgressSnackbar, Task } from "@/components";
+import { BasicPage } from "@/views/BasicPage";
 
-const styles = {
+const useStyles = makeStyles({
   outerContainer: { height: "100%" },
-};
+  home: {
+    height: "53px",
+    backgroundColor: theme.palette.primary.light,
+    width: "61px",
+    top: "20px",
+    right: "20px",
+  },
+  svgSmall: {
+    width: "22px",
+    height: "100%",
+    marginLeft: "21px",
+  },
 
-interface Props extends WithStyles<typeof styles> {
+  iconButton: {
+    marginLeft: "-20px",
+  },
+  avatarSVG: {
+    backgroundColor: theme.palette.primary.light,
+    marginLeft: "auto",
+    marginRight: "auto",
+    marginTop: "6px",
+    "&:hover": {
+      backgroundColor: theme.palette.primary.main,
+    },
+  },
+});
+
+interface Props {
   etebaseInstance: DominateEtebase;
-  // children?: Children;
 }
 
-interface State {
-  collections?: Collection[];
-}
+const UserInterface = (props: Props): ReactElement | null => {
+  const { etebaseInstance } = props;
+  const [task, setTask] = useState<Task>({
+    isLoading: false,
+    description: "",
+  });
+  const classes = useStyles();
+  const [isLoading, setIsLoading] = useState(false);
 
-class UserInterface extends Component<Props, State> {
-  constructor(props: Props) {
-    super(props);
-    this.state = { collections: null };
-  }
-
-  render = (): ReactNode => {
-    const { classes } = this.props;
-    return (
+  return (
+    <ThemeProvider theme={theme}>
+      <ProgressSnackbar task={task} setTask={setTask} />
+      <CssBaseline />
       <BrowserRouter>
         <div className={classes.outerContainer}>
-          <Navbar />
-          <br />
-          <br />
-          <br />
+          <PageSpinner isLoading={isLoading} />
+          <NavBar />
           <Routes>
             <Route path="/signin">
-              <SignIn />
+              <BasicPage view={<SignIn />} title={<>Login</>} />
             </Route>
             <Route path="/signup">
-              <SignUp />
+              <BasicPage view={<SignUp />} title={<>Create an Account</>} />
             </Route>
             <Route
               path="curate/:id"
               element={
-                <CurateWrapper etebaseInstance={this.props.etebaseInstance} />
+                <Curate
+                  etebaseInstance={etebaseInstance}
+                  setIsLoading={setIsLoading}
+                  setTask={setTask}
+                />
               }
             />
             <Route
               path="curate/"
               element={
-                <CurateWrapper etebaseInstance={this.props.etebaseInstance} />
+                <Curate
+                  etebaseInstance={etebaseInstance}
+                  setIsLoading={setIsLoading}
+                  setTask={setTask}
+                />
               }
             />
             <Route
               path="annotate/:collectionUid/:imageUid"
               element={
-                <AnnotateWrapper etebaseInstance={this.props.etebaseInstance} />
+                <Annotate
+                  etebaseInstance={etebaseInstance}
+                  setIsLoading={setIsLoading}
+                />
               }
             />
             <Route
               path="manage/*"
-              element={
-                <ManageWrapper etebaseInstance={this.props.etebaseInstance} />
-              }
+              element={<Manage etebaseInstance={etebaseInstance} />}
             />
-
             <Route
               path="recover/*"
               element={
-                <RecoverAccount etebaseInstance={this.props.etebaseInstance} />
+                <BasicPage
+                  view={<RecoverAccount etebaseInstance={etebaseInstance} />}
+                  title={<>Recover my Account</>}
+                />
+              }
+            />
+            <Route
+              path="request-recover/*"
+              element={
+                <BasicPage
+                  view={<RequestRecoverAccount />}
+                  title={<>Request Recovery</>}
+                />
               }
             />
 
-            <Route
-              path="request-recover/*"
-              element={<RequestRecoverAccount />}
-            />
-
             <Route path="/">
-              <Home />
+              <Navigate to="/manage" />
+            </Route>
+
+            <Route
+              path="/reset-password"
+              element={<ResetPassword etebaseInstance={etebaseInstance} />}
+            />
+            <Route path="/account">
+              <Account />
             </Route>
           </Routes>
         </div>
-
-        <footer>
-          <div>
-            {this.state.collections?.map((col) =>
-              JSON.stringify(col.getMeta())
-            )}
-          </div>
-        </footer>
       </BrowserRouter>
-    );
-  };
-}
+    </ThemeProvider>
+  );
+};
 
-export default withStyles(styles)(UserInterface);
+export default UserInterface;

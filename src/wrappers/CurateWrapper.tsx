@@ -1,9 +1,11 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+
+import Curate from "@gliff-ai/curate";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
 import { Slices, MetaItem } from "@/etebase/interfaces";
-import Curate from "@gliff-ai/curate";
+import { Task } from "@/components";
 
 import {
   stringifySlices,
@@ -13,18 +15,22 @@ import { useAuth } from "@/hooks/use-auth";
 
 interface Props {
   etebaseInstance: DominateEtebase;
+  setIsLoading: (isLoading: boolean) => void;
+  setTask: (task: Task) => void;
 }
 
 export const CurateWrapper = (props: Props): ReactElement | null => {
   if (!props.etebaseInstance) return null;
+  const navigate = useNavigate();
+  const auth = useAuth();
 
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
   const { id: galleryUidParam } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
   const [galleryUid, setGalleryUid] = useState<string>(galleryUidParam);
 
-  const navigate = useNavigate();
-
-  const auth = useAuth();
+  useEffect(() => {
+    props.setIsLoading(true);
+  }, []);
 
   const fetchImageItems = (): void => {
     // fetches images via DominateEtebase, and assigns them to imageItems state
@@ -133,6 +139,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       saveLabelsCallback={saveLabelsCallback}
       deleteImagesCallback={deleteImageCallback}
       annotateCallback={annotateCallback}
+      showAppBar={false}
+      setIsLoading={props.setIsLoading}
+      setTask={props.setTask}
     />
   );
 };

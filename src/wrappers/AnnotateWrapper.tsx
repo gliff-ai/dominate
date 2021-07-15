@@ -1,5 +1,6 @@
-import React, { ReactElement, useState, useEffect } from "react";
+import { ReactElement, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+
 import Annotate, { Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
@@ -11,6 +12,7 @@ import {
 
 interface Props {
   etebaseInstance: DominateEtebase;
+  setIsLoading: (isLoading: boolean) => void;
 }
 
 export const AnnotateWrapper = (props: Props): ReactElement | null => {
@@ -22,6 +24,10 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [imageFileInfo, setImageFileInfo] =
     useState<ImageFileInfo | null>(null);
   const [annotationsObject, setAnnotationsObject] = useState<Annotations>(null);
+
+  useEffect(() => {
+    props.setIsLoading(true);
+  }, []);
 
   const getImage = (): void => {
     // Retrieve image item and set it as state
@@ -90,10 +96,12 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
 
   return slicesData ? (
     <Annotate
+      showAppBar={false}
       slicesData={slicesData}
       imageFileInfo={imageFileInfo}
       annotationsObject={annotationsObject}
       saveAnnotationsCallback={saveAnnotation}
+      setIsLoading={props.setIsLoading}
     />
   ) : null;
 };
