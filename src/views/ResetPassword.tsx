@@ -16,7 +16,7 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { theme } from "@/theme";
 import { DominateEtebase } from "@/etebase";
-import { MessageAlert } from "@/components";
+import { MessageAlert, SubmitButton } from "@/components";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -178,11 +178,13 @@ export const ResetPassword = (props: Props): ReactElement => {
     }
   };
 
-  if (!props.etebaseInstance || !auth.user) {
+  if (!props.etebaseInstance) {
     return <Navigate to="/signin" />;
   }
 
-  return (
+  return !auth.user ? (
+    <></>
+  ) : (
     <Container component="main" maxWidth="xs">
       <CssBaseline />
 
@@ -279,20 +281,7 @@ export const ResetPassword = (props: Props): ReactElement => {
             }}
           />
 
-          <div className={classes.submitDiv}>
-            <Button
-              type="submit"
-              variant="contained"
-              color="primary"
-              className={classes.submit}
-            >
-              {loading ? (
-                <CircularProgress color="inherit" />
-              ) : (
-                "Change Password"
-              )}
-            </Button>
-          </div>
+          <SubmitButton loading={loading} value="Change Password" />
         </form>
       </div>
     </Container>
