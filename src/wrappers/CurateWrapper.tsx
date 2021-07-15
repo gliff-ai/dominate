@@ -60,8 +60,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         if (items.length > 0 && !galleryUid) {
           setGalleryUid(items[0].uid);
         } else {
-          // Create the user a default collection?
-          console.warn("User doesn't have any collections!");
+          props.etebaseInstance.createCollection("Default Collection");
+          console.warn("No collections found, creating a default collection");
         }
       })
       .catch((err) => {

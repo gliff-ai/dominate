@@ -128,9 +128,6 @@ export const SignUp = (): JSX.Element => {
 
   const redirectUser = async (): Promise<void> => {
     try {
-      const instance = auth.getInstance();
-
-      const project = await instance.createCollection("Default Collection");
       // Create and update their profile
       setLoading(false);
 
