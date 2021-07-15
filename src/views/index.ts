@@ -4,3 +4,6 @@ export { RecoverAccount } from "./RecoverAccount";
 export { RequestRecoverAccount } from "./RequestRecovery";
 export { Account } from "./Account";
 export { ResetPassword } from "./ResetPassword";
+export { ValidationSent } from "./ValidationSent";
+export { VerifyEmail } from "./VerifyEmail";
+export { RequestEmailVerification } from "./RequestEmailVerification";

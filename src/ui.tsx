@@ -12,6 +12,8 @@ import {
   ResetPassword,
   SignIn,
   SignUp,
+  VerifyEmail,
+  RequestEmailVerification,
 } from "@/views";
 import { NavBar, PageSpinner, ProgressSnackbar, Task } from "@/components";
 import { BasicPage } from "@/views/BasicPage";
@@ -121,6 +123,21 @@ const UserInterface = (props: Props): ReactElement | null => {
                 <BasicPage
                   view={<RequestRecoverAccount />}
                   title={<>Request Recovery</>}
+                />
+              }
+            />
+            <Route path="/verify_email/:uid">
+              <BasicPage
+                view={<VerifyEmail />}
+                title={<>Verify Email Address</>}
+              />
+            </Route>
+            <Route
+              path="request-verify-email"
+              element={
+                <BasicPage
+                  view={<RequestEmailVerification />}
+                  title={<>Request Email Verification</>}
                 />
               }
             />

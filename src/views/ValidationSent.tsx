@@ -119,11 +119,14 @@ const useStyles = makeStyles(() => ({
 }));
 
 interface Props {
-    emailAddress: string;
+  emailAddress: string;
   callback: () => void;
 }
 
-export function ValidationSent({ emailAddress, callback }: Props): ReactElement {
+export function ValidationSent({
+  emailAddress,
+  callback,
+}: Props): ReactElement {
   const classes = useStyles();
 
   return (
@@ -132,7 +135,8 @@ export function ValidationSent({ emailAddress, callback }: Props): ReactElement 
         A verification email has been sent to {emailAddress}.
       </Typography>
       <Typography className={classes.recoveryKeyParagraph}>
-        Please check your inbox, your account will remain disabled until your email address is verified.
+        Please check your inbox, your account will remain disabled until your
+        email address is verified.
       </Typography>
 
       <div className={classes.submitDiv}>
