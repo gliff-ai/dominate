@@ -105,27 +105,34 @@ export const VerifyEmail = (): JSX.Element => {
   const [loading, setLoading] = useState(false);
   const [requestError, setRequestError] = useState("");
 
-  const onSubmitForm = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault();
-    setLoading(true);
+  const onLoadForm = async (): Promise<void> => {
+    try {
+        setLoading(true);
 
-    // Reset any errors
-    setRequestError("");
+        // Reset any errors
+        setRequestError("");
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const verifiedEmail = await apiRequest<boolean>(
-      `/verify_email/${uid}`,
-      "GET"
-    );
-    console.log(verifiedEmail);
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const verifiedEmail = await apiRequest<boolean>(
+        `/user/verify_email/${uid}`,
+        "GET"
+        );
 
-    if (verifiedEmail) {
-      setLoading(false);
-      navigate("/");
-    } else {
-      setRequestError("Couldn't verify account with those details");
-    }
+        setLoading(false);
+      } catch (e) {
+        console.log(e)
+        setRequestError("Couldn't verify account with those details");
+      }
   };
+
+  const onSubmitForm = (event: FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    navigate("/");
+  }
+
+  useEffect(() => {
+    void onLoadForm();
+}, []);
 
   return (
     <>
@@ -134,10 +141,10 @@ export const VerifyEmail = (): JSX.Element => {
           Thank you for verifying your email address.
         </Typography>
         <Typography className={classes.recoveryKeyParagraph}>
-          Your gliff.ai account is now active, enjoy.
+          Your gliff.ai account is being verified..
         </Typography>
 
-        <SubmitButton loading={loading} value="Verify and sign me in" />
+        <SubmitButton loading={loading} disabled={loading} value="Take me to the platform" />
 
         <MessageAlert severity="error" message={requestError} />
 
