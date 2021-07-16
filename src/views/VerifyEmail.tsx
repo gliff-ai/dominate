@@ -113,10 +113,7 @@ export const VerifyEmail = (): JSX.Element => {
       setRequestError("");
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      await apiRequest<boolean>(
-        `/user/verify_email/${uid}`,
-        "GET"
-      );
+      await apiRequest<boolean>(`/user/verify_email/${uid}`, "GET");
 
       setLoading(false);
     } catch (e) {
