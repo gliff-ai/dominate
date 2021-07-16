@@ -125,7 +125,11 @@ interface Props {
   callback: () => void;
 }
 
-export function RecoveryKey({ recoveryKey, emailAddress, callback }: Props): ReactElement {
+export function RecoveryKey({
+  recoveryKey,
+  emailAddress,
+  callback,
+}: Props): ReactElement {
   const classes = useStyles();
 
   const [isUnderstood, setUnderstood] = useState(false);

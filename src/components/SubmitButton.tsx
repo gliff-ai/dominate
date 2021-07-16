@@ -48,11 +48,10 @@ function SubmitButton(props: Props): ReactElement {
       </Button>
     </div>
   );
-};
+}
 
 SubmitButton.defaultProps = {
   disabled: false,
 };
 
 export { SubmitButton, Props as SubmitButtonProps };
-

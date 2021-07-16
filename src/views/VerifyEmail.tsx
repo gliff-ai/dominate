@@ -107,32 +107,32 @@ export const VerifyEmail = (): JSX.Element => {
 
   const onLoadForm = async (): Promise<void> => {
     try {
-        setLoading(true);
+      setLoading(true);
 
-        // Reset any errors
-        setRequestError("");
+      // Reset any errors
+      setRequestError("");
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        const verifiedEmail = await apiRequest<boolean>(
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const verifiedEmail = await apiRequest<boolean>(
         `/user/verify_email/${uid}`,
         "GET"
-        );
+      );
 
-        setLoading(false);
-      } catch (e) {
-        console.log(e)
-        setRequestError("Couldn't verify account with those details");
-      }
+      setLoading(false);
+    } catch (e) {
+      console.log(e);
+      setRequestError("Couldn't verify account with those details");
+    }
   };
 
   const onSubmitForm = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     navigate("/");
-  }
+  };
 
   useEffect(() => {
     void onLoadForm();
-}, []);
+  }, []);
 
   return (
     <>
@@ -144,7 +144,11 @@ export const VerifyEmail = (): JSX.Element => {
           Your gliff.ai account is being verified..
         </Typography>
 
-        <SubmitButton loading={loading} disabled={loading} value="Take me to the platform" />
+        <SubmitButton
+          loading={loading}
+          disabled={loading}
+          value="Take me to the platform"
+        />
 
         <MessageAlert severity="error" message={requestError} />
 
