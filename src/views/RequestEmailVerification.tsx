@@ -88,7 +88,7 @@ export const RequestEmailVerification = (): JSX.Element => {
       setRequestError("");
       setTimeout(() => navigate("/signin"), 3000);
 
-      await apiRequest("/verify_email/", "POST", {
+      await apiRequest("/verify_email", "POST", {
         email: verifiableEmail,
       });
 
