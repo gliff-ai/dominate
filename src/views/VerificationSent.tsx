@@ -123,7 +123,7 @@ interface Props {
   callback: () => void;
 }
 
-export function ValidationSent({
+export function VerificationSent({
   emailAddress,
   callback,
 }: Props): ReactElement {

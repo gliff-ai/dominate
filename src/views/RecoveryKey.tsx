@@ -1,7 +1,7 @@
 import { ReactElement, useState } from "react";
 import { Button, Typography, makeStyles, Card } from "@material-ui/core";
 import { theme } from "@/theme";
-import { ValidationSent } from "@/views/ValidationSent";
+import { VerificationSent } from "@/views/VerificationSent";
 
 const useStyles = makeStyles(() => ({
   card: {
@@ -121,16 +121,17 @@ const useStyles = makeStyles(() => ({
 
 interface Props {
   recoveryKey: string[];
+  emailAddress: string;
   callback: () => void;
 }
 
-export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
+export function RecoveryKey({ recoveryKey, emailAddress, callback }: Props): ReactElement {
   const classes = useStyles();
 
   const [isUnderstood, setUnderstood] = useState(false);
 
   return isUnderstood ? (
-    <ValidationSent emailAddress={recoveryKey[0]} callback={callback} />
+    <VerificationSent emailAddress={emailAddress} callback={callback} />
   ) : (
     <>
       <Card className={classes.card}>
@@ -158,7 +159,7 @@ export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
           className={classes.submit}
           onClick={() => setUnderstood(true)}
         >
-          I Understand
+          I have saved my recovery key somewhere safe
         </Button>
       </div>
     </>

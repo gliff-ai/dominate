@@ -203,7 +203,7 @@ export const SignUp = (): JSX.Element => {
   };
 
   return recoveryKey ? (
-    <RecoveryKey recoveryKey={recoveryKey} callback={redirectUser} />
+    <RecoveryKey recoveryKey={recoveryKey} emailAddress={signUp.email} callback={redirectUser} />
   ) : (
     <>
       <form className={classes.form} onSubmit={onSubmitForm}>
