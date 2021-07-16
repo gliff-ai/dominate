@@ -171,7 +171,6 @@ export class DominateEtebase {
   } => {
     const readable = getRandomValueFromArrayOrString(wordlist, 9);
 
-    console.log(readable); // Remove when we show this in the UI
     const hashed = sodium.crypto_generichash(
       32,
       sodium.from_string(readable.join(""))
