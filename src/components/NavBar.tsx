@@ -1,4 +1,4 @@
-import { ReactElement, useState } from "react";
+import { ReactElement, useState, useEffect } from "react";
 import {
   AppBar,
   Avatar,
@@ -17,6 +17,8 @@ import SVG from "react-inlinesvg";
 import { useAuth } from "@/hooks/use-auth";
 import { HtmlTooltip } from "@/components/HtmlTooltip";
 import { imgSrc } from "@/theme";
+import { UserProfile } from "@/services/user/interfaces";
+import { getUserProfile } from "@/services/user";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -80,6 +82,7 @@ export const NavBar = (): ReactElement => {
   const auth = useAuth();
   const navigate = useNavigate();
   const classes = useStyles();
+  const [userInitials, setUserInitials] = useState<string>("");
 
   const [anchorElement, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -90,6 +93,18 @@ export const NavBar = (): ReactElement => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  useEffect(() => {
+    getUserProfile()
+      .then((profile: UserProfile) => {
+        const initials = profile.name
+          .split(" ")
+          .map((w) => w[0].toUpperCase())
+          .join("");
+        setUserInitials(initials);
+      })
+      .catch((e) => console.log(e));
+  }, [auth]);
 
   const hasNavbar = () =>
     ![
@@ -119,12 +134,12 @@ export const NavBar = (): ReactElement => {
     </Link>
   ));
 
-  const accountMenu = (
+  const accountMenu = userInitials ? (
     <>
       <IconButton onClick={handleClick} aria-controls="menu">
         <HtmlTooltip title={<Typography>Account</Typography>} placement="top">
           <Avatar variant="circular" className={classes.avatarUser}>
-            H
+            {userInitials}
           </Avatar>
         </HtmlTooltip>
       </IconButton>
@@ -161,7 +176,7 @@ export const NavBar = (): ReactElement => {
         </MenuItem>
       </Menu>
     </>
-  );
+  ) : null;
 
   return (
     <AppBar position="sticky" className={classes.appBar} elevation={0}>
