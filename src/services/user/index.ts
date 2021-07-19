@@ -21,6 +21,9 @@ export const createUserProfile = (
     recovery_key: recovery,
   });
 
+export const getUserProfile = (): Promise<UserProfile> =>
+  apiRequest<UserProfile>("/user/", "GET");
+
 export const inviteNewUser = (email: string): Promise<unknown> =>
   apiRequest<unknown>("/user/invite", "POST", { email });
 
