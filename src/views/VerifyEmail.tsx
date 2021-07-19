@@ -118,7 +118,7 @@ export const VerifyEmail = (): JSX.Element => {
       setLoading(false);
     } catch (e) {
       console.log(e);
-      setRequestError("Couldn't verify account with those details");
+      setRequestError("Account not verified");
     }
   };
 
@@ -138,7 +138,7 @@ export const VerifyEmail = (): JSX.Element => {
           Thank you for verifying your email address.
         </Typography>
         <Typography className={classes.recoveryKeyParagraph}>
-          Your gliff.ai account is being verified..
+          Your gliff.ai account is being verified...
         </Typography>
 
         <SubmitButton

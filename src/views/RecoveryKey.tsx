@@ -121,21 +121,16 @@ const useStyles = makeStyles(() => ({
 
 interface Props {
   recoveryKey: string[];
-  emailAddress: string;
   callback: () => void;
 }
 
-export function RecoveryKey({
-  recoveryKey,
-  emailAddress,
-  callback,
-}: Props): ReactElement {
+export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
   const classes = useStyles();
 
   const [isUnderstood, setUnderstood] = useState(false);
 
   return isUnderstood ? (
-    <VerificationSent emailAddress={emailAddress} callback={callback} />
+    <VerificationSent callback={callback} />
   ) : (
     <>
       <Card className={classes.card}>
