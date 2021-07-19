@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import SVG from "react-inlinesvg";
 import {
   Avatar,
@@ -13,10 +13,11 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { imgSrc, theme } from "@/theme";
 import { Link } from "react-router-dom";
-
 import { HtmlTooltip } from "@/components/HtmlTooltip";
+import { getUserProfile } from "@/services/user";
+import { UserProfile } from "@/services/user/interfaces";
 
-const useStyles = makeStyles(() => ({
+const useStyles = makeStyles({
   avatar: {
     width: "199px",
     height: "199px",
@@ -35,13 +36,10 @@ const useStyles = makeStyles(() => ({
     display: "inline-flex",
     padding: "16px 14px",
   },
-
   editAvatar: {
+    marginLeft: "18px",
+    position: "relative",
     display: "inline-flex",
-    width: "30px",
-    height: "30px",
-    marginLeft: "70%",
-    top: "-25px",
   },
   card: {
     backgroundColor: theme.palette.primary.light,
@@ -70,45 +68,52 @@ const useStyles = makeStyles(() => ({
     marginTop: "20px",
   },
   svgSmall: { width: "22px", height: "100%" },
-}));
+  avatarTopography: { fontSize: "50px" },
+  boxInfo: { margin: "30px 30px" },
+});
 
-export function Account(): JSX.Element {
-  const classes = useStyles();
+export function Account(): ReactElement {
   const auth = useAuth();
+  const classes = useStyles();
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
 
-  const editpasswordButton = (
-    <HtmlTooltip
-      title={<Typography color="inherit">Edit Password</Typography>}
-      placement="right"
-    >
-      <Avatar className={classes.editAvatar}>
-        <Link to="/reset-password">
-          <IconButton>
-            <SVG src={imgSrc("edit-details")} className={classes.svgSmall} />
-          </IconButton>
-        </Link>
-      </Avatar>
-    </HtmlTooltip>
-  );
+  useEffect(() => {
+    getUserProfile()
+      .then((profile) => {
+        setUserProfile(profile);
+      })
+      .catch((e) => console.log(e));
+  }, [auth]);
 
-  return (
+  const getInitials = (name: string): string =>
+    name
+      .split(" ")
+      .map((l) => l[0].toUpperCase())
+      .join("");
+
+  return userProfile ? (
     <Grid>
       <Card className={classes.card}>
         <Paper elevation={0} variant="outlined" className={classes.paperHeader}>
           <Typography className={classes.typographyHeader}>
-            John&apos;s Account Overview
+            Account Overview
           </Typography>
         </Paper>
         <Box className={classes.box}>
           <Box>
             <Avatar className={classes.avatar}>
-              <Typography style={{ fontSize: "50px" }}>H</Typography>
+              <Typography className={classes.avatarTopography}>
+                {getInitials(userProfile?.name)}
+              </Typography>
             </Avatar>
           </Box>
 
-          <Box style={{ margin: "30px 30px" }}>
+          <Box className={classes.boxInfo}>
             <Typography className={classes.boxTypography}>
-              Name: <span className={classes.spanTypography}>John</span>
+              Name:
+              <span className={classes.spanTypography}>
+                {userProfile?.name}
+              </span>
             </Typography>
             <Typography className={classes.boxTypography}>
               E-mail Address:
@@ -119,11 +124,31 @@ export function Account(): JSX.Element {
             <Typography component="span" className={classes.boxTypography}>
               Password:
               <span className={classes.spanTypography}>*********</span>
-              {editpasswordButton}
+              <HtmlTooltip
+                title={<Typography color="inherit">Edit Password</Typography>}
+                placement="right"
+              >
+                <Avatar className={classes.editAvatar}>
+                  <Link to="/reset-password">
+                    <IconButton>
+                      <SVG
+                        src={imgSrc("edit-details")}
+                        className={classes.svgSmall}
+                      />
+                    </IconButton>
+                  </Link>
+                </Avatar>
+              </HtmlTooltip>
+            </Typography>
+            <Typography className={classes.boxTypography}>
+              Team&apos;s Storage Usage:
+              <span
+                className={classes.spanTypography}
+              >{`${userProfile?.team?.usage} MB`}</span>
             </Typography>
           </Box>
         </Box>
       </Card>
     </Grid>
-  );
+  ) : null;
 }
