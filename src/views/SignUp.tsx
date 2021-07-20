@@ -7,7 +7,7 @@ import {
   ComponentType,
 } from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
-import { TextField, Link, Typography, makeStyles } from "@material-ui/core";
+import { TextField, Link, Typography, makeStyles, Checkbox, FormControlLabel } from "@material-ui/core";
 import Slide from "@material-ui/core/Slide";
 import { useNavigate } from "react-router-dom";
 import { theme } from "@/theme";
@@ -65,6 +65,7 @@ export const SignUp = (): JSX.Element => {
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
   const [etebaseError, setEtebaseError] = useState({});
+  const [termsAndConditionsError, setTermsAndConditionsError] = useState("");
   const [recoveryKey, setRecoveryKey] = useState<string[] | null>(null);
 
   const [signUp, setSignUp] = useState({
@@ -74,6 +75,7 @@ export const SignUp = (): JSX.Element => {
     confirmPassword: "",
     teamId: null as number,
     inviteId: null as string,
+    acceptedTermsAndConditions: false,
   });
 
   const TransitionUp = (props: TransitionProps) => (
@@ -100,6 +102,7 @@ export const SignUp = (): JSX.Element => {
           name: "",
           password: "",
           confirmPassword: "",
+          acceptedTermsAndConditions: false,
         });
       });
     }
@@ -111,15 +114,28 @@ export const SignUp = (): JSX.Element => {
       return false;
     }
 
+    if (signUp.acceptedTermsAndConditions === false) {
+        setTermsAndConditionsError("You must accept our terms and conditions")
+        return false
+    }
+
     return true;
   };
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { id, value } = event.target;
-    setSignUp({
-      ...signUp,
-      [id]: value,
-    });
+    const { id, value, checked } = event.target;
+    if (id === "acceptedTermsAndConditions") {
+        // in this case use the checkbox
+        setSignUp({
+            ...signUp,
+            [id]: checked,
+            });
+    } else {
+        setSignUp({
+            ...signUp,
+            [id]: value,
+          });
+    }
   };
 
   const handleClose = () => {
@@ -166,6 +182,7 @@ export const SignUp = (): JSX.Element => {
     setEmailError("");
     setPasswordError("");
     setNameError("");
+    setTermsAndConditionsError("");
     setLoading(true);
 
     const isValid = validate();
@@ -181,7 +198,8 @@ export const SignUp = (): JSX.Element => {
       const { profile, recoveryKey: keys } = await auth.createProfile(
         signUp.name,
         signUp.teamId,
-        signUp.inviteId
+        signUp.inviteId,
+        signUp.acceptedTermsAndConditions
       );
       setRecoveryKey(keys);
     } catch (e) {
@@ -195,6 +213,7 @@ export const SignUp = (): JSX.Element => {
       setEmailError("");
       setNameError("");
       setPasswordError("");
+      setTermsAndConditionsError("");
 
       if (e instanceof Error) {
         setEtebaseError(e.message);
@@ -269,15 +288,32 @@ export const SignUp = (): JSX.Element => {
         />
         <MessageAlert severity="error" message={passwordError} />
 
+        <FormControlLabel
+            control={
+                <Checkbox
+                    id="acceptedTermsAndConditions"
+                    checked={signUp.acceptedTermsAndConditions}
+                    onChange={handleChange}
+                    inputProps={{ 'aria-label': 'primary checkbox' }}
+                />
+            }
+            label={
+                <Typography variant="body2">
+                    I accept the <Link color="secondary" target="_blank" rel="noopener" href="https://gliff.ai/platform-terms-and-conditions/">gliff.ai terms and conditions</Link>.
+                </Typography>
+            }
+        />
+        <MessageAlert severity="error" message={termsAndConditionsError} />
+
         <SubmitButton loading={loading} value="Next" />
 
         <div className={classes.haveAccount}>
-          <Typography className={classes.haveAccountText}>
-            Already have an account?
-          </Typography>
-          <Link color="secondary" href="/signin" variant="body2">
+          <Typography className={classes.haveAccountText} variant="body2">
+            Already have an account?&nbsp;
+          <Link color="secondary" href="/signin">
             Sign In
           </Link>
+          </Typography >
         </div>
       </form>
 
