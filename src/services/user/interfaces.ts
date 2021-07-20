@@ -21,6 +21,8 @@ export interface UserProfile {
   id: number;
   name: string;
   team: Team;
+  email_verified: boolean;
+  email: string;
 }
 
 export interface Invite {

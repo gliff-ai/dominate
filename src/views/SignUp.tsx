@@ -189,7 +189,6 @@ export const SignUp = (): JSX.Element => {
       setLoading(false);
       setSignUp({
         ...signUp,
-        name: "",
         password: "",
         confirmPassword: "",
       });

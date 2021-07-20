@@ -34,3 +34,6 @@ export const getRecoverySession = (
   uid: string
 ): Promise<{ recovery_key: string }> =>
   apiRequest<{ recovery_key: string }>(`/user/recover/${uid}`, "GET");
+
+export const getUserProfile = (): Promise<UserProfile> =>
+  apiRequest<UserProfile>("/user/", "GET");
