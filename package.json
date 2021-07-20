@@ -1,6 +1,6 @@
 {
   "name": "@gliff-ai/dominate",
-  "version": "1.1.0",
+  "version": "1.2.0",
   "description": "gliff.ai DOMINATE",
   "repository": "git://github.com/gliff-ai/dominate.git",
   "main": "dist/main.js",
@@ -82,6 +82,7 @@
     "react": "^17.0.0",
     "react-dom": "^17.0.1",
     "react-inlinesvg": "^2.3.0",
+    "react-router": "^6.0.0-beta.0",
     "react-router-dom": "^6.0.0-beta.0"
   }
 }

@@ -2,7 +2,7 @@ import axios from "axios";
 import { useState, useEffect, useContext, createContext } from "react";
 import { DominateEtebase } from "@/etebase";
 import { User, UserProfile } from "@/services/user/interfaces";
-import { createUserProfile } from "@/services/user";
+import { createUserProfile, getUserProfile } from "@/services/user";
 
 interface Props {
   children: React.ReactElement;
@@ -11,6 +11,7 @@ interface Props {
 
 interface Context {
   user: User;
+  userProfile: UserProfile;
   getInstance: () => DominateEtebase;
   changePassword: (newPassword: string) => Promise<boolean>;
   signin: (username: string, password: string) => Promise<User>;
@@ -32,15 +33,23 @@ export const useAuth = (): Context => useContext(authContext);
 // Provider hook that creates auth object and handles state
 function useProvideAuth(etebaseInstance: DominateEtebase) {
   const [user, setUser] = useState<User>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile>(null);
 
   // Wrapper to the set hook to add the auth token
-  const updateUser = (authedUser: User | null): void => {
+  const updateUser = (authedUser: User | null) => {
     if (authedUser) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       axios.defaults.headers.common.Authorization = `Token ${authedUser.authToken}`;
     }
 
     setUser(authedUser);
+    if (authedUser) {
+      void getUserProfile().then((profile) => {
+        setUserProfile(profile);
+      });
+    } else {
+      setUserProfile(null);
+    }
   };
 
   const getInstance = (): DominateEtebase => etebaseInstance;
@@ -110,6 +119,7 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
   // Return the user object and auth methods
   return {
     user,
+    userProfile,
     signin,
     signout,
     signup,
