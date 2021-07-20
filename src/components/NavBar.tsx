@@ -17,8 +17,6 @@ import SVG from "react-inlinesvg";
 import { useAuth } from "@/hooks/use-auth";
 import { HtmlTooltip } from "@/components/HtmlTooltip";
 import { imgSrc } from "@/theme";
-import { UserProfile } from "@/services/user/interfaces";
-import { getUserProfile } from "@/services/user";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -82,7 +80,7 @@ export const NavBar = (): ReactElement => {
   const auth = useAuth();
   const navigate = useNavigate();
   const classes = useStyles();
-  const [userInitials, setUserInitials] = useState<string>("");
+  const [userInitials, setUserInitials] = useState("");
 
   const [anchorElement, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -95,15 +93,12 @@ export const NavBar = (): ReactElement => {
   };
 
   useEffect(() => {
-    getUserProfile()
-      .then((profile: UserProfile) => {
-        const initials = profile.name
-          .split(" ")
-          .map((w) => w[0].toUpperCase())
-          .join("");
-        setUserInitials(initials);
-      })
-      .catch((e) => console.log(e));
+    if (!auth?.userProfile?.name) return;
+    const initials = auth?.userProfile?.name
+      .split(" ")
+      .map((l) => l[0].toUpperCase())
+      .join("");
+    setUserInitials(initials);
   }, [auth]);
 
   const hasNavbar = () =>
@@ -134,7 +129,7 @@ export const NavBar = (): ReactElement => {
     </Link>
   ));
 
-  const accountMenu = userInitials ? (
+  const accountMenu = (
     <>
       <IconButton onClick={handleClick} aria-controls="menu">
         <HtmlTooltip title={<Typography>Account</Typography>} placement="top">
@@ -176,7 +171,7 @@ export const NavBar = (): ReactElement => {
         </MenuItem>
       </Menu>
     </>
-  ) : null;
+  );
 
   return (
     <AppBar position="sticky" className={classes.appBar} elevation={0}>
