@@ -7,7 +7,14 @@ import {
   ComponentType,
 } from "react";
 import { loadStripe, Stripe } from "@stripe/stripe-js";
-import { TextField, Link, Typography, makeStyles, Checkbox, FormControlLabel } from "@material-ui/core";
+import {
+  TextField,
+  Link,
+  Typography,
+  makeStyles,
+  Checkbox,
+  FormControlLabel,
+} from "@material-ui/core";
 import Slide from "@material-ui/core/Slide";
 import { useNavigate } from "react-router-dom";
 import { theme } from "@/theme";
@@ -115,8 +122,8 @@ export const SignUp = (): JSX.Element => {
     }
 
     if (signUp.acceptedTermsAndConditions === false) {
-        setTermsAndConditionsError("You must accept our terms and conditions")
-        return false
+      setTermsAndConditionsError("You must accept our terms and conditions");
+      return false;
     }
 
     return true;
@@ -125,16 +132,16 @@ export const SignUp = (): JSX.Element => {
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { id, value, checked } = event.target;
     if (id === "acceptedTermsAndConditions") {
-        // in this case use the checkbox
-        setSignUp({
-            ...signUp,
-            [id]: checked,
-            });
+      // in this case use the checkbox
+      setSignUp({
+        ...signUp,
+        [id]: checked,
+      });
     } else {
-        setSignUp({
-            ...signUp,
-            [id]: value,
-          });
+      setSignUp({
+        ...signUp,
+        [id]: value,
+      });
     }
   };
 
@@ -289,19 +296,28 @@ export const SignUp = (): JSX.Element => {
         <MessageAlert severity="error" message={passwordError} />
 
         <FormControlLabel
-            control={
-                <Checkbox
-                    id="acceptedTermsAndConditions"
-                    checked={signUp.acceptedTermsAndConditions}
-                    onChange={handleChange}
-                    inputProps={{ 'aria-label': 'primary checkbox' }}
-                />
-            }
-            label={
-                <Typography variant="body2">
-                    I accept the <Link color="secondary" target="_blank" rel="noopener" href="https://gliff.ai/platform-terms-and-conditions/">gliff.ai terms and conditions</Link>.
-                </Typography>
-            }
+          control={
+            <Checkbox
+              id="acceptedTermsAndConditions"
+              checked={signUp.acceptedTermsAndConditions}
+              onChange={handleChange}
+              inputProps={{ "aria-label": "primary checkbox" }}
+            />
+          }
+          label={
+            <Typography variant="body2">
+              I accept the{" "}
+              <Link
+                color="secondary"
+                target="_blank"
+                rel="noopener"
+                href="https://gliff.ai/platform-terms-and-conditions/"
+              >
+                gliff.ai terms and conditions
+              </Link>
+              .
+            </Typography>
+          }
         />
         <MessageAlert severity="error" message={termsAndConditionsError} />
 
@@ -310,10 +326,10 @@ export const SignUp = (): JSX.Element => {
         <div className={classes.haveAccount}>
           <Typography className={classes.haveAccountText} variant="body2">
             Already have an account?&nbsp;
-          <Link color="secondary" href="/signin">
-            Sign In
-          </Link>
-          </Typography >
+            <Link color="secondary" href="/signin">
+              Sign In
+            </Link>
+          </Typography>
         </div>
       </form>
 
