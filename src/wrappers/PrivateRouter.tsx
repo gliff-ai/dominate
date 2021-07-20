@@ -1,27 +1,33 @@
-import { ReactElement } from "react";
+import { ReactElement, useState, useEffect } from "react";
 import { Route, Navigate, RouteProps } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
 
 export const PrivateRoute = (props: RouteProps): ReactElement => {
-  // const { children, ...rest } = props;
   const auth = useAuth();
+  const [element, setElement] = useState<ReactElement | null>(null);
 
-  // if no authorised user at all
-  // redirect to signin
-  if (!auth?.user) {
-    return <Navigate to="/signin" />;
-  }
+  useEffect(() => {
+    // default to just following the route
+    if (auth) {
+      // eslint-disable-next-line react/jsx-props-no-spreading
+      setElement(<Route {...props} />);
+    }
+    // if no authorised user at all
+    // redirect to signin
+    else if (!auth?.user) {
+      console.log("here");
+      setElement(<Navigate to="/signin" />);
+    }
 
-  // if no verified email
-  // redirect to request verification email page
-  if (
-    !auth?.userProfile?.email_verified &&
-    props.path !== "request-verify-email"
-  ) {
-    return <Navigate to="/request-verify-email" />;
-  }
+    // if no verified email
+    // redirect to request verification email page
+    else if (
+      !auth?.userProfile?.email_verified &&
+      props.path !== "request-verify-email"
+    ) {
+      setElement(<Navigate to="/request-verify-email" />);
+    }
+  }, [auth]);
 
-  // default to just following the route
-  // eslint-disable-next-line react/jsx-props-no-spreading
-  return <Route {...props} />;
+  return element;
 };
