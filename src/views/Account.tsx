@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement } from "react";
 import SVG from "react-inlinesvg";
 import {
   Avatar,
@@ -14,8 +14,6 @@ import { useAuth } from "@/hooks/use-auth";
 import { imgSrc, theme } from "@/theme";
 import { Link } from "react-router-dom";
 import { HtmlTooltip } from "@/components/HtmlTooltip";
-import { getUserProfile } from "@/services/user";
-import { UserProfile } from "@/services/user/interfaces";
 
 const useStyles = makeStyles({
   avatar: {
@@ -75,15 +73,6 @@ const useStyles = makeStyles({
 export function Account(): ReactElement {
   const auth = useAuth();
   const classes = useStyles();
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-
-  useEffect(() => {
-    getUserProfile()
-      .then((profile) => {
-        setUserProfile(profile);
-      })
-      .catch((e) => console.log(e));
-  }, [auth]);
 
   const getInitials = (name: string): string =>
     name
@@ -91,7 +80,7 @@ export function Account(): ReactElement {
       .map((l) => l[0].toUpperCase())
       .join("");
 
-  return userProfile ? (
+  return auth?.user && auth?.userProfile ? (
     <Grid>
       <Card className={classes.card}>
         <Paper elevation={0} variant="outlined" className={classes.paperHeader}>
@@ -103,7 +92,7 @@ export function Account(): ReactElement {
           <Box>
             <Avatar className={classes.avatar}>
               <Typography className={classes.avatarTopography}>
-                {getInitials(userProfile?.name)}
+                {getInitials(auth?.userProfile?.name)}
               </Typography>
             </Avatar>
           </Box>
@@ -112,7 +101,7 @@ export function Account(): ReactElement {
             <Typography className={classes.boxTypography}>
               Name:
               <span className={classes.spanTypography}>
-                {userProfile?.name}
+                {auth?.userProfile?.name}
               </span>
             </Typography>
             <Typography className={classes.boxTypography}>
@@ -144,7 +133,7 @@ export function Account(): ReactElement {
               Team&apos;s Storage Usage:
               <span
                 className={classes.spanTypography}
-              >{`${userProfile?.team?.usage} MB`}</span>
+              >{`${auth?.userProfile?.team?.usage} MB`}</span>
             </Typography>
           </Box>
         </Box>
