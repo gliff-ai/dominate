@@ -20,7 +20,8 @@ interface Context {
   createProfile: (
     name: string,
     teamId?: number,
-    inviteId?: string
+    inviteId?: string,
+    acceptedTermsAndConditions?: boolean
   ) => Promise<{ profile: UserProfile; recoveryKey: string[] }>;
 }
 
@@ -78,7 +79,8 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
   const createProfile = async (
     name: string,
     teamId: number,
-    inviteId: string
+    inviteId: string,
+    acceptedTermsAndConditions: boolean
   ) => {
     if (!etebaseInstance.getUser()) return null;
 
@@ -91,6 +93,7 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
       name,
       teamId,
       inviteId,
+      acceptedTermsAndConditions,
       savedSession
     );
 
