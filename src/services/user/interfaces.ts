@@ -14,6 +14,7 @@ interface Team {
     id: number;
     name: string;
   };
+  usage: number;
 }
 
 export interface UserProfile {

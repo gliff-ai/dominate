@@ -1,4 +1,4 @@
-import { ReactElement, useState } from "react";
+import { ReactElement, useState, useEffect } from "react";
 import {
   AppBar,
   Avatar,
@@ -80,6 +80,7 @@ export const NavBar = (): ReactElement => {
   const auth = useAuth();
   const navigate = useNavigate();
   const classes = useStyles();
+  const [userInitials, setUserInitials] = useState("");
 
   const [anchorElement, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -90,6 +91,15 @@ export const NavBar = (): ReactElement => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  useEffect(() => {
+    if (!auth?.userProfile?.name) return;
+    const initials = auth?.userProfile?.name
+      .split(" ")
+      .map((l) => l[0].toUpperCase())
+      .join("");
+    setUserInitials(initials);
+  }, [auth]);
 
   const hasNavbar = () =>
     ![
@@ -124,7 +134,7 @@ export const NavBar = (): ReactElement => {
       <IconButton onClick={handleClick} aria-controls="menu">
         <HtmlTooltip title={<Typography>Account</Typography>} placement="top">
           <Avatar variant="circular" className={classes.avatarUser}>
-            H
+            {userInitials}
           </Avatar>
         </HtmlTooltip>
       </IconButton>

@@ -23,6 +23,9 @@ export const createUserProfile = (
     recovery_key: recovery,
   });
 
+export const getUserProfile = (): Promise<UserProfile> =>
+  apiRequest<UserProfile>("/user/", "GET");
+
 export const inviteNewUser = (email: string): Promise<unknown> =>
   apiRequest<unknown>("/user/invite", "POST", { email });
 
@@ -33,6 +36,3 @@ export const getRecoverySession = (
   uid: string
 ): Promise<{ recovery_key: string }> =>
   apiRequest<{ recovery_key: string }>(`/user/recover/${uid}`, "GET");
-
-export const getUserProfile = (): Promise<UserProfile> =>
-  apiRequest<UserProfile>("/user/", "GET");
