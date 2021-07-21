@@ -2,7 +2,7 @@ import { ChangeEvent, FormEvent, useState } from "react";
 
 import { apiRequest } from "@/api";
 import { TextField, makeStyles } from "@material-ui/core";
-import theme from "@gliff-ai/style";
+import { theme } from "@gliff-ai/style";
 import { MessageAlert, SubmitButton } from "@/components";
 import { useNavigate } from "react-router-dom";
 
