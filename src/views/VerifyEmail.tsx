@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { theme } from "@/theme";
+import { theme } from "@gliff-ai/style";
 import {
   TextField,
   Link,
