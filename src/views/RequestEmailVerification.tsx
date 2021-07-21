@@ -2,7 +2,7 @@ import { ChangeEvent, FormEvent, useState } from "react";
 
 import { apiRequest } from "@/api";
 import { TextField, makeStyles } from "@material-ui/core";
-import { theme } from "@gliff-ai/style";
+import { theme } from "@/theme";
 import { MessageAlert, SubmitButton } from "@/components";
 import { useNavigate } from "react-router-dom";
 
@@ -67,16 +67,16 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export const RequestRecoverAccount = (): JSX.Element => {
+export const RequestEmailVerification = (): JSX.Element => {
   const classes = useStyles();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
-  const [recoveryError, setRecoveryError] = useState("");
-  const [recoveryEmail, setRecoveryEmail] = useState("");
+  const [requestError, setRequestError] = useState("");
+  const [verifiableEmail, setVerifiableEmail] = useState("");
   const navigate = useNavigate();
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    setRecoveryEmail(event.target.value);
+    setVerifiableEmail(event.target.value);
   };
 
   const onSubmitForm = async (event: FormEvent<HTMLFormElement>) => {
@@ -85,11 +85,11 @@ export const RequestRecoverAccount = (): JSX.Element => {
       setLoading(true);
 
       // Reset any errors
-      setRecoveryError("");
+      setRequestError("");
       setTimeout(() => navigate("/signin"), 3000);
 
-      await apiRequest("/user/recover", "POST", {
-        email: recoveryEmail,
+      await apiRequest("/user/verify_email", "POST", {
+        email: verifiableEmail,
       });
 
       setLoading(false);
@@ -97,7 +97,7 @@ export const RequestRecoverAccount = (): JSX.Element => {
     } catch (e) {
       console.error(e);
 
-      setRecoveryError("Couldn't send email");
+      setRequestError("Couldn't send email");
     }
   };
 
@@ -106,8 +106,8 @@ export const RequestRecoverAccount = (): JSX.Element => {
   return (
     <>
       <div className={classes.text}>
-        Enter your email address to request a recovery link. You will need your
-        recovery key to complete the process.
+        Enter your email address to request a new verification email. Without a
+        verified account you will not be able to use the gliff.ai platform.
       </div>
 
       <form onSubmit={onSubmitForm}>
@@ -118,16 +118,16 @@ export const RequestRecoverAccount = (): JSX.Element => {
           required
           fullWidth
           id="email"
-          name="recoveryEmail"
+          name="verifiableEmail"
           type="email"
           onChange={handleChange}
-          value={recoveryEmail}
+          value={verifiableEmail}
           placeholder="E-mail"
         />
         <MessageAlert severity="success" message={successBanner} />
 
-        <SubmitButton loading={loading} value="Request Recovery" />
-        <MessageAlert severity="error" message={recoveryError} />
+        <SubmitButton loading={loading} value="Request Email Verification" />
+        <MessageAlert severity="error" message={requestError} />
       </form>
     </>
   );

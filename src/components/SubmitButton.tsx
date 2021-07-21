@@ -1,5 +1,6 @@
 import { theme } from "@gliff-ai/style";
 import { Button, CircularProgress, makeStyles } from "@material-ui/core";
+import { ReactElement } from "react";
 
 const useStyles = makeStyles(() => ({
   submitDiv: {
@@ -23,10 +24,11 @@ const useStyles = makeStyles(() => ({
 
 interface Props {
   loading: boolean;
+  disabled?: boolean;
   value: string;
 }
 
-export const SubmitButton = (props: Props): JSX.Element => {
+function SubmitButton(props: Props): ReactElement {
   const classes = useStyles();
 
   return (
@@ -35,6 +37,7 @@ export const SubmitButton = (props: Props): JSX.Element => {
         type="submit"
         variant="contained"
         color="primary"
+        disabled={props.disabled}
         className={classes.submit}
       >
         {props.loading ? (
@@ -45,4 +48,10 @@ export const SubmitButton = (props: Props): JSX.Element => {
       </Button>
     </div>
   );
+}
+
+SubmitButton.defaultProps = {
+  disabled: false,
 };
+
+export { SubmitButton, Props as SubmitButtonProps };

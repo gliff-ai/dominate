@@ -1,7 +1,6 @@
-import { ReactElement, useState } from "react";
+import { ReactElement } from "react";
 import { Button, Typography, makeStyles, Card } from "@material-ui/core";
-import { theme } from "@gliff-ai/style";
-import { VerificationSent } from "@/views/VerificationSent";
+import { theme } from "@/theme";
 
 const useStyles = makeStyles(() => ({
   card: {
@@ -120,34 +119,20 @@ const useStyles = makeStyles(() => ({
 }));
 
 interface Props {
-  recoveryKey: string[];
   callback: () => void;
 }
 
-export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
+export function VerificationSent({ callback }: Props): ReactElement {
   const classes = useStyles();
 
-  const [isUnderstood, setUnderstood] = useState(false);
-
-  return isUnderstood ? (
-    <VerificationSent callback={callback} />
-  ) : (
+  return (
     <>
-      <Card className={classes.card}>
-        <Typography className={classes.cardTypography}>
-          {recoveryKey.join(" ")}
-        </Typography>
-      </Card>
-
       <Typography className={classes.recoveryKeyText}>
-        This is YOUR randomly generate recovery key.
+        A verification email has been sent.
       </Typography>
       <Typography className={classes.recoveryKeyParagraph}>
-        Please keep your recovery key stored in a safe place as this is the
-        <span className={classes.spanBold}> ONLY</span> time you will be shown.
-        We <span className={classes.spanBold}>DO NOT</span> store your own
-        recovery key, if you lose this we will be unable to recover your data
-        attached to the account.
+        Please check your inbox, your account will remain disabled until your
+        email address is verified.
       </Typography>
 
       <div className={classes.submitDiv}>
@@ -156,9 +141,9 @@ export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
           variant="contained"
           color="primary"
           className={classes.submit}
-          onClick={() => setUnderstood(true)}
+          onClick={callback}
         >
-          I have saved my recovery key somewhere safe
+          I have verified my account, sign me in
         </Button>
       </div>
     </>
