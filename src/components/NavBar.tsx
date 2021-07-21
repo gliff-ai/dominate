@@ -13,13 +13,10 @@ import {
 } from "@material-ui/core";
 import { Link, useNavigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
+import { imgSrc } from "@/imgSrc";
 
 import { useAuth } from "@/hooks/use-auth";
 import { HtmlTooltip } from "@/components/HtmlTooltip";
-
-const imgSrc = (src: string, type = "svg"): string =>
-  // eslint-disable-next-line import/no-dynamic-require
-  require(`@/assets/${src}.${type}`) as string;
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {

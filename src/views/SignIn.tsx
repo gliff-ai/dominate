@@ -10,7 +10,7 @@ import {
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
-import { theme, imgSrc } from "@gliff-ai/style";
+import { theme } from "@gliff-ai/style";
 import SVG from "react-inlinesvg";
 import {
   MessageSnackbar,
@@ -18,6 +18,7 @@ import {
   TransitionProps,
   SubmitButton,
 } from "@/components";
+import { imgSrc } from "@/imgSrc";
 
 const useStyles = makeStyles(() => ({
   form: {

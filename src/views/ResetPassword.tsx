@@ -3,20 +3,19 @@ import { useNavigate, Navigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
 
 import {
-  Button,
   CssBaseline,
   TextField,
   Typography,
   makeStyles,
   Container,
-  CircularProgress,
   IconButton,
   InputAdornment,
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
-import theme from "@gliff-ai/style";
+import { theme } from "@gliff-ai/style";
 import { DominateEtebase } from "@/etebase";
 import { MessageAlert, SubmitButton } from "@/components";
+import { imgSrc } from "@/imgSrc";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -225,9 +224,7 @@ export const ResetPassword = (props: Props): ReactElement => {
                     id="newPassword"
                   >
                     <SVG
-                      src={
-                        require("../assets/show-or-hide-password.svg") as string
-                      }
+                      src={imgSrc("show-or-hide-password")}
                       className={classes.svgSmall}
                       id="newPassword"
                       fill={
@@ -264,9 +261,7 @@ export const ResetPassword = (props: Props): ReactElement => {
                     edge="end"
                   >
                     <SVG
-                      src={
-                        require("../assets/show-or-hide-password.svg") as string
-                      }
+                      src={imgSrc("show-or-hide-password")}
                       className={classes.svgSmall}
                       id="confirmPassword"
                       fill={

@@ -1,12 +1,13 @@
 import { Container, makeStyles, Typography } from "@material-ui/core";
-import { theme, lightGrey, imgSrc } from "@gliff-ai/style";
+import { theme, lightGrey } from "@gliff-ai/style";
+import { imgSrc } from "@/imgSrc";
 
-// const squiggles = imgSrc("squig-black", "png");
+const squiggles = imgSrc("squig-black", "png");
 
 const useStyles = makeStyles(() => ({
   "@global": {
     body: {
-      // backgroundImage: `url(${squiggles}),url(${squiggles})`,
+      backgroundImage: `url(${squiggles}),url(${squiggles})`,
       backgroundColor: lightGrey,
       backgroundRepeat: "no-repeat",
       backgroundPosition: "-350px -320px, 1400px 650px",
@@ -50,7 +51,7 @@ export const BasicPage = (props: Props): JSX.Element => {
     >
       <div className={classes.logo}>
         <img
-          // src={imgSrc("gliff-web-master-black")}
+          src={imgSrc("gliff-web-master-black")}
           alt="gliff logo"
           width="194px"
           height="148px"

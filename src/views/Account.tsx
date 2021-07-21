@@ -13,12 +13,9 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { theme } from "@gliff-ai/style";
 import { Link } from "react-router-dom";
+import { imgSrc } from "@/imgSrc";
 
 import { HtmlTooltip } from "@/components/HtmlTooltip";
-
-const imgSrc = (src: string, type = "svg"): string =>
-  // eslint-disable-next-line import/no-dynamic-require
-  require(`@/assets/${src}.${type}`) as string;
 
 const useStyles = makeStyles(() => ({
   avatar: {
