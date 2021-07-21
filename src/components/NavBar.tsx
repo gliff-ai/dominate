@@ -16,7 +16,8 @@ import SVG from "react-inlinesvg";
 
 import { useAuth } from "@/hooks/use-auth";
 import { HtmlTooltip } from "@/components/HtmlTooltip";
-import { imgSrc } from "@/theme";
+import { imgSrc, theme } from "@/theme";
+import { ProductIcons } from "@/components";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -112,23 +113,6 @@ export const NavBar = (): ReactElement => {
 
   if (!hasNavbar()) return null;
 
-  const internalLinks = ["annotate", "curate", "manage"].map((tool) => (
-    <Link to={`/${tool}`} key={tool}>
-      <HtmlTooltip
-        title={
-          <Typography color="inherit" className={classes.linkTooltip}>
-            {tool}
-          </Typography>
-        }
-        placement="top"
-      >
-        <Avatar variant="circular">
-          <SVG src={imgSrc(tool)} className={classes.svgMedium} />
-        </Avatar>
-      </HtmlTooltip>
-    </Link>
-  ));
-
   const accountMenu = (
     <>
       <IconButton onClick={handleClick} aria-controls="menu">
@@ -189,8 +173,7 @@ export const NavBar = (): ReactElement => {
             <nav className={classes.navLinks}>
               {auth.user ? (
                 <>
-                  {internalLinks}
-
+                  <ProductIcons />
                   {accountMenu}
                 </>
               ) : (
