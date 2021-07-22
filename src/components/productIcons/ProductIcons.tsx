@@ -9,7 +9,7 @@ const useStyles = makeStyles({
   },
   noHoverAvatar: {
     "&:hover": {
-      backgroundColor: "transparent !important",
+      backgroundColor: "transparent",
     },
   },
   activeName: {
@@ -49,20 +49,16 @@ function ProductIcons(): ReactElement {
   const [activeProduct, setActiveProduct] = useState(Product.manage);
   const products: string[] = ["manage", "curate", "annotate"];
 
-  useEffect(() => {
-    updateActiveProduct();
-  }, [window.location.pathname]);
-
   function updateActiveProduct() {
     const pathName = window.location.pathname;
     if (pathName.includes(activeProduct)) return;
 
-    products.map((product) => {
+    for (const product of products) {
       if (pathName.includes(product)) {
         setActiveProduct(Product[product]);
-        return;
+        break;
       }
-    });
+    }
   }
 
   const isActive = (product: Product): boolean => product === activeProduct;
@@ -76,7 +72,7 @@ function ProductIcons(): ReactElement {
           <BaseProductIcon
             buttonKey={key}
             tool={tool}
-            linkDisabled={true}
+            linkDisabled
             extraStyleAvatar={classes.noHoverAvatar}
             extraStyleSvg={classes.activeSvg}
             extraStyleName={classes.activeName}
@@ -97,7 +93,7 @@ function ProductIcons(): ReactElement {
           <BaseProductIcon
             buttonKey={key}
             tool={tool}
-            linkDisabled={true}
+            linkDisabled
             extraStyleAvatar={classes.noHoverAvatar}
             extraStyleSvg={classes.disabledSvg}
             extraStyleName={classes.disableName}
@@ -107,6 +103,10 @@ function ProductIcons(): ReactElement {
         return null;
     }
   }
+
+  useEffect(() => {
+    updateActiveProduct();
+  }, [window.location.pathname]);
 
   let otherStatus = Status.accessible;
   return (
