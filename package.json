@@ -11,10 +11,10 @@
     "build": "webpack --progress --config webpack.development.js",
     "build:staging": "webpack --config webpack.staging.js",
     "build:production": "webpack --config webpack.production.js",
-    "format": "npx --no-install prettier --write src/{**,.}/*.ts*",
-    "prettier": "npx --no-install prettier -c src/{**,.}/*.ts*",
+    "format": "npx --no-install prettier --write src/{**,.}/{**,.}/*.ts*",
+    "prettier": "npx --no-install prettier -c src/{**,.}/{**,.}/*.ts*",
     "lint": "npm run lint:ts && npm run prettier",
-    "lint:ts": "npx eslint src/{**,.}/*.ts*",
+    "lint:ts": "npx eslint src/{**,.}/{**,.}/*.ts*",
     "serve": "webpack serve --config webpack.development.js",
     "test": "jest --coverage --passWithNoTests"
   },
