@@ -1,10 +1,10 @@
 import { Theme, Tooltip, withStyles } from "@material-ui/core";
-import { theme, veryLightBlue } from "@gliff-ai/style";
+import { veryLightBlue } from "@gliff-ai/style";
 
-export const HtmlTooltip = withStyles((t: Theme) => ({
+export const HtmlTooltip = withStyles((theme: Theme) => ({
   tooltip: {
-    backgroundColor: t.palette.primary.light,
-    fontSize: t.typography.pxToRem(12),
+    backgroundColor: theme.palette.primary.light,
+    fontSize: theme.typography.pxToRem(12),
     border: "1px solid",
     borderColor: veryLightBlue,
     color: theme.palette.text.primary,
