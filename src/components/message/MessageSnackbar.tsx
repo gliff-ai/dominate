@@ -1,9 +1,9 @@
 import SVG from "react-inlinesvg";
-import { IconButton, makeStyles, Theme } from "@material-ui/core";
+import { IconButton, makeStyles } from "@material-ui/core";
 import { imgSrc } from "@/imgSrc";
-import { BaseSnackbar, BaseSnackbarProps } from "@gliff-ai/style";
+import { BaseSnackbar, BaseSnackbarProps, theme } from "@gliff-ai/style";
 
-const useStyle = makeStyles((theme: Theme) => ({
+const useStyle = makeStyles(() => ({
   svgSmall: {
     width: "22px",
     height: "100%",
