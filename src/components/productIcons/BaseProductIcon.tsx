@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import { Avatar, makeStyles, Link, Theme } from "@material-ui/core";
 import SVG from "react-inlinesvg";
-import { imgSrc } from "@/theme";
+import { imgSrc } from "@/imgSrc";
 
 const useStyles = makeStyles((theme: Theme) => ({
   productSvg: {

@@ -1,4 +1,4 @@
-import { theme } from "@/theme";
+import { theme } from "@gliff-ai/style";
 import { Button, CircularProgress, makeStyles } from "@material-ui/core";
 import { ReactElement } from "react";
 

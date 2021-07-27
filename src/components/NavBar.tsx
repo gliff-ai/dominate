@@ -13,10 +13,10 @@ import {
 } from "@material-ui/core";
 import { Link, useNavigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
+import { imgSrc } from "@/imgSrc";
 
 import { useAuth } from "@/hooks/use-auth";
 import { HtmlTooltip } from "@/components/HtmlTooltip";
-import { imgSrc } from "@/theme";
 import { ProductIcons } from "@/components";
 
 const useStyles = makeStyles((theme: Theme) => ({
