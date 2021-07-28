@@ -42,6 +42,7 @@ enum Product {
   manage = "manage",
   curate = "curate",
   annotate = "annotate",
+  other = "other",
 }
 
 function ProductIcons(): ReactElement {
@@ -56,9 +57,10 @@ function ProductIcons(): ReactElement {
     for (const product of products) {
       if (pathName.includes(product)) {
         setActiveProduct(Product[product]);
-        break;
+        return;
       }
     }
+    setActiveProduct(Product.other);
   }
 
   const isActive = (product: Product): boolean => product === activeProduct;
@@ -104,22 +106,31 @@ function ProductIcons(): ReactElement {
     }
   }
 
+  const getProductIcons = () => {
+    if (activeProduct !== Product.other) {
+      let otherStatus = Status.accessible; // Every button before the active one is accessible
+      return products.map((product) => {
+        if (isActive(Product[product])) {
+          otherStatus = Status.disabled; // Every button after the active one is disabled
+          return getProductIcon(product, Status.active);
+        }
+        return getProductIcon(product, otherStatus);
+      });
+    }
+    return products.map((product) => {
+      if (Product[product] === Product.manage) {
+        return getProductIcon(product, Status.accessible); // If not on any product, only manage is accessible
+      } else {
+        return getProductIcon(product, Status.disabled);
+      }
+    });
+  };
+
   useEffect(() => {
     updateActiveProduct();
   }, [window.location.pathname]);
 
-  let otherStatus = Status.accessible;
-  return (
-    <>
-      {products.map((product) => {
-        if (isActive(Product[product])) {
-          otherStatus = Status.disabled;
-          return getProductIcon(product, Status.active);
-        }
-        return getProductIcon(product, otherStatus);
-      })}
-    </>
-  );
+  return <>{getProductIcons()}</>;
 }
 
 export { ProductIcons, Status };
