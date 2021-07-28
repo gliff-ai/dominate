@@ -6,3 +6,7 @@ export { ProgressSnackbar, Task } from "./ProgressSnackbar";
 export { HtmlTooltip } from "./HtmlTooltip";
 export { SubmitButton } from "./SubmitButton";
 export { PageSpinner } from "./PageSpinner";
+export {
+  ProductIcons,
+  Status as ProductIconStatus,
+} from "./productIcons/ProductIcons";

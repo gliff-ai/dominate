@@ -12,14 +12,19 @@ export const createUserProfile = (
   name: string,
   teamId: number = null,
   inviteId: string = null,
+  acceptedTermsAndConditions = false,
   recovery: string
 ): Promise<UserProfile> =>
   apiRequest<UserProfile>("/user/", "POST", {
     name,
     team_id: teamId,
     invite_id: inviteId,
+    accepted_terms_and_conditions: acceptedTermsAndConditions,
     recovery_key: recovery,
   });
+
+export const getUserProfile = (): Promise<UserProfile> =>
+  apiRequest<UserProfile>("/user/", "GET");
 
 export const inviteNewUser = (email: string): Promise<unknown> =>
   apiRequest<unknown>("/user/invite", "POST", { email });

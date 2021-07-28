@@ -1,4 +1,4 @@
-import { ReactElement, useState } from "react";
+import { ReactElement, useState, useEffect } from "react";
 import {
   AppBar,
   Avatar,
@@ -13,10 +13,11 @@ import {
 } from "@material-ui/core";
 import { Link, useNavigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
+import { imgSrc } from "@/imgSrc";
 
 import { useAuth } from "@/hooks/use-auth";
 import { HtmlTooltip } from "@/components/HtmlTooltip";
-import { imgSrc } from "@/theme";
+import { ProductIcons } from "@/components";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -80,6 +81,7 @@ export const NavBar = (): ReactElement => {
   const auth = useAuth();
   const navigate = useNavigate();
   const classes = useStyles();
+  const [userInitials, setUserInitials] = useState("");
 
   const [anchorElement, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -90,6 +92,15 @@ export const NavBar = (): ReactElement => {
   const handleClose = () => {
     setAnchorEl(null);
   };
+
+  useEffect(() => {
+    if (!auth?.userProfile?.name) return;
+    const initials = auth?.userProfile?.name
+      .split(" ")
+      .map((l) => l[0].toUpperCase())
+      .join("");
+    setUserInitials(initials);
+  }, [auth]);
 
   const hasNavbar = () =>
     ![
@@ -102,29 +113,12 @@ export const NavBar = (): ReactElement => {
 
   if (!hasNavbar()) return null;
 
-  const internalLinks = ["annotate", "curate", "manage"].map((tool) => (
-    <Link to={`/${tool}`} key={tool}>
-      <HtmlTooltip
-        title={
-          <Typography color="inherit" className={classes.linkTooltip}>
-            {tool}
-          </Typography>
-        }
-        placement="top"
-      >
-        <Avatar variant="circular">
-          <SVG src={imgSrc(tool)} className={classes.svgMedium} />
-        </Avatar>
-      </HtmlTooltip>
-    </Link>
-  ));
-
   const accountMenu = (
     <>
       <IconButton onClick={handleClick} aria-controls="menu">
         <HtmlTooltip title={<Typography>Account</Typography>} placement="top">
           <Avatar variant="circular" className={classes.avatarUser}>
-            H
+            {userInitials}
           </Avatar>
         </HtmlTooltip>
       </IconButton>
@@ -179,8 +173,7 @@ export const NavBar = (): ReactElement => {
             <nav className={classes.navLinks}>
               {auth.user ? (
                 <>
-                  {internalLinks}
-
+                  <ProductIcons />
                   {accountMenu}
                 </>
               ) : (

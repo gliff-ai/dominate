@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { getRecoverySession } from "@/services/user";
 import { DominateEtebase } from "@/etebase";
-import { theme } from "@/theme";
+import { theme } from "@gliff-ai/style";
 import { TextField, Link, Typography, makeStyles } from "@material-ui/core";
 import { MessageAlert, SubmitButton } from "@/components";
 
