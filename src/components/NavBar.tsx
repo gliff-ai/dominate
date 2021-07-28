@@ -16,7 +16,7 @@ import SVG from "react-inlinesvg";
 import { imgSrc } from "@/imgSrc";
 
 import { useAuth } from "@/hooks/use-auth";
-import { HtmlTooltip } from "@/components/HtmlTooltip";
+import { HtmlTooltip } from "@gliff-ai/style";
 import { ProductIcons } from "@/components";
 
 const useStyles = makeStyles((theme: Theme) => ({
