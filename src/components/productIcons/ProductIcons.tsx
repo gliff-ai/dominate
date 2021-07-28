@@ -120,9 +120,8 @@ function ProductIcons(): ReactElement {
     return products.map((product) => {
       if (Product[product] === Product.manage) {
         return getProductIcon(product, Status.accessible); // If not on any product, only manage is accessible
-      } else {
-        return getProductIcon(product, Status.disabled);
       }
+      return getProductIcon(product, Status.disabled);
     });
   };
 
