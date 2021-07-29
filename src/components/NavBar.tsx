@@ -43,6 +43,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: "#FFFFFF",
     width: "313px",
   },
+  avatarButton: {
+    paddingTop: 0,
+  },
   avatarUser: {
     width: "64px !important",
     height: "64px !important",
@@ -55,6 +58,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     opacity: "1",
     "&:hover": {
       background: theme.palette.primary.main,
+    },
+    "& a": {
+      color: theme.palette.text.primary,
+      textDecoration: "none",
+      fontSize: "1rem",
+      display: "inline-flex",
     },
   },
   logo: {
@@ -131,19 +140,21 @@ export const NavBar = (): ReactElement => {
         open={Boolean(anchorElement)}
         onClose={handleClose}
         id="menu"
-        style={{ marginTop: "80px" }}
+        style={{ marginTop: "60px", marginLeft: "80px" }}
         transformOrigin={{
           vertical: "top",
           horizontal: "right",
         }}
       >
-        <MenuItem component="a" href="/account" className={classes.menuItem}>
-          <SVG
-            src={imgSrc("account-settings")}
-            className={classes.svgMedium}
-            style={{ marginRight: "12px" }}
-          />
-          Account Settings
+        <MenuItem className={classes.menuItem}>
+          <Link to="/account">
+            <SVG
+              src={imgSrc("account-settings")}
+              className={classes.svgMedium}
+              style={{ marginRight: "12px" }}
+            />
+            Account Settings
+          </Link>
         </MenuItem>
         <MenuItem
           className={classes.menuItem}

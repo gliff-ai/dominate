@@ -42,6 +42,7 @@ enum Product {
   manage = "manage",
   curate = "curate",
   annotate = "annotate",
+  other = "other",
 }
 
 function ProductIcons(): ReactElement {
@@ -56,12 +57,23 @@ function ProductIcons(): ReactElement {
     for (const product of products) {
       if (pathName.includes(product)) {
         setActiveProduct(Product[product]);
-        break;
+        return;
       }
     }
+    setActiveProduct(Product.other);
   }
 
   const isActive = (product: Product): boolean => product === activeProduct;
+
+  const getCustomUrlPath = (tool: string, status: Status): string | null => {
+    // When navigating back to curate from annotate using the navbar
+    // the collectionUid in the annotate url is used to set the url path for curate
+    if (tool === "curate" && status === Status.accessible) {
+      const galleryUid = window.location.pathname.split("/").reverse()[1];
+      return `/curate/${galleryUid}`;
+    }
+    return null;
+  };
 
   function getProductIcon(tool: string, status: Status): ReactElement | null {
     const key = `${tool}-${status}`;
@@ -70,7 +82,7 @@ function ProductIcons(): ReactElement {
       case Status.active:
         return (
           <BaseProductIcon
-            buttonKey={key}
+            key={key}
             tool={tool}
             linkDisabled
             extraStyleAvatar={classes.noHoverAvatar}
@@ -81,8 +93,9 @@ function ProductIcons(): ReactElement {
       case Status.accessible:
         return (
           <BaseProductIcon
-            buttonKey={key}
+            key={key}
             tool={tool}
+            customUrlPath={getCustomUrlPath(tool, status)}
             extraStyleSvg={classes.accessibleSvg}
             extraStyleName={classes.accessibleName}
             extraStyleTrailSvg={classes.accessibleTrailSvg}
@@ -91,7 +104,7 @@ function ProductIcons(): ReactElement {
       case Status.disabled:
         return (
           <BaseProductIcon
-            buttonKey={key}
+            key={key}
             tool={tool}
             linkDisabled
             extraStyleAvatar={classes.noHoverAvatar}
@@ -104,22 +117,30 @@ function ProductIcons(): ReactElement {
     }
   }
 
+  const getProductIcons = () => {
+    if (activeProduct !== Product.other) {
+      let otherStatus = Status.accessible; // Every button before the active one is accessible
+      return products.map((product) => {
+        if (isActive(Product[product])) {
+          otherStatus = Status.disabled; // Every button after the active one is disabled
+          return getProductIcon(product, Status.active);
+        }
+        return getProductIcon(product, otherStatus);
+      });
+    }
+    return products.map((product) => {
+      if (Product[product] === Product.manage) {
+        return getProductIcon(product, Status.accessible); // If not on any product, only manage is accessible
+      }
+      return getProductIcon(product, Status.disabled);
+    });
+  };
+
   useEffect(() => {
     updateActiveProduct();
   }, [window.location.pathname]);
 
-  let otherStatus = Status.accessible;
-  return (
-    <>
-      {products.map((product) => {
-        if (isActive(Product[product])) {
-          otherStatus = Status.disabled;
-          return getProductIcon(product, Status.active);
-        }
-        return getProductIcon(product, otherStatus);
-      })}
-    </>
-  );
+  return <>{getProductIcons()}</>;
 }
 
 export { ProductIcons, Status };
