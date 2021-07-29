@@ -77,17 +77,7 @@ const UserInterface = (props: Props): ReactElement | null => {
               <BasicPage view={<SignUp />} title={<>Create an Account</>} />
             </Route>
             <PrivateRoute
-              path="curate/:id"
-              element={
-                <Curate
-                  etebaseInstance={etebaseInstance}
-                  setIsLoading={setIsLoading}
-                  setTask={setTask}
-                />
-              }
-            />
-            <PrivateRoute
-              path="curate/"
+              path="curate/:collectionUid"
               element={
                 <Curate
                   etebaseInstance={etebaseInstance}

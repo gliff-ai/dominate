@@ -25,8 +25,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const auth = useAuth();
 
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
-  const { id: galleryUidParam } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
-  const [galleryUid, setGalleryUid] = useState<string>(galleryUidParam);
+  const { collectionUid } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
+  const [galleryUid, setGalleryUid] = useState<string>(collectionUid);
 
   useEffect(() => {
     props.setIsLoading(true);
