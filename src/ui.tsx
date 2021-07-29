@@ -212,8 +212,8 @@ const UserInterface = (props: Props): ReactElement | null => {
           setTimeout(() => window.location.replace("https://gliff.ai"), 1500);
         }}
       >
-        This website uses cookies to enhance the user experience (we don't use
-        tracking or advertising cookies).
+        This website uses cookies to enhance the user experience (we don&apos;t
+        use tracking or advertising cookies).
       </CookieConsent>
     </ThemeProvider>
   );
