@@ -128,11 +128,11 @@ export function VerificationSent({ callback }: Props): ReactElement {
   return (
     <>
       <Typography className={classes.recoveryKeyText}>
-        A verification email has been sent.
+        A verification email has been sent
       </Typography>
       <Typography className={classes.recoveryKeyParagraph}>
         Please check your inbox, your account will remain disabled until your
-        email address is verified.
+        email address is verified. Once this is complete, you can sign in below
       </Typography>
 
       <div className={classes.submitDiv}>
@@ -143,7 +143,7 @@ export function VerificationSent({ callback }: Props): ReactElement {
           className={classes.submit}
           onClick={callback}
         >
-          I have verified my account, sign me in
+          Sign In
         </Button>
       </div>
     </>
