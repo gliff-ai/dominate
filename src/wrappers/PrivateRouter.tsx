@@ -24,7 +24,7 @@ export const PrivateRoute = (props: RouteProps): ReactElement => {
   }, [auth.ready]);
 
   // default to just following the route
-  // eslint-disable-next-line react/jsx-props-no-spreading
+  /* eslint-disable react/jsx-props-no-spreading */
   return (
     (auth?.user && auth?.userProfile?.email_verified && <Route {...props} />) ||
     element
