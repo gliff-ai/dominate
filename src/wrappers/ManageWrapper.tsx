@@ -55,11 +55,12 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     // Open the selected project in curate
     navigate(`/curate/${projectUid}`);
 
+  // These require trailing slashes otherwise Safari won't send the Auth Token (as django will 301)
   const services = {
-    queryTeam: "GET /team",
+    queryTeam: "GET /team/",
     loginUser: "POST /user/login", // Not used, we pass an authd user down
     getProjects,
-    getProject: "GET /project", // TODO
+    getProject: "GET /project/", // TODO
     createProject,
     inviteUser,
     inviteToProject,
