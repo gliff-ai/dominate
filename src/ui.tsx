@@ -1,11 +1,5 @@
 import { ReactElement, useState } from "react";
-import {
-  BrowserRouter,
-  Route,
-  Routes,
-  Navigate,
-  useNavigate,
-} from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { CssBaseline, makeStyles, ThemeProvider } from "@material-ui/core";
 import CookieConsent from "react-cookie-consent";
 import { theme } from "@gliff-ai/style";
@@ -23,7 +17,6 @@ import {
 } from "@/views";
 import {
   MessageAlert,
-  MessageSnackbar,
   NavBar,
   PageSpinner,
   ProgressSnackbar,

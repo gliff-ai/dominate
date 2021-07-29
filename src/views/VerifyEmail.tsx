@@ -12,8 +12,7 @@ const useStyles = makeStyles(() => ({
   },
 
   noAccount: {
-    width: "200%",
-    marginBottom: "187px",
+    textAlign: "center",
   },
   noAccountText: {
     display: "inline",
