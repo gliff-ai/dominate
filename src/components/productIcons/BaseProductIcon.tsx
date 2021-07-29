@@ -41,7 +41,6 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 interface Props {
   tool: string;
-  buttonKey?: string;
   linkDisabled?: boolean;
   extraStyleAvatar?: string | null;
   extraStyleSvg?: string | null;
@@ -51,7 +50,6 @@ interface Props {
 
 function BaseProductIcon({
   tool,
-  buttonKey,
   linkDisabled,
   extraStyleAvatar,
   extraStyleSvg,
@@ -73,7 +71,7 @@ function BaseProductIcon({
   );
 
   return (
-    <div key={buttonKey} className={classes.outerDiv}>
+    <div className={classes.outerDiv}>
       <div className={classes.iconDiv}>
         {linkDisabled ? avatar : <Link href={`/${tool}`}>{avatar}</Link>}
         <p className={`${classes.productName} ${extraStyleName}`}>{tool}</p>
@@ -89,7 +87,6 @@ function BaseProductIcon({
 }
 
 BaseProductIcon.defaultProps = {
-  buttonKey: null,
   linkDisabled: false,
   extraStyleAvatar: null,
   extraStyleSvg: null,

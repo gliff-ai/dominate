@@ -70,7 +70,7 @@ function ProductIcons(): ReactElement {
       case Status.active:
         return (
           <BaseProductIcon
-            buttonKey={key}
+            key={key}
             tool={tool}
             linkDisabled
             extraStyleAvatar={classes.noHoverAvatar}
@@ -81,7 +81,7 @@ function ProductIcons(): ReactElement {
       case Status.accessible:
         return (
           <BaseProductIcon
-            buttonKey={key}
+            key={key}
             tool={tool}
             extraStyleSvg={classes.accessibleSvg}
             extraStyleName={classes.accessibleName}
@@ -91,7 +91,7 @@ function ProductIcons(): ReactElement {
       case Status.disabled:
         return (
           <BaseProductIcon
-            buttonKey={key}
+            key={key}
             tool={tool}
             linkDisabled
             extraStyleAvatar={classes.noHoverAvatar}
