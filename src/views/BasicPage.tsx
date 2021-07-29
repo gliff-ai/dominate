@@ -1,4 +1,5 @@
-import { Container, makeStyles, Typography } from "@material-ui/core";
+import { Container, makeStyles, Typography, Button } from "@material-ui/core";
+import { useNavigate } from "react-router-dom";
 import { theme, lightGrey } from "@gliff-ai/style";
 import { imgSrc } from "@/imgSrc";
 
@@ -12,6 +13,11 @@ const useStyles = makeStyles(() => ({
       backgroundRepeat: "no-repeat",
       backgroundPosition: "-350px -320px, 1400px 650px",
     },
+  },
+  backButton: {
+    position: "absolute",
+    left: "100px",
+    top: "100px",
   },
   typogragphyTitle: {
     width: "100%",
@@ -39,9 +45,17 @@ const useStyles = makeStyles(() => ({
 interface Props {
   view: JSX.Element;
   title: JSX.Element;
+  // eslint-disable-next-line react/require-default-props
+  showBackButton?: boolean;
 }
-export const BasicPage = (props: Props): JSX.Element => {
+
+export const BasicPage = ({
+  view,
+  title,
+  showBackButton = false,
+}: Props): JSX.Element => {
   const classes = useStyles();
+  const navigate = useNavigate();
 
   return (
     <Container
@@ -49,6 +63,19 @@ export const BasicPage = (props: Props): JSX.Element => {
       maxWidth="xs"
       style={{ display: "flex", flexDirection: "column", marginTop: 0 }}
     >
+      {showBackButton ? (
+        <Button
+          type="button"
+          onClick={() => navigate(-1)}
+          className={classes.backButton}
+          color="primary"
+          variant="contained"
+        >
+          BACK
+        </Button>
+      ) : (
+        ""
+      )}
       <div className={classes.logo}>
         <img
           src={imgSrc("gliff-web-master-black")}
@@ -58,11 +85,9 @@ export const BasicPage = (props: Props): JSX.Element => {
         />
       </div>
       <div className={classes.mainBlock}>
-        <Typography className={classes.typogragphyTitle}>
-          {props.title}
-        </Typography>
+        <Typography className={classes.typogragphyTitle}>{title}</Typography>
 
-        <div className={classes.paper}>{props.view}</div>
+        <div className={classes.paper}>{view}</div>
       </div>
     </Container>
   );

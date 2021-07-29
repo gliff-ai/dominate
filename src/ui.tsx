@@ -1,11 +1,5 @@
 import { ReactElement, useState } from "react";
-import {
-  BrowserRouter,
-  Route,
-  Routes,
-  Navigate,
-  useNavigate,
-} from "react-router-dom";
+import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { CssBaseline, makeStyles, ThemeProvider } from "@material-ui/core";
 import CookieConsent from "react-cookie-consent";
 import { theme } from "@gliff-ai/style";
@@ -23,7 +17,6 @@ import {
 } from "@/views";
 import {
   MessageAlert,
-  MessageSnackbar,
   NavBar,
   PageSpinner,
   ProgressSnackbar,
@@ -92,17 +85,7 @@ const UserInterface = (props: Props): ReactElement | null => {
               <BasicPage view={<SignUp />} title={<>Create an Account</>} />
             </Route>
             <PrivateRoute
-              path="curate/:id"
-              element={
-                <Curate
-                  etebaseInstance={etebaseInstance}
-                  setIsLoading={setIsLoading}
-                  setTask={setTask}
-                />
-              }
-            />
-            <PrivateRoute
-              path="curate/"
+              path="curate/:collectionUid"
               element={
                 <Curate
                   etebaseInstance={etebaseInstance}
@@ -164,7 +147,13 @@ const UserInterface = (props: Props): ReactElement | null => {
 
             <PrivateRoute
               path="/reset-password"
-              element={<ResetPassword etebaseInstance={etebaseInstance} />}
+              element={
+                <BasicPage
+                  view={<ResetPassword etebaseInstance={etebaseInstance} />}
+                  title={<>Change Password</>}
+                  showBackButton
+                />
+              }
             />
             <PrivateRoute path="/account">
               <Account />
