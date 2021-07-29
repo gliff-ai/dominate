@@ -1,6 +1,6 @@
 import { ReactElement, useState } from "react";
 import { Button, Typography, makeStyles, Card } from "@material-ui/core";
-import { theme } from "@/theme";
+import { theme } from "@gliff-ai/style";
 import { VerificationSent } from "@/views/VerificationSent";
 
 const useStyles = makeStyles(() => ({

@@ -1,6 +1,6 @@
 import { FormEvent, useEffect, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { theme } from "@/theme";
+import { theme } from "@gliff-ai/style";
 import { Link, Typography, makeStyles } from "@material-ui/core";
 import { MessageAlert, SubmitButton } from "@/components";
 import { apiRequest } from "@/api";

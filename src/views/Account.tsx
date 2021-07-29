@@ -11,8 +11,10 @@ import {
   Box,
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
-import { imgSrc, theme } from "@/theme";
+import { theme } from "@gliff-ai/style";
 import { Link } from "react-router-dom";
+import { imgSrc } from "@/imgSrc";
+
 import { HtmlTooltip } from "@/components/HtmlTooltip";
 
 const useStyles = makeStyles({

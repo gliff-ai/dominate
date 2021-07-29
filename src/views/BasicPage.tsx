@@ -1,5 +1,6 @@
 import { Container, makeStyles, Typography } from "@material-ui/core";
-import { imgSrc, theme, lightGrey } from "@/theme";
+import { theme, lightGrey } from "@gliff-ai/style";
+import { imgSrc } from "@/imgSrc";
 
 const squiggles = imgSrc("squig-black", "png");
 

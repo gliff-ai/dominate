@@ -1,6 +1,6 @@
 import { ReactElement, useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core";
-import { theme } from "@/theme";
+import { theme } from "@gliff-ai/style";
 import { BaseProductIcon } from "./BaseProductIcon";
 
 const useStyles = makeStyles({
