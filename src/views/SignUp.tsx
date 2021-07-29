@@ -314,8 +314,8 @@ export const SignUp = (): JSX.Element => {
                 href="https://gliff.ai/platform-terms-and-conditions/"
               >
                 terms and conditions
-              </Link>
-              and
+              </Link>{" "}
+              and{" "}
               <Link
                 color="secondary"
                 target="_blank"
