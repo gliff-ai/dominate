@@ -65,6 +65,16 @@ function ProductIcons(): ReactElement {
 
   const isActive = (product: Product): boolean => product === activeProduct;
 
+  const getCustomUrlPath = (tool: string, status: Status): string | null => {
+    // When navigating back to curate from annotate using the navbar
+    // the collectionUid in the annotate url is used to set the url path for curate
+    if (tool === "curate" && status === Status.accessible) {
+      const galleryUid = window.location.pathname.split("/").reverse()[1];
+      return `/curate/${galleryUid}`;
+    }
+    return null;
+  };
+
   function getProductIcon(tool: string, status: Status): ReactElement | null {
     const key = `${tool}-${status}`;
 
@@ -85,6 +95,7 @@ function ProductIcons(): ReactElement {
           <BaseProductIcon
             buttonKey={key}
             tool={tool}
+            customUrlPath={getCustomUrlPath(tool, status)}
             extraStyleSvg={classes.accessibleSvg}
             extraStyleName={classes.accessibleName}
             extraStyleTrailSvg={classes.accessibleTrailSvg}
