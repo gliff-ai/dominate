@@ -301,7 +301,7 @@ export const SignUp = (): JSX.Element => {
           }
           label={
             <Typography variant="body2">
-              I agree to the gliff.ai{" "}
+              I agree to the gliff.ai&nbsp;
               <Link
                 color="secondary"
                 target="_blank"
@@ -309,8 +309,8 @@ export const SignUp = (): JSX.Element => {
                 href="https://gliff.ai/platform-terms-and-conditions/"
               >
                 terms and conditions
-              </Link>{" "}
-              and{" "}
+              </Link>
+              &nbsp;and&nbsp;
               <Link
                 color="secondary"
                 target="_blank"
