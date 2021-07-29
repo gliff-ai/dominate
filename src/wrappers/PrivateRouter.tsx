@@ -5,12 +5,8 @@ import { useAuth } from "@/hooks/use-auth";
 export const PrivateRoute = (props: RouteProps): ReactElement => {
   const auth = useAuth();
   const [element, setElement] = useState<ReactElement>(<></>);
-  const [hasLoaded, setHasLoaded] = useState(false);
-
-  setTimeout(() => setHasLoaded(true), 2000);
 
   useEffect(() => {
-    if (!hasLoaded) return;
     // if no authorised user at all
     // redirect to signin
     if (!auth?.user) {
@@ -25,9 +21,12 @@ export const PrivateRoute = (props: RouteProps): ReactElement => {
     ) {
       setElement(<Navigate to="/request-verify-email" />);
     }
-  }, [hasLoaded]);
+  }, [auth.ready]);
 
   // default to just following the route
   // eslint-disable-next-line react/jsx-props-no-spreading
-  return (auth?.user && <Route {...props} />) || element;
+  return (
+    (auth?.user && auth?.userProfile?.email_verified && <Route {...props} />) ||
+    element
+  );
 };

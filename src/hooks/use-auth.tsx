@@ -12,6 +12,7 @@ interface Props {
 interface Context {
   user: User;
   userProfile: UserProfile;
+  ready: boolean;
   getInstance: () => DominateEtebase;
   changePassword: (newPassword: string) => Promise<boolean>;
   signin: (username: string, password: string) => Promise<User>;
@@ -35,6 +36,7 @@ export const useAuth = (): Context => useContext(authContext);
 function useProvideAuth(etebaseInstance: DominateEtebase) {
   const [user, setUser] = useState<User>(null);
   const [userProfile, setUserProfile] = useState<UserProfile>(null);
+  const [ready, setReady] = useState<boolean>(false);
 
   // Wrapper to the set hook to add the auth token
   const updateUser = (authedUser: User | null) => {
@@ -44,6 +46,7 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
     }
 
     setUser(authedUser);
+    setReady(true);
     if (authedUser) {
       void getUserProfile().then((profile) => {
         setUserProfile(profile);
@@ -123,6 +126,7 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
   return {
     user,
     userProfile,
+    ready,
     signin,
     signout,
     signup,
