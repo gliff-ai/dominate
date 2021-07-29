@@ -17,16 +17,11 @@ import {
 } from "@material-ui/core";
 import Slide from "@material-ui/core/Slide";
 import { useNavigate } from "react-router-dom";
-import { theme } from "@gliff-ai/style";
+import { theme, TransitionProps } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
-import {
-  MessageSnackbar,
-  MessageAlert,
-  TransitionProps,
-  SubmitButton,
-} from "@/components";
+import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
 
 const stripePromise = loadStripe(
   "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
@@ -306,14 +301,23 @@ export const SignUp = (): JSX.Element => {
           }
           label={
             <Typography variant="body2">
-              I accept the{" "}
+              I agree to the gliff.ai{" "}
               <Link
                 color="secondary"
                 target="_blank"
                 rel="noopener"
                 href="https://gliff.ai/platform-terms-and-conditions/"
               >
-                gliff.ai terms and conditions
+                terms and conditions
+              </Link>{" "}
+              and{" "}
+              <Link
+                color="secondary"
+                target="_blank"
+                rel="noopener"
+                href="https://gliff.ai/privacy-policy/"
+              >
+                privacy policy
               </Link>
               .
             </Typography>

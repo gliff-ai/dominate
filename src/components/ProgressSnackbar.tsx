@@ -1,6 +1,6 @@
 import { CircularProgress, makeStyles } from "@material-ui/core";
 import Slide from "@material-ui/core/Slide";
-import { BaseSnackbar } from "./BaseSnackbar";
+import { BaseSnackbar } from "@gliff-ai/style";
 
 const useStyle = makeStyles({
   messageContainer: {
