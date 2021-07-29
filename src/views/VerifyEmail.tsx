@@ -4,6 +4,7 @@ import { theme } from "@gliff-ai/style";
 import { Link, Typography, makeStyles } from "@material-ui/core";
 import { MessageAlert, SubmitButton } from "@/components";
 import { apiRequest } from "@/api";
+import { useAuth } from "@/hooks/use-auth";
 
 const useStyles = makeStyles(() => ({
   form: {
@@ -39,6 +40,7 @@ const useStyles = makeStyles(() => ({
 
 export const VerifyEmail = (): JSX.Element => {
   const classes = useStyles();
+  const auth = useAuth();
   const navigate = useNavigate();
   const { uid } = useParams(); // uid of user from URL
   const [loading, setLoading] = useState(false);
@@ -55,8 +57,9 @@ export const VerifyEmail = (): JSX.Element => {
 
       setLoading(false);
     } catch (e) {
-      console.log(e);
-      setRequestError("Account not verified");
+      // The user CAN get here if they're already verified! Show the error and then redirect
+      setRequestError("Account verification failed");
+      setTimeout(() => navigate("/"), 5000);
     }
   };
 
