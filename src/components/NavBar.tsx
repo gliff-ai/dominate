@@ -116,7 +116,10 @@ export const NavBar = (): ReactElement => {
   const accountMenu = (
     <>
       <IconButton onClick={handleClick} aria-controls="menu">
-        <HtmlTooltip title={<Typography>Account</Typography>} placement="top">
+        <HtmlTooltip
+          title={<Typography>Account</Typography>}
+          placement="bottom"
+        >
           <Avatar variant="circular" className={classes.avatarUser}>
             {userInitials}
           </Avatar>

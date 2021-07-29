@@ -114,7 +114,7 @@ export function Account(): ReactElement {
               Password:
               <span className={classes.spanTypography}>*********</span>
               <HtmlTooltip
-                title={<Typography color="inherit">Edit Password</Typography>}
+                title={<Typography>Edit Password</Typography>}
                 placement="right"
               >
                 <Avatar className={classes.editAvatar}>
