@@ -43,6 +43,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: "#FFFFFF",
     width: "313px",
   },
+  avatarButton: {
+    paddingTop: 0,
+  },
   avatarUser: {
     width: "64px !important",
     height: "64px !important",
@@ -115,7 +118,11 @@ export const NavBar = (): ReactElement => {
 
   const accountMenu = (
     <>
-      <IconButton onClick={handleClick} aria-controls="menu">
+      <IconButton
+        onClick={handleClick}
+        aria-controls="menu"
+        className={classes.avatarButton}
+      >
         <HtmlTooltip title={<Typography>Account</Typography>} placement="top">
           <Avatar variant="circular" className={classes.avatarUser}>
             {userInitials}
