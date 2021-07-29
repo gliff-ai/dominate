@@ -59,6 +59,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     "&:hover": {
       background: theme.palette.primary.main,
     },
+    "& a": {
+      color: theme.palette.text.primary,
+      textDecoration: "none",
+      fontSize: "1rem",
+      display: "inline-flex",
+    },
   },
   logo: {
     marginBottom: "5px",
@@ -141,13 +147,15 @@ export const NavBar = (): ReactElement => {
           horizontal: "right",
         }}
       >
-        <MenuItem component="a" href="/account" className={classes.menuItem}>
-          <SVG
-            src={imgSrc("account-settings")}
-            className={classes.svgMedium}
-            style={{ marginRight: "12px" }}
-          />
-          Account Settings
+        <MenuItem className={classes.menuItem}>
+          <Link to="/account">
+            <SVG
+              src={imgSrc("account-settings")}
+              className={classes.svgMedium}
+              style={{ marginRight: "12px" }}
+            />
+            Account Settings
+          </Link>
         </MenuItem>
         <MenuItem
           className={classes.menuItem}
