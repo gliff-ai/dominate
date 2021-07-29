@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import { Avatar, makeStyles, Link, Theme } from "@material-ui/core";
 import SVG from "react-inlinesvg";
-import { imgSrc } from "@/theme";
+import { imgSrc } from "@/imgSrc";
 
 const useStyles = makeStyles((theme: Theme) => ({
   productSvg: {
@@ -42,7 +42,6 @@ const useStyles = makeStyles((theme: Theme) => ({
 interface Props {
   tool: string;
   customUrlPath?: string;
-  buttonKey?: string;
   linkDisabled?: boolean;
   extraStyleAvatar?: string | null;
   extraStyleSvg?: string | null;
@@ -53,7 +52,6 @@ interface Props {
 function BaseProductIcon({
   tool,
   customUrlPath,
-  buttonKey,
   linkDisabled,
   extraStyleAvatar,
   extraStyleSvg,
@@ -75,7 +73,7 @@ function BaseProductIcon({
   );
 
   return (
-    <div key={buttonKey} className={classes.outerDiv}>
+    <div className={classes.outerDiv}>
       <div className={classes.iconDiv}>
         {linkDisabled ? (
           avatar
@@ -95,7 +93,6 @@ function BaseProductIcon({
 }
 
 BaseProductIcon.defaultProps = {
-  buttonKey: null,
   linkDisabled: false,
   extraStyleAvatar: null,
   extraStyleSvg: null,

@@ -1,6 +1,6 @@
 import { ReactElement, useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core";
-import { theme } from "@/theme";
+import { theme } from "@gliff-ai/style";
 import { BaseProductIcon } from "./BaseProductIcon";
 
 const useStyles = makeStyles({
@@ -82,7 +82,7 @@ function ProductIcons(): ReactElement {
       case Status.active:
         return (
           <BaseProductIcon
-            buttonKey={key}
+            key={key}
             tool={tool}
             linkDisabled
             extraStyleAvatar={classes.noHoverAvatar}
@@ -93,7 +93,7 @@ function ProductIcons(): ReactElement {
       case Status.accessible:
         return (
           <BaseProductIcon
-            buttonKey={key}
+            key={key}
             tool={tool}
             customUrlPath={getCustomUrlPath(tool, status)}
             extraStyleSvg={classes.accessibleSvg}
@@ -104,7 +104,7 @@ function ProductIcons(): ReactElement {
       case Status.disabled:
         return (
           <BaseProductIcon
-            buttonKey={key}
+            key={key}
             tool={tool}
             linkDisabled
             extraStyleAvatar={classes.noHoverAvatar}
