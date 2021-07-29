@@ -41,6 +41,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 
 interface Props {
   tool: string;
+  customUrlPath?: string;
   linkDisabled?: boolean;
   extraStyleAvatar?: string | null;
   extraStyleSvg?: string | null;
@@ -50,6 +51,7 @@ interface Props {
 
 function BaseProductIcon({
   tool,
+  customUrlPath,
   linkDisabled,
   extraStyleAvatar,
   extraStyleSvg,
@@ -73,7 +75,11 @@ function BaseProductIcon({
   return (
     <div className={classes.outerDiv}>
       <div className={classes.iconDiv}>
-        {linkDisabled ? avatar : <Link href={`/${tool}`}>{avatar}</Link>}
+        {linkDisabled ? (
+          avatar
+        ) : (
+          <Link href={customUrlPath || `/${tool}`}>{avatar}</Link>
+        )}
         <p className={`${classes.productName} ${extraStyleName}`}>{tool}</p>
       </div>
       {tool !== "annotate" && (
@@ -92,6 +98,7 @@ BaseProductIcon.defaultProps = {
   extraStyleSvg: null,
   extraStyleName: null,
   extraStyleTrailSvg: null,
+  customUrlPath: null,
 };
 
 export { BaseProductIcon };
