@@ -190,6 +190,7 @@ const UserInterface = (props: Props): ReactElement | null => {
           width: "169px",
           marginBottom: "20px",
           marginTop: "20px",
+          borderRadius: "9px",
         }}
         declineButtonStyle={{
           backgroundColor: theme.palette.secondary.main,
@@ -200,6 +201,7 @@ const UserInterface = (props: Props): ReactElement | null => {
           width: "169px",
           marginBottom: "20px",
           marginTop: "20px",
+          borderRadius: "9px",
         }}
         enableDeclineButton
         setDeclineCookie={false}
