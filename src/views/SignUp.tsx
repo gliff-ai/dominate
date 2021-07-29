@@ -30,17 +30,6 @@ const stripePromise = loadStripe(
 const query = new URLSearchParams(window.location.search);
 
 const useStyles = makeStyles(() => ({
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  form: {
-    width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
-  textFieldBackground: {
-    background: theme.palette.primary.light,
-  },
   haveAccount: {
     width: "fit-content",
     marginRight: "auto",
@@ -227,11 +216,10 @@ export const SignUp = (): JSX.Element => {
     <RecoveryKey recoveryKey={recoveryKey} callback={redirectUser} />
   ) : (
     <>
-      <form className={classes.form} onSubmit={onSubmitForm}>
+      <form onSubmit={onSubmitForm}>
         <TextField
           variant="outlined"
           margin="normal"
-          className={classes.textFieldBackground}
           required
           fullWidth
           id="email"
@@ -247,7 +235,6 @@ export const SignUp = (): JSX.Element => {
         <TextField
           variant="outlined"
           margin="normal"
-          className={classes.textFieldBackground}
           required
           fullWidth
           id="name"
@@ -262,7 +249,6 @@ export const SignUp = (): JSX.Element => {
         <TextField
           variant="outlined"
           margin="normal"
-          className={classes.textFieldBackground}
           required
           fullWidth
           name="password"
@@ -277,7 +263,6 @@ export const SignUp = (): JSX.Element => {
         <TextField
           variant="outlined"
           margin="normal"
-          className={classes.textFieldBackground}
           required
           fullWidth
           name="confirmPassword"

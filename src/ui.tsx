@@ -1,6 +1,6 @@
 import { ReactElement, useState } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { CssBaseline, makeStyles, ThemeProvider } from "@material-ui/core";
+import { CssBaseline, ThemeProvider } from "@material-ui/core";
 import CookieConsent from "react-cookie-consent";
 import { theme } from "@gliff-ai/style";
 import { DominateEtebase } from "@/etebase";
@@ -25,35 +25,6 @@ import {
 import { BasicPage } from "@/views/BasicPage";
 import { PrivateRoute } from "./wrappers/PrivateRouter";
 
-const useStyles = makeStyles({
-  outerContainer: { height: "100%" },
-  home: {
-    height: "53px",
-    backgroundColor: theme.palette.primary.light,
-    width: "61px",
-    top: "20px",
-    right: "20px",
-  },
-  svgSmall: {
-    width: "22px",
-    height: "100%",
-    marginLeft: "21px",
-  },
-
-  iconButton: {
-    marginLeft: "-20px",
-  },
-  avatarSVG: {
-    backgroundColor: theme.palette.primary.light,
-    marginLeft: "auto",
-    marginRight: "auto",
-    marginTop: "6px",
-    "&:hover": {
-      backgroundColor: theme.palette.primary.main,
-    },
-  },
-});
-
 interface Props {
   etebaseInstance: DominateEtebase;
 }
@@ -64,7 +35,6 @@ const UserInterface = (props: Props): ReactElement | null => {
     isLoading: false,
     description: "",
   });
-  const classes = useStyles();
   const [isLoading, setIsLoading] = useState(false);
   const [isCookiesConsented, setIsCookiesConsented] = useState("");
 
@@ -73,7 +43,7 @@ const UserInterface = (props: Props): ReactElement | null => {
       <ProgressSnackbar task={task} setTask={setTask} />
       <CssBaseline />
       <BrowserRouter>
-        <div className={classes.outerContainer}>
+        <div style={{ height: "100%" }}>
           <PageSpinner isLoading={isLoading} />
           <NavBar />
           <MessageAlert severity="error" message={isCookiesConsented} />
@@ -122,6 +92,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                 <BasicPage
                   view={<RequestRecoverAccount />}
                   title={<>Request Recovery</>}
+                  showBackButton
                 />
               }
             />

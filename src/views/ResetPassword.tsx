@@ -24,52 +24,6 @@ const useStyles = makeStyles(() => ({
     flexDirection: "column",
     alignItems: "center",
   },
-  logo: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "187px",
-  },
-
-  form: {
-    width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
-
-  forgotPasswordText: {
-    marginBottom: "44px",
-    marginTop: "13px",
-    color: theme.palette.secondary.main,
-    textAlign: "right",
-    fontStyle: "italic",
-  },
-  noAccountDiv: {
-    width: "200%",
-    marginBottom: "187px",
-  },
-  noAccountText: {
-    display: "inline",
-    marginRight: "10px",
-  },
-
-  submitDiv: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginTop: "86px",
-  },
-  typogragphyTitle: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "-40px",
-    fontSize: "34px",
-    fontWeight: 700,
-  },
-  textFieldBackground: {
-    background: theme.palette.primary.light,
-  },
-
   svgSmall: {
     width: "22px",
     height: "100%",
@@ -77,21 +31,6 @@ const useStyles = makeStyles(() => ({
     marginRight: "9px",
     marginTop: "0px",
     marginBottom: "-4px",
-  },
-
-  iconButton: {
-    color: theme.palette.primary.light,
-  },
-  submit: {
-    color: theme.palette.text.primary,
-    marginBottom: "112px",
-    textTransform: "none",
-    fontWeight: 700,
-    fontSize: "15px",
-    width: "169px",
-    "&:hover": {
-      backgroundColor: "none",
-    },
   },
 }));
 
@@ -185,13 +124,12 @@ export const ResetPassword = (props: Props): ReactElement => {
     <></>
   ) : (
     <div className={classes.paper}>
-      <form className={classes.form} onSubmit={onFormSubmit}>
+      <form onSubmit={onFormSubmit}>
         <TextField
           variant="outlined"
           margin="normal"
           required
           fullWidth
-          className={classes.textFieldBackground}
           name="newPassword"
           type={password.showNewPassword ? "text" : "password"}
           id="newPassword"
@@ -229,7 +167,6 @@ export const ResetPassword = (props: Props): ReactElement => {
           margin="normal"
           required
           fullWidth
-          className={classes.textFieldBackground}
           name="confirmPassword"
           type={password.showConfirmPassword ? "text" : "password"}
           id="confirmPassword"

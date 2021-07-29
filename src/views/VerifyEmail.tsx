@@ -40,7 +40,6 @@ const useStyles = makeStyles(() => ({
 
 export const VerifyEmail = (): JSX.Element => {
   const classes = useStyles();
-  const auth = useAuth();
   const navigate = useNavigate();
   const { uid } = useParams(); // uid of user from URL
   const [loading, setLoading] = useState(false);
