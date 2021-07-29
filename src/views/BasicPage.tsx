@@ -15,6 +15,9 @@ const useStyles = makeStyles(() => ({
       "& form": {
         width: "100%", // Fix IE 11 issue.
         marginTop: theme.spacing(1),
+        "& label": {
+          marginTop: "10px",
+        },
       },
     },
   },
@@ -64,7 +67,7 @@ export const BasicPage = ({
   return (
     <Container
       component="main"
-      maxWidth="xs"
+      maxWidth="sm"
       style={{ display: "flex", flexDirection: "column", marginTop: 0 }}
     >
       {showBackButton ? (

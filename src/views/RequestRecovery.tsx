@@ -1,36 +1,11 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 
 import { apiRequest } from "@/api";
-import { TextField, makeStyles, Typography } from "@material-ui/core";
-import { theme } from "@gliff-ai/style";
+import { TextField, Typography, Container } from "@material-ui/core";
 import { MessageAlert, SubmitButton } from "@/components";
 import { useNavigate } from "react-router-dom";
 
-const useStyles = makeStyles(() => ({
-  form: {
-    width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
-
-  forgotPasswordText: {
-    marginBottom: "44px",
-    marginTop: "13px",
-    color: theme.palette.secondary.main,
-    textAlign: "right",
-    fontStyle: "italic",
-  },
-  noAccount: {
-    width: "200%",
-    marginBottom: "187px",
-  },
-  noAccountText: {
-    display: "inline",
-    marginRight: "10px",
-  },
-}));
-
 export const RequestRecoverAccount = (): JSX.Element => {
-  const classes = useStyles();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [recoveryError, setRecoveryError] = useState("");
@@ -72,24 +47,26 @@ export const RequestRecoverAccount = (): JSX.Element => {
         recovery key to complete the process.
       </Typography>
 
-      <form onSubmit={onSubmitForm}>
-        <TextField
-          variant="outlined"
-          margin="normal"
-          required
-          fullWidth
-          id="email"
-          name="recoveryEmail"
-          type="email"
-          onChange={handleChange}
-          value={recoveryEmail}
-          placeholder="E-mail"
-        />
-        <MessageAlert severity="success" message={successBanner} />
+      <Container maxWidth="xs">
+        <form onSubmit={onSubmitForm}>
+          <TextField
+            variant="outlined"
+            margin="normal"
+            required
+            fullWidth
+            id="email"
+            name="recoveryEmail"
+            type="email"
+            onChange={handleChange}
+            value={recoveryEmail}
+            placeholder="E-mail"
+          />
+          <MessageAlert severity="success" message={successBanner} />
 
-        <SubmitButton loading={loading} value="Request Recovery" />
-        <MessageAlert severity="error" message={recoveryError} />
-      </form>
+          <SubmitButton loading={loading} value="Request Recovery" />
+          <MessageAlert severity="error" message={recoveryError} />
+        </form>
+      </Container>
     </>
   );
 };
