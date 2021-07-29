@@ -157,7 +157,13 @@ const UserInterface = (props: Props): ReactElement | null => {
 
             <PrivateRoute
               path="/reset-password"
-              element={<ResetPassword etebaseInstance={etebaseInstance} />}
+              element={
+                <BasicPage
+                  view={<ResetPassword etebaseInstance={etebaseInstance} />}
+                  title={<>Change Password</>}
+                  showBackButton
+                />
+              }
             />
             <PrivateRoute path="/account">
               <Account />
