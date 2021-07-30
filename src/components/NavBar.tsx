@@ -16,7 +16,7 @@ import SVG from "react-inlinesvg";
 import { imgSrc } from "@/imgSrc";
 
 import { useAuth } from "@/hooks/use-auth";
-import { HtmlTooltip } from "@/components/HtmlTooltip";
+import { HtmlTooltip } from "@gliff-ai/style";
 import { ProductIcons } from "@/components";
 
 const useStyles = makeStyles((theme: Theme) => ({
@@ -124,12 +124,11 @@ export const NavBar = (): ReactElement => {
 
   const accountMenu = (
     <>
-      <IconButton
-        onClick={handleClick}
-        aria-controls="menu"
-        className={classes.avatarButton}
-      >
-        <HtmlTooltip title={<Typography>Account</Typography>} placement="top">
+      <IconButton onClick={handleClick} aria-controls="menu">
+        <HtmlTooltip
+          title={<Typography>Account</Typography>}
+          placement="bottom"
+        >
           <Avatar variant="circular" className={classes.avatarUser}>
             {userInitials}
           </Avatar>
