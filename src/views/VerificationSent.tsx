@@ -42,7 +42,7 @@ export function VerificationSent({ callback }: Props): ReactElement {
       </Typography>
 
       <form onSubmit={callback}>
-        <SubmitButton value={"Sign In"} loading={false} />
+        <SubmitButton value="Sign In" loading={false} />
       </form>
     </>
   );

@@ -40,11 +40,11 @@ export const VerifyEmail = (): JSX.Element => {
     <>
       <form onSubmit={onSubmitForm}>
         {!loading ? (
-          <Typography variant={"h6"} align={"center"} gutterBottom>
+          <Typography variant="h6" align="center" gutterBottom>
             Thank you for verifying your email address.
           </Typography>
         ) : (
-          <Typography variant={"body1"} align={"center"} gutterBottom>
+          <Typography variant="body1" align="center" gutterBottom>
             Your gliff.ai account is being verified...
           </Typography>
         )}

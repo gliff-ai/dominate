@@ -79,7 +79,7 @@ export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
       >
         <div>I have saved my recovery key somewhere safe</div>
         <form onSubmit={() => setUnderstood(true)}>
-          <SubmitButton value={"Continue"} loading={false} />
+          <SubmitButton value="Continue" loading={false} />
         </form>
       </div>
     </>
