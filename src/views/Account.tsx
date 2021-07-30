@@ -11,11 +11,9 @@ import {
   Box,
 } from "@material-ui/core";
 import { useAuth } from "@/hooks/use-auth";
-import { theme } from "@gliff-ai/style";
+import { theme, HtmlTooltip } from "@gliff-ai/style";
 import { Link } from "react-router-dom";
 import { imgSrc } from "@/imgSrc";
-
-import { HtmlTooltip } from "@/components/HtmlTooltip";
 
 const useStyles = makeStyles({
   avatar: {
@@ -116,7 +114,7 @@ export function Account(): ReactElement {
               Password:
               <span className={classes.spanTypography}>*********</span>
               <HtmlTooltip
-                title={<Typography color="inherit">Edit Password</Typography>}
+                title={<Typography>Edit Password</Typography>}
                 placement="right"
               >
                 <Avatar className={classes.editAvatar}>
