@@ -48,9 +48,15 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
     setUser(authedUser);
     setReady(true);
     if (authedUser) {
-      void getUserProfile().then((profile) => {
-        setUserProfile(profile);
-      });
+      void getUserProfile().then(
+        (profile) => {
+          setUserProfile(profile);
+        },
+        () => {
+          // 401 / 403 error, so clear saved session:
+          localStorage.removeItem("etebaseInstance");
+        }
+      );
     } else {
       setUserProfile(null);
     }
