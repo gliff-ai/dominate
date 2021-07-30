@@ -6,6 +6,7 @@ import { imgSrc } from "@/imgSrc";
 const squiggles = imgSrc("squig-black", "png");
 
 const useStyles = makeStyles(() => ({
+  // eslint-disable-next-line mui-unused-classes/unused-classes
   "@global": {
     body: {
       backgroundImage: `url(${squiggles}),url(${squiggles})`,
