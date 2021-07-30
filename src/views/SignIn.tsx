@@ -16,10 +16,6 @@ import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
 import { imgSrc } from "@/imgSrc";
 
 const useStyles = makeStyles(() => ({
-  form: {
-    width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
   forgotPasswordText: {
     marginBottom: "44px",
     marginTop: "13px",
@@ -34,10 +30,6 @@ const useStyles = makeStyles(() => ({
   noAccountText: {
     display: "inline",
     marginRight: "10px",
-  },
-
-  textFieldBackground: {
-    background: theme.palette.primary.light,
   },
   svgSmall: {
     width: "22px",
@@ -132,11 +124,10 @@ export function SignIn(): JSX.Element {
 
   return (
     <>
-      <form className={classes.form} onSubmit={onFormSubmit}>
+      <form onSubmit={onFormSubmit}>
         <TextField
           variant="outlined"
           margin="normal"
-          className={classes.textFieldBackground}
           required
           fullWidth
           id="email"
@@ -154,7 +145,6 @@ export function SignIn(): JSX.Element {
           margin="normal"
           required
           fullWidth
-          className={classes.textFieldBackground}
           name="password"
           type={login.showPassword ? "text" : "password"}
           id="password"

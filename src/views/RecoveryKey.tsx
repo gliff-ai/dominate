@@ -1,7 +1,8 @@
 import { ReactElement, useState } from "react";
-import { Button, Typography, makeStyles, Card } from "@material-ui/core";
+import { Typography, makeStyles, Card } from "@material-ui/core";
 import { theme } from "@gliff-ai/style";
 import { VerificationSent } from "@/views/VerificationSent";
+import { SubmitButton } from "@/components";
 
 const useStyles = makeStyles(() => ({
   card: {
@@ -9,15 +10,9 @@ const useStyles = makeStyles(() => ({
     height: "67px",
     border: "4px solid white",
   },
-
   cardTypography: {
     textAlign: "center",
     padding: "19px 0",
-  },
-
-  form: {
-    width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
   },
   recoveryKeyParagraph: {
     marginBottom: "44px",
@@ -32,12 +27,6 @@ const useStyles = makeStyles(() => ({
       fontStyle: "normal",
     },
   },
-
-  spanBold: {
-    fontWeight: "bold",
-    color: theme.palette.text.primary,
-  },
-
   recoveryKeyText: {
     marginBottom: "44px",
     marginTop: "13px",
@@ -47,58 +36,10 @@ const useStyles = makeStyles(() => ({
     width: "150%",
     textAlign: "center",
   },
-
-  noAccount: {
-    width: "200%",
-    marginBottom: "187px",
-  },
-  noAccountText: {
-    display: "inline",
-    marginRight: "10px",
-  },
-  home: {
-    height: "53px",
-    backgroundColor: theme.palette.primary.light,
-    width: "61px",
-    top: "22px",
-    right: "20px",
-  },
   submitDiv: {
     width: "fit-content",
     marginRight: "auto",
     marginLeft: "auto",
-  },
-  textFieldBackground: {
-    background: theme.palette.primary.light,
-  },
-  snackbar: {
-    background: theme.palette.info.light,
-  },
-  message: {
-    display: "inline-block",
-    marginRight: "5px",
-    marginLeft: "5px",
-    fontSize: "16px",
-  },
-  haveAccount: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "187px",
-  },
-  haveAccountText: {
-    display: "inline",
-    marginRight: "20px",
-  },
-  iconButton: {
-    color: theme.palette.primary.light,
-  },
-  submit: {
-    textTransform: "none", // This is set to uppercase globally, shouldn't be?
-    marginTop: "10px",
-    "&:hover": {
-      backgroundColor: "none",
-    },
   },
 }));
 
@@ -137,15 +78,9 @@ export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
         style={{ display: "flex", flexDirection: "column" }}
       >
         <div>I have saved my recovery key somewhere safe</div>
-        <Button
-          type="button"
-          variant="contained"
-          color="primary"
-          className={classes.submit}
-          onClick={() => setUnderstood(true)}
-        >
-          Continue
-        </Button>
+        <form onSubmit={() => setUnderstood(true)}>
+          <SubmitButton value="Continue" loading={false} />
+        </form>
       </div>
     </>
   );

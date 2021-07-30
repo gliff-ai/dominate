@@ -12,6 +12,13 @@ const useStyles = makeStyles(() => ({
       backgroundColor: lightGrey,
       backgroundRepeat: "no-repeat",
       backgroundPosition: "-350px -320px, 1400px 650px",
+      "& form": {
+        width: "100%", // Fix IE 11 issue.
+        marginTop: theme.spacing(1),
+        "& label": {
+          marginTop: "10px",
+        },
+      },
     },
   },
   backButton: {
@@ -60,7 +67,7 @@ export const BasicPage = ({
   return (
     <Container
       component="main"
-      maxWidth="xs"
+      maxWidth="sm"
       style={{ display: "flex", flexDirection: "column", marginTop: 0 }}
     >
       {showBackButton ? (
