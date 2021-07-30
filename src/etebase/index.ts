@@ -183,7 +183,7 @@ export class DominateEtebase {
     const invitationManager = this.etebaseInstance.getInvitationManager();
 
     const invitations = await invitationManager.listIncoming().then(
-      (invitations) => invitations.data,
+      (response) => response.data,
       () => [] // catches the "User inactive or deleted" errors when the user isn't verified yet
     );
 
