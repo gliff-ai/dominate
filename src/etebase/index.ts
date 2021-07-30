@@ -182,9 +182,12 @@ export class DominateEtebase {
   getPendingInvites = async (): Promise<void> => {
     const invitationManager = this.etebaseInstance.getInvitationManager();
 
-    const invitations = await invitationManager.listIncoming();
+    const invitations = await invitationManager.listIncoming().then(
+      (invitations) => invitations.data,
+      () => [] // catches the "User inactive or deleted" errors when the user isn't verified yet
+    );
 
-    for (const invite of invitations.data) {
+    for (const invite of invitations) {
       void invitationManager
         .accept(invite)
         .then(() => console.log("Accepted Invite"));
