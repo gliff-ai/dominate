@@ -25,26 +25,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     height: "90px",
     paddingTop: "9px",
   },
-  link: {
-    textDecoration: "none",
-    marginRight: "10px",
-    color: theme.palette.secondary.main,
-  },
   svgMedium: {
     width: "22px",
     height: "100%",
     marginLeft: "-1px",
-  },
-  paper: {
-    borderRadius: 0,
-    border: "none",
-    boxShadow: "none",
-    display: "inline-flex",
-    backgroundColor: "#FFFFFF",
-    width: "313px",
-  },
-  avatarButton: {
-    paddingTop: 0,
   },
   avatarUser: {
     width: "64px !important",
@@ -79,9 +63,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     height: "100%",
     alignItems: "center",
     display: "flex",
-  },
-  linkTooltip: {
-    textTransform: "uppercase",
   },
 }));
 
