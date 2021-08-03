@@ -4,8 +4,10 @@ import { useParams, useNavigate } from "react-router-dom";
 import Curate from "@gliff-ai/curate";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
-import { Slices, MetaItem } from "@/etebase/interfaces";
+import { Slices, MetaItem, GalleryTile, Image } from "@/etebase/interfaces";
 import { Task } from "@/components";
+import { saveAs } from "file-saver";
+import JSZip from "jszip";
 
 import {
   stringifySlices,
@@ -26,7 +28,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
   const { collectionUid } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
-  const [galleryUid, setGalleryUid] = useState<string>(collectionUid);
+  const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
 
   useEffect(() => {
     props.setIsLoading(true);
@@ -35,8 +37,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const fetchImageItems = (): void => {
     // fetches images via DominateEtebase, and assigns them to imageItems state
     props.etebaseInstance
-      .getImagesMeta(galleryUid)
+      .getImagesMeta(collectionUid)
       .then((items) => {
+        setCollectionContent(items);
         // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
         const wrangled = items.map(
           ({ thumbnail, imageLabels, id, metadata }) => ({
@@ -79,7 +82,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
     // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
     await props.etebaseInstance.createImage(
-      galleryUid,
+      collectionUid,
       imageMeta,
       thumbnailB64,
       stringfiedSlices
@@ -90,20 +93,41 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
     props.etebaseInstance
-      .setImageLabels(galleryUid, imageUid, newLabels)
+      .setImageLabels(collectionUid, imageUid, newLabels)
       .catch((error) => {
         console.log(error);
       });
   };
 
   const deleteImageCallback = (imageUids: string[]): void => {
-    props.etebaseInstance.deleteImages(galleryUid, imageUids).catch((error) => {
-      console.log(error);
-    });
+    props.etebaseInstance
+      .deleteImages(collectionUid, imageUids)
+      .catch((error) => {
+        console.log(error);
+      });
   };
 
   const annotateCallback = (imageUid: string): void => {
-    navigate(`/annotate/${galleryUid}/${imageUid}`);
+    navigate(`/annotate/${collectionUid}/${imageUid}`);
+  };
+
+  const downloadDatasetCallback = async (): Promise<void> => {
+    let zip = new JSZip();
+
+    for (const tile of collectionContent) {
+      let imageUid = tile.imageUID;
+      let image: Image = await props.etebaseInstance.getImage(
+        collectionUid,
+        imageUid
+      );
+      zip.file(tile.metadata.imageName, image.content, {
+        base64: true,
+      });
+    }
+
+    zip.generateAsync({ type: "blob" }).then(function (content) {
+      saveAs(content, "dataset.zip");
+    });
   };
 
   // runs once on page load, would have been a componentDidMount if this were a class component:
@@ -114,12 +138,12 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   }, [props.etebaseInstance.ready]);
 
   useEffect(() => {
-    if (galleryUid) {
+    if (collectionUid) {
       fetchImageItems();
     }
-  }, [galleryUid]);
+  }, [collectionUid]);
 
-  if (!props.etebaseInstance || !auth.user || !galleryUid) return null;
+  if (!props.etebaseInstance || !auth.user || !collectionUid) return null;
 
   return (
     <Curate
@@ -128,6 +152,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       saveLabelsCallback={saveLabelsCallback}
       deleteImagesCallback={deleteImageCallback}
       annotateCallback={annotateCallback}
+      downloadDatasetCallback={downloadDatasetCallback}
       showAppBar={false}
       setIsLoading={props.setIsLoading}
       setTask={props.setTask}
