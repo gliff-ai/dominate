@@ -7,6 +7,13 @@ export const PrivateRoute = (props: RouteProps): ReactElement => {
   const [element, setElement] = useState<ReactElement>(<></>);
 
   useEffect(() => {
+    // catch the situation where the effect
+    // has switched from true to false
+    // and just return (this shouldn't happen)
+    if (auth.ready === false) {
+      return;
+    }
+
     // if no authorised user at all
     // redirect to signin
     if (!auth?.user) {
