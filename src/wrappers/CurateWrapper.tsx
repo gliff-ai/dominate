@@ -127,12 +127,14 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     }
     const images: Image[] = await Promise.all(imagePromises);
 
+    // add images to zip:
     for (let i = 0; i < images.length; i += 1) {
       zip.file(imageNames[i], images[i].content, {
         base64: true,
       });
     }
 
+    // compress data and save to disk:
     zip
       .generateAsync({ type: "blob" })
       .then((content) => {
