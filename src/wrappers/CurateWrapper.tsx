@@ -112,22 +112,35 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   const downloadDatasetCallback = async (): Promise<void> => {
-    let zip = new JSZip();
+    const zip = new JSZip();
 
+    // retrieve Image items and their names from etebase:
+    // TODO: store image names in Image items!
+    const imagePromises: Promise<Image>[] = [];
+    const imageNames: string[] = [];
     for (const tile of collectionContent) {
-      let imageUid = tile.imageUID;
-      let image: Image = await props.etebaseInstance.getImage(
-        collectionUid,
-        imageUid
+      const imageUid = tile.imageUID;
+      imagePromises.push(
+        props.etebaseInstance.getImage(collectionUid, imageUid)
       );
-      zip.file(tile.metadata.imageName, image.content, {
+      imageNames.push(tile.metadata.imageName);
+    }
+    const images: Image[] = await Promise.all(imagePromises);
+
+    for (let i = 0; i < images.length; i += 1) {
+      zip.file(imageNames[i], images[i].content, {
         base64: true,
       });
     }
 
-    zip.generateAsync({ type: "blob" }).then(function (content) {
-      saveAs(content, "dataset.zip");
-    });
+    zip
+      .generateAsync({ type: "blob" })
+      .then((content) => {
+        (saveAs as (Blob, string) => void)(content, "dataset.zip");
+      })
+      .catch((err) => {
+        console.log(err);
+      });
   };
 
   // runs once on page load, would have been a componentDidMount if this were a class component:
