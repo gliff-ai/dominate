@@ -29,6 +29,9 @@ export const getUserProfile = (): Promise<UserProfile> =>
 export const inviteNewUser = (email: string): Promise<unknown> =>
   apiRequest<unknown>("/user/invite", "POST", { email });
 
+export const inviteNewCollaborator = (email: string): Promise<unknown> =>
+  apiRequest<unknown>("/user/invite/collaborator", "POST", { email });
+
 export const getInvite = (inviteId: string): Promise<Invite> =>
   apiRequest<Invite>(`/user/invite?invite_id=${inviteId}`, "GET");
 
