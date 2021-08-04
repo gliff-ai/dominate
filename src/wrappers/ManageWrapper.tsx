@@ -38,7 +38,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
       const { uid } = projects[p];
       membersPromises.push(props.etebaseInstance.getCollectionMembers(uid));
     }
-    const allMembers: string[][] = await Promise.all(membersPromises);
+    const allMembers: string[][] = await Promise.all<string[]>(membersPromises);
 
     // for each project, go through members and return the first that matches
     for (let p = 0; p < projects.length; p += 1) {
