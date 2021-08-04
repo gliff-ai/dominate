@@ -134,7 +134,7 @@ const UserInterface = (props: Props): ReactElement | null => {
       </BrowserRouter>
       <CookieConsent
         location="bottom"
-        cookieName="gliff-ai-conset-cookie"
+        cookieName="gliff-ai-consent-cookie"
         expires={999}
         overlay
         style={{
