@@ -7,7 +7,7 @@ import {
 } from "@gliff-ai/manage";
 import { DominateEtebase } from "@/etebase";
 import { useAuth } from "@/hooks/use-auth";
-import { inviteNewUser } from "@/services/user";
+import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
 
 declare const STORE_URL: string;
 export const API_URL = `${STORE_URL}django/api`;
@@ -42,6 +42,14 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     // Share collections with them?
   };
 
+  const inviteCollaborator = async ({ email }) => {
+    // Invite them to create a gliff account
+    const result = await inviteNewCollaborator(email);
+
+    return true;
+    // Share collections with them?
+  };
+
   const inviteToProject = async ({ email, projectId }) => {
     const result = await props.etebaseInstance.inviteUserToCollection(
       projectId,
@@ -63,6 +71,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     getProject: "GET /project/", // TODO
     createProject,
     inviteUser,
+    inviteCollaborator,
     inviteToProject,
   };
 
