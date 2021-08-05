@@ -354,6 +354,7 @@ export class DominateEtebase {
       const newImageItem = await itemManager.create(
         {
           type: "gliff.image",
+          name: imageMeta.imageName,
           createdTime,
           modifiedTime: createdTime,
           width: imageMeta.width,
