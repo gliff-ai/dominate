@@ -239,12 +239,7 @@ export class DominateEtebase {
     const memberManager = collectionManager.getMemberManager(collection);
     const members = await memberManager.list();
 
-    const stringMembers: string[] = [];
-    for (let m = 0; m < members.data.length; m += 1) {
-      stringMembers[m] = members.data[m].username;
-    }
-
-    return stringMembers;
+    return members.data.map((m) => m.username);
   };
 
   createCollection = async (name: string): Promise<void> => {
