@@ -131,18 +131,16 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     const allLabels = new Set<string>(
       collectionContent
         .map((tile) => tile.imageLabels)
-        .reduce((allLabels: string[], thisLabels: string[]) =>
-          allLabels.concat(thisLabels)
-        )
+        .reduce((acc: string[], thisLabels: string[]) => acc.concat(thisLabels))
     );
 
-    let allnames: string[] = collectionContent.map(
+    const allnames: string[] = collectionContent.map(
       (tile) => tile.metadata.imageName
     );
     const counts = {};
     for (let i = 0; i < allnames.length; i += 1) {
       if (counts[allnames[i]] > 0) {
-        allnames[i] = allnames[i] + ` (${counts[allnames[i]]})`;
+        allnames[i] += ` (${counts[allnames[i]] as number})`;
       }
       if (counts[allnames[i]] === undefined) {
         counts[allnames[i]] = 1;
