@@ -230,6 +230,18 @@ export class DominateEtebase {
     return this.collectionsMeta;
   };
 
+  getCollectionMembers = async (collectionUid: string): Promise<string[]> => {
+    if (this.collections.length > 0) return null;
+    if (!this.etebaseInstance) throw new Error("No etebase instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const memberManager = collectionManager.getMemberManager(collection);
+    const members = await memberManager.list();
+
+    return members.data.map((m) => m.username);
+  };
+
   createCollection = async (name: string): Promise<void> => {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
