@@ -10,9 +10,9 @@ import {
   Typography,
   Box,
 } from "@material-ui/core";
-import { useAuth } from "@/hooks/use-auth";
 import { theme, HtmlTooltip } from "@gliff-ai/style";
 import { Link } from "react-router-dom";
+import { useAuth } from "@/hooks/use-auth";
 import { imgSrc } from "@/imgSrc";
 
 const useStyles = makeStyles({

@@ -3,11 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 
 import Curate from "@gliff-ai/curate";
 import { ImageFileInfo } from "@gliff-ai/upload";
+import { saveAs } from "file-saver";
+import JSZip from "jszip";
 import { DominateEtebase } from "@/etebase";
 import { Slices, MetaItem, GalleryTile, Image } from "@/etebase/interfaces";
 import { Task } from "@/components";
-import { saveAs } from "file-saver";
-import JSZip from "jszip";
 
 import {
   stringifySlices,

@@ -1,14 +1,14 @@
 import ReactDOM from "react-dom";
 
-import { ProvideAuth } from "@/hooks/use-auth";
-import UserInterface from "@/ui";
-import { DominateEtebase } from "@/etebase";
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
 import { CaptureConsole } from "@sentry/integrations";
 import LogRocket from "logrocket";
 import setupLogRocketReact from "logrocket-react";
 import { createGenerateClassName, StylesProvider } from "@material-ui/core";
+import { DominateEtebase } from "@/etebase";
+import UserInterface from "@/ui";
+import { ProvideAuth } from "@/hooks/use-auth";
 
 declare const STORE_URL: string;
 declare const IS_MONITORED: boolean;
@@ -70,7 +70,7 @@ const generateClassName = createGenerateClassName({
 });
 
 ReactDOM.render(
-  <Sentry.ErrorBoundary fallback="An error has occurred" showDialog>
+  <Sentry.ErrorBoundary fallback={<>An error has occurred</>} showDialog>
     <ProvideAuth etebaseInstance={etebaseInstance}>
       <StylesProvider generateClassName={generateClassName}>
         <UserInterface etebaseInstance={etebaseInstance} />

@@ -1,9 +1,9 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 
-import { apiRequest } from "@/api";
 import { TextField, makeStyles, Typography } from "@material-ui/core";
-import { MessageAlert, SubmitButton } from "@/components";
 import { useNavigate } from "react-router-dom";
+import { apiRequest } from "@/api";
+import { MessageAlert, SubmitButton } from "@/components";
 
 export const RequestEmailVerification = (): JSX.Element => {
   const [loading, setLoading] = useState(false);

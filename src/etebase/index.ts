@@ -9,9 +9,9 @@ import {
   OutputFormat,
   CollectionAccessLevel,
 } from "etebase";
+import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
-import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
 
 const getRandomValueFromArrayOrString = (
