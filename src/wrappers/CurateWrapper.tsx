@@ -127,13 +127,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     }
     const images: Image[] = await Promise.all(imagePromises);
 
-    // get set of all labels:
-    const allLabels = new Set<string>(
-      collectionContent
-        .map((tile) => tile.imageLabels)
-        .reduce((acc: string[], thisLabels: string[]) => acc.concat(thisLabels))
-    );
-
+    // append " (n)" to image names when multiple images have the same name,
+    // or else JSZip will treat them as a single image:
     const allnames: string[] = collectionContent.map(
       (tile) => tile.metadata.imageName
     );
@@ -149,32 +144,66 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }
     }
 
-    // add label folders to zip:
-    for (const label of allLabels) {
-      const labelFolder = zip.folder(label);
-      // add images to label folder in zip:
-      for (let i = 0; i < images.length; i += 1) {
-        if (collectionContent[i].imageLabels.includes(label)) {
-          labelFolder.file(allnames[i], images[i].content, {
-            base64: true,
-          });
-        }
+    // check for multi-labelled images:
+    let multilabels = false;
+    for (const tile of collectionContent) {
+      if (tile.imageLabels.length > 1) {
+        multilabels = true;
       }
     }
 
-    // put unlabelled images in their own folder:
-    if (collectionContent.filter((tile) => tile.imageLabels === [])) {
-      const unlabelledFolder = zip.folder("unlabelled");
+    if (multilabels) {
+      // put them all in the root of the zip along with a JSON file describing labels:
+      type JSONImage = { name: string; labels: string[] };
+      const json: JSONImage[] = allnames.map((name, i) => ({
+        name,
+        labels: collectionContent[i].imageLabels,
+      }));
 
+      const jsonString = JSON.stringify(json);
+
+      // add JSON and all images to zip:
+      zip.file("labels.json", jsonString);
       for (let i = 0; i < images.length; i += 1) {
-        if (collectionContent[i].imageLabels.length === 0) {
-          unlabelledFolder.file(
-            collectionContent[i].metadata.imageName,
-            images[i].content,
-            {
+        zip.file(allnames[i], images[i].content, { base64: true });
+      }
+    } else {
+      // get set of all labels:
+      const allLabels = new Set<string>(
+        collectionContent
+          .map((tile) => tile.imageLabels)
+          .reduce((acc: string[], thisLabels: string[]) =>
+            acc.concat(thisLabels)
+          )
+      );
+
+      // add label folders to zip:
+      for (const label of allLabels) {
+        const labelFolder = zip.folder(label);
+        // add images to label folder in zip:
+        for (let i = 0; i < images.length; i += 1) {
+          if (collectionContent[i].imageLabels.includes(label)) {
+            labelFolder.file(allnames[i], images[i].content, {
               base64: true,
-            }
-          );
+            });
+          }
+        }
+      }
+
+      // put unlabelled images in their own folder:
+      if (collectionContent.filter((tile) => tile.imageLabels === [])) {
+        const unlabelledFolder = zip.folder("unlabelled");
+
+        for (let i = 0; i < images.length; i += 1) {
+          if (collectionContent[i].imageLabels.length === 0) {
+            unlabelledFolder.file(
+              collectionContent[i].metadata.imageName,
+              images[i].content,
+              {
+                base64: true,
+              }
+            );
+          }
         }
       }
     }
