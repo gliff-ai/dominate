@@ -132,7 +132,7 @@ export const NavBar = (): ReactElement => {
         }}
       >
         <MenuItem className={classes.menuItem}>
-          <Link to="/account">
+          <Link to="/account" onClick={() => setAnchorEl(null)}>
             <SVG
               src={imgSrc("account-settings")}
               className={classes.svgMedium}
@@ -143,7 +143,12 @@ export const NavBar = (): ReactElement => {
         </MenuItem>
         <MenuItem
           className={classes.menuItem}
-          onClick={() => auth.signout().then(() => navigate("signin"))}
+          onClick={() =>
+            auth.signout().then(() => {
+              navigate("signin");
+              setAnchorEl(null);
+            })
+          }
         >
           <SVG
             src={imgSrc("log-out")}
