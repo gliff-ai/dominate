@@ -1,6 +1,17 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+import {
+  Dialog,
+  Button,
+  Typography,
+  Card,
+  Paper,
+  makeStyles,
+  Theme,
+  DialogActions,
+} from "@material-ui/core";
+
 import Curate from "@gliff-ai/curate";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
@@ -15,18 +26,7 @@ import {
 } from "@/imageConversions";
 import { useAuth } from "@/hooks/use-auth";
 
-import {
-  Dialog,
-  Button,
-  Typography,
-  Card,
-  Paper,
-  makeStyles,
-  Theme,
-  DialogActions,
-} from "@material-ui/core";
-
-const useStyles = (props: Props) =>
+const useStyles = () =>
   makeStyles((theme: Theme) => ({
     paperHeader: {
       padding: "10px",
@@ -38,12 +38,6 @@ const useStyles = (props: Props) =>
       fontSize: "21px",
       marginRight: "125px",
     },
-    "@global": {
-      '.MuiAutocomplete-option[data-focus="true"]': {
-        background: "#01dbff",
-      },
-    },
-    tableCell: { padding: "0px 16px 0px 25px", fontSize: "16px" },
   }));
 
 interface Props {
@@ -127,10 +121,10 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
     props.etebaseInstance
       .setImageLabels(collectionUid, imageUid, newLabels)
+      .then(fetchImageItems)
       .catch((error) => {
         console.log(error);
-      })
-      .then(fetchImageItems);
+      });
   };
 
   const deleteImageCallback = (imageUids: string[]): void => {
@@ -143,19 +137,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   const annotateCallback = (imageUid: string): void => {
     navigate(`/annotate/${collectionUid}/${imageUid}`);
-  };
-
-  const downloadDatasetCallback = async (): Promise<void> => {
-    // check for multi-labelled images:
-    for (const tile of collectionContent) {
-      if (tile.imageLabels.length > 1) {
-        setMulti(true);
-        setShowDialog(true);
-        return;
-      }
-    }
-    setMulti(false);
-    downloadDataset();
   };
 
   const downloadDataset = async (): Promise<void> => {
@@ -259,6 +240,19 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       });
   };
 
+  const downloadDatasetCallback = (): void => {
+    // check for multi-labelled images:
+    for (const tile of collectionContent) {
+      if (tile.imageLabels.length > 1) {
+        setMulti(true);
+        setShowDialog(true);
+        return;
+      }
+    }
+    setMulti(false);
+    void downloadDataset();
+  };
+
   // runs once on page load, would have been a componentDidMount if this were a class component:
   useEffect(() => {
     if (props.etebaseInstance.ready) {
@@ -274,7 +268,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   if (!props.etebaseInstance || !auth.user || !collectionUid) return null;
 
-  const classes = useStyles(props)();
+  const classes = useStyles()();
 
   return (
     <>
@@ -309,7 +303,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             <Button
               onClick={() => {
                 setShowDialog(false);
-                downloadDataset();
+                void downloadDataset();
               }}
               color="primary"
             >
