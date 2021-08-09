@@ -105,7 +105,11 @@ export const NavBar = (): ReactElement => {
 
   const accountMenu = (
     <>
-      <IconButton onClick={handleClick} aria-controls="menu">
+      <IconButton
+        onClick={handleClick}
+        aria-controls="menu"
+        style={{ paddingTop: 0 }}
+      >
         <HtmlTooltip
           title={<Typography>Account</Typography>}
           placement="bottom"
