@@ -70,7 +70,7 @@ const generateClassName = createGenerateClassName({
 });
 
 ReactDOM.render(
-  <Sentry.ErrorBoundary fallback="An error has occurred" showDialog>
+  <Sentry.ErrorBoundary fallback={<>An error has occurred</>} showDialog>
     <ProvideAuth etebaseInstance={etebaseInstance}>
       <StylesProvider generateClassName={generateClassName}>
         <UserInterface etebaseInstance={etebaseInstance} />
