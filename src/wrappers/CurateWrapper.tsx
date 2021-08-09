@@ -15,6 +15,37 @@ import {
 } from "@/imageConversions";
 import { useAuth } from "@/hooks/use-auth";
 
+import {
+  Dialog,
+  Button,
+  Typography,
+  Card,
+  Paper,
+  makeStyles,
+  Theme,
+  DialogActions,
+} from "@material-ui/core";
+
+const useStyles = (props: Props) =>
+  makeStyles((theme: Theme) => ({
+    paperHeader: {
+      padding: "10px",
+      backgroundColor: theme.palette.primary.main,
+    },
+    projectsTypography: {
+      color: "#000000",
+      display: "inline",
+      fontSize: "21px",
+      marginRight: "125px",
+    },
+    "@global": {
+      '.MuiAutocomplete-option[data-focus="true"]': {
+        background: "#01dbff",
+      },
+    },
+    tableCell: { padding: "0px 16px 0px 25px", fontSize: "16px" },
+  }));
+
 interface Props {
   etebaseInstance: DominateEtebase;
   setIsLoading: (isLoading: boolean) => void;
@@ -29,6 +60,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
   const { collectionUid } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
+  const [multi, setMulti] = useState<boolean>(false);
+  const [showDialog, setShowDialog] = useState<boolean>(false);
 
   useEffect(() => {
     props.setIsLoading(true);
@@ -96,7 +129,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       .setImageLabels(collectionUid, imageUid, newLabels)
       .catch((error) => {
         console.log(error);
-      });
+      })
+      .then(fetchImageItems);
   };
 
   const deleteImageCallback = (imageUids: string[]): void => {
@@ -112,6 +146,19 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   const downloadDatasetCallback = async (): Promise<void> => {
+    // check for multi-labelled images:
+    for (const tile of collectionContent) {
+      if (tile.imageLabels.length > 1) {
+        setMulti(true);
+        setShowDialog(true);
+        return;
+      }
+    }
+    setMulti(false);
+    downloadDataset();
+  };
+
+  const downloadDataset = async (): Promise<void> => {
     const zip = new JSZip();
 
     // retrieve Image items and their names from etebase:
@@ -144,15 +191,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }
     }
 
-    // check for multi-labelled images:
-    let multilabels = false;
-    for (const tile of collectionContent) {
-      if (tile.imageLabels.length > 1) {
-        multilabels = true;
-      }
-    }
-
-    if (multilabels) {
+    console.log(multi);
+    if (multi) {
       // put them all in the root of the zip along with a JSON file describing labels:
       type JSONImage = { name: string; labels: string[] };
       const json: JSONImage[] = allnames.map((name, i) => ({
@@ -234,17 +274,58 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   if (!props.etebaseInstance || !auth.user || !collectionUid) return null;
 
+  const classes = useStyles(props)();
+
   return (
-    <Curate
-      metadata={curateInput}
-      saveImageCallback={addImageToGallery}
-      saveLabelsCallback={saveLabelsCallback}
-      deleteImagesCallback={deleteImageCallback}
-      annotateCallback={annotateCallback}
-      downloadDatasetCallback={downloadDatasetCallback}
-      showAppBar={false}
-      setIsLoading={props.setIsLoading}
-      setTask={props.setTask}
-    />
+    <>
+      <Curate
+        metadata={curateInput}
+        saveImageCallback={addImageToGallery}
+        saveLabelsCallback={saveLabelsCallback}
+        deleteImagesCallback={deleteImageCallback}
+        annotateCallback={annotateCallback}
+        downloadDatasetCallback={downloadDatasetCallback}
+        showAppBar={false}
+        setIsLoading={props.setIsLoading}
+        setTask={props.setTask}
+      />
+      <Dialog open={showDialog}>
+        <Card>
+          <Paper
+            elevation={0}
+            variant="outlined"
+            square
+            className={classes.paperHeader}
+          >
+            <Typography className={classes.projectsTypography}>
+              Warning
+            </Typography>
+          </Paper>
+          <Typography style={{ margin: "10px" }}>
+            Dataset contains multilabel images, this will export as a flat
+            directory with a JSON file for labels. Continue?
+          </Typography>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setShowDialog(false);
+                downloadDataset();
+              }}
+              color="primary"
+            >
+              OK
+            </Button>
+            <Button
+              onClick={() => {
+                setShowDialog(false);
+              }}
+              color="primary"
+            >
+              Cancel
+            </Button>
+          </DialogActions>
+        </Card>
+      </Dialog>
+    </>
   );
 };
