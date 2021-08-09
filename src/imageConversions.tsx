@@ -14,6 +14,7 @@ function getImageMetaFromImageFileInfo(
     resolution_x: imageFileInfo.resolution_x,
     resolution_y: imageFileInfo.resolution_y,
     resolution_z: imageFileInfo.resolution_z,
+    content_hash: imageFileInfo.content_hash,
   };
 }
 

@@ -50,6 +50,7 @@ interface ImageMeta {
   resolution_y: number;
   resolution_z: number;
   format?: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
+  content_hash?: string; // we use this for making sure we don't have duplicate images in a dataset
   customMeta?: string; // JSON of custom metadata
 }
 
