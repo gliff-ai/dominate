@@ -8,10 +8,10 @@ import {
   InputAdornment,
   Slide,
 } from "@material-ui/core";
-import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
 import { theme, TransitionProps } from "@gliff-ai/style";
 import SVG from "react-inlinesvg";
+import { useAuth } from "@/hooks/use-auth";
 import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
 import { imgSrc } from "@/imgSrc";
 
