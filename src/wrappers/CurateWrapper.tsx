@@ -1,6 +1,17 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+import {
+  Dialog,
+  Button,
+  Typography,
+  Card,
+  Paper,
+  makeStyles,
+  Theme,
+  DialogActions,
+} from "@material-ui/core";
+
 import Curate from "@gliff-ai/curate";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
@@ -14,6 +25,20 @@ import {
   getImageMetaFromImageFileInfo,
 } from "@/imageConversions";
 import { useAuth } from "@/hooks/use-auth";
+
+const useStyles = () =>
+  makeStyles((theme: Theme) => ({
+    paperHeader: {
+      padding: "10px",
+      backgroundColor: theme.palette.primary.main,
+    },
+    projectsTypography: {
+      color: "#000000",
+      display: "inline",
+      fontSize: "21px",
+      marginRight: "125px",
+    },
+  }));
 
 interface Props {
   etebaseInstance: DominateEtebase;
@@ -29,6 +54,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
   const { collectionUid } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
+  const [multi, setMulti] = useState<boolean>(false);
+  const [showDialog, setShowDialog] = useState<boolean>(false);
 
   useEffect(() => {
     props.setIsLoading(true);
@@ -94,6 +121,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
     props.etebaseInstance
       .setImageLabels(collectionUid, imageUid, newLabels)
+      .then(fetchImageItems)
       .catch((error) => {
         console.log(error);
       });
@@ -111,7 +139,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     navigate(`/annotate/${collectionUid}/${imageUid}`);
   };
 
-  const downloadDatasetCallback = async (): Promise<void> => {
+  const downloadDataset = async (): Promise<void> => {
     const zip = new JSZip();
 
     // retrieve Image items and their names from etebase:
@@ -127,13 +155,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     }
     const images: Image[] = await Promise.all(imagePromises);
 
-    // get set of all labels:
-    const allLabels = new Set<string>(
-      collectionContent
-        .map((tile) => tile.imageLabels)
-        .reduce((acc: string[], thisLabels: string[]) => acc.concat(thisLabels))
-    );
-
+    // append " (n)" to image names when multiple images have the same name,
+    // or else JSZip will treat them as a single image:
     const allnames: string[] = collectionContent.map(
       (tile) => tile.metadata.imageName
     );
@@ -149,32 +172,59 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }
     }
 
-    // add label folders to zip:
-    for (const label of allLabels) {
-      const labelFolder = zip.folder(label);
-      // add images to label folder in zip:
+    console.log(multi);
+    if (multi) {
+      // put them all in the root of the zip along with a JSON file describing labels:
+      type JSONImage = { name: string; labels: string[] };
+      const json: JSONImage[] = allnames.map((name, i) => ({
+        name,
+        labels: collectionContent[i].imageLabels,
+      }));
+
+      const jsonString = JSON.stringify(json);
+
+      // add JSON and all images to zip:
+      zip.file("labels.json", jsonString);
       for (let i = 0; i < images.length; i += 1) {
-        if (collectionContent[i].imageLabels.includes(label)) {
-          labelFolder.file(allnames[i], images[i].content, {
-            base64: true,
-          });
+        zip.file(allnames[i], images[i].content, { base64: true });
+      }
+    } else {
+      // get set of all labels:
+      const allLabels = new Set<string>(
+        collectionContent
+          .map((tile) => tile.imageLabels)
+          .reduce((acc: string[], thisLabels: string[]) =>
+            acc.concat(thisLabels)
+          )
+      );
+
+      // add label folders to zip:
+      for (const label of allLabels) {
+        const labelFolder = zip.folder(label);
+        // add images to label folder in zip:
+        for (let i = 0; i < images.length; i += 1) {
+          if (collectionContent[i].imageLabels.includes(label)) {
+            labelFolder.file(allnames[i], images[i].content, {
+              base64: true,
+            });
+          }
         }
       }
-    }
 
-    // put unlabelled images in their own folder:
-    if (collectionContent.filter((tile) => tile.imageLabels === [])) {
-      const unlabelledFolder = zip.folder("unlabelled");
+      // put unlabelled images in their own folder:
+      if (collectionContent.filter((tile) => tile.imageLabels === [])) {
+        const unlabelledFolder = zip.folder("unlabelled");
 
-      for (let i = 0; i < images.length; i += 1) {
-        if (collectionContent[i].imageLabels.length === 0) {
-          unlabelledFolder.file(
-            collectionContent[i].metadata.imageName,
-            images[i].content,
-            {
-              base64: true,
-            }
-          );
+        for (let i = 0; i < images.length; i += 1) {
+          if (collectionContent[i].imageLabels.length === 0) {
+            unlabelledFolder.file(
+              collectionContent[i].metadata.imageName,
+              images[i].content,
+              {
+                base64: true,
+              }
+            );
+          }
         }
       }
     }
@@ -188,6 +238,19 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       .catch((err) => {
         console.log(err);
       });
+  };
+
+  const downloadDatasetCallback = (): void => {
+    // check for multi-labelled images:
+    for (const tile of collectionContent) {
+      if (tile.imageLabels.length > 1) {
+        setMulti(true);
+        setShowDialog(true);
+        return;
+      }
+    }
+    setMulti(false);
+    void downloadDataset();
   };
 
   // runs once on page load, would have been a componentDidMount if this were a class component:
@@ -205,17 +268,58 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   if (!props.etebaseInstance || !auth.user || !collectionUid) return null;
 
+  const classes = useStyles()();
+
   return (
-    <Curate
-      metadata={curateInput}
-      saveImageCallback={addImageToGallery}
-      saveLabelsCallback={saveLabelsCallback}
-      deleteImagesCallback={deleteImageCallback}
-      annotateCallback={annotateCallback}
-      downloadDatasetCallback={downloadDatasetCallback}
-      showAppBar={false}
-      setIsLoading={props.setIsLoading}
-      setTask={props.setTask}
-    />
+    <>
+      <Curate
+        metadata={curateInput}
+        saveImageCallback={addImageToGallery}
+        saveLabelsCallback={saveLabelsCallback}
+        deleteImagesCallback={deleteImageCallback}
+        annotateCallback={annotateCallback}
+        downloadDatasetCallback={downloadDatasetCallback}
+        showAppBar={false}
+        setIsLoading={props.setIsLoading}
+        setTask={props.setTask}
+      />
+      <Dialog open={showDialog}>
+        <Card>
+          <Paper
+            elevation={0}
+            variant="outlined"
+            square
+            className={classes.paperHeader}
+          >
+            <Typography className={classes.projectsTypography}>
+              Warning
+            </Typography>
+          </Paper>
+          <Typography style={{ margin: "10px" }}>
+            Dataset contains multilabel images, this will export as a flat
+            directory with a JSON file for labels. Continue?
+          </Typography>
+          <DialogActions>
+            <Button
+              onClick={() => {
+                setShowDialog(false);
+                void downloadDataset();
+              }}
+              color="primary"
+            >
+              OK
+            </Button>
+            <Button
+              onClick={() => {
+                setShowDialog(false);
+              }}
+              color="primary"
+            >
+              Cancel
+            </Button>
+          </DialogActions>
+        </Card>
+      </Dialog>
+    </>
   );
 };
