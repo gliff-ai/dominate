@@ -25,11 +25,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-interface Props {
-  callback: () => void;
-}
-
-export function VerificationSent({ callback }: Props): ReactElement {
+export function VerificationSent(): ReactElement {
   const classes = useStyles();
   const navigate = useNavigate();
 

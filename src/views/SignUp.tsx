@@ -358,7 +358,7 @@ export const SignUp = (props: Props): JSX.Element => {
   }
 
   if (state === "4-VerificationSent") {
-    return <VerificationSent callback={() => {}} />;
+    return <VerificationSent />;
   }
 
   return <></>;
