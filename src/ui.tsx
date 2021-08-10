@@ -54,6 +54,18 @@ const UserInterface = (props: Props): ReactElement | null => {
             <Route path="/signup">
               <BasicPage view={<SignUp />} title={<>Create an Account</>} />
             </Route>
+            <Route path="/signup/success">
+              <BasicPage
+                view={<SignUp state="4-VerificationSent" />}
+                title={<>Verify Email</>}
+              />
+            </Route>
+            <Route path="/signup/failure">
+              <BasicPage
+                view={<SignUp state="3-BillingFailed" />}
+                title={<>Payment Failed</>}
+              />
+            </Route>
             <PrivateRoute
               path="curate/:collectionUid"
               element={

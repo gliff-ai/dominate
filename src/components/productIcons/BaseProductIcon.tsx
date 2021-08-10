@@ -36,6 +36,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
+    marginTop: "20px",
   },
 }));
 

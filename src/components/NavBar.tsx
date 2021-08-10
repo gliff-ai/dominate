@@ -105,7 +105,11 @@ export const NavBar = (): ReactElement => {
 
   const accountMenu = (
     <>
-      <IconButton onClick={handleClick} aria-controls="menu">
+      <IconButton
+        onClick={handleClick}
+        aria-controls="menu"
+        style={{ paddingTop: 0 }}
+      >
         <HtmlTooltip
           title={<Typography>Account</Typography>}
           placement="bottom"
@@ -128,7 +132,7 @@ export const NavBar = (): ReactElement => {
         }}
       >
         <MenuItem className={classes.menuItem}>
-          <Link to="/account">
+          <Link to="/account" onClick={() => setAnchorEl(null)}>
             <SVG
               src={imgSrc("account-settings")}
               className={classes.svgMedium}
@@ -139,7 +143,12 @@ export const NavBar = (): ReactElement => {
         </MenuItem>
         <MenuItem
           className={classes.menuItem}
-          onClick={() => auth.signout().then(() => navigate("signin"))}
+          onClick={() =>
+            auth.signout().then(() => {
+              navigate("signin");
+              setAnchorEl(null);
+            })
+          }
         >
           <SVG
             src={imgSrc("log-out")}
