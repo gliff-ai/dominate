@@ -141,6 +141,16 @@ export const NavBar = (): ReactElement => {
             Account Settings
           </Link>
         </MenuItem>
+        <MenuItem className={classes.menuItem}>
+          <Link to="/billing" onClick={() => setAnchorEl(null)}>
+            <SVG
+              src={imgSrc("account-settings")}
+              className={classes.svgMedium}
+              style={{ marginRight: "12px" }}
+            />
+            Billing
+          </Link>
+        </MenuItem>
         <MenuItem
           className={classes.menuItem}
           onClick={() =>

@@ -14,6 +14,7 @@ import {
   SignUp,
   VerifyEmail,
   RequestEmailVerification,
+  Billing,
 } from "@/views";
 import {
   MessageAlert,
@@ -141,9 +142,13 @@ const UserInterface = (props: Props): ReactElement | null => {
             <PrivateRoute path="/account">
               <Account />
             </PrivateRoute>
+            <PrivateRoute path="/billing">
+              <Billing />
+            </PrivateRoute>
           </Routes>
         </div>
       </BrowserRouter>
+
       <CookieConsent
         location="bottom"
         cookieName="gliff-ai-consent-cookie"
