@@ -2,10 +2,14 @@ import { apiRequest } from "@/api";
 import { CheckoutSession, UserProfile, Invite } from "./interfaces";
 
 export const createCheckoutSession = (
-  tier_id: string
+  tier_id: string,
+  user_id: number,
+  user_email: string
 ): Promise<CheckoutSession> =>
   apiRequest<CheckoutSession>("/billing/create-checkout-session", "POST", {
     tier_id,
+    user_id,
+    user_email,
   });
 
 export const createUserProfile = (

@@ -22,6 +22,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
 import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
+import { VerificationSent } from "@/views/VerificationSent";
 
 const stripePromise = loadStripe(
   "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
@@ -42,11 +43,22 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export const SignUp = (): JSX.Element => {
+type State =
+  | "1-Signup"
+  | "2-RecoveryKey"
+  | "3-BillingFailed"
+  | "4-VerificationSent";
+
+interface Props {
+  // eslint-disable-next-line react/require-default-props
+  state?: State;
+}
+export const SignUp = (props: Props): JSX.Element => {
   const classes = useStyles();
   const auth = useAuth();
   const navigate = useNavigate();
 
+  const [state, setState] = useState<State>(props.state || "1-Signup");
   const [open, setOpen] = useState(false);
   const [transition, setTransition] =
     useState<ComponentType<TransitionProps> | null>(null);
@@ -58,6 +70,7 @@ export const SignUp = (): JSX.Element => {
   const [etebaseError, setEtebaseError] = useState({});
   const [termsAndConditionsError, setTermsAndConditionsError] = useState("");
   const [recoveryKey, setRecoveryKey] = useState<string[] | null>(null);
+  const [user, setUser] = useState<{ email: string; id: number } | null>(null);
 
   const [signUp, setSignUp] = useState({
     name: "",
@@ -69,9 +82,9 @@ export const SignUp = (): JSX.Element => {
     acceptedTermsAndConditions: false,
   });
 
-  const TransitionUp = (props: TransitionProps) => (
+  const TransitionUp = (p: TransitionProps) => (
     // eslint-disable-next-line react/jsx-props-no-spreading
-    <Slide {...props} direction="up" />
+    <Slide {...p} direction="up" />
   );
 
   const handleSnackbar = (Transition: ComponentType<TransitionProps>) => {
@@ -113,6 +126,12 @@ export const SignUp = (): JSX.Element => {
     return true;
   };
 
+  const clearErrors = () => {
+    setEmailError("");
+    setPasswordError("");
+    setNameError("");
+    setTermsAndConditionsError("");
+  };
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { id, value, checked } = event.target;
     if (id === "acceptedTermsAndConditions") {
@@ -133,47 +152,11 @@ export const SignUp = (): JSX.Element => {
     setOpen(false);
   };
 
-  const redirectUser = async (): Promise<void> => {
-    try {
-      // Create and update their profile
-      setLoading(false);
-
-      if (!tierId || inviteId) {
-        navigate("/"); // It's the free plan or an invite so don't bill them
-        return;
-      }
-
-      const stripe = await stripePromise;
-
-      const { id: sessionId } = await createCheckoutSession(tierId);
-
-      // When the customer clicks on the button, redirect them to Checkout.
-      const result = await stripe.redirectToCheckout({
-        sessionId,
-      });
-
-      if (result.error) {
-        // If `redirectToCheckout` fails due to a browser or network
-        // error, display the localized error message to your customer
-        // using `result.error.message`.
-      }
-    } catch (e) {
-      setRecoveryKey(null);
-
-      if (e instanceof Error) {
-        setEtebaseError(e.message);
-      }
-    }
-  };
-
   const onSubmitForm = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     // Reset any errors
-    setEmailError("");
-    setPasswordError("");
-    setNameError("");
-    setTermsAndConditionsError("");
+    clearErrors();
     setLoading(true);
 
     const isValid = validate();
@@ -184,7 +167,7 @@ export const SignUp = (): JSX.Element => {
     }
 
     try {
-      const user = await auth.signup(signUp.email, signUp.password);
+      await auth.signup(signUp.email, signUp.password);
 
       const { profile, recoveryKey: keys } = await auth.createProfile(
         signUp.name,
@@ -192,7 +175,10 @@ export const SignUp = (): JSX.Element => {
         signUp.inviteId,
         signUp.acceptedTermsAndConditions
       );
+
+      setUser(profile);
       setRecoveryKey(keys);
+      setState("2-RecoveryKey");
     } catch (e) {
       handleSnackbar(TransitionUp);
       setLoading(false);
@@ -201,10 +187,7 @@ export const SignUp = (): JSX.Element => {
         password: "",
         confirmPassword: "",
       });
-      setEmailError("");
-      setNameError("");
-      setPasswordError("");
-      setTermsAndConditionsError("");
+      clearErrors();
 
       if (e instanceof Error) {
         setEtebaseError(e.message);
@@ -212,9 +195,31 @@ export const SignUp = (): JSX.Element => {
     }
   };
 
-  return recoveryKey ? (
-    <RecoveryKey recoveryKey={recoveryKey} callback={redirectUser} />
-  ) : (
+  const billing = async () => {
+    if (!tierId || inviteId) {
+      setState("4-VerificationSent");
+      return;
+    }
+
+    const stripe = await stripePromise;
+
+    const { id: sessionId } = await createCheckoutSession(
+      tierId,
+      user.id,
+      user.email
+    );
+
+    // When the customer clicks on the button, redirect them to Checkout.
+    const result = await stripe.redirectToCheckout({
+      sessionId,
+    });
+
+    if (result.error) {
+      console.error(result.error);
+    }
+  };
+
+  const signupForm = (
     <>
       <form onSubmit={onSubmitForm}>
         <TextField
@@ -335,4 +340,35 @@ export const SignUp = (): JSX.Element => {
       />
     </>
   );
+
+  if (state === "1-Signup") {
+    return signupForm;
+  }
+
+  if (state === "2-RecoveryKey") {
+    return <RecoveryKey recoveryKey={recoveryKey} callback={billing} />;
+  }
+
+  if (state === "3-BillingFailed") {
+    // This should be infrequent as Stripe will normally catch errors within Checkout
+    return (
+      <>
+        <p>
+          There was an error processing your payment. Please&nbsp;
+          <Link color="secondary" href="/signin">
+            Sign In
+          </Link>
+          &nbsp; and upgrade your account from the billing page
+        </p>
+
+        <p>Alternatively, contact us at support@gliff.ai for help</p>
+      </>
+    );
+  }
+
+  if (state === "4-VerificationSent") {
+    return <VerificationSent callback={() => {}} />;
+  }
+
+  return <></>;
 };

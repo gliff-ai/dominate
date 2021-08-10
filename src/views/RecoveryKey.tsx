@@ -1,7 +1,6 @@
-import { ReactElement, useState } from "react";
+import { ReactElement } from "react";
 import { Typography, makeStyles, Card } from "@material-ui/core";
 import { theme } from "@gliff-ai/style";
-import { VerificationSent } from "@/views/VerificationSent";
 import { SubmitButton } from "@/components";
 
 const useStyles = makeStyles(() => ({
@@ -51,11 +50,7 @@ interface Props {
 export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
   const classes = useStyles();
 
-  const [isUnderstood, setUnderstood] = useState(false);
-
-  return isUnderstood ? (
-    <VerificationSent callback={callback} />
-  ) : (
+  return (
     <>
       <Card className={classes.card}>
         <Typography className={classes.cardTypography}>
@@ -78,7 +73,12 @@ export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
         style={{ display: "flex", flexDirection: "column" }}
       >
         <div>I have saved my recovery key somewhere safe</div>
-        <form onSubmit={() => setUnderstood(true)}>
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            callback();
+          }}
+        >
           <SubmitButton value="Continue" loading={false} />
         </form>
       </div>
