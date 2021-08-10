@@ -6,7 +6,7 @@ import {
   useState,
   ComponentType,
 } from "react";
-import { loadStripe, Stripe } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import {
   TextField,
   Link,
@@ -16,8 +16,7 @@ import {
   FormControlLabel,
 } from "@material-ui/core";
 import Slide from "@material-ui/core/Slide";
-import { useNavigate } from "react-router-dom";
-import { theme, TransitionProps } from "@gliff-ai/style";
+import { TransitionProps } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
@@ -56,7 +55,6 @@ interface Props {
 export const SignUp = (props: Props): JSX.Element => {
   const classes = useStyles();
   const auth = useAuth();
-  const navigate = useNavigate();
 
   const [state, setState] = useState<State>(props.state || "1-Signup");
   const [open, setOpen] = useState(false);
@@ -132,20 +130,13 @@ export const SignUp = (props: Props): JSX.Element => {
     setNameError("");
     setTermsAndConditionsError("");
   };
+
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { id, value, checked } = event.target;
-    if (id === "acceptedTermsAndConditions") {
-      // in this case use the checkbox
-      setSignUp({
-        ...signUp,
-        [id]: checked,
-      });
-    } else {
-      setSignUp({
-        ...signUp,
-        [id]: value,
-      });
-    }
+    const { id, value, checked, type } = event.target;
+    setSignUp({
+      ...signUp,
+      [id]: type === "checkbox" ? checked : value,
+    });
   };
 
   const handleClose = () => {

@@ -1,10 +1,11 @@
 import { ReactElement } from "react";
 import { Typography, makeStyles } from "@material-ui/core";
 import { theme } from "@gliff-ai/style";
+import { useNavigate } from "react-router-dom";
 import { SubmitButton } from "@/components";
 
 const useStyles = makeStyles(() => ({
-  recoveryKeyParagraph: {
+  verificationSentParagraph: {
     marginBottom: "44px",
     marginTop: "13px",
     color: theme.palette.text.secondary,
@@ -13,7 +14,7 @@ const useStyles = makeStyles(() => ({
     width: "519px",
   },
 
-  recoveryKeyText: {
+  verificationSentText: {
     marginBottom: "44px",
     marginTop: "13px",
     color: theme.palette.text.primary,
@@ -30,18 +31,24 @@ interface Props {
 
 export function VerificationSent({ callback }: Props): ReactElement {
   const classes = useStyles();
+  const navigate = useNavigate();
 
   return (
     <>
-      <Typography className={classes.recoveryKeyText}>
+      <Typography className={classes.verificationSentText}>
         A verification email has been sent
       </Typography>
-      <Typography className={classes.recoveryKeyParagraph}>
+      <Typography className={classes.verificationSentParagraph}>
         Please check your inbox, your account will remain disabled until your
         email address is verified. Once this is complete, you can sign in below
       </Typography>
 
-      <form onSubmit={callback}>
+      <form
+        onSubmit={(e) => {
+          e.preventDefault();
+          navigate("/signin");
+        }}
+      >
         <SubmitButton value="Sign In" loading={false} />
       </form>
     </>
