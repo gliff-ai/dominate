@@ -230,10 +230,29 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     }
 
     // compress data and save to disk:
+    const date = new Date();
+    const projectName = await props.etebaseInstance
+      .getCollectionsMeta()
+      .then(
+        (collections) =>
+          collections.filter((c) => c.uid === collectionUid)[0].name
+      )
+      .catch((err) => {
+        console.log(err);
+        return "";
+      });
+    const month = `0${date.getMonth() + 1}`.slice(-2);
+    const day = `0${date.getDate()}`.slice(-2);
+    const hours = `0${date.getHours()}`.slice(-2);
+    const minutes = `0${date.getMinutes()}`.slice(-2);
+
     zip
       .generateAsync({ type: "blob" })
       .then((content) => {
-        (saveAs as (Blob, string) => void)(content, "dataset.zip");
+        (saveAs as (Blob, string) => void)(
+          content,
+          `${date.getFullYear()}${month}${day}_${hours}${minutes}_${projectName}.zip`
+        );
       })
       .catch((err) => {
         console.log(err);
