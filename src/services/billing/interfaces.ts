@@ -43,3 +43,9 @@ export interface Addon {
   name: string;
   price_per_unit: number;
 }
+
+export interface AddonPrices {
+  project: number | null;
+  user: number | null;
+  collaborator: number | null;
+}

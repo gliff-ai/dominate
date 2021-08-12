@@ -2,25 +2,52 @@ import { useEffect, useState } from "react";
 import { Card, Grid, Paper, Typography } from "@material-ui/core";
 
 import { useAuth } from "@/hooks/use-auth";
-import { getInvoices, getLimits, getPlan } from "@/services/billing";
-import { Invoice, Limits, Plan } from "@/services/billing/interfaces";
+import {
+  getAddonPrices,
+  getInvoices,
+  getLimits,
+  getPlan,
+} from "@/services/billing";
+import {
+  AddonPrices,
+  Invoice,
+  Limits,
+  Plan,
+} from "@/services/billing/interfaces";
 import { GliffCard } from "@/components/GliffCard";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
 import { imgSrc } from "@/imgSrc";
+import { useInput } from "@/hooks/use-input";
+import { SubmitButton } from "@/components";
 
+type FormState = {
+  [key in "user" | "project" | "collaborator"]: any;
+};
 export function Billing(): JSX.Element {
   const [limits, setLimits] = useState<Limits | null>(null);
   const [plan, setPlan] = useState<Plan | null>(null);
-  const [payment, setPayment] = useState<string | null>(null);
+  const [payment, setPayment] = useState<string | null>(null); // TODO
   const [invoices, setInvoices] = useState<Invoice[] | null>(null);
+  const [addonPrices, setAddonPrices] = useState<AddonPrices | null>(null);
 
-  useEffect(() => {
-    void getLimits().then(setLimits);
-    void getPlan().then(setPlan);
-    void getInvoices().then(setInvoices);
+  const form = {
+    user: useInput<number>(0),
+    project: useInput<number>(0),
+    collaborator: useInput<number>(0),
+  } as FormState;
 
-    // setPayment("temp");
-  }, []);
+  useEffect(
+    () => {
+      void getLimits().then(setLimits);
+      void getPlan().then(setPlan);
+      void getInvoices().then(setInvoices);
+
+      // setPayment("temp");
+    },
+    [
+      /* on addon updaet */
+    ]
+  );
 
   const usageElement = (
     <GliffCard
@@ -149,6 +176,39 @@ export function Billing(): JSX.Element {
     />
   );
 
+  const addonTypes = ["user", "project", "collaborator"];
+  const addonForm = !addonPrices ? (
+    <LoadingSpinner />
+  ) : (
+    <form
+      onSubmit={(e) => {
+        e.preventDefault();
+        console.log(form);
+      }}
+    >
+      {addonTypes.map((addon) => {
+        if (!addonPrices[addon]) return null;
+        return (
+          <label key={addon}>
+            Additional {addon} @ £{addonPrices[addon] / 100}:
+            <input type="number" min="0" {...form[addon].bind} />
+          </label>
+        );
+      })}
+      Total: £
+      {(
+        addonTypes.reduce(
+          (total, addon) => total + addonPrices[addon] * form[addon].value,
+          0
+        ) / 100
+      ).toFixed(2)}{" "}
+      per month
+      <SubmitButton loading={false} value="Confirm" />
+    </form>
+  );
+
+  const addonModal = <GliffCard title="Add-Ons" el={addonForm} />;
+
   return (
     <div style={{ margin: "20px" }}>
       <Grid container spacing={3}>
@@ -164,6 +224,18 @@ export function Billing(): JSX.Element {
         <Grid item xs={3}>
           {paymentElement}
         </Grid>
+
+        <Grid item xs={4}>
+          {addonModal}
+        </Grid>
+
+        <button
+          onClick={() => {
+            void getAddonPrices().then(setAddonPrices);
+          }}
+        >
+          get prices
+        </button>
       </Grid>
     </div>
   );
