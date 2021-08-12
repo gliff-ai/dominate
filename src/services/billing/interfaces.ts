@@ -1,4 +1,4 @@
-export interface Plan {
+export interface Limits {
   has_billing: boolean;
   tier_name: string;
   tier_id: number;
@@ -21,4 +21,25 @@ export interface Invoice {
   number: string;
   paid: boolean;
   status: string;
+}
+
+export interface Plan {
+  tier_name: string;
+  tier_id: number;
+  current_period_end: number;
+  current_period_start: number;
+  base_price: number;
+  addons: {
+    project: Addon;
+    user: Addon;
+    collaborator: Addon;
+  };
+  billed_usage: number;
+  billed_usage_gb_price: number;
+}
+
+export interface Addon {
+  quantity: number;
+  name: string;
+  price_per_unit: number;
 }
