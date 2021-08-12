@@ -6,9 +6,9 @@ import { getInvoices, getLimits, getPlan } from "@/services/billing";
 import { Invoice, Limits, Plan } from "@/services/billing/interfaces";
 import { GliffCard } from "@/components/GliffCard";
 import { LoadingSpinner } from "@/components/LoadingSpinner";
+import { imgSrc } from "@/imgSrc";
 
 export function Billing(): JSX.Element {
-  const auth = useAuth();
   const [limits, setLimits] = useState<Limits | null>(null);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [payment, setPayment] = useState<string | null>(null);
@@ -25,6 +25,11 @@ export function Billing(): JSX.Element {
   const usageElement = (
     <GliffCard
       title="Plan Usage"
+      action={{
+        tooltip: "Add Addons",
+        icon: imgSrc("add"),
+        onClick: () => console.log("clicked"),
+      }}
       el={
         !limits ? (
           <LoadingSpinner />
