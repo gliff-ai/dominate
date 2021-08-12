@@ -30,6 +30,9 @@ type FormState = {
   };
 };
 
+const toTitleCase = (s: string): string =>
+  `${s.charAt(0).toUpperCase()}${s.slice(1)}`;
+
 export function Billing(): JSX.Element {
   const [limits, setLimits] = useState<Limits | null>(null);
   const [plan, setPlan] = useState<Plan | null>(null);
@@ -43,6 +46,8 @@ export function Billing(): JSX.Element {
     collaborator: useInput<number>(0),
     loading: false,
   } as FormState;
+
+  const addonTypes = ["user", "project", "collaborator"] as const;
 
   useEffect(() => {
     void getLimits().then(setLimits);
@@ -72,25 +77,14 @@ export function Billing(): JSX.Element {
               </tr>
             </thead>
             <tbody>
-              <tr>
-                <td>Projects</td>
-                <td>
-                  {limits.projects} of {limits.projects_limit ?? "Unlimited"}
-                </td>
-              </tr>
-              <tr>
-                <td>Users</td>
-                <td>
-                  {limits.users} of {limits.users_limit ?? "Unlimited"}
-                </td>
-              </tr>
-              <tr>
-                <td>Collaborators</td>
-                <td>
-                  {limits.collaborators} of{" "}
-                  {limits.collaborators_limit ?? "Unlimited"}
-                </td>
-              </tr>
+              {addonTypes.map((a) => (
+                <tr>
+                  <td>{`${toTitleCase(a)}s`}</td>
+                  <td>
+                    {limits[`${a}s`]} of {limits[`${a}s_limit`] ?? "Unlimited"}
+                  </td>
+                </tr>
+              ))}
               <tr>
                 <td>Storage</td>
                 <td>
@@ -160,9 +154,7 @@ export function Billing(): JSX.Element {
                       <td>{number}</td>
                       <td>{date.toLocaleDateString()}</td>
                       <td>£{amount_due / 100}</td>
-                      <td>{`${status.charAt(0).toUpperCase()}${status.slice(
-                        1
-                      )}`}</td>
+                      <td>{toTitleCase(status)}</td>
                       <td>
                         <a href={invoice_pdf} target="_blank" rel="noreferrer">
                           ICON
@@ -179,7 +171,6 @@ export function Billing(): JSX.Element {
     />
   );
 
-  const addonTypes = ["user", "project", "collaborator"] as const;
   const addonForm = !addonPrices ? (
     <LoadingSpinner />
   ) : (
