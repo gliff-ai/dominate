@@ -19,3 +19,14 @@ export const getPlan = (): Promise<Plan> =>
 
 export const getAddonPrices = (): Promise<AddonPrices> =>
   apiRequest<AddonPrices>("/billing/addon-prices", "GET");
+
+export const addAddons = (
+  users: number,
+  projects: number,
+  collaborators: number
+): Promise<boolean> =>
+  apiRequest<boolean>("/billing/addon", "POST", {
+    users,
+    projects,
+    collaborators,
+  });

@@ -3,6 +3,7 @@ import { Card, Grid, Paper, Typography } from "@material-ui/core";
 
 import { useAuth } from "@/hooks/use-auth";
 import {
+  addAddons,
   getAddonPrices,
   getInvoices,
   getLimits,
@@ -21,33 +22,35 @@ import { useInput } from "@/hooks/use-input";
 import { SubmitButton } from "@/components";
 
 type FormState = {
-  [key in "user" | "project" | "collaborator"]: any;
+  [key in "user" | "project" | "collaborator"]: {
+    value: number;
+    setValue: React.Dispatch<React.SetStateAction<number>>;
+    reset: () => void;
+    bind: { value: number; onChange: (event: any) => void };
+  };
 };
+
 export function Billing(): JSX.Element {
   const [limits, setLimits] = useState<Limits | null>(null);
   const [plan, setPlan] = useState<Plan | null>(null);
   const [payment, setPayment] = useState<string | null>(null); // TODO
   const [invoices, setInvoices] = useState<Invoice[] | null>(null);
   const [addonPrices, setAddonPrices] = useState<AddonPrices | null>(null);
-
+  const [addonFormLoading, setAddonFormLoading] = useState(false);
   const form = {
     user: useInput<number>(0),
     project: useInput<number>(0),
     collaborator: useInput<number>(0),
+    loading: false,
   } as FormState;
 
-  useEffect(
-    () => {
-      void getLimits().then(setLimits);
-      void getPlan().then(setPlan);
-      void getInvoices().then(setInvoices);
+  useEffect(() => {
+    void getLimits().then(setLimits);
+    void getPlan().then(setPlan);
+    void getInvoices().then(setInvoices);
 
-      // setPayment("temp");
-    },
-    [
-      /* on addon updaet */
-    ]
-  );
+    // setPayment("temp");
+  }, [addonFormLoading]);
 
   const usageElement = (
     <GliffCard
@@ -55,7 +58,7 @@ export function Billing(): JSX.Element {
       action={{
         tooltip: "Add Addons",
         icon: imgSrc("add"),
-        onClick: () => console.log("clicked"),
+        onClick: () => getAddonPrices().then(setAddonPrices),
       }}
       el={
         !limits ? (
@@ -176,22 +179,36 @@ export function Billing(): JSX.Element {
     />
   );
 
-  const addonTypes = ["user", "project", "collaborator"];
+  const addonTypes = ["user", "project", "collaborator"] as const;
   const addonForm = !addonPrices ? (
     <LoadingSpinner />
   ) : (
     <form
       onSubmit={(e) => {
         e.preventDefault();
-        console.log(form);
+        setAddonFormLoading(true);
+
+        void addAddons(
+          form.user.value,
+          form.project.value,
+          form.collaborator.value
+        ).then(() => {
+          setAddonFormLoading(false);
+          form.user.reset();
+          form.project.reset();
+          form.collaborator.reset();
+
+          // Close modal
+        });
       }}
     >
       {addonTypes.map((addon) => {
         if (!addonPrices[addon]) return null;
         return (
-          <label key={addon}>
+          <label key={addon} htmlFor={addon}>
             Additional {addon} @ £{addonPrices[addon] / 100}:
-            <input type="number" min="0" {...form[addon].bind} />
+            {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+            <input name={addon} type="number" min="0" {...form[addon].bind} />
           </label>
         );
       })}
@@ -203,7 +220,7 @@ export function Billing(): JSX.Element {
         ) / 100
       ).toFixed(2)}{" "}
       per month
-      <SubmitButton loading={false} value="Confirm" />
+      <SubmitButton loading={addonFormLoading} value="Confirm" />
     </form>
   );
 
@@ -228,14 +245,6 @@ export function Billing(): JSX.Element {
         <Grid item xs={4}>
           {addonModal}
         </Grid>
-
-        <button
-          onClick={() => {
-            void getAddonPrices().then(setAddonPrices);
-          }}
-        >
-          get prices
-        </button>
       </Grid>
     </div>
   );
