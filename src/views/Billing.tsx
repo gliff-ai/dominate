@@ -79,6 +79,12 @@ export function Billing(): JSX.Element {
     loading: false,
   } as FormState;
 
+  const plansMap = {
+    COMMUNITY: { icon: imgSrc("essential-plan"), name: "Essential" },
+    PRO: { icon: imgSrc("small-team-plan"), name: "Small Team" },
+    TEAM: { icon: imgSrc("growing-team-plan"), name: "Growing Team" },
+  } as const;
+
   const addonTypes = ["user", "project", "collaborator"] as const;
 
   useEffect(() => {
@@ -143,12 +149,40 @@ export function Billing(): JSX.Element {
         !plan ? (
           <LoadingSpinner />
         ) : (
-          <>
-            <p>Your current plan is {plan.tier_name}</p>
-            Ends on: {plan.current_period_end}
-            base price: {plan.base_price}
-            addons: You have {Object.values(plan.addons).length} addons
-          </>
+          <Grid container spacing={3}>
+            <Grid item xs={3}>
+              <div
+                style={{ width: "100%", padding: "75px", textAlign: "center" }}
+              >
+                <SVG
+                  src={plansMap[plan.tier_name].icon}
+                  style={{ width: "100px", margin: "auto" }}
+                />
+              </div>
+              Your current plan is{" "}
+              <strong>{plansMap[plan.tier_name].name}</strong> with{" "}
+              <strong>{Object.values(plan.addons).length}</strong> addons
+              <br />
+              The current period ends on:{" "}
+              {new Date(plan.current_period_end * 1000).toLocaleDateString()}
+            </Grid>
+            <Grid item xs={6}>
+              <table className={classes.baseTable}>
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th>Amount</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>{plansMap[plan.tier_name].name}</td>
+                    <td>£{plan.base_price / 100}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </Grid>
+          </Grid>
         )
       }
     />
@@ -166,7 +200,7 @@ export function Billing(): JSX.Element {
             <br />
             Card Expiry: {payment.expiry}
             <br />
-            Type: {payment.brand}
+            Type: {toTitleCase(payment.brand)}
             <br />
             Name: {payment.name}
             <br />

@@ -24,7 +24,7 @@ export interface Invoice {
 }
 
 export interface Plan {
-  tier_name: string;
+  tier_name: "PRO" | "TEAM" | "COMMUNITY";
   tier_id: number;
   current_period_end: number;
   current_period_start: number;
