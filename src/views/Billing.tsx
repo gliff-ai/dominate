@@ -287,7 +287,8 @@ export function Billing(): JSX.Element {
       Total: £
       {(
         addonTypes.reduce(
-          (total, addon) => total + addonPrices[addon] * form[addon].value,
+          (total, addon) =>
+            total + addonPrices[addon] * parseInt(form[addon].value, 10),
           0
         ) / 100
       ).toFixed(2)}{" "}
