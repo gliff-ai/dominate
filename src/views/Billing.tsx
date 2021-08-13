@@ -29,10 +29,10 @@ import { SubmitButton, GliffCard, LoadingSpinner } from "@/components";
 
 type FormState = {
   [key in "user" | "project" | "collaborator"]: {
-    value: number;
-    setValue: Dispatch<SetStateAction<number>>;
+    value: string;
+    setValue: Dispatch<SetStateAction<string>>;
     reset: () => void;
-    bind: { value: number; onChange: (event: any) => void };
+    bind: { value: string; onChange: (event: any) => void };
   };
 };
 
@@ -73,9 +73,9 @@ export function Billing(): JSX.Element {
   const [addonDialogOpen, setAddonDialogOpen] = useState(false);
 
   const form = {
-    user: useInput<number>(0),
-    project: useInput<number>(0),
-    collaborator: useInput<number>(0),
+    user: useInput("0"),
+    project: useInput("0"),
+    collaborator: useInput("0"),
     loading: false,
   } as FormState;
 
@@ -156,7 +156,7 @@ export function Billing(): JSX.Element {
               >
                 <SVG
                   src={plansMap[plan.tier_name].icon}
-                  style={{ width: "100px", margin: "auto" }}
+                  style={{ width: "100px", height: "100px", margin: "auto" }}
                 />
               </div>
               Your current plan is{" "}

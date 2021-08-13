@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { ChangeEvent, useState } from "react";
 
-export function useInput<T>(initialValue: T | null) {
-  const [value, setValue] = useState<T | null>(initialValue);
+export function useInput(initialValue: string | null) {
+  const [value, setValue] = useState<string | null>(initialValue);
 
   return {
     value,
@@ -9,7 +9,7 @@ export function useInput<T>(initialValue: T | null) {
     reset: () => setValue(null),
     bind: {
       value,
-      onChange: (event) => {
+      onChange: (event: ChangeEvent<HTMLInputElement>) => {
         setValue(event.target.value);
       },
     },
