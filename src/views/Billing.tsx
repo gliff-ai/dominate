@@ -261,9 +261,9 @@ export function Billing(): JSX.Element {
         e.preventDefault();
         setAddonFormLoading(true);
         void addAddons(
-          form.user.value,
-          form.project.value,
-          form.collaborator.value
+          parseInt(form.user.value, 10),
+          parseInt(form.project.value, 10),
+          parseInt(form.collaborator.value, 10)
         ).then(() => {
           setAddonFormLoading(false);
           form.user.reset();
