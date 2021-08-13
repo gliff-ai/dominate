@@ -1,9 +1,11 @@
 import { apiRequest } from "@/api";
+
 import {
   AddonPrices,
   Invoice,
   Limits,
   Plan,
+  Payment,
 } from "@/services/billing/interfaces";
 
 export const getLimits = (): Promise<Limits> =>
@@ -20,6 +22,9 @@ export const getPlan = (): Promise<Plan> =>
 export const getAddonPrices = (): Promise<AddonPrices> =>
   apiRequest<AddonPrices>("/billing/addon-prices", "GET");
 
+export const getPayment = (): Promise<Payment> =>
+  apiRequest<Payment>("/billing/payment-method", "GET");
+
 export const addAddons = (
   users: number,
   projects: number,
@@ -30,3 +35,5 @@ export const addAddons = (
     projects,
     collaborators,
   });
+
+export { AddonPrices, Invoice, Limits, Plan, Payment };

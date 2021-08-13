@@ -49,3 +49,10 @@ export interface AddonPrices {
   user: number | null;
   collaborator: number | null;
 }
+
+export interface Payment {
+  number: string;
+  expiry: string;
+  brand: string;
+  name: string;
+}

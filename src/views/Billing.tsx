@@ -1,4 +1,5 @@
 import { useEffect, useState, Dispatch, SetStateAction } from "react";
+import SVG from "react-inlinesvg";
 import {
   Dialog,
   DialogContent,
@@ -14,18 +15,17 @@ import {
   getInvoices,
   getLimits,
   getPlan,
-} from "@/services/billing";
-import {
+  getPayment,
   AddonPrices,
   Invoice,
   Limits,
   Plan,
-} from "@/services/billing/interfaces";
-import { GliffCard } from "@/components/GliffCard";
-import { LoadingSpinner } from "@/components/LoadingSpinner";
+  Payment,
+} from "@/services/billing";
+
 import { imgSrc } from "@/imgSrc";
 import { useInput } from "@/hooks/use-input";
-import { SubmitButton } from "@/components";
+import { SubmitButton, GliffCard, LoadingSpinner } from "@/components";
 
 type FormState = {
   [key in "user" | "project" | "collaborator"]: {
@@ -37,6 +37,15 @@ type FormState = {
 };
 
 const useStyle = makeStyles(() => ({
+  baseTable: {
+    width: "100%",
+    "& th, & td": {
+      textAlign: "left",
+    },
+    "& svg": {
+      width: "30px",
+    },
+  },
   dialogTitle: {
     backgroundColor: theme.palette.primary.main,
     "& > h2": {
@@ -56,7 +65,7 @@ export function Billing(): JSX.Element {
   const classes = useStyle();
   const [limits, setLimits] = useState<Limits | null>(null);
   const [plan, setPlan] = useState<Plan | null>(null);
-  const [payment, setPayment] = useState<string | null>(null); // TODO
+  const [payment, setPayment] = useState<Payment | null>(null);
   const [invoices, setInvoices] = useState<Invoice[] | null>(null);
 
   const [addonPrices, setAddonPrices] = useState<AddonPrices | null>(null);
@@ -76,26 +85,17 @@ export function Billing(): JSX.Element {
     void getLimits().then(setLimits);
     void getPlan().then(setPlan);
     void getInvoices().then(setInvoices);
-
-    // setPayment("temp");
+    void getPayment().then(setPayment);
   }, [addonFormLoading]);
 
   const usageElement = (
     <GliffCard
       title="Plan Usage"
-      action={{
-        tooltip: "Add Addons",
-        icon: imgSrc("add"),
-        onClick: () => {
-          setAddonDialogOpen(true);
-          void getAddonPrices().then(setAddonPrices);
-        },
-      }}
       el={
         !limits ? (
           <LoadingSpinner />
         ) : (
-          <table>
+          <table className={classes.baseTable}>
             <thead>
               <tr>
                 <th>Description</th>
@@ -114,18 +114,25 @@ export function Billing(): JSX.Element {
               <tr>
                 <td>Storage</td>
                 <td>
-                  {limits.storage / 1000}Gb used.{" "}
-                  <p>
-                    Your current plan includes{" "}
-                    {limits.storage_included_limit / 1000}
-                    GB
-                  </p>
+                  {limits.storage / 1000}Gb used
+                  <br />
+                  Your current plan includes{" "}
+                  {limits.storage_included_limit / 1000}
+                  GB
                 </td>
               </tr>
             </tbody>
           </table>
         )
       }
+      action={{
+        tooltip: "Add Addons",
+        icon: imgSrc("add"),
+        onClick: () => {
+          setAddonDialogOpen(true);
+          void getAddonPrices().then(setAddonPrices);
+        },
+      }}
     />
   );
 
@@ -150,7 +157,22 @@ export function Billing(): JSX.Element {
   const paymentElement = (
     <GliffCard
       title="Payment Details"
-      el={!payment ? <LoadingSpinner /> : <>Payment etc</>}
+      el={
+        !payment ? (
+          <LoadingSpinner />
+        ) : (
+          <>
+            Card Number: {payment.number}
+            <br />
+            Card Expiry: {payment.expiry}
+            <br />
+            Type: {payment.brand}
+            <br />
+            Name: {payment.name}
+            <br />
+          </>
+        )
+      }
     />
   );
 
@@ -161,7 +183,7 @@ export function Billing(): JSX.Element {
         !invoices ? (
           <LoadingSpinner />
         ) : (
-          <table>
+          <table className={classes.baseTable}>
             <thead>
               <tr>
                 <th>Invoice Number</th>
@@ -183,7 +205,7 @@ export function Billing(): JSX.Element {
                       <td>{toTitleCase(status)}</td>
                       <td>
                         <a href={invoice_pdf} target="_blank" rel="noreferrer">
-                          ICON
+                          <SVG src={imgSrc("download-icon")} />
                         </a>
                       </td>
                     </tr>
