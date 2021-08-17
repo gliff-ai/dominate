@@ -53,16 +53,17 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const saveAnnotation = (newAnnotationsObject: Annotations): void => {
     // Save annotations data
     const annotationsData = newAnnotationsObject.getAllAnnotations();
+    const auditData = newAnnotationsObject.getAuditObject();
 
     if (annotationsObject === null) {
       // If an annotation item for the given image does not exist, create one.
       props.etebaseInstance
-        .createAnnotation(collectionUid, imageUid, annotationsData)
+        .createAnnotation(collectionUid, imageUid, annotationsData, auditData)
         .catch((e) => console.log(e));
     } else {
       // Otherwise update it.
       props.etebaseInstance
-        .updateAnnotation(collectionUid, imageUid, annotationsData)
+        .updateAnnotation(collectionUid, imageUid, annotationsData, auditData)
         .catch((e) => console.log(e));
     }
   };
