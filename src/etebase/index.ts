@@ -593,6 +593,19 @@ export class DominateEtebase {
       content,
     } as Image;
   };
+
+  getLatestAudit = async (collectionUid: string): Promise<AuditAction[]> => {
+    // only necessary until we make a project level audit page, where all ANNOTATE audits will be listed
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const collectionContent = await collection.getContent(OutputFormat.String);
+    const tiles: GalleryTile[] = JSON.parse(collectionContent);
+    const auditUID = tiles[tiles.length].auditUID;
+    const auditItem = await this.getItem(collectionUid, auditUID);
+    const audit: string = await auditItem.getContent(OutputFormat.String);
+    console.log(audit);
+    return JSON.parse(audit);
+  };
 }
 
 export { Collection, Item, GalleryMeta, Image };
