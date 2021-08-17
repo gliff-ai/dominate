@@ -7,7 +7,6 @@ import { DominateEtebase } from "@/etebase";
 
 interface Props {
   etebaseInstance: DominateEtebase;
-  setIsLoading: (isLoading: boolean) => void;
 }
 
 export const AuditWrapper = (props: Props): ReactElement => {
@@ -15,19 +14,21 @@ export const AuditWrapper = (props: Props): ReactElement => {
   const [audit, setAudit] = useState<AuditAction[]>(null);
 
   const fetchAudit = async () => {
-    const audit: AuditAction[] = await props.etebaseInstance.getLatestAudit(
+    const auditData: AuditAction[] = await props.etebaseInstance.getLatestAudit(
       collectionUid
     );
-    setAudit(audit);
+    setAudit(auditData);
   };
 
   useEffect(() => {
     // fetch latest ANNOTATE audit from etebase on page load:
-    fetchAudit();
+    fetchAudit().catch((err) => {
+      console.log(err);
+    });
   }, [props.etebaseInstance.ready]);
 
   return audit !== null ? (
-    <UserInterface audit={audit} showAppBar={false}></UserInterface>
+    <UserInterface audit={audit} showAppBar={false} />
   ) : (
     <></>
   );

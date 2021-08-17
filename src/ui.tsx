@@ -94,7 +94,7 @@ const UserInterface = (props: Props): ReactElement | null => {
               element={
                 <Audit
                   etebaseInstance={etebaseInstance}
-                  setIsLoading={setIsLoading}
+                  // setIsLoading={setIsLoading}
                 />
               }
             />
