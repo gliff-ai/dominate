@@ -10,7 +10,7 @@ interface Props {
   setIsLoading: (isLoading: boolean) => void;
 }
 
-export const CurateWrapper = (props: Props): ReactElement => {
+export const AuditWrapper = (props: Props): ReactElement => {
   const { collectionUid } = useParams(); // uid of selected gallery, from URL
   const [audit, setAudit] = useState<AuditAction[]>(null);
 
