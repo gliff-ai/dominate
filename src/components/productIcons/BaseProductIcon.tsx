@@ -44,6 +44,7 @@ interface Props {
   tool: string;
   customUrlPath?: string;
   linkDisabled?: boolean;
+  target?: string;
   extraStyleAvatar?: string | null;
   extraStyleSvg?: string | null;
   extraStyleName?: string | null;
@@ -54,6 +55,7 @@ function BaseProductIcon({
   tool,
   customUrlPath,
   linkDisabled,
+  target,
   extraStyleAvatar,
   extraStyleSvg,
   extraStyleName,
@@ -79,11 +81,13 @@ function BaseProductIcon({
         {linkDisabled ? (
           avatar
         ) : (
-          <Link href={customUrlPath || `/${tool}`}>{avatar}</Link>
+          <Link href={customUrlPath || `/${tool}`} target={target}>
+            {avatar}
+          </Link>
         )}
         <p className={`${classes.productName} ${extraStyleName}`}>{tool}</p>
       </div>
-      {tool !== "annotate" && (
+      {tool !== "annotate" && tool !== "help" && (
         <SVG
           src={imgSrc("breadcrumb-trail")}
           className={`${classes.trailSvg} ${extraStyleTrailSvg}`}
@@ -95,6 +99,7 @@ function BaseProductIcon({
 
 BaseProductIcon.defaultProps = {
   linkDisabled: false,
+  target: "_self",
   extraStyleAvatar: null,
   extraStyleSvg: null,
   extraStyleName: null,

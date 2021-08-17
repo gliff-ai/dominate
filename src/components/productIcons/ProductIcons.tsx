@@ -143,4 +143,4 @@ function ProductIcons(): ReactElement {
   return <>{getProductIcons()}</>;
 }
 
-export { ProductIcons, Status };
+export { ProductIcons, Status, BaseProductIcon };

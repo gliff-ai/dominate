@@ -17,7 +17,7 @@ import { HtmlTooltip } from "@gliff-ai/style";
 import { imgSrc } from "@/imgSrc";
 
 import { useAuth } from "@/hooks/use-auth";
-import { ProductIcons } from "@/components";
+import { ProductIcons, BaseProductIcon } from "@/components";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -63,6 +63,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     height: "100%",
     alignItems: "center",
     display: "flex",
+  },
+  accessibleSvg: {
+    fill: "#000000",
+  },
+  accessibleName: {
+    color: "#000000",
   },
 }));
 
@@ -178,6 +184,14 @@ export const NavBar = (): ReactElement => {
               {auth.user ? (
                 <>
                   <ProductIcons />
+                  <BaseProductIcon
+                    key="document"
+                    tool="document"
+                    target="_blank"
+                    customUrlPath="https://docs.gliff.app/"
+                    extraStyleSvg={classes.accessibleSvg}
+                    extraStyleName={classes.accessibleName}
+                  />
                   {accountMenu}
                 </>
               ) : (

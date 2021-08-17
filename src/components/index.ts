@@ -7,4 +7,5 @@ export { PageSpinner } from "./PageSpinner";
 export {
   ProductIcons,
   Status as ProductIconStatus,
+  BaseProductIcon,
 } from "./productIcons/ProductIcons";
