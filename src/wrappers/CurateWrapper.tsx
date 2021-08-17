@@ -52,7 +52,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const auth = useAuth();
 
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
-  const { collectionUid } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
+  const { collectionUid } = useParams(); // uid of selected gallery, from URL
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
   const [multi, setMulti] = useState<boolean>(false);
   const [showDialog, setShowDialog] = useState<boolean>(false);
@@ -82,13 +82,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       .catch((err) => {
         console.log(err);
       });
-  };
-
-  const fetchGalleries = (): void => {
-    // fetches galleries via DominateEtebase, and assigns them to galleryItems state
-    props.etebaseInstance.getCollectionsMeta("gliff.gallery").catch((err) => {
-      console.log(err);
-    });
   };
 
   const addImageToGallery = async (
@@ -271,13 +264,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     setMulti(false);
     void downloadDataset();
   };
-
-  // runs once on page load, would have been a componentDidMount if this were a class component:
-  useEffect(() => {
-    if (props.etebaseInstance.ready) {
-      fetchGalleries();
-    }
-  }, [props.etebaseInstance.ready]);
 
   useEffect(() => {
     if (collectionUid) {
