@@ -577,7 +577,7 @@ export class DominateEtebase {
     const itemManager = await this.getItemManager(collectionUid);
     const items = await itemManager.fetchMulti([annotationUid, auditUid]);
     const annotationItem = items[0] as Item;
-    const auditItem = items[1];
+    const auditItem = items[1] as Item;
 
     // Update annotationItem:
     const modifiedTime = new Date().getTime();
@@ -620,13 +620,13 @@ export class DominateEtebase {
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const collectionContent = await collection.getContent(OutputFormat.String);
-    const tiles: GalleryTile[] = JSON.parse(collectionContent).filter(
+    const tiles = (JSON.parse(collectionContent) as GalleryTile[]).filter(
       (tile) => tile.auditUID !== null
     );
-    const auditUID = tiles[tiles.length - 1].auditUID;
+    const { auditUID } = tiles[tiles.length - 1];
     const auditItem = await this.getItem(collectionUid, auditUID);
     const audit: string = await auditItem.getContent(OutputFormat.String);
-    return JSON.parse(audit);
+    return JSON.parse(audit) as AuditAction[];
   };
 }
 
