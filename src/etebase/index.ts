@@ -576,7 +576,7 @@ export class DominateEtebase {
     // Retrieve items
     const itemManager = await this.getItemManager(collectionUid);
     const items = await itemManager.fetchMulti([annotationUid, auditUid]);
-    const annotationItem = items[0];
+    const annotationItem = items[0] as Item;
     const auditItem = items[1];
 
     // Update annotationItem:
