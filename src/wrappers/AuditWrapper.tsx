@@ -1,7 +1,8 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { }
+import { AuditAction } from "@gliff-ai/annotate";
+import { UserInterface } from "@gliff-ai/audit";
 import { DominateEtebase } from "@/etebase";
 
 interface Props {
@@ -10,5 +11,20 @@ interface Props {
 }
 
 export const CurateWrapper = (props: Props): ReactElement => {
-  return <></>
+  const { collectionUid } = useParams(); // uid of selected gallery, from URL
+  const [audit, setAudit] = useState<AuditAction[]>(null);
+
+  const fetchAudit = async () => {
+    const audit: AuditAction[] = await props.etebaseInstance.getLatestAudit(
+      collectionUid
+    );
+    setAudit(audit);
+  };
+
+  useEffect(() => {
+    // fetch latest ANNOTATE audit from etebase on page load:
+    fetchAudit();
+  }, [props.etebaseInstance.ready]);
+
+  return audit !== null ? <UserInterface audit={audit}></UserInterface> : <></>;
 };
