@@ -2,7 +2,7 @@ import { ReactElement, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
 import { AuditAction } from "@gliff-ai/annotate";
-import { UserInterface } from "@gliff-ai/audit";
+import UserInterface from "@gliff-ai/audit";
 import { DominateEtebase } from "@/etebase";
 
 interface Props {
@@ -26,5 +26,9 @@ export const AuditWrapper = (props: Props): ReactElement => {
     fetchAudit();
   }, [props.etebaseInstance.ready]);
 
-  return audit !== null ? <UserInterface audit={audit}></UserInterface> : <></>;
+  return audit !== null ? (
+    <UserInterface audit={audit} showAppBar={false}></UserInterface>
+  ) : (
+    <></>
+  );
 };
