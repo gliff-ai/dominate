@@ -4,7 +4,7 @@ import { CssBaseline, ThemeProvider } from "@material-ui/core";
 import CookieConsent from "react-cookie-consent";
 import { theme } from "@gliff-ai/style";
 import { DominateEtebase } from "@/etebase";
-import { Annotate, Curate, Manage } from "@/wrappers";
+import { Annotate, Audit, Curate, Manage } from "@/wrappers";
 import {
   Account,
   RecoverAccount,
@@ -89,6 +89,15 @@ const UserInterface = (props: Props): ReactElement | null => {
             <PrivateRoute
               path="manage/*"
               element={<Manage etebaseInstance={etebaseInstance} />}
+            />
+            <PrivateRoute
+              path="audit/:collectionUid"
+              element={
+                <Audit
+                  etebaseInstance={etebaseInstance}
+                  setIsLoading={setIsLoading}
+                />
+              }
             />
             <Route
               path="recover/*"
