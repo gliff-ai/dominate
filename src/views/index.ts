@@ -7,3 +7,4 @@ export { ResetPassword } from "./ResetPassword";
 export { VerificationSent } from "./VerificationSent";
 export { VerifyEmail } from "./VerifyEmail";
 export { RequestEmailVerification } from "./RequestEmailVerification";
+export { Billing } from "./Billing";

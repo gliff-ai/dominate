@@ -109,6 +109,11 @@ export const NavBar = (): ReactElement => {
 
   if (!hasNavbar()) return null;
 
+  // TODO: owners who are on free plan should still be able to upgrade
+  const showBilling =
+    auth?.userProfile?.id &&
+    auth?.userProfile?.id === auth?.userProfile?.team.owner_id;
+
   const accountMenu = (
     <>
       <IconButton
@@ -147,6 +152,18 @@ export const NavBar = (): ReactElement => {
             Account Settings
           </Link>
         </MenuItem>
+        {showBilling ? (
+          <MenuItem className={classes.menuItem}>
+            <Link to="/billing" onClick={() => setAnchorEl(null)}>
+              <SVG
+                src={imgSrc("account-settings")}
+                className={classes.svgMedium}
+                style={{ marginRight: "12px" }}
+              />
+              Billing
+            </Link>
+          </MenuItem>
+        ) : null}
         <MenuItem
           className={classes.menuItem}
           onClick={() =>

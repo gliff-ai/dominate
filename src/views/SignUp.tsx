@@ -23,9 +23,9 @@ import { RecoveryKey } from "@/views/RecoveryKey";
 import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
 import { VerificationSent } from "@/views/VerificationSent";
 
-const stripePromise = loadStripe(
-  "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
-);
+declare const STRIPE_KEY: string;
+
+const stripePromise = loadStripe(STRIPE_KEY);
 
 const query = new URLSearchParams(window.location.search);
 
@@ -358,7 +358,7 @@ export const SignUp = (props: Props): JSX.Element => {
   }
 
   if (state === "4-VerificationSent") {
-    return <VerificationSent callback={() => {}} />;
+    return <VerificationSent />;
   }
 
   return <></>;
