@@ -23,6 +23,9 @@ module.exports = merge(common, {
       SENTRY_ENVIRONMENT: JSON.stringify("development"),
       IS_SENTRY_DEBUG: true,
       VERSION: JSON.stringify(version),
+      STRIPE_KEY: JSON.stringify(
+        "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
+      ),
     }),
   ],
 });
