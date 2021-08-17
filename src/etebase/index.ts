@@ -578,6 +578,7 @@ export class DominateEtebase {
   getItem = async (collectionUid: string, itemUid: string): Promise<Item> => {
     // Retrieve item from a collection.
     const itemManager = await this.getItemManager(collectionUid);
+    console.log(await itemManager.list());
     const item = await itemManager.fetch(itemUid);
     return item;
   };
@@ -599,11 +600,12 @@ export class DominateEtebase {
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const collectionContent = await collection.getContent(OutputFormat.String);
-    const tiles: GalleryTile[] = JSON.parse(collectionContent);
-    const auditUID = tiles[tiles.length].auditUID;
+    const tiles: GalleryTile[] = JSON.parse(collectionContent).filter(
+      (tile) => tile.auditUID !== null
+    );
+    const auditUID = tiles[tiles.length - 1].auditUID;
     const auditItem = await this.getItem(collectionUid, auditUID);
     const audit: string = await auditItem.getContent(OutputFormat.String);
-    console.log(audit);
     return JSON.parse(audit);
   };
 }
