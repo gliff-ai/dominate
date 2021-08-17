@@ -6,6 +6,7 @@ import { apiRequest } from "@/api";
 import { MessageAlert, SubmitButton } from "@/components";
 
 export const RequestRecoverAccount = (): JSX.Element => {
+  const classes = useStyles();
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(false);
   const [recoveryError, setRecoveryError] = useState("");
