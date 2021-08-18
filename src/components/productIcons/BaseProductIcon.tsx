@@ -87,7 +87,7 @@ function BaseProductIcon({
         )}
         <p className={`${classes.productName} ${extraStyleName}`}>{tool}</p>
       </div>
-      {tool !== "annotate" && tool !== "help" && (
+      {tool !== "annotate" && tool !== "document" && (
         <SVG
           src={imgSrc("breadcrumb-trail")}
           className={`${classes.trailSvg} ${extraStyleTrailSvg}`}
