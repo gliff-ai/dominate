@@ -90,7 +90,12 @@ export const SignUp = (props: Props): JSX.Element => {
     setOpen(true);
   };
 
-  const tierId = query.get("tier_id") || null;
+  let tierId = query.get("tier_id") || null;
+  // the following catches free tiers
+  // and makes sure we don't start a Stripe checkout session
+  if (tierId === "1") {
+    tierId = null;
+  }
   const inviteId = query.get("invite_id") || null;
 
   useEffect(() => {
