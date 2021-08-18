@@ -29,7 +29,7 @@ export const VerifyEmail = (): JSX.Element => {
 
   const onSubmitForm = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    navigate("/");
+    navigate("/manage/projects");
   };
 
   useEffect(() => {
