@@ -352,7 +352,7 @@ export const SignUp = (props: Props): JSX.Element => {
           &nbsp; and upgrade your account from the billing page
         </p>
 
-        <p>Alternatively, contact us at support@gliff.ai for help</p>
+        <p>Alternatively, contact us at contact@gliff.ai for help</p>
       </>
     );
   }
