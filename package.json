@@ -1,6 +1,6 @@
 {
   "name": "@gliff-ai/dominate",
-  "version": "1.5.1",
+  "version": "1.6.0",
   "description": "gliff.ai DOMINATE",
   "repository": "git://github.com/gliff-ai/dominate.git",
   "main": "dist/main.js",
@@ -63,11 +63,11 @@
     "webpack-dev-server": "^3.11.2"
   },
   "dependencies": {
-    "@gliff-ai/annotate": "^0.21.2",
-    "@gliff-ai/curate": "^0.13.4",
-    "@gliff-ai/manage": "^0.3.8",
+    "@gliff-ai/annotate": "^0.21.3",
+    "@gliff-ai/curate": "^0.14.2",
+    "@gliff-ai/manage": "^0.3.11",
     "@gliff-ai/style": "^0.6.0",
-    "@gliff-ai/upload": "^0.2.0",
+    "@gliff-ai/upload": "^0.2.2",
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.58",
