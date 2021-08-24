@@ -132,7 +132,7 @@ function ProductIcons(): ReactElement {
         return getProductIcon(
           product,
           product === "audit" && activeProduct === Product.curate
-            ? Status.accessible
+            ? Status.accessible // as an exception to the usual rule, allow navigating to AUDIT from CURATE even though it's further down the list
             : otherStatus
         );
       });
