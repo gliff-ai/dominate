@@ -129,7 +129,12 @@ function ProductIcons(): ReactElement {
           otherStatus = Status.disabled; // Every button after the active one is disabled
           return getProductIcon(product, Status.active);
         }
-        return getProductIcon(product, otherStatus);
+        return getProductIcon(
+          product,
+          product === "audit" && activeProduct === Product.curate
+            ? Status.accessible
+            : otherStatus
+        );
       });
     }
     return products.map((product) => {
