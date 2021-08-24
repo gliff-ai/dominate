@@ -70,11 +70,11 @@ function ProductIcons(): ReactElement {
   const getCustomUrlPath = (tool: string, status: Status): string | null => {
     // When navigating back to curate from annotate using the navbar
     // the collectionUid in the annotate url is used to set the url path for curate
-    if (tool === "curate" && status === Status.accessible) {
+    if (["curate", "audit"].includes(tool) && status === Status.accessible) {
       const galleryUid = window.location.pathname.split("/").reverse()[
         activeProduct === Product.annotate ? 1 : 0
       ];
-      return `/curate/${galleryUid}`;
+      return `/${tool}/${galleryUid}`;
     }
     return null;
   };
