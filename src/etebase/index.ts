@@ -513,14 +513,15 @@ export class DominateEtebase {
   createAnnotation = async (
     collectionUid: string,
     imageUid: string,
-    annotationData: Annotation[]
+    annotationData: Annotation[],
+    auditData: AuditAction[]
   ): Promise<void> => {
     // Store annotations object in a new item.
 
     // Retrieve itemManager
     const itemManager = await this.getItemManager(collectionUid);
 
-    // Create new item
+    // Create new Annotation item
     const createdTime = new Date().getTime();
     const annotationsItem = await itemManager.create(
       {
@@ -531,8 +532,18 @@ export class DominateEtebase {
       JSON.stringify(annotationData)
     );
 
-    // Store annotationsItem inside its own collection
-    await itemManager.batch([annotationsItem]);
+    // Create new Audit item:
+    const auditItem = await itemManager.create(
+      {
+        type: "gliff.audit",
+        mtime: createdTime,
+        createdTime,
+      },
+      JSON.stringify(auditData)
+    );
+
+    // Store annotationsItem and auditItem inside the collection:
+    await itemManager.batch([annotationsItem, auditItem]);
 
     // Update collection content JSON:
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -543,6 +554,7 @@ export class DominateEtebase {
       (item) => item.imageUID === imageUid
     );
     galleryTiles[tileIdx].annotationUID = annotationsItem.uid;
+    galleryTiles[tileIdx].auditUID = auditItem.uid;
     await collection.setContent(JSON.stringify(galleryTiles));
     await collectionManager.upload(collection);
   };
@@ -550,7 +562,8 @@ export class DominateEtebase {
   updateAnnotation = async (
     collectionUid: string,
     imageUid: string,
-    annotationData: Annotation[]
+    annotationData: Annotation[],
+    auditData: AuditAction[]
   ): Promise<void> => {
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
@@ -558,21 +571,29 @@ export class DominateEtebase {
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
     const tile = galleryTiles.find((item) => item.imageUID === imageUid);
     const annotationUid = tile.annotationUID;
+    const auditUid = tile.auditUID;
 
-    // Retrieve itemManager
+    // Retrieve items
     const itemManager = await this.getItemManager(collectionUid);
-    const item = await itemManager.fetch(annotationUid);
+    const items = await itemManager.fetchMulti([annotationUid, auditUid]);
+    const annotationItem = items[0] as Item;
+    const auditItem = items[1] as Item;
 
-    // Update item's content and modified time
+    // Update annotationItem:
     const modifiedTime = new Date().getTime();
-    const meta = item.getMeta();
+    let meta = annotationItem.getMeta();
     delete meta.mtime;
+    annotationItem.setMeta({ ...meta, modifiedTime });
+    await annotationItem.setContent(JSON.stringify(annotationData));
 
-    item.setMeta({ ...meta, modifiedTime });
-    await item.setContent(JSON.stringify(annotationData));
+    // Update auditItem:
+    meta = auditItem.getMeta();
+    delete meta.mtime;
+    auditItem.setMeta({ ...meta, modifiedTime });
+    await auditItem.setContent(JSON.stringify(auditData));
 
     // Save changes
-    await itemManager.batch([item]);
+    await itemManager.batch([annotationItem, auditItem]);
   };
 
   getItem = async (collectionUid: string, itemUid: string): Promise<Item> => {
@@ -592,6 +613,20 @@ export class DominateEtebase {
       uid: item.uid,
       content,
     } as Image;
+  };
+
+  getLatestAudit = async (collectionUid: string): Promise<AuditAction[]> => {
+    // only necessary until we make a project level audit page, where all ANNOTATE audits will be listed
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const collectionContent = await collection.getContent(OutputFormat.String);
+    const tiles = (JSON.parse(collectionContent) as GalleryTile[]).filter(
+      (tile) => tile.auditUID !== null
+    );
+    const { auditUID } = tiles[tiles.length - 1];
+    const auditItem = await this.getItem(collectionUid, auditUID);
+    const audit: string = await auditItem.getContent(OutputFormat.String);
+    return JSON.parse(audit) as AuditAction[];
   };
 }
 
