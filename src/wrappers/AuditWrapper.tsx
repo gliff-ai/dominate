@@ -1,8 +1,7 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import UserInterface from "@gliff-ai/audit";
-import { AnnotationSession } from "@gliff-ai/audit";
+import UserInterface, { AnnotationSession } from "@gliff-ai/audit";
 import { DominateEtebase } from "@/etebase";
 
 interface Props {
