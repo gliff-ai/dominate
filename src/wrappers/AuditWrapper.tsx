@@ -1,8 +1,8 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 
-import { AuditAction } from "@gliff-ai/annotate";
 import UserInterface from "@gliff-ai/audit";
+import { AnnotationSession } from "@gliff-ai/audit";
 import { DominateEtebase } from "@/etebase";
 
 interface Props {
@@ -11,13 +11,11 @@ interface Props {
 
 export const AuditWrapper = (props: Props): ReactElement => {
   const { collectionUid } = useParams(); // uid of selected gallery, from URL
-  const [audit, setAudit] = useState<AuditAction[]>(null);
+  const [sessions, setSessions] = useState<AnnotationSession[]>(null);
 
   const fetchAudit = async () => {
-    const auditData: AuditAction[] = await props.etebaseInstance.getLatestAudit(
-      collectionUid
-    );
-    setAudit(auditData);
+    const sessionsData = await props.etebaseInstance.getAudits(collectionUid);
+    setSessions(sessionsData);
   };
 
   useEffect(() => {
@@ -27,8 +25,8 @@ export const AuditWrapper = (props: Props): ReactElement => {
     });
   }, [props.etebaseInstance.ready]);
 
-  return audit !== null ? (
-    <UserInterface audit={audit} showAppBar={false} />
+  return sessions !== null ? (
+    <UserInterface sessions={sessions} showAppBar={false} />
   ) : (
     <></>
   );

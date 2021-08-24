@@ -64,7 +64,7 @@
   },
   "dependencies": {
     "@gliff-ai/annotate": "^0.21.2",
-    "@gliff-ai/audit": "^0.1.0",
+    "@gliff-ai/audit": "^0.1.1",
     "@gliff-ai/curate": "^0.13.4",
     "@gliff-ai/manage": "^0.3.8",
     "@gliff-ai/style": "^0.6.0",
