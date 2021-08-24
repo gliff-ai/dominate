@@ -41,6 +41,7 @@ enum Status {
 enum Product {
   manage = "manage",
   curate = "curate",
+  audit = "audit",
   annotate = "annotate",
   other = "other",
 }
@@ -48,9 +49,10 @@ enum Product {
 function ProductIcons(): ReactElement {
   const classes = useStyles();
   const [activeProduct, setActiveProduct] = useState(Product.manage);
-  const products: string[] = ["manage", "curate", "annotate"];
+  const products: string[] = ["manage", "curate", "audit", "annotate"];
 
   function updateActiveProduct() {
+    // reads the address bar, sets activeProduct accordingly
     const pathName = window.location.pathname;
     if (pathName.includes(activeProduct)) return;
 
@@ -69,7 +71,9 @@ function ProductIcons(): ReactElement {
     // When navigating back to curate from annotate using the navbar
     // the collectionUid in the annotate url is used to set the url path for curate
     if (tool === "curate" && status === Status.accessible) {
-      const galleryUid = window.location.pathname.split("/").reverse()[1];
+      const galleryUid = window.location.pathname.split("/").reverse()[
+        activeProduct === Product.annotate ? 1 : 0
+      ];
       return `/curate/${galleryUid}`;
     }
     return null;
