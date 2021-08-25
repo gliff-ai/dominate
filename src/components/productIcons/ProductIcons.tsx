@@ -2,6 +2,7 @@ import { ReactElement, useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core";
 import { theme } from "@gliff-ai/style";
 import { BaseProductIcon } from "./BaseProductIcon";
+import { useAuth } from "@/hooks/use-auth";
 
 const useStyles = makeStyles({
   activeSvg: {
@@ -48,8 +49,19 @@ enum Product {
 
 function ProductIcons(): ReactElement {
   const classes = useStyles();
+  const auth = useAuth();
   const [activeProduct, setActiveProduct] = useState(Product.manage);
-  const products: string[] = ["manage", "curate", "audit", "annotate"];
+  const [products, setProducts] = useState<string[]>([
+    "manage",
+    "curate",
+    "annotate",
+  ]);
+
+  // only display the AUDIT icon if on a paid tier:
+  useEffect(() => {
+    if (auth.userProfile?.team.tier.id > 1)
+      setProducts(["manage", "curate", "audit", "annotate"]);
+  }, [auth.ready]);
 
   function updateActiveProduct() {
     // reads the address bar, sets activeProduct accordingly
