@@ -5,7 +5,8 @@ function apiRequest<T>(
   path: string,
   method: Method,
   body?: Record<string, unknown>,
-  config?: AxiosRequestConfig
+  config?: AxiosRequestConfig,
+  customApiUrl?: string
 ): Promise<T> {
   return axios
     .request({
@@ -13,7 +14,7 @@ function apiRequest<T>(
       headers: {
         "Content-Type": "application/json",
       },
-      url: `${API_URL}${path}`,
+      url: `${customApiUrl || API_URL}${path}`,
       data: body || {},
       ...config,
     })
