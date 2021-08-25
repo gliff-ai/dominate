@@ -114,7 +114,9 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
         services={services}
         apiUrl={API_URL}
         launchCurateCallback={launchCurate}
-        launchAuditCallback={launchAudit}
+        launchAuditCallback={
+          auth.userProfile.team.tier.id > 1 ? launchAudit : null
+        }
       />
     </ProvideAuth>
   );
