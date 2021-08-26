@@ -142,34 +142,35 @@ function ProductIcons(): ReactElement {
           product === "manage" ? Status.accessible : Status.disabled
         )
       );
-    } else {
-      return [
-        getProductIcon(
-          "manage",
-          activeProduct === Product.manage ? Status.active : Status.accessible
-        ),
-        getProductIcon(
-          "curate",
-          activeProduct === Product.curate
-            ? Status.active
-            : activeProduct === Product.manage
-            ? Status.disabled
-            : Status.accessible
-        ),
-        getProductIcon(
-          "annotate",
-          activeProduct === Product.annotate ? Status.active : Status.disabled
-        ),
-        getProductIcon(
-          "audit",
-          activeProduct === Product.audit
-            ? Status.active
-            : activeProduct === Product.manage
-            ? Status.disabled
-            : Status.accessible
-        ),
-      ];
     }
+
+    let curateStatus;
+    let auditStatus;
+    if (activeProduct === Product.manage) {
+      curateStatus = Status.disabled;
+      auditStatus = Status.disabled;
+    } else if (activeProduct === Product.annotate) {
+      curateStatus = Status.accessible;
+      auditStatus = Status.accessible;
+    } else {
+      curateStatus =
+        activeProduct === Product.curate ? Status.active : Status.accessible;
+      auditStatus =
+        activeProduct === Product.audit ? Status.active : Status.accessible;
+    }
+
+    return [
+      getProductIcon(
+        "manage",
+        activeProduct === Product.manage ? Status.active : Status.accessible
+      ),
+      getProductIcon("curate", curateStatus),
+      getProductIcon(
+        "annotate",
+        activeProduct === Product.annotate ? Status.active : Status.disabled
+      ),
+      getProductIcon("audit", auditStatus),
+    ];
   };
 
   useEffect(() => {
