@@ -1,18 +1,19 @@
-interface TrustedServiceProps {
+interface TrustedServicePluginV1 {
   trustedService: string; // name of trusted service
   placement: string[]; // where the ui element is placed
   apiUrl: string; // url of api endpoint
-  icon?: string; // icon of ui element
+  icon: string; // icon of ui element
   tooltip?: string; // tooltip of ui element
   value?: string; // value for ui element
   message?: string; // message returned in the response
+  onClick: (collectionUid: string, imageUid: string) => void;
 }
 
 interface ApiResponse {
   message: string;
 }
 
-export default class TrustedServicePlugin implements TrustedServiceProps {
+export default class TrustedServicePlugin implements TrustedServicePluginV1 {
   trustedService: string;
 
   placement: string[];
