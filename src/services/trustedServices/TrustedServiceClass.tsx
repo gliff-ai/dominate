@@ -1,4 +1,4 @@
-interface TrustedServicePluginV1 {
+interface TrustedServiceInterface {
   trustedService: string; // name of trusted service
   placement: string[]; // where the ui element is placed
   apiUrl: string; // url of api endpoint
@@ -13,7 +13,7 @@ interface ApiResponse {
   message: string;
 }
 
-export default class TrustedServicePlugin implements TrustedServicePluginV1 {
+export class TrustedServiceClass implements TrustedServiceInterface {
   trustedService: string;
 
   placement: string[];

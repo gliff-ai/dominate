@@ -6,16 +6,16 @@ import {
 import {
   getTrustedService,
   getUiTemplate,
-} from "@/services/trustedServices/index";
+  TrustedServiceClass,
+} from "@/services/trustedServices";
 import { useAuth } from "@/hooks/use-auth";
-import TrustedServicePlugin from "@/plugins/TrustedServicePlugin";
 
 interface Props {
   children: React.ReactElement;
 }
 
 interface Context {
-  uiElements: TrustedServicePlugin[];
+  uiElements: TrustedServiceClass[];
   ready: boolean;
 }
 
@@ -33,7 +33,7 @@ function useProviderTrustedService() {
   const [trustedServices, setTrustedServices] =
     useState<TrustedService[] | null>(null);
   const [uiElements, setUiElements] =
-    useState<TrustedServicePlugin[] | null>(null);
+    useState<TrustedServiceClass[] | null>(null);
   const [ready, setReady] = useState<boolean>(false);
 
   useEffect(() => {
@@ -45,13 +45,13 @@ function useProviderTrustedService() {
   const unpackUiElements = (
     apiUrl: string,
     template: UiTemplate
-  ): TrustedServicePlugin[] => {
-    const elements: TrustedServicePlugin[] = [];
+  ): TrustedServiceClass[] => {
+    const elements: TrustedServiceClass[] = [];
     template.uiElements.forEach(({ placement, uiParams, apiEndpoint }) => {
       const { value, icon, tooltip } = uiParams;
 
       elements.push(
-        new TrustedServicePlugin(
+        new TrustedServiceClass(
           template.trustedService,
           placement,
           `${apiUrl}${apiEndpoint}`,
@@ -69,7 +69,7 @@ function useProviderTrustedService() {
 
     // When the list of trusted services has been fetched,
     // fetch the temaplates for all UI elements and
-    const elements: TrustedServicePlugin[] = [];
+    const elements: TrustedServiceClass[] = [];
     trustedServices.forEach(({ base_url }) => {
       if (!base_url || base_url === "") return;
       void getUiTemplate(base_url).then((template) => {
