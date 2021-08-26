@@ -5,6 +5,7 @@ import Annotate, { Annotations } from "@gliff-ai/annotate"; // note: Annotations
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateEtebase } from "@/etebase";
 import { Image } from "@/etebase/interfaces";
+import { TSButtonToolbar } from "@/components";
 import {
   parseStringifiedSlices,
   getImageFileInfoFromImageMeta,
@@ -102,6 +103,13 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       annotationsObject={annotationsObject}
       saveAnnotationsCallback={saveAnnotation}
       setIsLoading={props.setIsLoading}
+      trustedServiceButtonToolbar={
+        <TSButtonToolbar
+          placement="annotate"
+          collectionUid={collectionUid}
+          imageUid={imageUid}
+        />
+      }
     />
   ) : null;
 };
