@@ -12,4 +12,4 @@ export {
 
 export { GliffCard } from "./GliffCard";
 export { LoadingSpinner } from "./LoadingSpinner";
-export { TSButtonToolbar } from "./trustedService/TSButtonToolbar";
+export { TSButtonToolbar } from "./TSButtonToolbar";
