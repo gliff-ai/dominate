@@ -60,7 +60,7 @@ function ProductIcons(): ReactElement {
   // only display the AUDIT icon if on a paid tier:
   useEffect(() => {
     if (auth.userProfile?.team.tier.id > 1)
-      setProducts(["manage", "curate", "audit", "annotate"]);
+      setProducts(["manage", "curate", "annotate", "audit"]);
   }, [auth.ready]);
 
   function updateActiveProduct() {
@@ -134,32 +134,47 @@ function ProductIcons(): ReactElement {
   }
 
   const getProductIcons = () => {
-    if (activeProduct !== Product.other) {
-      let otherStatus = Status.accessible; // Every button before the active one is accessible
-      return products.map((product) => {
-        if (isActive(Product[product])) {
-          otherStatus = Status.disabled; // Every button after the active one is disabled
-          return getProductIcon(product, Status.active);
-        }
-        return getProductIcon(
+    if (activeProduct === Product.other) {
+      // If not on any product, only manage is accessible
+      return products.map((product) =>
+        getProductIcon(
           product,
-          product === "audit" && activeProduct === Product.curate
-            ? Status.accessible // as an exception to the usual rule, allow navigating to AUDIT from CURATE even though it's further down the list
-            : otherStatus
-        );
-      });
+          product === "manage" ? Status.accessible : Status.disabled
+        )
+      );
+    } else {
+      return [
+        getProductIcon(
+          "manage",
+          activeProduct === Product.manage ? Status.active : Status.accessible
+        ),
+        getProductIcon(
+          "curate",
+          activeProduct === Product.curate
+            ? Status.active
+            : activeProduct === Product.manage
+            ? Status.disabled
+            : Status.accessible
+        ),
+        getProductIcon(
+          "annotate",
+          activeProduct === Product.annotate ? Status.active : Status.disabled
+        ),
+        getProductIcon(
+          "audit",
+          activeProduct === Product.audit
+            ? Status.active
+            : activeProduct === Product.manage
+            ? Status.disabled
+            : Status.accessible
+        ),
+      ];
     }
-    return products.map((product) => {
-      if (Product[product] === Product.manage) {
-        return getProductIcon(product, Status.accessible); // If not on any product, only manage is accessible
-      }
-      return getProductIcon(product, Status.disabled);
-    });
   };
 
   useEffect(() => {
     updateActiveProduct();
-  }, [window.location.pathname]);
+  }, [window.location.pathname, products]);
 
   return <>{getProductIcons()}</>;
 }
