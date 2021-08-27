@@ -38,7 +38,7 @@ function useProviderTrustedService() {
 
   useEffect(() => {
     // Retrive the list of trusted services for the user's team
-    if (!auth.ready || trustedServices) return;
+    if (!auth.ready || trustedServices || !auth.userProfile) return;
     void getTrustedService(auth.userProfile.team.id).then(setTrustedServices);
   }, [auth]);
 
@@ -68,11 +68,12 @@ function useProviderTrustedService() {
     if (!trustedServices) return;
 
     // When the list of trusted services has been fetched,
-    // fetch the temaplates for all UI elements and
+    // fetch the temaplates for all UI elements and store them in objects
     const elements: TrustedServiceClass[] = [];
     trustedServices.forEach(({ base_url }) => {
       if (!base_url || base_url === "") return;
       void getUiTemplate(base_url).then((template) => {
+        // TODO: validate the templates against a schema!
         elements.push(...unpackUiElements(base_url, template));
       });
     });
