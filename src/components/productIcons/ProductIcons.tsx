@@ -159,7 +159,7 @@ function ProductIcons(): ReactElement {
         activeProduct === Product.audit ? Status.active : Status.accessible;
     }
 
-    return [
+    const icons = [
       getProductIcon(
         "manage",
         activeProduct === Product.manage ? Status.active : Status.accessible
@@ -169,8 +169,11 @@ function ProductIcons(): ReactElement {
         "annotate",
         activeProduct === Product.annotate ? Status.active : Status.disabled
       ),
-      getProductIcon("audit", auditStatus),
     ];
+    if (auth.userProfile?.team.tier.id > 1)
+      icons.push(getProductIcon("audit", auditStatus));
+
+    return icons;
   };
 
   useEffect(() => {
