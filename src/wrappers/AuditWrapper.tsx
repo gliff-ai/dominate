@@ -3,10 +3,10 @@ import { useParams } from "react-router-dom";
 
 import { AuditAction } from "@gliff-ai/annotate";
 import UserInterface from "@gliff-ai/audit";
-import { DominateEtebase } from "@/etebase";
+import { DominateStore } from "@/store";
 
 interface Props {
-  etebaseInstance: DominateEtebase;
+  storeInstance: DominateStore;
 }
 
 export const AuditWrapper = (props: Props): ReactElement => {
@@ -14,18 +14,18 @@ export const AuditWrapper = (props: Props): ReactElement => {
   const [audit, setAudit] = useState<AuditAction[]>(null);
 
   const fetchAudit = async () => {
-    const auditData: AuditAction[] = await props.etebaseInstance.getLatestAudit(
+    const auditData: AuditAction[] = await props.storeInstance.getLatestAudit(
       collectionUid
     );
     setAudit(auditData);
   };
 
   useEffect(() => {
-    // fetch latest ANNOTATE audit from etebase on page load:
+    // fetch latest ANNOTATE audit from store on page load:
     fetchAudit().catch((err) => {
       console.log(err);
     });
-  }, [props.etebaseInstance.ready]);
+  }, [props.storeInstance.ready]);
 
   return audit !== null ? (
     <UserInterface audit={audit} showAppBar={false} />

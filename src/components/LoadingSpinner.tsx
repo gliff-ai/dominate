@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
-import { makeStyles, Theme, CircularProgress } from "@material-ui/core";
+import { makeStyles, CircularProgress } from "@material-ui/core";
 
-const useStyle = makeStyles((theme: Theme) => ({
+const useStyle = makeStyles(() => ({
   mainDiv: {
     position: "relative",
     margin: "auto",

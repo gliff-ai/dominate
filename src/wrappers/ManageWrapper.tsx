@@ -5,7 +5,7 @@ import {
   UserInterface as Manage,
   ProvideAuth /* TODO export Services */,
 } from "@gliff-ai/manage";
-import { DominateEtebase } from "@/etebase";
+import { DominateStore } from "@/store";
 import { useAuth } from "@/hooks/use-auth";
 import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
 
@@ -13,30 +13,29 @@ declare const STORE_URL: string;
 export const API_URL = `${STORE_URL}django/api`;
 
 interface Props {
-  etebaseInstance: DominateEtebase;
+  storeInstance: DominateStore;
 }
 
 export const ManageWrapper = (props: Props): ReactElement | null => {
   const auth = useAuth();
   const navigate = useNavigate();
 
-  if (!props.etebaseInstance || !auth.user) return null;
+  if (!props.storeInstance || !auth.user) return null;
 
   const getProjects = async () => {
-    const projects = await props.etebaseInstance.getCollectionsMeta();
+    const projects = await props.storeInstance.getCollectionsMeta();
 
     return projects;
   };
 
   const getCollaboratorProject = async ({ name }) => {
-    console.log("getting projects");
-    const projects = await props.etebaseInstance.getCollectionsMeta();
+    const projects = await props.storeInstance.getCollectionsMeta();
 
     // get all members of all team projects
     const membersPromises = [];
     for (let p = 0; p < projects.length; p += 1) {
       const { uid } = projects[p];
-      membersPromises.push(props.etebaseInstance.getCollectionMembers(uid));
+      membersPromises.push(props.storeInstance.getCollectionMembers(uid));
     }
     const allMembers: string[][] = await Promise.all<string[]>(membersPromises);
 
@@ -54,7 +53,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   };
 
   const createProject = async ({ name }) => {
-    const project = await props.etebaseInstance.createCollection(name);
+    const result = await props.storeInstance.createCollection(name);
 
     return true; // Maybe not always true...
   };
@@ -76,7 +75,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   };
 
   const inviteToProject = async ({ email, projectId }) => {
-    const result = await props.etebaseInstance.inviteUserToCollection(
+    const result = await props.storeInstance.inviteUserToCollection(
       projectId,
       email
     );

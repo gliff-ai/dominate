@@ -26,8 +26,8 @@ declare const STORE_URL: string;
 const SERVER_URL = `${STORE_URL}etebase`;
 export const API_URL = `${STORE_URL}django/api`;
 
-export class DominateEtebase {
-  etebaseInstance: Account;
+export class DominateStore {
+  storeInstance: Account;
 
   ready: boolean;
 
@@ -45,10 +45,10 @@ export class DominateEtebase {
   }
 
   getUser = (): null | User => {
-    if (this.etebaseInstance?.user?.username) {
+    if (this.storeInstance?.user?.username) {
       return {
-        username: this.etebaseInstance.user.username,
-        authToken: this.etebaseInstance.authToken,
+        username: this.storeInstance.user.username,
+        authToken: this.storeInstance.authToken,
       };
     }
 
@@ -56,12 +56,12 @@ export class DominateEtebase {
   };
 
   init = async (account?: Account): Promise<null | User> => {
-    const savedSession = localStorage.getItem("etebaseInstance");
+    const savedSession = localStorage.getItem("storeInstance");
 
     if (account) {
-      this.etebaseInstance = account;
+      this.storeInstance = account;
     } else if (savedSession) {
-      this.etebaseInstance = await Account.restore(savedSession);
+      this.storeInstance = await Account.restore(savedSession);
     } else {
       this.isLoggedIn = false;
       return null;
@@ -69,13 +69,13 @@ export class DominateEtebase {
 
     this.ready = true;
 
-    this.isLoggedIn = !!this.etebaseInstance?.user?.username;
+    this.isLoggedIn = !!this.storeInstance?.user?.username;
 
-    void this.getPendingInvites().then(() => console.log("Checked invites"));
+    void this.getPendingInvites().catch((e) => console.log(e));
 
     return {
-      username: this.etebaseInstance.user.username,
-      authToken: this.etebaseInstance.authToken,
+      username: this.storeInstance.user.username,
+      authToken: this.storeInstance.authToken,
     };
   };
 
@@ -83,33 +83,29 @@ export class DominateEtebase {
     await this.init();
 
     if (!this.isLoggedIn) {
-      this.etebaseInstance = await Account.login(
-        username,
-        password,
-        SERVER_URL
-      );
+      this.storeInstance = await Account.login(username, password, SERVER_URL);
 
       this.ready = true;
 
-      void this.getPendingInvites().then(() => console.log("Checked invites"));
+      void this.getPendingInvites().catch((e) => console.log(e));
 
-      const newSession = await this.etebaseInstance.save();
+      const newSession = await this.storeInstance.save();
 
       // TODO: encrypt this!
-      localStorage.setItem("etebaseInstance", newSession);
+      localStorage.setItem("storeInstance", newSession);
 
-      await this.etebaseInstance.fetchToken();
+      await this.storeInstance.fetchToken();
     }
     this.isLoggedIn = true;
 
     return {
-      username: this.etebaseInstance.user.username,
-      authToken: this.etebaseInstance.authToken,
+      username: this.storeInstance.user.username,
+      authToken: this.storeInstance.authToken,
     };
   };
 
   signup = async (email: string, password: string): Promise<User> => {
-    this.etebaseInstance = await Account.signup(
+    this.storeInstance = await Account.signup(
       {
         username: toBase64(email),
         email,
@@ -118,28 +114,28 @@ export class DominateEtebase {
       SERVER_URL
     );
 
-    const newSession = await this.etebaseInstance.save();
+    const newSession = await this.storeInstance.save();
 
     // TODO: encrypt this!
-    localStorage.setItem("etebaseInstance", newSession);
+    localStorage.setItem("storeInstance", newSession);
 
     this.isLoggedIn = true;
 
     return {
-      username: this.etebaseInstance.user.username,
-      authToken: this.etebaseInstance.authToken,
+      username: this.storeInstance.user.username,
+      authToken: this.storeInstance.authToken,
     };
   };
 
   logout = async (): Promise<boolean> => {
-    await this.etebaseInstance.logout();
-    localStorage.removeItem("etebaseInstance");
+    await this.storeInstance.logout();
+    localStorage.removeItem("storeInstance");
     this.isLoggedIn = false;
     return true;
   };
 
   changePassword = async (newPassword: string): Promise<void> =>
-    this.etebaseInstance.changePassword(newPassword);
+    this.storeInstance.changePassword(newPassword);
 
   #hashRecoveryPhrase = (phrase: string): Uint8Array =>
     sodium.crypto_generichash(32, sodium.from_string(phrase.replace(/ /g, "")));
@@ -180,7 +176,7 @@ export class DominateEtebase {
   };
 
   getPendingInvites = async (): Promise<void> => {
-    const invitationManager = this.etebaseInstance.getInvitationManager();
+    const invitationManager = this.storeInstance.getInvitationManager();
 
     const invitations = await invitationManager.listIncoming().then(
       (response) => response.data,
@@ -188,9 +184,7 @@ export class DominateEtebase {
     );
 
     for (const invite of invitations) {
-      void invitationManager
-        .accept(invite)
-        .then(() => console.log("Accepted Invite"));
+      void invitationManager.accept(invite).catch((e) => console.log(e));
     }
   };
 
@@ -208,9 +202,9 @@ export class DominateEtebase {
   };
 
   getImagesMeta = async (collectionUid: string): Promise<GalleryTile[]> => {
-    if (!this.etebaseInstance) throw new Error("No etebase instance");
+    if (!this.storeInstance) throw new Error("No store instance");
 
-    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collectionManager = this.storeInstance.getCollectionManager();
 
     const collection = await collectionManager.fetch(collectionUid);
     const json = await collection.getContent(OutputFormat.String);
@@ -221,9 +215,9 @@ export class DominateEtebase {
     type = "gliff.gallery"
   ): Promise<GalleryMeta[]> => {
     if (this.collections.length > 0) return this.collectionsMeta;
-    if (!this.etebaseInstance) throw new Error("No etebase instance");
+    if (!this.storeInstance) throw new Error("No store instance");
 
-    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collectionManager = this.storeInstance.getCollectionManager();
 
     const { data } = await collectionManager.list(type);
     this.collectionsMeta = data.map(this.wrangleGallery);
@@ -232,9 +226,9 @@ export class DominateEtebase {
 
   getCollectionMembers = async (collectionUid: string): Promise<string[]> => {
     if (this.collections.length > 0) return null;
-    if (!this.etebaseInstance) throw new Error("No etebase instance");
+    if (!this.storeInstance) throw new Error("No store instance");
 
-    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collectionManager = this.storeInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const memberManager = collectionManager.getMemberManager(collection);
     const members = await memberManager.list();
@@ -243,7 +237,7 @@ export class DominateEtebase {
   };
 
   createCollection = async (name: string): Promise<void> => {
-    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collectionManager = this.storeInstance.getCollectionManager();
 
     // Create, encrypt and upload a new collection
     const collection = await collectionManager.create(
@@ -266,10 +260,10 @@ export class DominateEtebase {
   ): Promise<boolean> => {
     // You can in theory invite ANY user to a collection with this, but the UI currently limits it to team members
 
-    if (!this.etebaseInstance) throw new Error("No etebase instance");
-    const etebase = this.etebaseInstance;
+    if (!this.storeInstance) throw new Error("No store instance");
+    const store = this.storeInstance;
 
-    const collectionManager = etebase.getCollectionManager();
+    const collectionManager = store.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const memberManager = collectionManager.getMemberManager(collection);
     const members = await memberManager.list();
@@ -283,7 +277,7 @@ export class DominateEtebase {
       }
     }
 
-    const invitationManager = etebase.getInvitationManager();
+    const invitationManager = store.getInvitationManager();
 
     // Fetch their public key
     const user2 = await invitationManager.fetchUserProfile(userEmail);
@@ -303,7 +297,7 @@ export class DominateEtebase {
       );
 
       return true;
-    } catch (e: any) {
+    } catch (e) {
       console.log(e);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (e?.content?.code) {
@@ -318,8 +312,8 @@ export class DominateEtebase {
   };
 
   getItemManager = async (collectionUid: string): Promise<ItemManager> => {
-    if (!this.etebaseInstance) throw new Error("No etebase instance");
-    const collectionManager = this.etebaseInstance.getCollectionManager();
+    if (!this.storeInstance) throw new Error("No store instance");
+    const collectionManager = this.storeInstance.getCollectionManager();
 
     const collection = await collectionManager.fetch(collectionUid);
     return collectionManager.getItemManager(collection);
@@ -331,7 +325,7 @@ export class DominateEtebase {
     tile: GalleryTile
   ): Promise<void> => {
     // adds a new GalleryTile object to the gallery collection's content JSON
-    // uses etebase transactions to prevent race conditions if multiple images are uploaded at once
+    // uses store transactions to prevent race conditions if multiple images are uploaded at once
     // (if race conditions occur, it re-fetches and tries again until it works)
 
     const collection = await collectionManager.fetch(collectionUid);
@@ -357,7 +351,7 @@ export class DominateEtebase {
     imageContent: string | Uint8Array
   ): Promise<void> => {
     try {
-      // Create/upload new etebase item for the image:
+      // Create/upload new store item for the image:
       const createdTime = new Date().getTime();
       // Retrieve itemManager
       const itemManager = await this.getItemManager(collectionUid);
@@ -387,7 +381,7 @@ export class DominateEtebase {
         auditUID: null,
       };
       await this.appendGalleryTile(
-        this.etebaseInstance.getCollectionManager(),
+        this.storeInstance.getCollectionManager(),
         collectionUid,
         newTile
       );
@@ -402,7 +396,7 @@ export class DominateEtebase {
     newLabels: string[]
   ): Promise<void> => {
     // get gallery items metadata from gallery collection:
-    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collectionManager = this.storeInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const oldContent = await collection.getContent(OutputFormat.String);
 
@@ -415,7 +409,7 @@ export class DominateEtebase {
       return item;
     });
 
-    // save updated metadata in etebase:
+    // save updated metadata in store:
     await collection.setContent(JSON.stringify(newContent));
     await collectionManager.upload(collection);
   };
@@ -425,7 +419,7 @@ export class DominateEtebase {
     imageUids: string[]
   ): Promise<void> => {
     // get gallery items metadata from gallery collection:
-    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collectionManager = this.storeInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const oldContentString = await collection.getContent(OutputFormat.String);
     const oldContent = JSON.parse(oldContentString) as GalleryTile[];
@@ -447,7 +441,7 @@ export class DominateEtebase {
       (item) => !imageUids.includes(item.imageUID)
     );
 
-    // save updated metadata in etebase:
+    // save updated metadata in store:
     await collection.setContent(JSON.stringify(newContent));
     await collectionManager.upload(collection);
 
@@ -488,7 +482,7 @@ export class DominateEtebase {
   ): Promise<Annotations> => {
     // retrieves the Annotations object for the specified image
 
-    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collectionManager = this.storeInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const content = JSON.parse(
       await collection.getContent(OutputFormat.String)
@@ -504,8 +498,6 @@ export class DominateEtebase {
     const annotationContent = await annotationItem.getContent(
       OutputFormat.String
     );
-
-    console.log(JSON.parse(annotationContent));
 
     return new Annotations(JSON.parse(annotationContent));
   };
@@ -546,7 +538,7 @@ export class DominateEtebase {
     await itemManager.batch([annotationsItem, auditItem]);
 
     // Update collection content JSON:
-    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collectionManager = this.storeInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
@@ -565,7 +557,7 @@ export class DominateEtebase {
     annotationData: Annotation[],
     auditData: AuditAction[]
   ): Promise<void> => {
-    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collectionManager = this.storeInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
@@ -617,7 +609,7 @@ export class DominateEtebase {
 
   getLatestAudit = async (collectionUid: string): Promise<AuditAction[]> => {
     // only necessary until we make a project level audit page, where all ANNOTATE audits will be listed
-    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collectionManager = this.storeInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const collectionContent = await collection.getContent(OutputFormat.String);
     const tiles = (JSON.parse(collectionContent) as GalleryTile[]).filter(
