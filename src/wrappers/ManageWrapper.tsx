@@ -87,6 +87,10 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     // Open the selected project in curate
     navigate(`/curate/${projectUid}`);
 
+  const launchAudit = (projectUid: string): void =>
+    // Open the selected project in audit
+    navigate(`/audit/${projectUid}`);
+
   // These require trailing slashes otherwise Safari won't send the Auth Token (as django will 301)
   const services = {
     queryTeam: "GET /team/",
@@ -109,6 +113,9 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
         services={services}
         apiUrl={API_URL}
         launchCurateCallback={launchCurate}
+        launchAuditCallback={
+          auth.userProfile.team.tier.id > 1 ? launchAudit : null
+        }
       />
     </ProvideAuth>
   );

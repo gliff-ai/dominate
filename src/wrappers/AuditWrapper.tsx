@@ -1,9 +1,9 @@
 import { ReactElement, useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 
-import { AuditAction } from "@gliff-ai/annotate";
-import UserInterface from "@gliff-ai/audit";
+import UserInterface, { AnnotationSession } from "@gliff-ai/audit";
 import { DominateStore } from "@/store";
+import { useAuth } from "@/hooks/use-auth";
 
 interface Props {
   storeInstance: DominateStore;
@@ -11,13 +11,13 @@ interface Props {
 
 export const AuditWrapper = (props: Props): ReactElement => {
   const { collectionUid } = useParams(); // uid of selected gallery, from URL
-  const [audit, setAudit] = useState<AuditAction[]>(null);
+  const auth = useAuth();
+  const navigate = useNavigate();
+  const [sessions, setSessions] = useState<AnnotationSession[]>(null);
 
   const fetchAudit = async () => {
-    const auditData: AuditAction[] = await props.storeInstance.getLatestAudit(
-      collectionUid
-    );
-    setAudit(auditData);
+    const sessionsData = await props.storeInstance.getAudits(collectionUid);
+    setSessions(sessionsData);
   };
 
   useEffect(() => {
@@ -27,8 +27,15 @@ export const AuditWrapper = (props: Props): ReactElement => {
     });
   }, [props.storeInstance.ready]);
 
-  return audit !== null ? (
-    <UserInterface audit={audit} showAppBar={false} />
+  useEffect(() => {
+    if (auth.userProfile?.team.tier.id < 2) {
+      // no AUDIT on free tier
+      navigate("/manage");
+    }
+  }, [auth.ready]);
+
+  return sessions !== null ? (
+    <UserInterface sessions={sessions} showAppBar={false} />
   ) : (
     <></>
   );

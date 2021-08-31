@@ -10,6 +10,7 @@ import {
   CollectionAccessLevel,
 } from "etebase";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
+import { AnnotationSession } from "@gliff-ai/audit";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
 import { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
@@ -611,18 +612,37 @@ export class DominateStore {
     } as Image;
   };
 
-  getLatestAudit = async (collectionUid: string): Promise<AuditAction[]> => {
-    // only necessary until we make a project level audit page, where all ANNOTATE audits will be listed
+  getAudits = async (collectionUid: string): Promise<AnnotationSession[]> => {
+    // Retrieve all ANNOTATE session audits for the given collection
+
+    // get collection content JSON:
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const collectionContent = await collection.getContent(OutputFormat.String);
+    // pick out the items that have audits:
     const tiles = (JSON.parse(collectionContent) as GalleryTile[]).filter(
       (tile) => tile.auditUID !== null
     );
-    const { auditUID } = tiles[tiles.length - 1];
-    const auditItem = await this.getItem(collectionUid, auditUID);
-    const audit: string = await auditItem.getContent(OutputFormat.String);
-    return JSON.parse(audit) as AuditAction[];
+
+    // fetch the audits and parse as JSON:
+    const itemManager = collectionManager.getItemManager(collection);
+    const auditItems = (
+      await itemManager.fetchMulti(tiles.map((tile) => tile.auditUID))
+    ).data;
+    const auditStrings: string[] = await Promise.all(
+      auditItems.map((audit) => audit.getContent(OutputFormat.String))
+    );
+    const audits = auditStrings.map(
+      (audit) => JSON.parse(audit) as AuditAction[]
+    );
+
+    const sessions = tiles.map((tile, i) => ({
+      imagename: tile.metadata.imageName,
+      username: this.getUser().username,
+      timestamp: audits[i][0].timestamp,
+      audit: audits[i],
+    }));
+    return sessions;
   };
 }
 
