@@ -1,7 +1,10 @@
+import { apiRequest } from "@/api";
+
 interface TrustedServiceInterface {
   trustedService: string; // name of trusted service
   placement: string[]; // where the ui element is placed
-  apiUrl: string; // url of api endpoint
+  baseUrl: string; // base url of api endpoint
+  apiEndpoint: string;
   icon: string; // icon of ui element
   tooltip?: string; // tooltip of ui element
   value?: string; // value for ui element
@@ -18,7 +21,9 @@ export class TrustedServiceClass implements TrustedServiceInterface {
 
   placement: string[];
 
-  apiUrl: string;
+  baseUrl: string;
+
+  apiEndpoint: string;
 
   icon: string;
 
@@ -31,14 +36,16 @@ export class TrustedServiceClass implements TrustedServiceInterface {
   constructor(
     trustedService: string,
     placement: string[],
-    apiUrl: string,
+    baseUrl: string,
+    apiEndpoint: string,
     value?: string,
     icon?: string,
     tooltip?: string
   ) {
     this.trustedService = trustedService;
     this.placement = placement;
-    this.apiUrl = apiUrl;
+    this.baseUrl = baseUrl;
+    this.apiEndpoint = apiEndpoint;
     this.value = value;
     this.icon = icon;
     this.tooltip = tooltip;
@@ -46,13 +53,12 @@ export class TrustedServiceClass implements TrustedServiceInterface {
   }
 
   onClick = (collectionUid: string, imageUid: string): void => {
-    fetch(this.apiUrl, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ collectionUid, imageUid }),
-    })
-      .then((response) => response.json())
-      .then((data: ApiResponse) => console.log(data.message))
-      .catch((e) => console.log(e));
+    void apiRequest<ApiResponse>(
+      this.apiEndpoint,
+      "POST",
+      { collectionUid, imageUid },
+      null,
+      this.baseUrl
+    ).then(({ message }) => console.log(message));
   };
 }

@@ -54,7 +54,8 @@ function useProviderTrustedService() {
         new TrustedServiceClass(
           template.trustedService,
           placement,
-          `${apiUrl}${apiEndpoint}`,
+          apiUrl,
+          apiEndpoint,
           value,
           icon,
           tooltip
