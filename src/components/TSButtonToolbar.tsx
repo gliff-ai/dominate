@@ -1,4 +1,4 @@
-import { ReactElement, useState, MouseEvent } from "react";
+import { ReactElement, useState, MouseEvent, useEffect } from "react";
 import { makeStyles, Popover, TooltipProps } from "@material-ui/core";
 import { BaseIconButton } from "@gliff-ai/style";
 import { useTrustedService } from "@/hooks/use-trustedService";
@@ -23,9 +23,11 @@ interface Props {
 export const TSButtonToolbar = (props: Props): ReactElement | null => {
   const trustedService = useTrustedService();
   const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
+  const [isEnabled, setIsEnabled] = useState(false);
   const classes = useStyle();
 
   const handleClick = (event: MouseEvent<HTMLButtonElement>): void => {
+    if (!isEnabled) return;
     setAnchorEl(event.currentTarget);
   };
 
@@ -34,11 +36,15 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
   };
 
   const selectedElements = () =>
+    // Select ui elements for the active product
     trustedService.uiElements.filter((ts) =>
       ts.placement.includes(props.placement)
     );
 
-  const isEnabled = (): boolean => selectedElements().length && props.enabled;
+  useEffect(() => {
+    // Update isEnabled
+    setIsEnabled(selectedElements().length && props.enabled);
+  }, [trustedService.uiElements, props.enabled]);
 
   return trustedService.ready ? (
     <>
@@ -48,7 +54,7 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
           icon: imgSrc("annotate"),
         }} // TODO: replace icon!
         onClick={handleClick}
-        enabled={isEnabled()}
+        enabled={isEnabled}
         tooltipPlacement={props.tooltipPlacement}
       />
       <Popover
@@ -64,8 +70,11 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
               name: ts.tooltip,
               icon: imgSrc(ts.icon),
             }}
-            onClick={() => ts.onClick(props.collectionUid, props.imageUid)}
-            enabled={isEnabled()}
+            onClick={() => {
+              if (!isEnabled) return;
+              ts.onClick(props.collectionUid, props.imageUid);
+            }}
+            enabled={isEnabled}
             tooltipPlacement={props.tooltipPlacement}
           />
         ))}
