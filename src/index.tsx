@@ -6,7 +6,7 @@ import { CaptureConsole } from "@sentry/integrations";
 import LogRocket from "logrocket";
 import setupLogRocketReact from "logrocket-react";
 import { createGenerateClassName, StylesProvider } from "@material-ui/core";
-import { DominateEtebase } from "@/etebase";
+import { DominateStore } from "@/store";
 import UserInterface from "@/ui";
 import { ProvideAuth } from "@/hooks/use-auth";
 
@@ -24,11 +24,11 @@ if (IS_MONITORED) {
     tunnel: `${STORE_URL}django/api/tunnel/`,
 
     integrations: [
-      //   new Integrations.BrowserTracing(),
+      new Integrations.BrowserTracing(),
       /* eslint-disable @typescript-eslint/no-unsafe-call */
       new CaptureConsole({
         // options: ['log', 'info', 'warn', 'error', 'debug', 'assert']
-        levels: ["assert"],
+        levels: ["error", "assert"],
       }),
       /* eslint-enable @typescript-eslint/no-unsafe-call */
     ],
@@ -62,7 +62,7 @@ if (IS_MONITORED) {
   });
 }
 
-const etebaseInstance = new DominateEtebase();
+const storeInstance = new DominateStore();
 
 const generateClassName = createGenerateClassName({
   seed: "dominate",
@@ -71,9 +71,9 @@ const generateClassName = createGenerateClassName({
 
 ReactDOM.render(
   <Sentry.ErrorBoundary fallback={<>An error has occurred</>} showDialog>
-    <ProvideAuth etebaseInstance={etebaseInstance}>
+    <ProvideAuth storeInstance={storeInstance}>
       <StylesProvider generateClassName={generateClassName}>
-        <UserInterface etebaseInstance={etebaseInstance} />
+        <UserInterface storeInstance={storeInstance} />
       </StylesProvider>
     </ProvideAuth>
   </Sentry.ErrorBoundary>,

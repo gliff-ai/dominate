@@ -2,11 +2,11 @@ import { ReactElement, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import UserInterface, { AnnotationSession } from "@gliff-ai/audit";
-import { DominateEtebase } from "@/etebase";
+import { DominateStore } from "@/store";
 import { useAuth } from "@/hooks/use-auth";
 
 interface Props {
-  etebaseInstance: DominateEtebase;
+  storeInstance: DominateStore;
 }
 
 export const AuditWrapper = (props: Props): ReactElement => {
@@ -16,16 +16,16 @@ export const AuditWrapper = (props: Props): ReactElement => {
   const [sessions, setSessions] = useState<AnnotationSession[]>(null);
 
   const fetchAudit = async () => {
-    const sessionsData = await props.etebaseInstance.getAudits(collectionUid);
+    const sessionsData = await props.storeInstance.getAudits(collectionUid);
     setSessions(sessionsData);
   };
 
   useEffect(() => {
-    // fetch latest ANNOTATE audit from etebase on page load:
+    // fetch latest ANNOTATE audit from store on page load:
     fetchAudit().catch((err) => {
       console.log(err);
     });
-  }, [props.etebaseInstance.ready]);
+  }, [props.storeInstance.ready]);
 
   useEffect(() => {
     if (auth.userProfile?.team.tier.id < 2) {

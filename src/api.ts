@@ -1,5 +1,5 @@
 import axios, { AxiosRequestConfig, AxiosResponse, Method } from "axios";
-import { API_URL } from "@/etebase";
+import { API_URL } from "@/store";
 
 function apiRequest<T>(
   path: string,

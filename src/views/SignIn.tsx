@@ -52,7 +52,7 @@ export function SignIn(): JSX.Element {
 
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState("");
-  const [etebaseError, setEtebaseError] = useState({});
+  const [storeError, setStoreError] = useState({});
   const [login, setLogin] = useState({
     email: "",
     password: "",
@@ -116,7 +116,7 @@ export function SignIn(): JSX.Element {
 
           if (e instanceof Error) {
             // eslint-disable-next-line no-console
-            setEtebaseError(e.message);
+            setStoreError(e.message);
           }
         });
     }
@@ -195,7 +195,7 @@ export function SignIn(): JSX.Element {
         handleClose={handleClose}
         transition={transition}
         messageText={
-          String(etebaseError).includes("Wrong password for user.")
+          String(storeError).includes("Wrong password for user.")
             ? "Login Failed. Your username and/or password do not match"
             : "There was an error logging you in. Please try again"
         }

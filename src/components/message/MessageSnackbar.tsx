@@ -1,3 +1,4 @@
+import { ReactElement } from "react";
 import SVG from "react-inlinesvg";
 import { IconButton, makeStyles } from "@material-ui/core";
 import { BaseSnackbar, BaseSnackbarProps, theme } from "@gliff-ai/style";
@@ -41,7 +42,7 @@ function MessageSnackbar({
   handleClose,
   messageText,
   transition,
-}: Props) {
+}: Props): ReactElement {
   const classes = useStyle();
   return (
     <BaseSnackbar
