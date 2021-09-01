@@ -43,6 +43,7 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
 
   useEffect(() => {
     // Update isEnabled
+    if (!trustedService.ready) return;
     setIsEnabled(selectedElements().length && props.enabled);
   }, [trustedService.uiElements, props.enabled]);
 
@@ -66,6 +67,7 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
       >
         {selectedElements().map((ts) => (
           <BaseIconButton
+            key={ts.tooltip}
             tooltip={{
               name: ts.tooltip,
               icon: imgSrc(ts.icon),
