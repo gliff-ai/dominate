@@ -3,8 +3,8 @@ import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { CssBaseline, ThemeProvider } from "@material-ui/core";
 import CookieConsent from "react-cookie-consent";
 import { theme } from "@gliff-ai/style";
-import { DominateEtebase } from "@/etebase";
-import { Annotate, Curate, Manage } from "@/wrappers";
+import { DominateStore } from "@/store";
+import { Annotate, Audit, Curate, Manage } from "@/wrappers";
 import {
   Account,
   RecoverAccount,
@@ -27,11 +27,11 @@ import { BasicPage } from "@/views/BasicPage";
 import { PrivateRoute } from "./wrappers/PrivateRouter";
 
 interface Props {
-  etebaseInstance: DominateEtebase;
+  storeInstance: DominateStore;
 }
 
 const UserInterface = (props: Props): ReactElement | null => {
-  const { etebaseInstance } = props;
+  const { storeInstance } = props;
   const [task, setTask] = useState<Task>({
     isLoading: false,
     description: "",
@@ -71,7 +71,7 @@ const UserInterface = (props: Props): ReactElement | null => {
               path="curate/:collectionUid"
               element={
                 <Curate
-                  etebaseInstance={etebaseInstance}
+                  storeInstance={storeInstance}
                   setIsLoading={setIsLoading}
                   setTask={setTask}
                 />
@@ -81,20 +81,29 @@ const UserInterface = (props: Props): ReactElement | null => {
               path="annotate/:collectionUid/:imageUid"
               element={
                 <Annotate
-                  etebaseInstance={etebaseInstance}
+                  storeInstance={storeInstance}
                   setIsLoading={setIsLoading}
                 />
               }
             />
             <PrivateRoute
               path="manage/*"
-              element={<Manage etebaseInstance={etebaseInstance} />}
+              element={<Manage storeInstance={storeInstance} />}
+            />
+            <PrivateRoute
+              path="audit/:collectionUid"
+              element={
+                <Audit
+                  storeInstance={storeInstance}
+                  // setIsLoading={setIsLoading}
+                />
+              }
             />
             <Route
               path="recover/*"
               element={
                 <BasicPage
-                  view={<RecoverAccount etebaseInstance={etebaseInstance} />}
+                  view={<RecoverAccount storeInstance={storeInstance} />}
                   title={<>Recover my Account</>}
                 />
               }
@@ -133,7 +142,7 @@ const UserInterface = (props: Props): ReactElement | null => {
               path="/reset-password"
               element={
                 <BasicPage
-                  view={<ResetPassword etebaseInstance={etebaseInstance} />}
+                  view={<ResetPassword storeInstance={storeInstance} />}
                   title={<>Change Password</>}
                   showBackButton
                 />

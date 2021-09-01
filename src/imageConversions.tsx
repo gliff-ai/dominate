@@ -1,5 +1,5 @@
 import { ImageFileInfo } from "@gliff-ai/upload";
-import { ImageMeta } from "@/etebase/interfaces";
+import { ImageMeta } from "@/store/interfaces";
 
 function getImageMetaFromImageFileInfo(
   imageFileInfo: ImageFileInfo

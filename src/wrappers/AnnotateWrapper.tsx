@@ -3,8 +3,8 @@ import { useParams } from "react-router-dom";
 
 import Annotate, { Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
 import { ImageFileInfo } from "@gliff-ai/upload";
-import { DominateEtebase } from "@/etebase";
-import { Image } from "@/etebase/interfaces";
+import { DominateStore } from "@/store";
+import { Image } from "@/store/interfaces";
 import { TSButtonToolbar } from "@/components";
 import {
   parseStringifiedSlices,
@@ -12,12 +12,12 @@ import {
 } from "@/imageConversions";
 
 interface Props {
-  etebaseInstance: DominateEtebase;
+  storeInstance: DominateStore;
   setIsLoading: (isLoading: boolean) => void;
 }
 
 export const AnnotateWrapper = (props: Props): ReactElement | null => {
-  if (!props.etebaseInstance) return null;
+  if (!props.storeInstance) return null;
 
   const { collectionUid, imageUid } = useParams();
   const [imageItem, setImageItem] = useState<Image | null>(null);
@@ -32,7 +32,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
 
   const getImage = (): void => {
     // Retrieve image item and set it as state
-    props.etebaseInstance
+    props.storeInstance
       .getImage(collectionUid, imageUid)
       .then((image) => {
         setImageItem(image);
@@ -42,10 +42,9 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
 
   const getAnnotationsObject = (): void => {
     // Set state for annotation items.
-    props.etebaseInstance
+    props.storeInstance
       .getAnnotationsObject(collectionUid, imageUid)
       .then((retrievedAnnotationsObject) => {
-        console.log("Setting annotationsObject");
         setAnnotationsObject(retrievedAnnotationsObject);
       })
       .catch((e) => console.log(e));
@@ -54,16 +53,17 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const saveAnnotation = (newAnnotationsObject: Annotations): void => {
     // Save annotations data
     const annotationsData = newAnnotationsObject.getAllAnnotations();
+    const auditData = newAnnotationsObject.getAuditObject();
 
     if (annotationsObject === null) {
       // If an annotation item for the given image does not exist, create one.
-      props.etebaseInstance
-        .createAnnotation(collectionUid, imageUid, annotationsData)
+      props.storeInstance
+        .createAnnotation(collectionUid, imageUid, annotationsData, auditData)
         .catch((e) => console.log(e));
     } else {
       // Otherwise update it.
-      props.etebaseInstance
-        .updateAnnotation(collectionUid, imageUid, annotationsData)
+      props.storeInstance
+        .updateAnnotation(collectionUid, imageUid, annotationsData, auditData)
         .catch((e) => console.log(e));
     }
   };

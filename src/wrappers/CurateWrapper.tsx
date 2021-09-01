@@ -16,8 +16,8 @@ import Curate from "@gliff-ai/curate";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
-import { DominateEtebase } from "@/etebase";
-import { Slices, MetaItem, GalleryTile, Image } from "@/etebase/interfaces";
+import { DominateStore } from "@/store";
+import { Slices, MetaItem, GalleryTile, Image } from "@/store/interfaces";
 import { Task, TSButtonToolbar } from "@/components";
 
 import {
@@ -41,18 +41,18 @@ const useStyles = () =>
   }));
 
 interface Props {
-  etebaseInstance: DominateEtebase;
+  storeInstance: DominateStore;
   setIsLoading: (isLoading: boolean) => void;
   setTask: (task: Task) => void;
 }
 
 export const CurateWrapper = (props: Props): ReactElement | null => {
-  if (!props.etebaseInstance) return null;
+  if (!props.storeInstance) return null;
   const navigate = useNavigate();
   const auth = useAuth();
 
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
-  const { collectionUid } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
+  const { collectionUid } = useParams(); // uid of selected gallery, from URL
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
   const [multi, setMulti] = useState<boolean>(false);
   const [showDialog, setShowDialog] = useState<boolean>(false);
@@ -62,8 +62,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   }, []);
 
   const fetchImageItems = (): void => {
-    // fetches images via DominateEtebase, and assigns them to imageItems state
-    props.etebaseInstance
+    // fetches images via DominateStore, and assigns them to imageItems state
+    props.storeInstance
       .getImagesMeta(collectionUid)
       .then((items) => {
         setCollectionContent(items);
@@ -84,13 +84,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       });
   };
 
-  const fetchGalleries = (): void => {
-    // fetches galleries via DominateEtebase, and assigns them to galleryItems state
-    props.etebaseInstance.getCollectionsMeta("gliff.gallery").catch((err) => {
-      console.log(err);
-    });
-  };
-
   const addImageToGallery = async (
     imageFileInfo: ImageFileInfo,
     slicesData: Slices
@@ -108,7 +101,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     const thumbnailB64 = canvas.toDataURL();
 
     // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
-    await props.etebaseInstance.createImage(
+    await props.storeInstance.createImage(
       collectionUid,
       imageMeta,
       thumbnailB64,
@@ -119,7 +112,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
-    props.etebaseInstance
+    props.storeInstance
       .setImageLabels(collectionUid, imageUid, newLabels)
       .then(fetchImageItems)
       .catch((error) => {
@@ -128,7 +121,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   const deleteImageCallback = (imageUids: string[]): void => {
-    props.etebaseInstance
+    props.storeInstance
       .deleteImages(collectionUid, imageUids)
       .catch((error) => {
         console.log(error);
@@ -142,15 +135,13 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const downloadDataset = async (): Promise<void> => {
     const zip = new JSZip();
 
-    // retrieve Image items and their names from etebase:
+    // retrieve Image items and their names from store:
     // TODO: store image names in Image items!
     const imagePromises: Promise<Image>[] = [];
     const imageNames: string[] = [];
     for (const tile of collectionContent) {
       const imageUid = tile.imageUID;
-      imagePromises.push(
-        props.etebaseInstance.getImage(collectionUid, imageUid)
-      );
+      imagePromises.push(props.storeInstance.getImage(collectionUid, imageUid));
       imageNames.push(tile.metadata.imageName);
     }
     const images: Image[] = await Promise.all(imagePromises);
@@ -172,7 +163,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }
     }
 
-    console.log(multi);
     if (multi) {
       // put them all in the root of the zip along with a JSON file describing labels:
       type JSONImage = { name: string; labels: string[] };
@@ -231,7 +221,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
     // compress data and save to disk:
     const date = new Date();
-    const projectName = await props.etebaseInstance
+    const projectName = await props.storeInstance
       .getCollectionsMeta()
       .then(
         (collections) =>
@@ -272,20 +262,13 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     void downloadDataset();
   };
 
-  // runs once on page load, would have been a componentDidMount if this were a class component:
-  useEffect(() => {
-    if (props.etebaseInstance.ready) {
-      fetchGalleries();
-    }
-  }, [props.etebaseInstance.ready]);
-
   useEffect(() => {
     if (collectionUid) {
       fetchImageItems();
     }
   }, [collectionUid]);
 
-  if (!props.etebaseInstance || !auth.user || !collectionUid) return null;
+  if (!props.storeInstance || !auth.user || !collectionUid) return null;
 
   const classes = useStyles()();
 

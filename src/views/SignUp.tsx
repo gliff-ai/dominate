@@ -65,7 +65,7 @@ export const SignUp = (props: Props): JSX.Element => {
   const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [etebaseError, setEtebaseError] = useState({});
+  const [storeError, setStoreError] = useState({});
   const [termsAndConditionsError, setTermsAndConditionsError] = useState("");
   const [recoveryKey, setRecoveryKey] = useState<string[] | null>(null);
   const [user, setUser] = useState<{ email: string; id: number } | null>(null);
@@ -181,7 +181,7 @@ export const SignUp = (props: Props): JSX.Element => {
       clearErrors();
 
       if (e instanceof Error) {
-        setEtebaseError(e.message);
+        setStoreError(e.message);
       }
     }
   };
@@ -324,7 +324,7 @@ export const SignUp = (props: Props): JSX.Element => {
         handleClose={handleClose}
         transition={transition}
         messageText={
-          String(etebaseError).includes("duplicate key")
+          String(storeError).includes("duplicate key")
             ? "Looks like that account already exists, try another email!"
             : "There was an error creating an account"
         }
