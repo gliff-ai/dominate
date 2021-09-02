@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, ReactNode, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import {
@@ -18,7 +18,7 @@ import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import { DominateStore } from "@/store";
 import { Slices, MetaItem, GalleryTile, Image } from "@/store/interfaces";
-import { Task } from "@/components";
+import { Task, TSButtonToolbar } from "@/components";
 
 import {
   stringifySlices,
@@ -284,6 +284,15 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         showAppBar={false}
         setIsLoading={props.setIsLoading}
         setTask={props.setTask}
+        trustedServiceButtonToolbar={(imageUid: string, enabled: boolean) => (
+          <TSButtonToolbar
+            placement="curate"
+            tooltipPlacement="top"
+            collectionUid={collectionUid}
+            imageUid={imageUid}
+            enabled={enabled}
+          />
+        )}
       />
       <Dialog open={showDialog}>
         <Card>

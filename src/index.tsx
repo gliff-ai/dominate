@@ -9,6 +9,7 @@ import { createGenerateClassName, StylesProvider } from "@material-ui/core";
 import { DominateStore } from "@/store";
 import UserInterface from "@/ui";
 import { ProvideAuth } from "@/hooks/use-auth";
+import { ProvideTrustedService } from "@/hooks/use-trustedService";
 
 declare const STORE_URL: string;
 declare const IS_MONITORED: boolean;
@@ -72,9 +73,11 @@ const generateClassName = createGenerateClassName({
 ReactDOM.render(
   <Sentry.ErrorBoundary fallback={<>An error has occurred</>} showDialog>
     <ProvideAuth storeInstance={storeInstance}>
-      <StylesProvider generateClassName={generateClassName}>
-        <UserInterface storeInstance={storeInstance} />
-      </StylesProvider>
+      <ProvideTrustedService>
+        <StylesProvider generateClassName={generateClassName}>
+          <UserInterface storeInstance={storeInstance} />
+        </StylesProvider>
+      </ProvideTrustedService>
     </ProvideAuth>
   </Sentry.ErrorBoundary>,
   document.getElementById("react-container")
