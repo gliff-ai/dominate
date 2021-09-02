@@ -8,10 +8,10 @@ export interface UiElement {
   placement: string[];
   apiEndpoint: string;
   uiParams: {
-    tag: string;
+    tag?: string;
     value?: string;
-    icon?: string;
-    tooltip?: string;
+    icon: string;
+    tooltip: string;
   };
 }
 

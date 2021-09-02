@@ -38,18 +38,18 @@ export class TrustedServiceClass implements TrustedServiceInterface {
     placement: string[],
     baseUrl: string,
     apiEndpoint: string,
-    value?: string,
-    icon?: string,
-    tooltip?: string
+    icon: string,
+    tooltip: string,
+    value?: string
   ) {
     this.trustedService = trustedService;
     this.placement = placement;
     this.baseUrl = baseUrl;
     this.apiEndpoint = apiEndpoint;
-    this.value = value;
     this.icon = icon;
     this.tooltip = tooltip;
-    this.message = null;
+    this.value = value || "";
+    this.message = "";
   }
 
   onClick = (collectionUid: string, imageUid: string): void => {

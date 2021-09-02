@@ -56,9 +56,9 @@ function useProviderTrustedService() {
           placement,
           apiUrl,
           apiEndpoint,
-          value,
           icon,
-          tooltip
+          tooltip,
+          value
         )
       );
     });
