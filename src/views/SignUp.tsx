@@ -250,7 +250,7 @@ export const SignUp = (props: Props): JSX.Element => {
           name="password"
           type="password"
           id="password"
-          autoComplete="current-password"
+          autoComplete="new-password"
           value={signUp.password}
           onChange={handleChange}
           placeholder="Password *"
@@ -264,7 +264,7 @@ export const SignUp = (props: Props): JSX.Element => {
           name="confirmPassword"
           type="password"
           id="confirmPassword"
-          autoComplete="current-password"
+          autoComplete="off"
           value={signUp.confirmPassword}
           onChange={handleChange}
           placeholder="Confirm Password *"

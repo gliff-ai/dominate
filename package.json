@@ -79,6 +79,7 @@
     "axios": "^0.21.1",
     "etebase": "^0.43.1",
     "file-saver": "^2.0.5",
+    "history": "^5.0.1",
     "jszip": "^3.7.0",
     "libsodium-wrappers": "^0.7.6",
     "logrocket": "^2.0.0",
