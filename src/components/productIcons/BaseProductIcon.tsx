@@ -49,6 +49,7 @@ interface Props {
   extraStyleSvg?: string | null;
   extraStyleName?: string | null;
   extraStyleTrailSvg?: string | null;
+  auditEnabled?: boolean;
 }
 
 function BaseProductIcon({
@@ -60,6 +61,7 @@ function BaseProductIcon({
   extraStyleSvg,
   extraStyleName,
   extraStyleTrailSvg,
+  auditEnabled,
 }: Props): ReactElement {
   const classes = useStyles();
 
@@ -87,12 +89,14 @@ function BaseProductIcon({
         )}
         <p className={`${classes.productName} ${extraStyleName}`}>{tool}</p>
       </div>
-      {tool !== "audit" && tool !== "document" && (
-        <SVG
-          src={imgSrc("breadcrumb-trail")}
-          className={`${classes.trailSvg} ${extraStyleTrailSvg}`}
-        />
-      )}
+      {tool !== "audit" &&
+        tool !== "document" &&
+        !(tool === "annotate" && !auditEnabled) && ( // don't put an arrow after ANNOTATE if AUDIT is absent from the navbar
+          <SVG
+            src={imgSrc("breadcrumb-trail")}
+            className={`${classes.trailSvg} ${extraStyleTrailSvg}`}
+          />
+        )}
     </div>
   );
 }
@@ -105,6 +109,7 @@ BaseProductIcon.defaultProps = {
   extraStyleName: null,
   extraStyleTrailSvg: null,
   customUrlPath: null,
+  auditEnabled: false,
 };
 
 export { BaseProductIcon };
