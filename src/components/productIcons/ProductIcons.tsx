@@ -104,6 +104,7 @@ function ProductIcons(): ReactElement {
             extraStyleAvatar={classes.noHoverAvatar}
             extraStyleSvg={classes.activeSvg}
             extraStyleName={classes.activeName}
+            auditEnabled={auth.userProfile?.team.tier.id > 1}
           />
         );
       case Status.accessible:
@@ -115,6 +116,7 @@ function ProductIcons(): ReactElement {
             extraStyleSvg={classes.accessibleSvg}
             extraStyleName={classes.accessibleName}
             extraStyleTrailSvg={classes.accessibleTrailSvg}
+            auditEnabled={auth.userProfile?.team.tier.id > 1}
           />
         );
       case Status.disabled:
@@ -126,6 +128,7 @@ function ProductIcons(): ReactElement {
             extraStyleAvatar={classes.noHoverAvatar}
             extraStyleSvg={classes.disabledSvg}
             extraStyleName={classes.disableName}
+            auditEnabled={auth.userProfile?.team.tier.id > 1}
           />
         );
       default:
