@@ -20,7 +20,7 @@ export const createTrustedService = (
 
 export const getUiTemplate = (apiUrl: string): Promise<UiTemplate> =>
   // TODO: validate ui template against a schema.
-  apiRequest<UiTemplate>("/ui-template", "POST", null, null, apiUrl);
+  apiRequest<UiTemplate>("/ui-template", "POST", {}, apiUrl);
 
 export { TrustedService };
 export { TrustedServiceClass } from "./TrustedServiceClass";

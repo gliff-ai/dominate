@@ -47,7 +47,7 @@ enum Product {
   other = "other",
 }
 
-function ProductIcons(): ReactElement {
+function ProductIcons(): ReactElement | null {
   const classes = useStyles();
   const auth = useAuth();
   const [activeProduct, setActiveProduct] = useState(Product.manage);
@@ -56,10 +56,12 @@ function ProductIcons(): ReactElement {
     "curate",
     "annotate",
   ]);
+  if (!auth) return null;
 
   // only display the AUDIT icon if on a paid tier:
   useEffect(() => {
-    if (auth.userProfile?.team.tier.id > 1)
+    const tier = auth?.userProfile?.team.tier;
+    if (tier && tier.id > 1)
       setProducts(["manage", "curate", "annotate", "audit"]);
   }, [auth.ready]);
 
@@ -79,7 +81,10 @@ function ProductIcons(): ReactElement {
 
   const isActive = (product: Product): boolean => product === activeProduct;
 
-  const getCustomUrlPath = (tool: string, status: Status): string | null => {
+  const getCustomUrlPath = (
+    tool: string,
+    status: Status
+  ): string | undefined => {
     // When navigating back to curate from annotate using the navbar
     // the collectionUid in the annotate url is used to set the url path for curate
     if (["curate", "audit"].includes(tool) && status === Status.accessible) {
@@ -88,11 +93,13 @@ function ProductIcons(): ReactElement {
       ];
       return `/${tool}/${galleryUid}`;
     }
-    return null;
+    return undefined;
   };
 
   function getProductIcon(tool: string, status: Status): ReactElement | null {
     const key = `${tool}-${status}`;
+    const tier = auth?.userProfile?.team.tier;
+    const auditEnabled = tier && tier.id > 1;
 
     switch (status) {
       case Status.active:
@@ -104,7 +111,7 @@ function ProductIcons(): ReactElement {
             extraStyleAvatar={classes.noHoverAvatar}
             extraStyleSvg={classes.activeSvg}
             extraStyleName={classes.activeName}
-            auditEnabled={auth.userProfile?.team.tier.id > 1}
+            auditEnabled={auditEnabled}
           />
         );
       case Status.accessible:
@@ -116,7 +123,7 @@ function ProductIcons(): ReactElement {
             extraStyleSvg={classes.accessibleSvg}
             extraStyleName={classes.accessibleName}
             extraStyleTrailSvg={classes.accessibleTrailSvg}
-            auditEnabled={auth.userProfile?.team.tier.id > 1}
+            auditEnabled={auditEnabled}
           />
         );
       case Status.disabled:
@@ -128,7 +135,7 @@ function ProductIcons(): ReactElement {
             extraStyleAvatar={classes.noHoverAvatar}
             extraStyleSvg={classes.disabledSvg}
             extraStyleName={classes.disableName}
-            auditEnabled={auth.userProfile?.team.tier.id > 1}
+            auditEnabled={auditEnabled}
           />
         );
       default:
@@ -173,8 +180,8 @@ function ProductIcons(): ReactElement {
         activeProduct === Product.annotate ? Status.active : Status.disabled
       ),
     ];
-    if (auth.userProfile?.team.tier.id > 1)
-      icons.push(getProductIcon("audit", auditStatus));
+    const tier = auth.userProfile?.team.tier;
+    if (tier && tier.id > 1) icons.push(getProductIcon("audit", auditStatus));
 
     return icons;
   };

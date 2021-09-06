@@ -3,6 +3,7 @@ import { makeStyles, Popover, TooltipProps } from "@material-ui/core";
 import { BaseIconButton } from "@gliff-ai/style";
 import { useTrustedService } from "@/hooks/use-trustedService";
 import { imgSrc } from "@/imgSrc";
+import { TrustedServiceClass } from "@/services/trustedServices";
 
 const useStyle = makeStyles(() => ({
   popoverPaper: {
@@ -26,6 +27,8 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
   const [isEnabled, setIsEnabled] = useState(false);
   const classes = useStyle();
 
+  if (!trustedService || !trustedService.uiElements) return null;
+
   const handleClick = (event: MouseEvent<HTMLButtonElement>): void => {
     if (!isEnabled) return;
     setAnchorEl(event.currentTarget);
@@ -35,16 +38,16 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
     setAnchorEl(null);
   };
 
-  const selectedElements = () =>
+  const selectedElements = (): TrustedServiceClass[] =>
     // Select ui elements for the active product
-    trustedService.uiElements.filter((ts) =>
+    (trustedService.uiElements as TrustedServiceClass[]).filter((ts) =>
       ts.placement.includes(props.placement)
     );
 
   useEffect(() => {
     // Update isEnabled
     if (!trustedService.ready) return;
-    setIsEnabled(selectedElements().length && props.enabled);
+    setIsEnabled(Boolean(selectedElements().length > 0 && props.enabled));
   }, [trustedService.uiElements, props.enabled]);
 
   return trustedService.ready ? (

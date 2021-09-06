@@ -70,7 +70,7 @@ const useStyles = makeStyles({
   boxInfo: { margin: "30px 30px" },
 });
 
-export function Account(): ReactElement {
+export function Account(): ReactElement | null {
   const auth = useAuth();
   const classes = useStyles();
 

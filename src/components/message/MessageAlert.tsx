@@ -6,8 +6,11 @@ interface MessageProps {
   severity: "info" | "warning" | "error" | "success";
 }
 
-function MessageAlert({ message, severity }: MessageProps): ReactElement {
-  return message && <Alert severity={severity}>{message}</Alert>;
+function MessageAlert({
+  message,
+  severity,
+}: MessageProps): ReactElement | null {
+  return message ? <Alert severity={severity}>{message}</Alert> : null;
 }
 
 export { MessageAlert };
