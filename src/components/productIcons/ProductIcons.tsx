@@ -56,10 +56,12 @@ function ProductIcons(): ReactElement | null {
     "curate",
     "annotate",
   ]);
+  if (!auth) return null;
 
   // only display the AUDIT icon if on a paid tier:
   useEffect(() => {
-    if (auth.userProfile?.team.tier.id > 1)
+    const tier = auth?.userProfile?.team.tier;
+    if (tier && tier.id > 1)
       setProducts(["manage", "curate", "annotate", "audit"]);
   }, [auth.ready]);
 
@@ -172,8 +174,8 @@ function ProductIcons(): ReactElement | null {
         activeProduct === Product.annotate ? Status.active : Status.disabled
       ),
     ];
-    if (auth.userProfile?.team.tier.id > 1)
-      icons.push(getProductIcon("audit", auditStatus));
+    const tier = auth.userProfile?.team.tier;
+    if (tier && tier.id > 1) icons.push(getProductIcon("audit", auditStatus));
 
     return icons;
   };

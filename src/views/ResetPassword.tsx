@@ -34,12 +34,10 @@ interface Props {
   storeInstance: DominateStore;
 }
 
-export const ResetPassword = (props: Props): ReactElement => {
+export const ResetPassword = (props: Props): ReactElement | null => {
   const classes = useStyles();
   const auth = useAuth();
-
   const navigate = useNavigate();
-
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [storeError, setStoreError] = useState({});
@@ -49,6 +47,8 @@ export const ResetPassword = (props: Props): ReactElement => {
     showNewPassword: false,
     showConfirmPassword: false,
   });
+
+  if (!auth) return null;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = event.target;

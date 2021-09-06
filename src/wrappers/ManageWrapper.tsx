@@ -20,7 +20,8 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   const auth = useAuth();
   const navigate = useNavigate();
 
-  if (!props.storeInstance || !auth.user) return null;
+  if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
+    return null;
 
   const getProjects = async () => {
     const projects = await props.storeInstance.getCollectionsMeta();
@@ -118,7 +119,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
         apiUrl={API_URL}
         launchCurateCallback={launchCurate}
         launchAuditCallback={
-          auth.userProfile.team.tier.id > 1 ? launchAudit : null
+          auth?.userProfile.team.tier.id > 1 ? launchAudit : null
         }
       />
     </ProvideAuth>

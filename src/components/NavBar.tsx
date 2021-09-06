@@ -78,8 +78,9 @@ export const NavBar = (): ReactElement | null => {
   const navigate = useNavigate();
   const classes = useStyles();
   const [userInitials, setUserInitials] = useState("");
-
   const [anchorElement, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  if (!auth) return null;
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);

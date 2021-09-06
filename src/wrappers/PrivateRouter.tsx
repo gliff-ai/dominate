@@ -2,9 +2,10 @@ import { ReactElement, useState, useEffect } from "react";
 import { Route, Navigate, RouteProps } from "react-router";
 import { useAuth } from "@/hooks/use-auth";
 
-export const PrivateRoute = (props: RouteProps): ReactElement => {
+export const PrivateRoute = (props: RouteProps): ReactElement | null => {
   const auth = useAuth();
   const [element, setElement] = useState<ReactElement>(<></>);
+  if (!auth) return null;
 
   useEffect(() => {
     // catch the situation where the effect

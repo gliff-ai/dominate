@@ -57,6 +57,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [multi, setMulti] = useState<boolean>(false);
   const [showDialog, setShowDialog] = useState<boolean>(false);
 
+  if (!auth) return null;
+
   useEffect(() => {
     props.setIsLoading(true);
   }, []);
