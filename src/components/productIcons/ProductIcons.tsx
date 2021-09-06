@@ -93,10 +93,13 @@ function ProductIcons(): ReactElement | null {
       ];
       return `/${tool}/${galleryUid}`;
     }
+    return undefined;
   };
 
   function getProductIcon(tool: string, status: Status): ReactElement | null {
     const key = `${tool}-${status}`;
+    const tier = auth?.userProfile?.team.tier;
+    const auditEnabled = tier && tier.id > 1;
 
     switch (status) {
       case Status.active:
@@ -108,7 +111,7 @@ function ProductIcons(): ReactElement | null {
             extraStyleAvatar={classes.noHoverAvatar}
             extraStyleSvg={classes.activeSvg}
             extraStyleName={classes.activeName}
-            auditEnabled={auth.userProfile?.team.tier.id > 1}
+            auditEnabled={auditEnabled}
           />
         );
       case Status.accessible:
@@ -120,7 +123,7 @@ function ProductIcons(): ReactElement | null {
             extraStyleSvg={classes.accessibleSvg}
             extraStyleName={classes.accessibleName}
             extraStyleTrailSvg={classes.accessibleTrailSvg}
-            auditEnabled={auth.userProfile?.team.tier.id > 1}
+            auditEnabled={auditEnabled}
           />
         );
       case Status.disabled:
@@ -132,7 +135,7 @@ function ProductIcons(): ReactElement | null {
             extraStyleAvatar={classes.noHoverAvatar}
             extraStyleSvg={classes.disabledSvg}
             extraStyleName={classes.disableName}
-            auditEnabled={auth.userProfile?.team.tier.id > 1}
+            auditEnabled={auditEnabled}
           />
         );
       default:
