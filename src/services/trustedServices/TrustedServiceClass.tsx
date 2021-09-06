@@ -57,7 +57,6 @@ export class TrustedServiceClass implements TrustedServiceInterface {
       this.apiEndpoint,
       "POST",
       { collectionUid, imageUid },
-      null,
       this.baseUrl
     ).then(({ message }) => console.log(message));
   };
