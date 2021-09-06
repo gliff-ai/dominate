@@ -35,6 +35,7 @@ function stringifySlices(slicesData: ImageBitmap[][]): string {
   const { width, height } = slicesData[0][0];
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
+  if (!ctx) return "";
   canvas.width = width;
   canvas.height = height;
 
@@ -117,6 +118,7 @@ function convertImageBitmapToUint8Array(
   const { width, height } = slicesData[0][0];
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
+  if (!ctx) return [];
   canvas.width = width;
   canvas.height = height;
 
@@ -142,6 +144,8 @@ async function convertUint8ArrayToImageBitmap(
 
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
+  if (!ctx) return [];
+
   canvas.width = width;
   canvas.height = height;
   const imageData = ctx.createImageData(width, height);

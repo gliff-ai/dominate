@@ -164,7 +164,9 @@ export function SignIn(): JSX.Element {
                     src={imgSrc("show-or-hide-password")}
                     className={classes.svgSmall}
                     fill={
-                      login.showPassword ? theme.palette.primary.main : null
+                      login.showPassword
+                        ? theme.palette.primary.main
+                        : undefined
                     }
                   />
                 </IconButton>

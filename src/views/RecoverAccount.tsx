@@ -44,11 +44,13 @@ export const RecoverAccount = (props: Props): JSX.Element => {
   });
 
   useEffect(() => {
-    if (query.get("uid")) {
-      void getRecoverySession(query.get("uid")).then(({ recovery_key }) => {
+    const queryUid = query.get("uid");
+    if (!queryUid) return;
+    void getRecoverySession(query.get("uid") as string).then(
+      ({ recovery_key }) => {
         setRecoverySession(recovery_key);
-      });
-    }
+      }
+    );
   }, []);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {

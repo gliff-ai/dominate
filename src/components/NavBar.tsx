@@ -72,7 +72,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-export const NavBar = (): ReactElement => {
+export const NavBar = (): ReactElement | null => {
   // Get auth state and re-render anytime it changes
   const auth = useAuth();
   const navigate = useNavigate();
@@ -98,7 +98,7 @@ export const NavBar = (): ReactElement => {
     setUserInitials(initials);
   }, [auth]);
 
-  const hasNavbar = () =>
+  const hasNavbar = (): boolean =>
     ![
       "/signin",
       "/signup",

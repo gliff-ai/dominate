@@ -13,7 +13,7 @@ export const AuditWrapper = (props: Props): ReactElement => {
   const { collectionUid } = useParams(); // uid of selected gallery, from URL
   const auth = useAuth();
   const navigate = useNavigate();
-  const [sessions, setSessions] = useState<AnnotationSession[]>(null);
+  const [sessions, setSessions] = useState<AnnotationSession[] | null>(null);
 
   const fetchAudit = async () => {
     const sessionsData = await props.storeInstance.getAudits(collectionUid);

@@ -97,6 +97,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     canvas.width = 128;
     canvas.height = 128;
     const ctx = canvas.getContext("2d");
+    if (!ctx) return;
     ctx.drawImage(slicesData[0][0], 0, 0, 128, 128);
     const thumbnailB64 = canvas.toDataURL();
 
@@ -191,12 +192,14 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       // add label folders to zip:
       for (const label of allLabels) {
         const labelFolder = zip.folder(label);
-        // add images to label folder in zip:
-        for (let i = 0; i < images.length; i += 1) {
-          if (collectionContent[i].imageLabels.includes(label)) {
-            labelFolder.file(allnames[i], images[i].content, {
-              base64: true,
-            });
+        if (labelFolder) {
+          // add images to label folder in zip:
+          for (let i = 0; i < images.length; i += 1) {
+            if (collectionContent[i].imageLabels.includes(label)) {
+              labelFolder.file(allnames[i], images[i].content, {
+                base64: true,
+              });
+            }
           }
         }
       }
@@ -205,15 +208,17 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       if (collectionContent.filter((tile) => tile.imageLabels === [])) {
         const unlabelledFolder = zip.folder("unlabelled");
 
-        for (let i = 0; i < images.length; i += 1) {
-          if (collectionContent[i].imageLabels.length === 0) {
-            unlabelledFolder.file(
-              collectionContent[i].metadata.imageName,
-              images[i].content,
-              {
-                base64: true,
-              }
-            );
+        if (unlabelledFolder) {
+          for (let i = 0; i < images.length; i += 1) {
+            if (collectionContent[i].imageLabels.length === 0) {
+              unlabelledFolder.file(
+                collectionContent[i].metadata.imageName,
+                images[i].content,
+                {
+                  base64: true,
+                }
+              );
+            }
           }
         }
       }

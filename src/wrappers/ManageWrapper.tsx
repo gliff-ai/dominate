@@ -32,19 +32,23 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     const projects = await props.storeInstance.getCollectionsMeta();
 
     // get all members of all team projects
-    const membersPromises = [];
+    const membersPromises: Promise<string[] | null>[] = [];
     for (let p = 0; p < projects.length; p += 1) {
       const { uid } = projects[p];
       membersPromises.push(props.storeInstance.getCollectionMembers(uid));
     }
-    const allMembers: string[][] = await Promise.all<string[]>(membersPromises);
+    const allMembers: (string[] | null)[] = await Promise.all<string[] | null>(
+      membersPromises
+    );
 
     // for each project, go through members and return the first that matches
     for (let p = 0; p < projects.length; p += 1) {
       const members = allMembers[p];
-      for (let m = 0; p < members.length; m += 1) {
-        if (members[m] === name) {
-          return projects[p].uid;
+      if (members) {
+        for (let m = 0; p < members.length; m += 1) {
+          if (members[m] === name) {
+            return projects[p].uid;
+          }
         }
       }
     }

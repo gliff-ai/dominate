@@ -148,7 +148,7 @@ export const ResetPassword = (props: Props): ReactElement => {
                     fill={
                       password.showNewPassword
                         ? theme.palette.primary.main
-                        : null
+                        : undefined
                     }
                   />
                 </IconButton>
@@ -184,7 +184,7 @@ export const ResetPassword = (props: Props): ReactElement => {
                     fill={
                       password.showConfirmPassword
                         ? theme.palette.primary.main
-                        : null
+                        : undefined
                     }
                   />
                 </IconButton>

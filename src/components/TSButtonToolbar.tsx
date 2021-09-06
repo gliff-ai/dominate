@@ -44,7 +44,7 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
   useEffect(() => {
     // Update isEnabled
     if (!trustedService.ready) return;
-    setIsEnabled(selectedElements().length && props.enabled);
+    setIsEnabled(Boolean(selectedElements().length > 0 && props.enabled));
   }, [trustedService.uiElements, props.enabled]);
 
   return trustedService.ready ? (

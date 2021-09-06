@@ -47,7 +47,7 @@ enum Product {
   other = "other",
 }
 
-function ProductIcons(): ReactElement {
+function ProductIcons(): ReactElement | null {
   const classes = useStyles();
   const auth = useAuth();
   const [activeProduct, setActiveProduct] = useState(Product.manage);
@@ -79,7 +79,10 @@ function ProductIcons(): ReactElement {
 
   const isActive = (product: Product): boolean => product === activeProduct;
 
-  const getCustomUrlPath = (tool: string, status: Status): string | null => {
+  const getCustomUrlPath = (
+    tool: string,
+    status: Status
+  ): string | undefined => {
     // When navigating back to curate from annotate using the navbar
     // the collectionUid in the annotate url is used to set the url path for curate
     if (["curate", "audit"].includes(tool) && status === Status.accessible) {
@@ -88,7 +91,6 @@ function ProductIcons(): ReactElement {
       ];
       return `/${tool}/${galleryUid}`;
     }
-    return null;
   };
 
   function getProductIcon(tool: string, status: Status): ReactElement | null {
