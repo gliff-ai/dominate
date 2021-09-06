@@ -1,7 +1,7 @@
 import { ReactElement, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-import Annotate, { Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
+import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateStore } from "@/store";
 import { Image } from "@/store/interfaces";
@@ -96,7 +96,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   }, [imageItem]);
 
   return slicesData ? (
-    <Annotate
+    <UserInterface
       showAppBar={false}
       slicesData={slicesData}
       imageFileInfo={imageFileInfo}

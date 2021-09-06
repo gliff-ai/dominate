@@ -22,6 +22,6 @@
     "test/**/*.ts",
     "typings/**/*.ts",
     "./jest-setup.ts"
-  ],
+, "src/env.d.ts"  ],
   "exclude": ["src/**/*_.tsx"]
 }

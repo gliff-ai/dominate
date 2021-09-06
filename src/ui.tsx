@@ -49,6 +49,7 @@ const UserInterface = (props: Props): ReactElement | null => {
           <NavBar />
           <MessageAlert severity="error" message={isCookiesConsented} />
           <Routes>
+            <h2>Routes</h2>
             <Route path="/signin">
               <BasicPage view={<SignIn />} title={<>Login</>} />
             </Route>

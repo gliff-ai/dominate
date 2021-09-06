@@ -5,12 +5,11 @@ import {
   UserInterface as Manage,
   ProvideAuth /* TODO export Services */,
 } from "@gliff-ai/manage";
-import { DominateStore } from "@/store";
+import { DominateStore , API_URL} from "@/store";
 import { useAuth } from "@/hooks/use-auth";
 import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
 
-declare const STORE_URL: string;
-export const API_URL = `${STORE_URL}django/api`;
+
 
 interface Props {
   storeInstance: DominateStore;

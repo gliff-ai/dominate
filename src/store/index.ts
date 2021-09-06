@@ -13,7 +13,9 @@ import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
-import { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
+import type { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
+
+
 
 const getRandomValueFromArrayOrString = (
   dictionary: string | string[],
@@ -23,7 +25,7 @@ const getRandomValueFromArrayOrString = (
     (x) => dictionary[x % dictionary.length]
   );
 
-declare const STORE_URL: string;
+const STORE_URL = import.meta.env.VITE_STORE_URL;
 const SERVER_URL = `${STORE_URL}etebase`;
 export const API_URL = `${STORE_URL}django/api`;
 

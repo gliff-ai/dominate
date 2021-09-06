@@ -1,5 +1,5 @@
 import { ReactElement, useState, useEffect } from "react";
-import { Route, Navigate, RouteProps } from "react-router";
+import { Route, Navigate, RouteProps } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 
 export const PrivateRoute = (props: RouteProps): ReactElement => {

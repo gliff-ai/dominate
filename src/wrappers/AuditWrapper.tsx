@@ -10,6 +10,7 @@ interface Props {
 }
 
 export const AuditWrapper = (props: Props): ReactElement => {
+
   const { collectionUid } = useParams(); // uid of selected gallery, from URL
   const auth = useAuth();
   const navigate = useNavigate();
@@ -38,5 +39,6 @@ export const AuditWrapper = (props: Props): ReactElement => {
     <UserInterface sessions={sessions} showAppBar={false} />
   ) : (
     <></>
-  );
-};
+  ); 
+}
+;
