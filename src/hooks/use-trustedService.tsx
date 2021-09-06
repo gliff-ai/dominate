@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext, createContext } from "react";
+import Ajv from "ajv";
 import {
   TrustedService,
   UiTemplate,
@@ -9,7 +10,7 @@ import {
   TrustedServiceClass,
 } from "@/services/trustedServices";
 import { useAuth } from "@/hooks/use-auth";
-
+import { UiTemplateSchema } from "@/services/trustedServices/schemas";
 interface Props {
   children: React.ReactElement;
 }
@@ -68,6 +69,10 @@ function useProviderTrustedService() {
   useEffect(() => {
     if (!trustedServices || uiElements) return;
 
+    const ajv = new Ajv();
+
+    const validate = ajv.compile(UiTemplateSchema);
+
     // When the list of trusted services has been fetched,
     // fetch the temaplates for all UI elements and store them in objects
     const elements: TrustedServiceClass[] = [];
@@ -75,9 +80,11 @@ function useProviderTrustedService() {
       if (!base_url || base_url === "") return;
       void getUiTemplate(base_url)
         .then((template) => {
-          // TODO: validate the templates against a schema!
-          if (!template) return;
-          elements.push(...unpackUiElements(base_url, template));
+          if (template && validate(template)) {
+            elements.push(...unpackUiElements(base_url, template));
+          } else {
+            console.error(`UI template for ${name} doesn't match the schema.`);
+          }
         })
         .catch(() =>
           console.error(
@@ -86,7 +93,7 @@ function useProviderTrustedService() {
         );
     });
     setUiElements(elements);
-  }, [trustedServices, uiElements]);
+  }, [trustedServices]);
 
   useEffect(() => {
     if (!uiElements) return;
