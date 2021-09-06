@@ -66,20 +66,27 @@ function useProviderTrustedService() {
   };
 
   useEffect(() => {
-    if (!trustedServices) return;
+    if (!trustedServices || uiElements) return;
 
     // When the list of trusted services has been fetched,
     // fetch the temaplates for all UI elements and store them in objects
     const elements: TrustedServiceClass[] = [];
-    trustedServices.forEach(({ base_url }) => {
+    trustedServices.forEach(({ base_url, name }) => {
       if (!base_url || base_url === "") return;
-      void getUiTemplate(base_url).then((template) => {
-        // TODO: validate the templates against a schema!
-        elements.push(...unpackUiElements(base_url, template));
-      });
+      void getUiTemplate(base_url)
+        .then((template) => {
+          // TODO: validate the templates against a schema!
+          if (!template) return;
+          elements.push(...unpackUiElements(base_url, template));
+        })
+        .catch(() =>
+          console.error(
+            `Cannot fetch UI Elements for the trusted service ${name}.`
+          )
+        );
     });
     setUiElements(elements);
-  }, [trustedServices]);
+  }, [trustedServices, uiElements]);
 
   useEffect(() => {
     if (!uiElements) return;
