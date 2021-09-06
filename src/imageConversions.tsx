@@ -62,12 +62,8 @@ function convertBase64ToImageBitmap(
 
     image.onload = () => {
       createImageBitmap(image, 0, 0, width, height).then(
-        (imageBitmap) => {
-          resolve(imageBitmap);
-        },
-        (e) => {
-          console.log(e);
-        }
+        (imageBitmap) => resolve(imageBitmap),
+        (e) => console.log(e)
       );
     };
     image.src = `data:image/png;base64,${base64}`;

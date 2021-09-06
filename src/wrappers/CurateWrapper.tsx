@@ -99,19 +99,20 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     canvas.width = 128;
     canvas.height = 128;
     const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-    ctx.drawImage(slicesData[0][0], 0, 0, 128, 128);
-    const thumbnailB64 = canvas.toDataURL();
+    if (ctx) {
+      ctx.drawImage(slicesData[0][0], 0, 0, 128, 128);
+      const thumbnailB64 = canvas.toDataURL();
 
-    // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
-    await props.storeInstance.createImage(
-      collectionUid,
-      imageMeta,
-      thumbnailB64,
-      stringfiedSlices
-    );
+      // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
+      await props.storeInstance.createImage(
+        collectionUid,
+        imageMeta,
+        thumbnailB64,
+        stringfiedSlices
+      );
 
-    fetchImageItems();
+      fetchImageItems();
+    }
   };
 
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
