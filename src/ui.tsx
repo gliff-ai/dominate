@@ -44,7 +44,7 @@ const UserInterface = (props: Props): ReactElement | null => {
       <ProgressSnackbar task={task} setTask={setTask} />
       <CssBaseline />
       <BrowserRouter>
-        <div style={{ height: "100%" }}>
+        <div style={{ height: "100%", overflow: "auto" }}>
           <PageSpinner isLoading={isLoading} />
           <NavBar />
           <MessageAlert severity="error" message={isCookiesConsented} />
