@@ -11,6 +11,7 @@ import {
 } from "@/services/trustedServices";
 import { useAuth } from "@/hooks/use-auth";
 import { UiTemplateSchema } from "@/services/trustedServices/schemas";
+
 interface Props {
   children: React.ReactElement;
 }
