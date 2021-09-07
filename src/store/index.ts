@@ -25,8 +25,8 @@ const getRandomValueFromArrayOrString = (
     (x) => dictionary[x % dictionary.length]
   );
 
-const STORE_URL = import.meta.env.VITE_STORE_URL;
-const SERVER_URL = `${STORE_URL}etebase`;
+export const STORE_URL = import.meta.env.VITE_STORE_URL;
+export const SERVER_URL = `${STORE_URL}etebase`;
 export const API_URL = `${STORE_URL}django/api`;
 
 export class DominateStore {
