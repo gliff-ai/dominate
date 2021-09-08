@@ -6,10 +6,7 @@ import reactJsx from "vite-react-jsx";
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => ({
   build: {
-    minify: mode !== "development",
-    build: {
-      commonjsOptions: {include: "react-cookie-consent"}
-    }
+    minify: mode !== "development"
   },
   resolve: {
     dedupe: [
