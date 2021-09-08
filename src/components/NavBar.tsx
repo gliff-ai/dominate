@@ -72,14 +72,15 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-export const NavBar = (): ReactElement => {
+export const NavBar = (): ReactElement | null => {
   // Get auth state and re-render anytime it changes
   const auth = useAuth();
   const navigate = useNavigate();
   const classes = useStyles();
   const [userInitials, setUserInitials] = useState("");
-
   const [anchorElement, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  if (!auth) return null;
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -98,7 +99,7 @@ export const NavBar = (): ReactElement => {
     setUserInitials(initials);
   }, [auth]);
 
-  const hasNavbar = () =>
+  const hasNavbar = (): boolean =>
     ![
       "/signin",
       "/signup",

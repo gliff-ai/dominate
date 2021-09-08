@@ -278,7 +278,7 @@ export function Billing(): JSX.Element {
         if (!addonPrices[addon]) return null;
         return (
           <label key={addon} htmlFor={addon}>
-            Additional {addon} @ £{addonPrices[addon] / 100}:
+            Additional {addon} @ £{(addonPrices[addon] as number) / 100}:
             {/* eslint-disable-next-line react/jsx-props-no-spreading */}
             <input name={addon} type="number" min="0" {...form[addon].bind} />
           </label>
@@ -286,12 +286,15 @@ export function Billing(): JSX.Element {
       })}
       Total: £
       {(
-        addonTypes.reduce(
-          (total, addon) =>
-            total + addonPrices[addon] * parseInt(form[addon].value, 10),
-          0
-        ) / 100
-      ).toFixed(2)}{" "}
+        addonTypes
+          .filter((addon) => addonPrices[addon] !== null)
+          .reduce(
+            (total, addon) =>
+              total +
+              (addonPrices[addon] as number) * parseInt(form[addon].value, 10),
+            0
+          ) / 100
+      ).toFixed(2)}
       per month
       <SubmitButton loading={addonFormLoading} value="Confirm" />
     </form>

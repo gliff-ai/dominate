@@ -1,4 +1,5 @@
 import { useState, useEffect, useContext, createContext } from "react";
+import Ajv from "ajv";
 import {
   TrustedService,
   UiTemplate,
@@ -9,27 +10,28 @@ import {
   TrustedServiceClass,
 } from "@/services/trustedServices";
 import { useAuth } from "@/hooks/use-auth";
+import { UiTemplateSchema } from "@/services/trustedServices/schemas";
 
 interface Props {
   children: React.ReactElement;
 }
 
 interface Context {
-  uiElements: TrustedServiceClass[];
+  uiElements: TrustedServiceClass[] | null;
   ready: boolean;
 }
 
-const trustedServiceContext = createContext<Context>(null);
+const trustedServiceContext = createContext<Context | null>(null);
 
 // Hook for child components to get the trustedService object ...
 // ... and re-render when it changes.
-export const useTrustedService = (): Context =>
+export const useTrustedService = (): Context | null =>
   useContext(trustedServiceContext);
 
 // Provider hook that creates auth object and handles state
 function useProviderTrustedService() {
   const auth = useAuth(); // TODO: get this out of here!
-
+  if (!auth) return null;
   const [trustedServices, setTrustedServices] =
     useState<TrustedService[] | null>(null);
   const [uiElements, setUiElements] =
@@ -56,9 +58,9 @@ function useProviderTrustedService() {
           placement,
           apiUrl,
           apiEndpoint,
-          value,
           icon,
-          tooltip
+          tooltip,
+          value
         )
       );
     });
@@ -66,17 +68,30 @@ function useProviderTrustedService() {
   };
 
   useEffect(() => {
-    if (!trustedServices) return;
+    if (!trustedServices || uiElements) return;
+
+    const ajv = new Ajv();
+
+    const validate = ajv.compile(UiTemplateSchema);
 
     // When the list of trusted services has been fetched,
     // fetch the temaplates for all UI elements and store them in objects
     const elements: TrustedServiceClass[] = [];
-    trustedServices.forEach(({ base_url }) => {
+    trustedServices.forEach(({ base_url, name }) => {
       if (!base_url || base_url === "") return;
-      void getUiTemplate(base_url).then((template) => {
-        // TODO: validate the templates against a schema!
-        elements.push(...unpackUiElements(base_url, template));
-      });
+      void getUiTemplate(base_url)
+        .then((template) => {
+          if (template && validate(template)) {
+            elements.push(...unpackUiElements(base_url, template));
+          } else {
+            console.error(`UI template for ${name} doesn't match the schema.`);
+          }
+        })
+        .catch(() =>
+          console.error(
+            `Cannot fetch UI Elements for the trusted service ${name}.`
+          )
+        );
     });
     setUiElements(elements);
   }, [trustedServices]);

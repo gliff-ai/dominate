@@ -5,6 +5,7 @@ import {
   useEffect,
   useState,
   ComponentType,
+  ReactElement,
 } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
@@ -27,6 +28,16 @@ const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY;
 const stripePromise = loadStripe(STRIPE_KEY);
 
 const query = new URLSearchParams(window.location.search);
+
+type SignupForm = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  teamId: number | null;
+  inviteId: string | null;
+  acceptedTermsAndConditions: boolean;
+};
 
 const useStyles = makeStyles(() => ({
   haveAccount: {
@@ -51,7 +62,7 @@ interface Props {
   // eslint-disable-next-line react/require-default-props
   state?: State;
 }
-export const SignUp = (props: Props): JSX.Element => {
+export const SignUp = (props: Props): ReactElement | null => {
   const classes = useStyles();
   const auth = useAuth();
 
@@ -66,16 +77,16 @@ export const SignUp = (props: Props): JSX.Element => {
   const [termsAndConditionsError, setTermsAndConditionsError] = useState("");
   const [recoveryKey, setRecoveryKey] = useState<string[] | null>(null);
   const [user, setUser] = useState<{ email: string; id: number } | null>(null);
-
-  const [signUp, setSignUp] = useState({
+  const [signUp, setSignUp] = useState<SignupForm>({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    teamId: null as number,
-    inviteId: null as string,
+    teamId: null,
+    inviteId: null,
     acceptedTermsAndConditions: false,
   });
+  if (!auth) return null;
 
   const handleSnackbar = () => {
     setOpen(true);
@@ -151,16 +162,17 @@ export const SignUp = (props: Props): JSX.Element => {
     try {
       await auth.signup(signUp.email, signUp.password);
 
-      const { profile, recoveryKey: keys } = await auth.createProfile(
+      const profile = await auth.createProfile(
         signUp.name,
-        signUp.teamId,
-        signUp.inviteId,
+        signUp.teamId as number,
+        signUp.inviteId as string,
         signUp.acceptedTermsAndConditions
       );
-
-      setUser(profile);
-      setRecoveryKey(keys);
-      setState("2-RecoveryKey");
+      if (profile) {
+        setUser(profile.profile);
+        setRecoveryKey(profile.recoveryKey);
+        setState("2-RecoveryKey");
+      }
     } catch (e) {
       handleSnackbar();
       setLoading(false);
@@ -184,6 +196,10 @@ export const SignUp = (props: Props): JSX.Element => {
     }
 
     const stripe = await stripePromise;
+
+    if (!user || !stripe) {
+      return;
+    }
 
     const { id: sessionId } = await createCheckoutSession(
       tierId,
@@ -326,7 +342,7 @@ export const SignUp = (props: Props): JSX.Element => {
     return signupForm;
   }
 
-  if (state === "2-RecoveryKey") {
+  if (state === "2-RecoveryKey" && recoveryKey) {
     return <RecoveryKey recoveryKey={recoveryKey} callback={billing} />;
   }
 

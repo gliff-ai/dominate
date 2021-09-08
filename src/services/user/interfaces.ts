@@ -3,8 +3,8 @@ export interface CheckoutSession {
 }
 
 export interface User {
-  username: string;
-  authToken: string;
+  username: string | null;
+  authToken: string | null;
 }
 
 interface Team {

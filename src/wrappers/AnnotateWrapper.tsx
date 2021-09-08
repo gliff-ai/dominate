@@ -22,9 +22,9 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const { collectionUid, imageUid } = useParams();
   const [imageItem, setImageItem] = useState<Image | null>(null);
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
-  const [imageFileInfo, setImageFileInfo] =
-    useState<ImageFileInfo | null>(null);
-  const [annotationsObject, setAnnotationsObject] = useState<Annotations>(null);
+  const [imageFileInfo, setImageFileInfo] = useState<ImageFileInfo>();
+  const [annotationsObject, setAnnotationsObject] =
+    useState<Annotations | null>(null);
 
   useEffect(() => {
     props.setIsLoading(true);

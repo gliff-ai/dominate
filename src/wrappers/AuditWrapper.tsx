@@ -9,11 +9,13 @@ interface Props {
   storeInstance: DominateStore;
 }
 
-export const AuditWrapper = (props: Props): ReactElement => {
+export const AuditWrapper = (props: Props): ReactElement | null => {
   const { collectionUid } = useParams(); // uid of selected gallery, from URL
   const auth = useAuth();
   const navigate = useNavigate();
-  const [sessions, setSessions] = useState<AnnotationSession[]>(null);
+  const [sessions, setSessions] = useState<AnnotationSession[] | null>(null);
+
+  if (!auth) return null;
 
   const fetchAudit = async () => {
     const sessionsData = await props.storeInstance.getAudits(collectionUid);
@@ -28,7 +30,8 @@ export const AuditWrapper = (props: Props): ReactElement => {
   }, [props.storeInstance.ready]);
 
   useEffect(() => {
-    if (auth.userProfile?.team.tier.id < 2) {
+    const tier = auth.userProfile?.team.tier;
+    if (tier && tier.id < 2) {
       // no AUDIT on free tier
       navigate("/manage");
     }

@@ -1,4 +1,4 @@
-import { useState, ComponentType } from "react";
+import { useState, ComponentType, ReactElement } from "react";
 import {
   TextField,
   Link,
@@ -6,7 +6,6 @@ import {
   makeStyles,
   IconButton,
   InputAdornment,
-  Slide,
 } from "@material-ui/core";
 import { useNavigate } from "react-router-dom";
 import { theme } from "@gliff-ai/style";
@@ -41,12 +40,11 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export function SignIn(): JSX.Element {
+export function SignIn(): ReactElement | null {
   const classes = useStyles();
   const auth = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState("");
   const [storeError, setStoreError] = useState({});
@@ -55,6 +53,8 @@ export function SignIn(): JSX.Element {
     password: "",
     showPassword: false,
   });
+
+  if (!auth) return null;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = event.target;
@@ -155,7 +155,9 @@ export function SignIn(): JSX.Element {
                     src={imgSrc("show-or-hide-password")}
                     className={classes.svgSmall}
                     fill={
-                      login.showPassword ? theme.palette.primary.main : null
+                      login.showPassword
+                        ? theme.palette.primary.main
+                        : undefined
                     }
                   />
                 </IconButton>

@@ -14,8 +14,8 @@ export const createCheckoutSession = (
 
 export const createUserProfile = (
   name: string,
-  teamId: number = null,
-  inviteId: string = null,
+  teamId: number | null = null,
+  inviteId: string | null = null,
   acceptedTermsAndConditions = false,
   recovery: string
 ): Promise<UserProfile> =>
