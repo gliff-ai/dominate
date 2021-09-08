@@ -1,9 +1,14 @@
 import { ReactElement } from "react";
-import { Avatar, makeStyles, Link, Theme } from "@material-ui/core";
+import { Avatar, makeStyles, Theme, Button } from "@material-ui/core";
+import { useNavigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
 import { imgSrc } from "@/imgSrc";
 
 const useStyles = makeStyles((theme: Theme) => ({
+  productButton: {
+    minWidth: "unset",
+    padding: 0,
+  },
   productSvg: {
     width: "39px",
     height: "39px",
@@ -36,7 +41,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    marginTop: "20px",
   },
 }));
 
@@ -64,6 +68,7 @@ function BaseProductIcon({
   auditEnabled,
 }: Props): ReactElement {
   const classes = useStyles();
+  const navigate = useNavigate();
 
   const avatar = (
     <Avatar
@@ -88,13 +93,13 @@ function BaseProductIcon({
   return (
     <div className={classes.outerDiv}>
       <div className={classes.iconDiv}>
-        {linkDisabled ? (
-          avatar
-        ) : (
-          <Link href={customUrlPath || `/${tool}`} target={target}>
-            {avatar}
-          </Link>
-        )}
+        <Button
+          className={classes.productButton}
+          onClick={() => navigate(customUrlPath || `/${tool}`)}
+          disabled={linkDisabled}
+        >
+          {avatar}
+        </Button>
         <p
           className={
             extraStyleName !== undefined
