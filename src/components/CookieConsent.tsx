@@ -7,8 +7,8 @@ function CookieConsent(): JSX.Element {
   // TODO: patch this
   // https://github.com/Mastermindzh/react-cookie-consent/issues/110
   /* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unsafe-assignment */
-  // @ts-ignore
   const ReactCookieConsent =
+    /* @ts-ignore */
     ReactCookieConsentDefault.default || ReactCookieConsentDefault;
   /* eslint-enable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unsafe-assignment */
 

@@ -13,7 +13,7 @@
     "build:production": "npx vite build --mode production",
     "format": "npx --no-install prettier --write src",
     "prettier": "npx --no-install prettier -c src",
-    "lint": "npm run lint:ts && npm run prettier",
+    "lint": "tsc --noEmit && npm run lint:ts && npm run prettier",
     "lint:ts": "npx eslint src",
     "serve": "npx vite",
     "test": "jest --coverage --passWithNoTests"
