@@ -47,9 +47,6 @@ function MessageSnackbar({
     <BaseSnackbar
       open={open}
       handleClose={handleClose}
-
-
-      
       message={
         <span>
           <SVG src={imgSrc("warning")} className={classes.svgSmall} />

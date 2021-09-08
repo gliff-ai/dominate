@@ -7,7 +7,9 @@ import reactJsx from "vite-react-jsx";
 export default defineConfig(({ command, mode }) => ({
   build: {
     minify: mode !== "development",
-    
+    build: {
+      commonjsOptions: {include: "react-cookie-consent"}
+    }
   },
   resolve: {
     dedupe: [
@@ -19,6 +21,7 @@ export default defineConfig(({ command, mode }) => ({
       "@material-ui/icons",
     ],
   },
+  
   server: {
     port: parseInt(process.env.PORT) || 3000,
     hmr: {

@@ -5,11 +5,9 @@ import {
   UserInterface as Manage,
   ProvideAuth /* TODO export Services */,
 } from "@gliff-ai/manage";
-import { DominateStore , API_URL} from "@/store";
+import { DominateStore, API_URL } from "@/store";
 import { useAuth } from "@/hooks/use-auth";
 import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
-
-
 
 interface Props {
   storeInstance: DominateStore;

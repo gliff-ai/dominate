@@ -15,8 +15,6 @@ import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
 import type { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
 
-
-
 const getRandomValueFromArrayOrString = (
   dictionary: string | string[],
   count: number

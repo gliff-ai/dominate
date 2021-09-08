@@ -80,8 +80,8 @@ export function Account(): ReactElement {
       .map((l) => l[0].toUpperCase())
       .join("");
 
-      console.log("account")
-      console.log(auth?.user && auth?.userProfile)
+  console.log("account");
+  console.log(auth?.user && auth?.userProfile);
   return auth?.user && auth?.userProfile ? (
     <Grid>
       <Card className={classes.card}>

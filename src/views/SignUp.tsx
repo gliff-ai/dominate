@@ -76,7 +76,7 @@ export const SignUp = (props: Props): JSX.Element => {
     inviteId: null as string,
     acceptedTermsAndConditions: false,
   });
-  
+
   const handleSnackbar = () => {
     setOpen(true);
   };
