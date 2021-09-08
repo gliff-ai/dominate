@@ -35,7 +35,7 @@ if (IS_MONITORED) {
       /* eslint-enable @typescript-eslint/no-unsafe-call */
     ],
 
-    release: `dominate@${VERSION}`,
+    release: `dominate@${VERSION || "0.0.0"}`,
 
     // We recommend adjusting this value in production, or using tracesSampler
     // for finer control

@@ -4,12 +4,13 @@ import { theme } from "@gliff-ai/style";
 import { MessageAlert } from "./message/MessageAlert";
 
 function CookieConsent(): JSX.Element {
-  // TODO patch this
+  // TODO: patch this
   // https://github.com/Mastermindzh/react-cookie-consent/issues/110
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  /* eslint-disable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unsafe-assignment */
   // @ts-ignore
   const ReactCookieConsent =
-    ReactCookieConsentDefault.default || ReactCookieConsentDefault; // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+    ReactCookieConsentDefault.default || ReactCookieConsentDefault;
+  /* eslint-enable @typescript-eslint/ban-ts-comment, @typescript-eslint/no-unsafe-assignment */
 
   const [isCookiesConsented, setIsCookiesConsented] = useState("");
   return (
