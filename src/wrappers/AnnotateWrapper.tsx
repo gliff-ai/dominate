@@ -24,7 +24,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
   const [imageFileInfo, setImageFileInfo] = useState<ImageFileInfo>();
   const [annotationsObject, setAnnotationsObject] =
-    useState<Annotations | null>(null);
+    useState<Annotations | undefined>(undefined);
 
   useEffect(() => {
     props.setIsLoading(true);

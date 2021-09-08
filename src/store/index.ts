@@ -486,7 +486,7 @@ export class DominateStore {
   getAnnotationsObject = async (
     collectionUid: string,
     imageUid: string
-  ): Promise<Annotations | null> => {
+  ): Promise<Annotations | undefined> => {
     // retrieves the Annotations object for the specified image
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -496,7 +496,7 @@ export class DominateStore {
     ) as GalleryTile[];
     const galleryTile = content.find((item) => item.imageUID === imageUid);
 
-    if (!galleryTile?.annotationUID) return null;
+    if (!galleryTile?.annotationUID) return undefined;
 
     const itemManager = collectionManager.getItemManager(collection);
     const annotationItem = await itemManager.fetch(galleryTile.annotationUID);
