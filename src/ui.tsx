@@ -37,7 +37,6 @@ const UserInterface = (props: Props): ReactElement | null => {
   });
   const [isLoading, setIsLoading] = useState(false);
 
-  console.log(CookieConsent);
   return (
     <ThemeProvider theme={theme}>
       <ProgressSnackbar task={task} setTask={setTask} />
@@ -48,7 +47,6 @@ const UserInterface = (props: Props): ReactElement | null => {
           <NavBar />
 
           <Routes>
-            <h2>Routes</h2>
             <Route path="/signin">
               <BasicPage view={<SignIn />} title={<>Login</>} />
             </Route>
