@@ -17,14 +17,13 @@ import {
   FormControlLabel,
 } from "@material-ui/core";
 import Slide from "@material-ui/core/Slide";
-import { TransitionProps } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
 import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
 import { VerificationSent } from "@/views/VerificationSent";
 
-declare const STRIPE_KEY: string;
+const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY;
 
 const stripePromise = loadStripe(STRIPE_KEY);
 
@@ -69,8 +68,6 @@ export const SignUp = (props: Props): ReactElement | null => {
 
   const [state, setState] = useState<State>(props.state || "1-Signup");
   const [open, setOpen] = useState(false);
-  const [transition, setTransition] =
-    useState<ComponentType<TransitionProps> | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
@@ -91,13 +88,7 @@ export const SignUp = (props: Props): ReactElement | null => {
   });
   if (!auth) return null;
 
-  const TransitionUp = (p: TransitionProps) => (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <Slide {...p} direction="up" />
-  );
-
-  const handleSnackbar = (Transition: ComponentType<TransitionProps>) => {
-    setTransition(() => Transition);
+  const handleSnackbar = () => {
     setOpen(true);
   };
 
@@ -183,7 +174,7 @@ export const SignUp = (props: Props): ReactElement | null => {
         setState("2-RecoveryKey");
       }
     } catch (e) {
-      handleSnackbar(TransitionUp);
+      handleSnackbar();
       setLoading(false);
       setSignUp({
         ...signUp,
@@ -338,7 +329,6 @@ export const SignUp = (props: Props): ReactElement | null => {
       <MessageSnackbar
         open={open}
         handleClose={handleClose}
-        transition={transition}
         messageText={
           String(storeError).includes("duplicate key")
             ? "Looks like that account already exists, try another email!"

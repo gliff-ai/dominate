@@ -5,24 +5,25 @@ import { Integrations } from "@sentry/tracing";
 import { CaptureConsole } from "@sentry/integrations";
 import LogRocket from "logrocket";
 import setupLogRocketReact from "logrocket-react";
-import { createGenerateClassName, StylesProvider } from "@material-ui/core";
-import { DominateStore } from "@/store";
+import { StylesProvider } from "@material-ui/core";
+import { generateClassName } from "@gliff-ai/style";
+
+import { DominateStore, API_URL } from "@/store";
 import UserInterface from "@/ui";
 import { ProvideAuth } from "@/hooks/use-auth";
 import { ProvideTrustedService } from "@/hooks/use-trustedService";
 
-declare const STORE_URL: string;
-declare const IS_MONITORED: boolean;
-declare const SENTRY_ENVIRONMENT: string;
-declare const IS_SENTRY_DEBUG: boolean;
-declare const VERSION: string;
-const version = VERSION;
+const IS_MONITORED = import.meta.env.VITE_IS_MONITORED === "true";
 
 if (IS_MONITORED) {
+  const VERSION = import.meta.env.VITE_VERSION;
+  const SENTRY_ENVIRONMENT = import.meta.env.VITE_SENTRY_ENVIRONMENT;
+  const IS_SENTRY_DEBUG = import.meta.env.VITE_IS_SENTRY_DEBUG;
+
   // setup Sentry
   Sentry.init({
     dsn: "https://097ef1f6a3364e6895c2fcb95c88446a@o651808.ingest.sentry.io/5812330",
-    tunnel: `${STORE_URL}django/api/tunnel/`,
+    tunnel: `${API_URL}/tunnel/`,
 
     integrations: [
       new Integrations.BrowserTracing(),
@@ -34,7 +35,7 @@ if (IS_MONITORED) {
       /* eslint-enable @typescript-eslint/no-unsafe-call */
     ],
 
-    release: `dominate@${version}`,
+    release: `dominate@${VERSION || "0.0.0"}`,
 
     // We recommend adjusting this value in production, or using tracesSampler
     // for finer control
@@ -43,7 +44,7 @@ if (IS_MONITORED) {
     // flag for filtering
     environment: SENTRY_ENVIRONMENT,
 
-    debug: IS_SENTRY_DEBUG,
+    debug: IS_SENTRY_DEBUG === "true",
   });
 
   // setup LogRocket
@@ -65,16 +66,11 @@ if (IS_MONITORED) {
 
 const storeInstance = new DominateStore();
 
-const generateClassName = createGenerateClassName({
-  seed: "dominate",
-  disableGlobal: true,
-});
-
 ReactDOM.render(
   <Sentry.ErrorBoundary fallback={<>An error has occurred</>} showDialog>
     <ProvideAuth storeInstance={storeInstance}>
       <ProvideTrustedService>
-        <StylesProvider generateClassName={generateClassName}>
+        <StylesProvider generateClassName={generateClassName("dominate")}>
           <UserInterface storeInstance={storeInstance} />
         </StylesProvider>
       </ProvideTrustedService>

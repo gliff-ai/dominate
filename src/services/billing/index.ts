@@ -1,12 +1,6 @@
 import { apiRequest } from "@/api";
 
-import {
-  AddonPrices,
-  Invoice,
-  Limits,
-  Plan,
-  Payment,
-} from "@/services/billing/interfaces";
+import type { AddonPrices, Invoice, Limits, Plan, Payment } from "./interfaces";
 
 export const getLimits = (): Promise<Limits> =>
   apiRequest<Limits>("/billing/limits", "GET");

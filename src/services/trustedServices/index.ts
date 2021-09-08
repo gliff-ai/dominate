@@ -1,8 +1,5 @@
 import { apiRequest } from "@/api";
-import {
-  TrustedService,
-  UiTemplate,
-} from "@/services/trustedServices/interfaces";
+import type { TrustedService, UiTemplate } from "./interfaces";
 
 export const getTrustedService = (teamId: number): Promise<TrustedService[]> =>
   apiRequest<TrustedService[]>(`/trusted_service/${teamId}`, "GET");

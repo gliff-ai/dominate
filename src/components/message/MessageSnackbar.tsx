@@ -41,14 +41,12 @@ function MessageSnackbar({
   open,
   handleClose,
   messageText,
-  transition,
 }: Props): ReactElement {
   const classes = useStyle();
   return (
     <BaseSnackbar
       open={open}
       handleClose={handleClose}
-      transition={transition}
       message={
         <span>
           <SVG src={imgSrc("warning")} className={classes.svgSmall} />

@@ -13,7 +13,7 @@ import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
-import { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
+import type { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
 
 const getRandomValueFromArrayOrString = (
   dictionary: string | string[],
@@ -23,8 +23,8 @@ const getRandomValueFromArrayOrString = (
     (x) => dictionary[x % dictionary.length]
   );
 
-declare const STORE_URL: string;
-const SERVER_URL = `${STORE_URL}etebase`;
+export const STORE_URL = import.meta.env.VITE_STORE_URL;
+export const SERVER_URL = `${STORE_URL}etebase`;
 export const API_URL = `${STORE_URL}django/api`;
 
 export class DominateStore {
@@ -486,7 +486,7 @@ export class DominateStore {
   getAnnotationsObject = async (
     collectionUid: string,
     imageUid: string
-  ): Promise<Annotations | null> => {
+  ): Promise<Annotations | undefined> => {
     // retrieves the Annotations object for the specified image
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -496,7 +496,7 @@ export class DominateStore {
     ) as GalleryTile[];
     const galleryTile = content.find((item) => item.imageUID === imageUid);
 
-    if (!galleryTile?.annotationUID) return null;
+    if (!galleryTile?.annotationUID) return undefined;
 
     const itemManager = collectionManager.getItemManager(collection);
     const annotationItem = await itemManager.fetch(galleryTile.annotationUID);

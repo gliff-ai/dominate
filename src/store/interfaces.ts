@@ -63,4 +63,4 @@ interface AnnotationItemMeta {
   createdTime?: number;
 }
 
-export { GalleryMeta, GalleryTile, MetaItem, Image, Slices, ImageMeta };
+export type { GalleryMeta, GalleryTile, MetaItem, Image, Slices, ImageMeta };

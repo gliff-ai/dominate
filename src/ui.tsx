@@ -1,7 +1,6 @@
 import { ReactElement, useState } from "react";
 import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
 import { CssBaseline, ThemeProvider } from "@material-ui/core";
-import CookieConsent from "react-cookie-consent";
 import { theme } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
 import { Annotate, Audit, Curate, Manage } from "@/wrappers";
@@ -17,11 +16,11 @@ import {
   Billing,
 } from "@/views";
 import {
-  MessageAlert,
   NavBar,
   PageSpinner,
   ProgressSnackbar,
   Task,
+  CookieConsent,
 } from "@/components";
 import { BasicPage } from "@/views/BasicPage";
 import { PrivateRoute } from "./wrappers/PrivateRouter";
@@ -37,7 +36,6 @@ const UserInterface = (props: Props): ReactElement | null => {
     description: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [isCookiesConsented, setIsCookiesConsented] = useState("");
 
   return (
     <ThemeProvider theme={theme}>
@@ -47,7 +45,7 @@ const UserInterface = (props: Props): ReactElement | null => {
         <div style={{ height: "100%", overflow: "auto" }}>
           <PageSpinner isLoading={isLoading} />
           <NavBar />
-          <MessageAlert severity="error" message={isCookiesConsented} />
+
           <Routes>
             <Route path="/signin">
               <BasicPage view={<SignIn />} title={<>Login</>} />
@@ -157,50 +155,7 @@ const UserInterface = (props: Props): ReactElement | null => {
           </Routes>
         </div>
       </BrowserRouter>
-
-      <CookieConsent
-        location="bottom"
-        cookieName="gliff-ai-consent-cookie"
-        expires={999}
-        overlay
-        style={{
-          backgroundColor: "#ffffff",
-          color: "#000000",
-        }}
-        buttonStyle={{
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.text.primary,
-          textTransform: "none",
-          fontWeight: 700,
-          fontSize: "15px",
-          width: "169px",
-          marginBottom: "20px",
-          marginTop: "20px",
-          borderRadius: "9px",
-        }}
-        declineButtonStyle={{
-          backgroundColor: theme.palette.secondary.main,
-          color: theme.palette.text.primary,
-          textTransform: "none",
-          fontWeight: 700,
-          fontSize: "15px",
-          width: "169px",
-          marginBottom: "20px",
-          marginTop: "20px",
-          borderRadius: "9px",
-        }}
-        enableDeclineButton
-        setDeclineCookie={false}
-        onDecline={() => {
-          setIsCookiesConsented(
-            "Without cookies this app will not work, redirecting you to our homepage."
-          );
-          setTimeout(() => window.location.replace("https://gliff.ai"), 1500);
-        }}
-      >
-        This website uses cookies to enhance the user experience (we don&apos;t
-        use tracking or advertising cookies).
-      </CookieConsent>
+      <CookieConsent />
     </ThemeProvider>
   );
 };

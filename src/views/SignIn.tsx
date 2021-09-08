@@ -6,10 +6,9 @@ import {
   makeStyles,
   IconButton,
   InputAdornment,
-  Slide,
 } from "@material-ui/core";
 import { useNavigate } from "react-router-dom";
-import { theme, TransitionProps } from "@gliff-ai/style";
+import { theme } from "@gliff-ai/style";
 import SVG from "react-inlinesvg";
 import { useAuth } from "@/hooks/use-auth";
 import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
@@ -46,8 +45,6 @@ export function SignIn(): ReactElement | null {
   const auth = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-  const [transition, setTransition] =
-    useState<ComponentType<TransitionProps> | null>(null);
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState("");
   const [storeError, setStoreError] = useState({});
@@ -67,13 +64,7 @@ export function SignIn(): ReactElement | null {
     }));
   };
 
-  const TransitionUp = (props: TransitionProps) => (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <Slide {...props} direction="up" />
-  );
-
-  const handleSnackbar = (Transition: React.ComponentType<TransitionProps>) => {
-    setTransition(() => Transition);
+  const handleSnackbar = () => {
     setOpen(true);
   };
 
@@ -110,7 +101,7 @@ export function SignIn(): ReactElement | null {
           navigate("/");
         })
         .catch((e) => {
-          handleSnackbar(TransitionUp);
+          handleSnackbar();
           setLoading(false);
           setLogin({ email: "", password: "", showPassword: false });
 
@@ -195,7 +186,6 @@ export function SignIn(): ReactElement | null {
       <MessageSnackbar
         open={open}
         handleClose={handleClose}
-        transition={transition}
         messageText={
           String(storeError).includes("Wrong password for user.")
             ? "Login Failed. Your username and/or password do not match"
