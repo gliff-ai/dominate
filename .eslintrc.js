@@ -5,7 +5,7 @@ module.exports = {
       tsconfigRootDir: __dirname,
       project: ["./tsconfig.json"],
   },
-  plugins: ["@typescript-eslint"],
+  plugins: ["@typescript-eslint", "mui-unused-classes"],
   extends: [
       "eslint:recommended",
       "airbnb",

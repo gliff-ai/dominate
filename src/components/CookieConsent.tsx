@@ -8,7 +8,8 @@ function CookieConsent(): JSX.Element {
   // https://github.com/Mastermindzh/react-cookie-consent/issues/110
   // eslint-disable-next-line @typescript-eslint/ban-ts-comment
   // @ts-ignore
-  const ReactCookieConsent = ReactCookieConsentDefault.default || ReactCookieConsentDefault; // eslint-disable-line @typescript-eslint/no-unsafe-assignment
+  const ReactCookieConsent =
+    ReactCookieConsentDefault.default || ReactCookieConsentDefault; // eslint-disable-line @typescript-eslint/no-unsafe-assignment
 
   const [isCookiesConsented, setIsCookiesConsented] = useState("");
   return (
@@ -61,4 +62,4 @@ function CookieConsent(): JSX.Element {
   );
 }
 
-export {CookieConsent};
+export { CookieConsent };
