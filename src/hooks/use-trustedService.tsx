@@ -82,7 +82,14 @@ function useProviderTrustedService() {
       void getUiTemplate(base_url)
         .then((template) => {
           if (template && validate(template)) {
-            elements.push(...unpackUiElements(base_url, template));
+            setUiElements((prevElements) => {
+              const newElements = unpackUiElements(base_url, template);
+              if (!prevElements) {
+                return newElements;
+              }
+              prevElements.push(...newElements);
+              return prevElements;
+            });
           } else {
             console.error(`UI template for ${name} doesn't match the schema.`);
           }
@@ -93,7 +100,6 @@ function useProviderTrustedService() {
           )
         );
     });
-    setUiElements(elements);
   }, [trustedServices]);
 
   useEffect(() => {
