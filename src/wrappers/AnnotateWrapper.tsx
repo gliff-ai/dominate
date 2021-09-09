@@ -104,11 +104,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       saveAnnotationsCallback={saveAnnotation}
       setIsLoading={props.setIsLoading}
       trustedServiceButtonToolbar={
-        <TSButtonToolbar
-          placement="annotate"
-          collectionUid={collectionUid}
-          imageUid={imageUid}
-        />
+        <TSButtonToolbar collectionUid={collectionUid} imageUid={imageUid} />
       }
     />
   ) : null;
