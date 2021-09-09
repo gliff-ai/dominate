@@ -9,8 +9,8 @@
   ],
   "scripts": {
     "build": "npx vite build --mode development",
-    "build:staging": "npx vite build --mode staging",
-    "build:production": "npx vite build --mode production",
+    "build:staging": "npx vite build --mode staging && cp staticwebapp.config.json dist/",
+    "build:production": "npx vite build --mode production && cp staticwebapp.config.json dist/",
     "format": "npx --no-install prettier --write src",
     "prettier": "npx --no-install prettier -c src",
     "lint": "tsc --noEmit && npm run lint:ts && npm run prettier",
