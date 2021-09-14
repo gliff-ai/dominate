@@ -59,7 +59,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   if (!auth) return null;
 
-  if(!collectionUid) return null;
+  if (!collectionUid) return null;
 
   useEffect(() => {
     props.setIsLoading(true);
