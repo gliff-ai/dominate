@@ -39,7 +39,8 @@ function useProviderTrustedService() {
 
   useEffect(() => {
     // Retrive the list of trusted services for the user's team
-    if (auth === null || !auth.ready || trustedServices || !auth.userProfile) return;
+    if (auth === null || !auth.ready || trustedServices || !auth.userProfile)
+      return;
     void getTrustedService(auth.userProfile.team.id).then(setTrustedServices);
   }, [auth, trustedServices]);
 

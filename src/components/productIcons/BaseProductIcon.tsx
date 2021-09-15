@@ -71,8 +71,6 @@ function BaseProductIcon({
   const classes = useStyles();
   const navigate = useNavigate();
 
-  
-
   const avatar = (
     <Avatar
       variant="circular"

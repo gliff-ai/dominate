@@ -24,7 +24,6 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [annotationsObject, setAnnotationsObject] =
     useState<Annotations | undefined>(undefined);
 
-
   useEffect(() => {
     props.setIsLoading(true);
   }, []);
