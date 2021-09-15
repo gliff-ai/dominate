@@ -10,6 +10,10 @@ export const VerifyEmail = (): JSX.Element => {
   const [loading, setLoading] = useState(false);
   const [requestError, setRequestError] = useState("");
 
+  if (!uid) {
+    return <></>;
+  }
+
   const onLoadForm = async (): Promise<void> => {
     try {
       setLoading(true);

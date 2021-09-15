@@ -16,6 +16,7 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
   const [sessions, setSessions] = useState<AnnotationSession[] | null>(null);
 
   if (!auth) return null;
+  if (!collectionUid) return null;
 
   const fetchAudit = async () => {
     const sessionsData = await props.storeInstance.getAudits(collectionUid);
