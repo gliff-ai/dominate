@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState, useCallback } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import {
@@ -25,6 +25,8 @@ import {
   getImageMetaFromImageFileInfo,
 } from "@/imageConversions";
 import { useAuth } from "@/hooks/use-auth";
+import { useMountEffect } from "@/hooks/use-mountEffect";
+import { useStore } from "@/hooks/use-store";
 
 const useStyles = () =>
   makeStyles((theme: Theme) => ({
@@ -58,30 +60,32 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   const classes = useStyles()();
 
-  console.log(props.storeInstance.ready);
+  const fetchImageItems = useStore(
+    props,
+    (storeInstance) => {
+      // fetches images via DominateStore, and assigns them to imageItems state
+      storeInstance
+        .getImagesMeta(collectionUid)
+        .then((items) => {
+          setCollectionContent(items);
+          // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
+          const wrangled = items.map(
+            ({ thumbnail, imageLabels, id, metadata }) => ({
+              thumbnail,
+              imageLabels,
+              id,
+              ...metadata,
+            })
+          );
 
-  const fetchImageItems = useCallback(() => {
-    // fetches images via DominateStore, and assigns them to imageItems state
-    props.storeInstance
-      .getImagesMeta(collectionUid)
-      .then((items) => {
-        setCollectionContent(items);
-        // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
-        const wrangled = items.map(
-          ({ thumbnail, imageLabels, id, metadata }) => ({
-            thumbnail,
-            imageLabels,
-            id,
-            ...metadata,
-          })
-        );
-
-        setCurateInput(wrangled);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  }, [props.storeInstance, props.storeInstance.ready, collectionUid]);
+          setCurateInput(wrangled);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    [collectionUid]
+  );
 
   const addImageToGallery = async (
     imageFileInfo: ImageFileInfo,
@@ -267,9 +271,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     void downloadDataset();
   };
 
-  useEffect(() => {
+  useMountEffect(() => {
     props.setIsLoading(true);
-  }, []);
+  });
 
   useEffect(() => {
     if (collectionUid) {

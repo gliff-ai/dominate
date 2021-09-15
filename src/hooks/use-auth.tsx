@@ -1,8 +1,9 @@
 import axios from "axios";
-import { useState, useEffect, useContext, createContext } from "react";
+import { useState, useContext, createContext } from "react";
 import { DominateStore } from "@/store";
 import { User, UserProfile } from "@/services/user/interfaces";
 import { createUserProfile, getUserProfile } from "@/services/user";
+import { useMountEffect } from "./use-mountEffect";
 
 interface Props {
   children: React.ReactElement;
@@ -114,7 +115,7 @@ function useProvideAuth(storeInstance: DominateStore) {
   };
 
   // Login initially if we have a session
-  useEffect(() => {
+  useMountEffect(() => {
     storeInstance
       .init()
       .then((authedUser) => {
@@ -127,7 +128,7 @@ function useProvideAuth(storeInstance: DominateStore) {
       .catch((err) => {
         console.log(err);
       });
-  }, []);
+  });
 
   // Return the user object and auth methods
   return {
