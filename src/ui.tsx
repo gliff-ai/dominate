@@ -14,6 +14,7 @@ import {
   VerifyEmail,
   RequestEmailVerification,
   Billing,
+  SentryErrorPage,
 } from "@/views";
 import {
   NavBar,
@@ -52,6 +53,9 @@ const UserInterface = (props: Props): ReactElement | null => {
             </Route>
             <Route path="/signup">
               <BasicPage view={<SignUp />} title={<>Create an Account</>} />
+            </Route>
+            <Route path="/sentry-error">
+              <BasicPage view={<SentryErrorPage />} title={<>Opps!</>} />
             </Route>
             <Route path="/signup/success">
               <BasicPage
