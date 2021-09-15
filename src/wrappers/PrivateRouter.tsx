@@ -3,9 +3,9 @@ import { Route, Navigate, RouteProps } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 
 export const PrivateRoute = (props: RouteProps): ReactElement | null => {
-  console.log("private route)")
+  console.log("private route)");
   console.log(props);
-  
+
   const auth = useAuth();
   const [element, setElement] = useState<ReactElement>(<></>);
   if (!auth) return null;
