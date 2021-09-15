@@ -5,7 +5,6 @@ import { theme } from "@gliff-ai/style";
 import { BaseProductIcon } from "./BaseProductIcon";
 import { useAuth } from "@/hooks/use-auth";
 
-
 const useStyles = makeStyles({
   activeSvg: {
     fill: theme.palette.primary.main,
@@ -66,7 +65,6 @@ function ProductIcons(): ReactElement | null {
     if (tier && tier.id > 1)
       setProducts(["manage", "curate", "annotate", "audit"]);
   }, [auth]);
-
 
   const isActive = (product: Product): boolean => product === activeProduct;
 
@@ -180,7 +178,7 @@ function ProductIcons(): ReactElement | null {
       // reads the address bar, sets activeProduct accordingly
       const pathName = location.pathname;
       if (pathName.includes(activeProduct)) return;
-  
+
       for (const product of products) {
         if (pathName.includes(product)) {
           setActiveProduct(Product[product]);
