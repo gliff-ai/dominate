@@ -154,7 +154,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                 }
               />
 
-              <PrivateRoute path="" element={<Navigate to="/manage" />} />
+              <PrivateRoute path="" element={<Navigate to="manage/projects" />} />
 
               <PrivateRoute
                 path="reset-password"

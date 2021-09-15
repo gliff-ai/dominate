@@ -67,11 +67,15 @@ if (IS_MONITORED) {
 const storeInstance = new DominateStore();
 
 ReactDOM.render(
-  <ProvideAuth storeInstance={storeInstance}>
-    <StylesProvider generateClassName={generateClassName("dominate")}>
-      <UserInterface storeInstance={storeInstance} />
-    </StylesProvider>
-  </ProvideAuth>,
+  <Sentry.ErrorBoundary fallback={<>An error has occurred</>} showDialog>
+    <ProvideAuth storeInstance={storeInstance}>
+      <ProvideTrustedService>
+        <StylesProvider generateClassName={generateClassName("dominate")}>
+          <UserInterface storeInstance={storeInstance} />
+        </StylesProvider>
+      </ProvideTrustedService>
+    </ProvideAuth>
+  </Sentry.ErrorBoundary>,
 
   document.getElementById("react-container")
 );
