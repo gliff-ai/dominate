@@ -26,6 +26,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [annotationsObject, setAnnotationsObject] =
     useState<Annotations | undefined>(undefined);
 
+  if (!collectionUid || !imageUid) return null;
+
   useEffect(() => {
     props.setIsLoading(true);
   }, []);

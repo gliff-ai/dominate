@@ -1,5 +1,5 @@
-import { ReactElement, useState } from "react";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
+import { ReactElement, useEffect, useState } from "react";
+import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { CssBaseline, ThemeProvider } from "@material-ui/core";
 import { theme } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
@@ -36,35 +36,65 @@ const UserInterface = (props: Props): ReactElement | null => {
     description: "",
   });
   const [isLoading, setIsLoading] = useState(false);
+  const location = useLocation();
+  const [isOverflow, setIsOverflow] = useState(true);
+
+  // Paths we never scroll on because it messes with canvases etc
+  const noScroll = ["annotate"];
+  const shouldOverflow = (pathname: string): boolean =>
+    noScroll.reduce((o, path) => {
+      if (pathname.includes(path) || !o) {
+        return false;
+      }
+      return true;
+    }, true);
+
+  useEffect(() => {
+    setIsOverflow(shouldOverflow(location.pathname));
+  }, [location]);
 
   return (
     <ThemeProvider theme={theme}>
       <ProgressSnackbar task={task} setTask={setTask} />
       <CssBaseline />
-      <BrowserRouter>
-        <div style={{ height: "100%", overflow: "auto" }}>
-          <PageSpinner isLoading={isLoading} />
-          <NavBar />
 
+      <div
+        style={{ height: "100%", overflow: isOverflow ? "auto" : "no-scroll" }}
+      >
+        <PageSpinner isLoading={isLoading} />
+        <NavBar />
+        <Routes>
           <Routes>
-            <Route path="/signin">
-              <BasicPage view={<SignIn />} title={<>Login</>} />
-            </Route>
-            <Route path="/signup">
-              <BasicPage view={<SignUp />} title={<>Create an Account</>} />
-            </Route>
-            <Route path="/signup/success">
-              <BasicPage
-                view={<SignUp state="4-VerificationSent" />}
-                title={<>Verify Email</>}
-              />
-            </Route>
-            <Route path="/signup/failure">
-              <BasicPage
-                view={<SignUp state="3-BillingFailed" />}
-                title={<>Payment Failed</>}
-              />
-            </Route>
+            <Route
+              path="signin"
+              element={<BasicPage view={<SignIn />} title={<>Login</>} />}
+            />
+            <Route
+              path="signup"
+              element={
+                <BasicPage view={<SignUp />} title={<>Create an Account</>} />
+              }
+            />
+            <Route
+              path="signup/success"
+              element={
+                <BasicPage
+                  view={<SignUp state="4-VerificationSent" />}
+                  title={<>Verify Email</>}
+                />
+              }
+            />
+
+            <Route
+              path="signup/failure"
+              element={
+                <BasicPage
+                  view={<SignUp state="3-BillingFailed" />}
+                  title={<>Payment Failed</>}
+                />
+              }
+            />
+
             <PrivateRoute
               path="curate/:collectionUid"
               element={
@@ -116,12 +146,16 @@ const UserInterface = (props: Props): ReactElement | null => {
                 />
               }
             />
-            <Route path="/verify_email/:uid">
-              <BasicPage
-                view={<VerifyEmail />}
-                title={<>Verify Email Address</>}
-              />
-            </Route>
+            <Route
+              path="verify_email/:uid"
+              element={
+                <BasicPage
+                  view={<VerifyEmail />}
+                  title={<>Verify Email Address</>}
+                />
+              }
+            />
+
             <Route
               path="request-verify-email"
               element={
@@ -132,12 +166,10 @@ const UserInterface = (props: Props): ReactElement | null => {
               }
             />
 
-            <PrivateRoute path="/">
-              <Navigate to="/manage" />
-            </PrivateRoute>
+            <PrivateRoute path="" element={<Navigate to="manage/projects" />} />
 
             <PrivateRoute
-              path="/reset-password"
+              path="reset-password"
               element={
                 <BasicPage
                   view={<ResetPassword storeInstance={storeInstance} />}
@@ -146,15 +178,13 @@ const UserInterface = (props: Props): ReactElement | null => {
                 />
               }
             />
-            <PrivateRoute path="/account">
-              <Account />
-            </PrivateRoute>
-            <PrivateRoute path="/billing">
-              <Billing />
-            </PrivateRoute>
+            <PrivateRoute path="account" element={<Account />} />
+
+            <PrivateRoute path="billing" element={<Billing />} />
           </Routes>
-        </div>
-      </BrowserRouter>
+        </Routes>
+      </div>
+
       <CookieConsent />
     </ThemeProvider>
   );
