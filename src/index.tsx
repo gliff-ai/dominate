@@ -14,7 +14,6 @@ import UserInterface from "@/ui";
 import { ProvideAuth } from "@/hooks/use-auth";
 import { ProvideTrustedService } from "@/hooks/use-trustedService";
 
-
 const IS_MONITORED = import.meta.env.VITE_IS_MONITORED === "true";
 
 if (IS_MONITORED) {
