@@ -1,7 +1,6 @@
 import { ReactElement, useEffect, useState } from "react";
 import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { CssBaseline, ThemeProvider, makeStyles } from "@material-ui/core";
-import { CollectionsOutlined } from "@material-ui/icons";
 import { theme } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
 import { Annotate, Audit, Curate, Manage } from "@/wrappers";

@@ -1,8 +1,10 @@
 import { ReactElement, useState, useEffect } from "react";
+import { useLocation } from "react-router-dom";
 import { makeStyles } from "@material-ui/core";
 import { theme } from "@gliff-ai/style";
 import { BaseProductIcon } from "./BaseProductIcon";
 import { useAuth } from "@/hooks/use-auth";
+
 
 const useStyles = makeStyles({
   activeSvg: {
@@ -50,6 +52,7 @@ enum Product {
 function ProductIcons(): ReactElement | null {
   const classes = useStyles();
   const auth = useAuth();
+  const location = useLocation();
   const [activeProduct, setActiveProduct] = useState(Product.manage);
   const [products, setProducts] = useState<string[]>([
     "manage",
@@ -64,19 +67,6 @@ function ProductIcons(): ReactElement | null {
       setProducts(["manage", "curate", "annotate", "audit"]);
   }, [auth]);
 
-  function updateActiveProduct() {
-    // reads the address bar, sets activeProduct accordingly
-    const pathName = window.location.pathname;
-    if (pathName.includes(activeProduct)) return;
-
-    for (const product of products) {
-      if (pathName.includes(product)) {
-        setActiveProduct(Product[product]);
-        return;
-      }
-    }
-    setActiveProduct(Product.other);
-  }
 
   const isActive = (product: Product): boolean => product === activeProduct;
 
@@ -186,8 +176,22 @@ function ProductIcons(): ReactElement | null {
   };
 
   useEffect(() => {
+    function updateActiveProduct() {
+      // reads the address bar, sets activeProduct accordingly
+      const pathName = location.pathname;
+      if (pathName.includes(activeProduct)) return;
+  
+      for (const product of products) {
+        if (pathName.includes(product)) {
+          setActiveProduct(Product[product]);
+          return;
+        }
+      }
+      setActiveProduct(Product.other);
+    }
+
     updateActiveProduct();
-  }, [window.location.pathname, products]);
+  }, [location.pathname, products, activeProduct]);
 
   if (!auth) return null;
 

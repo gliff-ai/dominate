@@ -1,4 +1,4 @@
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { Typography } from "@material-ui/core";
 import { MessageAlert, SubmitButton } from "@/components";
