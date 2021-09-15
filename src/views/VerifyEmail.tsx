@@ -6,13 +6,9 @@ import { apiRequest } from "@/api";
 
 export const VerifyEmail = (): JSX.Element => {
   const navigate = useNavigate();
-  const { uid } = useParams(); // uid of user from URL
+  const { uid = "" } = useParams(); // uid of user from URL
   const [loading, setLoading] = useState(false);
   const [requestError, setRequestError] = useState("");
-
-  if (!uid) {
-    return <></>;
-  }
 
   const onLoadForm = async (): Promise<void> => {
     try {
@@ -39,6 +35,10 @@ export const VerifyEmail = (): JSX.Element => {
   useEffect(() => {
     void onLoadForm();
   }, []);
+
+  if (!uid) {
+    return <></>;
+  }
 
   return (
     <>

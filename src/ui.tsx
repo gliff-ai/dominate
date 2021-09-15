@@ -57,12 +57,11 @@ const UserInterface = (props: Props): ReactElement | null => {
     <ThemeProvider theme={theme}>
       <ProgressSnackbar task={task} setTask={setTask} />
       <CssBaseline />
-
+      <NavBar />
       <div
         style={{ height: "100%", overflow: isOverflow ? "auto" : "no-scroll" }}
       >
         <PageSpinner isLoading={isLoading} />
-        <NavBar />
         <Routes>
           <Routes>
             <Route

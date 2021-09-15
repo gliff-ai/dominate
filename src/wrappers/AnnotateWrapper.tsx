@@ -17,16 +17,13 @@ interface Props {
 }
 
 export const AnnotateWrapper = (props: Props): ReactElement | null => {
-  if (!props.storeInstance) return null;
-
-  const { collectionUid, imageUid } = useParams();
+  const { collectionUid = "", imageUid = "" } = useParams();
   const [imageItem, setImageItem] = useState<Image | null>(null);
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
   const [imageFileInfo, setImageFileInfo] = useState<ImageFileInfo>();
   const [annotationsObject, setAnnotationsObject] =
     useState<Annotations | undefined>(undefined);
 
-  if (!collectionUid || !imageUid) return null;
 
   useEffect(() => {
     props.setIsLoading(true);
@@ -96,6 +93,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       setImageFileInfo(fileInfo);
     }
   }, [imageItem]);
+
+  if (!collectionUid || !imageUid) return null;
 
   return slicesData ? (
     <UserInterface

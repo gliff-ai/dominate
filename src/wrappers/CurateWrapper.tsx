@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useEffect, useState } from "react";
+import { ReactElement, useEffect, useState, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import {
@@ -58,7 +58,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   const classes = useStyles()();
 
-  const fetchImageItems = (): void => {
+  console.log(props.storeInstance.ready);
+
+  const fetchImageItems = useCallback(() => {
     // fetches images via DominateStore, and assigns them to imageItems state
     props.storeInstance
       .getImagesMeta(collectionUid)
@@ -79,7 +81,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       .catch((err) => {
         console.log(err);
       });
-  };
+  }, [props.storeInstance, props.storeInstance.ready, collectionUid]);
 
   const addImageToGallery = async (
     imageFileInfo: ImageFileInfo,
@@ -273,7 +275,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     if (collectionUid) {
       fetchImageItems();
     }
-  }, [collectionUid]);
+  }, [collectionUid, fetchImageItems]);
 
   if (!props.storeInstance || !auth?.user || !collectionUid) return null;
 

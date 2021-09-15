@@ -4,7 +4,6 @@ import {
   FormEvent,
   useEffect,
   useState,
-  ComponentType,
   ReactElement,
 } from "react";
 import { loadStripe } from "@stripe/stripe-js";
@@ -16,7 +15,6 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@material-ui/core";
-import Slide from "@material-ui/core/Slide";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
@@ -86,7 +84,6 @@ export const SignUp = (props: Props): ReactElement | null => {
     inviteId: null,
     acceptedTermsAndConditions: false,
   });
-  if (!auth) return null;
 
   const handleSnackbar = () => {
     setOpen(true);
@@ -111,6 +108,8 @@ export const SignUp = (props: Props): ReactElement | null => {
       });
     }
   }, []);
+
+  if (!auth) return null;
 
   const validate = () => {
     if (signUp.password !== signUp.confirmPassword) {

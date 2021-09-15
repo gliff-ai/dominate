@@ -5,19 +5,21 @@ module.exports = {
       tsconfigRootDir: __dirname,
       project: ["./tsconfig.json"],
   },
-  plugins: ["@typescript-eslint", "mui-unused-classes"],
+  plugins: ["@typescript-eslint", "mui-unused-classes", "react-hooks"],
   extends: [
       "eslint:recommended",
       "airbnb",
       "airbnb-typescript",
       "plugin:@typescript-eslint/recommended",
       "plugin:@typescript-eslint/recommended-requiring-type-checking",
-      "prettier",
+      "prettier"
   ],
   overrides: [
       {
           files: ["*.ts", "*.tsx"],
           rules: {
+"no-console": 0,
+
               "global-require": 0,
               "import/extensions": 0,
               "@typescript-eslint/no-var-requires": 0,
@@ -47,6 +49,8 @@ module.exports = {
               ],
               "react/static-property-placement": [2, "static public field"],
               "no-param-reassign": [2, { props: false }],
+              "react-hooks/rules-of-hooks": "error", // Checks rules of Hooks
+              "react-hooks/exhaustive-deps": "warn" // Checks effect dependencies
           },
       },
       {

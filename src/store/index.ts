@@ -207,6 +207,7 @@ export class DominateStore {
   };
 
   getImagesMeta = async (collectionUid: string): Promise<GalleryTile[]> => {
+    console.log(this);
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();

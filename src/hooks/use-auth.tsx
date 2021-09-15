@@ -49,8 +49,6 @@ function useProvideAuth(storeInstance: DominateStore) {
     if (authedUser) {
       void getUserProfile().then(
         (profile) => {
-          console.log("UPDATING USER");
-          console.log(profile);
           setUserProfile(profile);
           setReady(true);
         },
