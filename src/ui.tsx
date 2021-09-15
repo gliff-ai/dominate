@@ -1,6 +1,6 @@
 import { ReactElement, useEffect, useState } from "react";
 import { Route, Routes, Navigate, useLocation } from "react-router-dom";
-import { CssBaseline, ThemeProvider,makeStyles } from "@material-ui/core";
+import { CssBaseline, ThemeProvider, makeStyles } from "@material-ui/core";
 import { CollectionsOutlined } from "@material-ui/icons";
 import { theme } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
@@ -26,7 +26,6 @@ import {
 import { BasicPage } from "@/views/BasicPage";
 import { PrivateRoute } from "./wrappers/PrivateRouter";
 
-
 interface Props {
   storeInstance: DominateStore;
 }
@@ -34,12 +33,12 @@ interface Props {
 const useStyles = makeStyles(() => ({
   overflow: {
     height: "calc(100% - 90px)",
-     overflow:"auto"
+    overflow: "auto",
   },
   noOverflow: {
     height: "calc(100% - 90px)",
-    overflow: "hidden"
-  }
+    overflow: "hidden",
+  },
 }));
 
 const UserInterface = (props: Props): ReactElement | null => {
