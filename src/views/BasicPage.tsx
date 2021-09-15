@@ -71,6 +71,7 @@ export const BasicPage = ({
       maxWidth="sm"
       style={{ display: "flex", flexDirection: "column", marginTop: 0 }}
     >
+      BASIC PAGE
       {showBackButton ? (
         <Button
           type="button"
