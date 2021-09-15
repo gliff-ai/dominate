@@ -1,10 +1,8 @@
 import { ReactElement, useEffect, useState } from "react";
 import {
-  BrowserRouter,
   Route,
   Routes,
   Navigate,
-  useRoutes,
   useLocation,
 } from "react-router-dom";
 import { CssBaseline, ThemeProvider } from "@material-ui/core";

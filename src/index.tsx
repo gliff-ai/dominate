@@ -5,6 +5,7 @@ import { Integrations } from "@sentry/tracing";
 import { CaptureConsole } from "@sentry/integrations";
 import LogRocket from "logrocket";
 import setupLogRocketReact from "logrocket-react";
+import { BrowserRouter } from "react-router-dom";
 import { StylesProvider } from "@material-ui/core";
 import { generateClassName } from "@gliff-ai/style";
 
@@ -12,7 +13,7 @@ import { DominateStore, API_URL } from "@/store";
 import UserInterface from "@/ui";
 import { ProvideAuth } from "@/hooks/use-auth";
 import { ProvideTrustedService } from "@/hooks/use-trustedService";
-import { BrowserRouter } from "react-router-dom";
+
 
 const IS_MONITORED = import.meta.env.VITE_IS_MONITORED === "true";
 
