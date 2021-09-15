@@ -1,18 +1,19 @@
 import axios from "axios";
 import { useState, useEffect, useContext, createContext } from "react";
-import { DominateEtebase } from "@/etebase";
+import { DominateStore } from "@/store";
 import { User, UserProfile } from "@/services/user/interfaces";
 import { createUserProfile, getUserProfile } from "@/services/user";
 
 interface Props {
   children: React.ReactElement;
-  etebaseInstance: DominateEtebase;
+  storeInstance: DominateStore;
 }
 
 interface Context {
-  user: User;
-  userProfile: UserProfile;
-  getInstance: () => DominateEtebase;
+  user: User | null;
+  userProfile: UserProfile | null;
+  ready: boolean;
+  getInstance: () => DominateStore;
   changePassword: (newPassword: string) => Promise<boolean>;
   signin: (username: string, password: string) => Promise<User>;
   signout: () => Promise<boolean>;
@@ -22,72 +23,83 @@ interface Context {
     teamId?: number,
     inviteId?: string,
     acceptedTermsAndConditions?: boolean
-  ) => Promise<{ profile: UserProfile; recoveryKey: string[] }>;
+  ) => Promise<{ profile: UserProfile; recoveryKey: string[] } | null>;
 }
 
-const authContext = createContext<Context>(null);
+const authContext = createContext<Context | null>(null);
 
 // Hook for child components to get the auth object ...
 // ... and re-render when it changes.
-export const useAuth = (): Context => useContext(authContext);
+export const useAuth = (): Context | null => useContext(authContext);
 
 // Provider hook that creates auth object and handles state
-function useProvideAuth(etebaseInstance: DominateEtebase) {
-  const [user, setUser] = useState<User>(null);
-  const [userProfile, setUserProfile] = useState<UserProfile>(null);
+function useProvideAuth(storeInstance: DominateStore) {
+  const [user, setUser] = useState<User | null>(null);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
+  const [ready, setReady] = useState<boolean>(false);
 
   // Wrapper to the set hook to add the auth token
   const updateUser = (authedUser: User | null) => {
-    if (authedUser) {
+    if (authedUser?.authToken) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       axios.defaults.headers.common.Authorization = `Token ${authedUser.authToken}`;
     }
 
     setUser(authedUser);
     if (authedUser) {
-      void getUserProfile().then((profile) => {
-        setUserProfile(profile);
-      });
+      void getUserProfile().then(
+        (profile) => {
+          console.log("UPDATING USER");
+          console.log(profile);
+          setUserProfile(profile);
+          setReady(true);
+        },
+        () => {
+          // 401 / 403 error, so clear saved session:
+          localStorage.removeItem("storeInstance");
+          setReady(true);
+        }
+      );
     } else {
       setUserProfile(null);
     }
   };
 
-  const getInstance = (): DominateEtebase => etebaseInstance;
+  const getInstance = (): DominateStore => storeInstance;
 
   const signin = (username, password): Promise<User> =>
-    etebaseInstance.login(username, password).then((etebaseUser) => {
-      updateUser(etebaseUser);
-      return etebaseUser;
+    storeInstance.login(username, password).then((storeUser) => {
+      updateUser(storeUser);
+      return storeUser;
     });
 
   const signup = (email, password): Promise<User> =>
-    etebaseInstance.signup(email, password).then((etebaseUser) => {
-      updateUser(etebaseUser);
-      return etebaseUser;
+    storeInstance.signup(email, password).then((storeUser) => {
+      updateUser(storeUser);
+      return storeUser;
     });
 
   const signout = (): Promise<boolean> =>
-    etebaseInstance.logout().then((response) => {
+    storeInstance.logout().then((response) => {
       updateUser(null);
       return response;
     });
 
   const changePassword = (newPassword: string): Promise<boolean> =>
-    etebaseInstance.changePassword(newPassword).then(signout);
+    storeInstance.changePassword(newPassword).then(signout);
 
   const createProfile = async (
     name: string,
     teamId: number,
     inviteId: string,
     acceptedTermsAndConditions: boolean
-  ) => {
-    if (!etebaseInstance.getUser()) return null;
+  ): Promise<{ profile: UserProfile; recoveryKey: string[] } | null> => {
+    if (!storeInstance.getUser()) return null;
 
     const { readable: recoveryKey, hashed } =
-      etebaseInstance.generateRecoveryKey();
+      storeInstance.generateRecoveryKey();
 
-    const savedSession = await etebaseInstance.etebaseInstance.save(hashed);
+    const savedSession = await storeInstance.etebaseInstance.save(hashed);
 
     const profile = await createUserProfile(
       name,
@@ -105,7 +117,7 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
 
   // Login initially if we have a session
   useEffect(() => {
-    etebaseInstance
+    storeInstance
       .init()
       .then((authedUser) => {
         if (authedUser) {
@@ -123,6 +135,7 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
   return {
     user,
     userProfile,
+    ready,
     signin,
     signout,
     signup,
@@ -135,7 +148,7 @@ function useProvideAuth(etebaseInstance: DominateEtebase) {
 // Provider component that wraps your app and makes auth object
 // available to any child component that calls useAuth().
 export function ProvideAuth(props: Props): React.ReactElement {
-  const auth = useProvideAuth(props.etebaseInstance);
+  const auth = useProvideAuth(props.storeInstance);
   return (
     <authContext.Provider value={auth}>{props.children}</authContext.Provider>
   );

@@ -1,39 +1,41 @@
 import ReactDOM from "react-dom";
 
-import { ProvideAuth } from "@/hooks/use-auth";
-import UserInterface from "@/ui";
-import { DominateEtebase } from "@/etebase";
 import * as Sentry from "@sentry/react";
 import { Integrations } from "@sentry/tracing";
 import { CaptureConsole } from "@sentry/integrations";
 import LogRocket from "logrocket";
 import setupLogRocketReact from "logrocket-react";
-import { createGenerateClassName, StylesProvider } from "@material-ui/core";
+import { StylesProvider } from "@material-ui/core";
+import { generateClassName } from "@gliff-ai/style";
 
-declare const STORE_URL: string;
-declare const IS_MONITORED: boolean;
-declare const SENTRY_ENVIRONMENT: string;
-declare const IS_SENTRY_DEBUG: boolean;
-declare const VERSION: string;
-const version = VERSION;
+import { DominateStore, API_URL } from "@/store";
+import UserInterface from "@/ui";
+import { ProvideAuth } from "@/hooks/use-auth";
+import { ProvideTrustedService } from "@/hooks/use-trustedService";
+
+const IS_MONITORED = import.meta.env.VITE_IS_MONITORED === "true";
 
 if (IS_MONITORED) {
+  const VERSION = import.meta.env.VITE_VERSION;
+  const SENTRY_ENVIRONMENT = import.meta.env.VITE_SENTRY_ENVIRONMENT;
+  const IS_SENTRY_DEBUG = import.meta.env.VITE_IS_SENTRY_DEBUG;
+
   // setup Sentry
   Sentry.init({
     dsn: "https://097ef1f6a3364e6895c2fcb95c88446a@o651808.ingest.sentry.io/5812330",
-    tunnel: `${STORE_URL}django/api/tunnel/`,
+    tunnel: `${API_URL}/tunnel/`,
 
     integrations: [
-      //   new Integrations.BrowserTracing(),
+      new Integrations.BrowserTracing(),
       /* eslint-disable @typescript-eslint/no-unsafe-call */
       new CaptureConsole({
         // options: ['log', 'info', 'warn', 'error', 'debug', 'assert']
-        levels: ["assert"],
+        levels: ["error", "assert"],
       }),
       /* eslint-enable @typescript-eslint/no-unsafe-call */
     ],
 
-    release: `dominate@${version}`,
+    release: `dominate@${VERSION || "0.0.0"}`,
 
     // We recommend adjusting this value in production, or using tracesSampler
     // for finer control
@@ -42,7 +44,7 @@ if (IS_MONITORED) {
     // flag for filtering
     environment: SENTRY_ENVIRONMENT,
 
-    debug: IS_SENTRY_DEBUG,
+    debug: IS_SENTRY_DEBUG === "true",
   });
 
   // setup LogRocket
@@ -62,19 +64,16 @@ if (IS_MONITORED) {
   });
 }
 
-const etebaseInstance = new DominateEtebase();
-
-const generateClassName = createGenerateClassName({
-  seed: "dominate",
-  disableGlobal: true,
-});
+const storeInstance = new DominateStore();
 
 ReactDOM.render(
-  <Sentry.ErrorBoundary fallback="An error has occurred" showDialog>
-    <ProvideAuth etebaseInstance={etebaseInstance}>
-      <StylesProvider generateClassName={generateClassName}>
-        <UserInterface etebaseInstance={etebaseInstance} />
-      </StylesProvider>
+  <Sentry.ErrorBoundary fallback={<>An error has occurred</>} showDialog>
+    <ProvideAuth storeInstance={storeInstance}>
+      <ProvideTrustedService>
+        <StylesProvider generateClassName={generateClassName("dominate")}>
+          <UserInterface storeInstance={storeInstance} />
+        </StylesProvider>
+      </ProvideTrustedService>
     </ProvideAuth>
   </Sentry.ErrorBoundary>,
   document.getElementById("react-container")

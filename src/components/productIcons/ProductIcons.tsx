@@ -2,6 +2,7 @@ import { ReactElement, useState, useEffect } from "react";
 import { makeStyles } from "@material-ui/core";
 import { theme } from "@gliff-ai/style";
 import { BaseProductIcon } from "./BaseProductIcon";
+import { useAuth } from "@/hooks/use-auth";
 
 const useStyles = makeStyles({
   activeSvg: {
@@ -41,30 +42,64 @@ enum Status {
 enum Product {
   manage = "manage",
   curate = "curate",
+  audit = "audit",
   annotate = "annotate",
+  other = "other",
 }
 
-function ProductIcons(): ReactElement {
+function ProductIcons(): ReactElement | null {
   const classes = useStyles();
+  const auth = useAuth();
   const [activeProduct, setActiveProduct] = useState(Product.manage);
-  const products: string[] = ["manage", "curate", "annotate"];
+  const [products, setProducts] = useState<string[]>([
+    "manage",
+    "curate",
+    "annotate",
+  ]);
+  if (!auth) return null;
+
+  // only display the AUDIT icon if on a paid tier:
+  useEffect(() => {
+    const tier = auth?.userProfile?.team.tier;
+    if (tier && tier.id > 1)
+      setProducts(["manage", "curate", "annotate", "audit"]);
+  }, [auth.ready]);
 
   function updateActiveProduct() {
+    // reads the address bar, sets activeProduct accordingly
     const pathName = window.location.pathname;
     if (pathName.includes(activeProduct)) return;
 
     for (const product of products) {
       if (pathName.includes(product)) {
         setActiveProduct(Product[product]);
-        break;
+        return;
       }
     }
+    setActiveProduct(Product.other);
   }
 
   const isActive = (product: Product): boolean => product === activeProduct;
 
+  const getCustomUrlPath = (
+    tool: string,
+    status: Status
+  ): string | undefined => {
+    // When navigating back to curate from annotate using the navbar
+    // the collectionUid in the annotate url is used to set the url path for curate
+    if (["curate", "audit"].includes(tool) && status === Status.accessible) {
+      const galleryUid = window.location.pathname.split("/").reverse()[
+        activeProduct === Product.annotate ? 1 : 0
+      ];
+      return `/${tool}/${galleryUid}`;
+    }
+    return undefined;
+  };
+
   function getProductIcon(tool: string, status: Status): ReactElement | null {
     const key = `${tool}-${status}`;
+    const tier = auth?.userProfile?.team.tier;
+    const auditEnabled = tier && tier.id > 1;
 
     switch (status) {
       case Status.active:
@@ -76,6 +111,7 @@ function ProductIcons(): ReactElement {
             extraStyleAvatar={classes.noHoverAvatar}
             extraStyleSvg={classes.activeSvg}
             extraStyleName={classes.activeName}
+            auditEnabled={auditEnabled}
           />
         );
       case Status.accessible:
@@ -83,9 +119,11 @@ function ProductIcons(): ReactElement {
           <BaseProductIcon
             key={key}
             tool={tool}
+            customUrlPath={getCustomUrlPath(tool, status)}
             extraStyleSvg={classes.accessibleSvg}
             extraStyleName={classes.accessibleName}
             extraStyleTrailSvg={classes.accessibleTrailSvg}
+            auditEnabled={auditEnabled}
           />
         );
       case Status.disabled:
@@ -97,6 +135,7 @@ function ProductIcons(): ReactElement {
             extraStyleAvatar={classes.noHoverAvatar}
             extraStyleSvg={classes.disabledSvg}
             extraStyleName={classes.disableName}
+            auditEnabled={auditEnabled}
           />
         );
       default:
@@ -104,22 +143,54 @@ function ProductIcons(): ReactElement {
     }
   }
 
+  const getProductIcons = () => {
+    if (activeProduct === Product.other) {
+      // If not on any product, only manage is accessible
+      return products.map((product) =>
+        getProductIcon(
+          product,
+          product === "manage" ? Status.accessible : Status.disabled
+        )
+      );
+    }
+
+    let curateStatus;
+    let auditStatus;
+    if (activeProduct === Product.manage) {
+      curateStatus = Status.disabled;
+      auditStatus = Status.disabled;
+    } else if (activeProduct === Product.annotate) {
+      curateStatus = Status.accessible;
+      auditStatus = Status.accessible;
+    } else {
+      curateStatus =
+        activeProduct === Product.curate ? Status.active : Status.accessible;
+      auditStatus =
+        activeProduct === Product.audit ? Status.active : Status.accessible;
+    }
+
+    const icons = [
+      getProductIcon(
+        "manage",
+        activeProduct === Product.manage ? Status.active : Status.accessible
+      ),
+      getProductIcon("curate", curateStatus),
+      getProductIcon(
+        "annotate",
+        activeProduct === Product.annotate ? Status.active : Status.disabled
+      ),
+    ];
+    const tier = auth.userProfile?.team.tier;
+    if (tier && tier.id > 1) icons.push(getProductIcon("audit", auditStatus));
+
+    return icons;
+  };
+
   useEffect(() => {
     updateActiveProduct();
-  }, [window.location.pathname]);
+  }, [window.location.pathname, products]);
 
-  let otherStatus = Status.accessible;
-  return (
-    <>
-      {products.map((product) => {
-        if (isActive(Product[product])) {
-          otherStatus = Status.disabled;
-          return getProductIcon(product, Status.active);
-        }
-        return getProductIcon(product, otherStatus);
-      })}
-    </>
-  );
+  return <>{getProductIcons()}</>;
 }
 
-export { ProductIcons, Status };
+export { ProductIcons, Status, BaseProductIcon };

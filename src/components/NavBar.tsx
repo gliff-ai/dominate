@@ -13,11 +13,11 @@ import {
 } from "@material-ui/core";
 import { Link, useNavigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
+import { HtmlTooltip } from "@gliff-ai/style";
 import { imgSrc } from "@/imgSrc";
 
 import { useAuth } from "@/hooks/use-auth";
-import { HtmlTooltip } from "@/components/HtmlTooltip";
-import { ProductIcons } from "@/components";
+import { ProductIcons, BaseProductIcon } from "@/components";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -25,23 +25,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     height: "90px",
     paddingTop: "9px",
   },
-  link: {
-    textDecoration: "none",
-    marginRight: "10px",
-    color: theme.palette.secondary.main,
-  },
   svgMedium: {
     width: "22px",
     height: "100%",
     marginLeft: "-1px",
-  },
-  paper: {
-    borderRadius: 0,
-    border: "none",
-    boxShadow: "none",
-    display: "inline-flex",
-    backgroundColor: "#FFFFFF",
-    width: "313px",
   },
   avatarUser: {
     width: "64px !important",
@@ -55,6 +42,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     opacity: "1",
     "&:hover": {
       background: theme.palette.primary.main,
+    },
+    "& a": {
+      color: theme.palette.text.primary,
+      textDecoration: "none",
+      fontSize: "1rem",
+      display: "inline-flex",
     },
   },
   logo: {
@@ -71,19 +64,23 @@ const useStyles = makeStyles((theme: Theme) => ({
     alignItems: "center",
     display: "flex",
   },
-  linkTooltip: {
-    textTransform: "uppercase",
+  accessibleSvg: {
+    fill: "#000000",
+  },
+  accessibleName: {
+    color: "#000000",
   },
 }));
 
-export const NavBar = (): ReactElement => {
+export const NavBar = (): ReactElement | null => {
   // Get auth state and re-render anytime it changes
   const auth = useAuth();
   const navigate = useNavigate();
   const classes = useStyles();
   const [userInitials, setUserInitials] = useState("");
-
   const [anchorElement, setAnchorEl] = useState<null | HTMLElement>(null);
+
+  if (!auth) return null;
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
@@ -102,7 +99,7 @@ export const NavBar = (): ReactElement => {
     setUserInitials(initials);
   }, [auth]);
 
-  const hasNavbar = () =>
+  const hasNavbar = (): boolean =>
     ![
       "/signin",
       "/signup",
@@ -113,10 +110,22 @@ export const NavBar = (): ReactElement => {
 
   if (!hasNavbar()) return null;
 
+  // TODO: owners who are on free plan should still be able to upgrade
+  const showBilling =
+    auth?.userProfile?.id &&
+    auth?.userProfile?.id === auth?.userProfile?.team.owner_id;
+
   const accountMenu = (
     <>
-      <IconButton onClick={handleClick} aria-controls="menu">
-        <HtmlTooltip title={<Typography>Account</Typography>} placement="top">
+      <IconButton
+        onClick={handleClick}
+        aria-controls="menu"
+        style={{ paddingTop: 0 }}
+      >
+        <HtmlTooltip
+          title={<Typography>Account</Typography>}
+          placement="bottom"
+        >
           <Avatar variant="circular" className={classes.avatarUser}>
             {userInitials}
           </Avatar>
@@ -128,23 +137,42 @@ export const NavBar = (): ReactElement => {
         open={Boolean(anchorElement)}
         onClose={handleClose}
         id="menu"
-        style={{ marginTop: "80px" }}
+        style={{ marginTop: "60px", marginLeft: "80px" }}
         transformOrigin={{
           vertical: "top",
           horizontal: "right",
         }}
       >
-        <MenuItem component="a" href="/account" className={classes.menuItem}>
-          <SVG
-            src={imgSrc("account-settings")}
-            className={classes.svgMedium}
-            style={{ marginRight: "12px" }}
-          />
-          Account Settings
+        <MenuItem className={classes.menuItem}>
+          <Link to="/account" onClick={() => setAnchorEl(null)}>
+            <SVG
+              src={imgSrc("account-settings")}
+              className={classes.svgMedium}
+              style={{ marginRight: "12px" }}
+            />
+            Account Settings
+          </Link>
         </MenuItem>
+        {showBilling ? (
+          <MenuItem className={classes.menuItem}>
+            <Link to="/billing" onClick={() => setAnchorEl(null)}>
+              <SVG
+                src={imgSrc("account-settings")}
+                className={classes.svgMedium}
+                style={{ marginRight: "12px" }}
+              />
+              Billing
+            </Link>
+          </MenuItem>
+        ) : null}
         <MenuItem
           className={classes.menuItem}
-          onClick={() => auth.signout().then(() => navigate("signin"))}
+          onClick={() =>
+            auth.signout().then(() => {
+              navigate("signin");
+              setAnchorEl(null);
+            })
+          }
         >
           <SVG
             src={imgSrc("log-out")}
@@ -174,6 +202,14 @@ export const NavBar = (): ReactElement => {
               {auth.user ? (
                 <>
                   <ProductIcons />
+                  <BaseProductIcon
+                    key="document"
+                    tool="document"
+                    target="_blank"
+                    customUrlPath="https://docs.gliff.app/"
+                    extraStyleSvg={classes.accessibleSvg}
+                    extraStyleName={classes.accessibleName}
+                  />
                   {accountMenu}
                 </>
               ) : (

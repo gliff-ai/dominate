@@ -1,6 +1,6 @@
 import { CircularProgress, makeStyles } from "@material-ui/core";
-import Slide from "@material-ui/core/Slide";
 import { BaseSnackbar } from "@gliff-ai/style";
+import { ReactElement } from "react";
 
 const useStyle = makeStyles({
   messageContainer: {
@@ -20,7 +20,7 @@ interface Props {
   setTask: (task: Task) => void;
 }
 
-function ProgressSnackbar({ task, setTask }: Props) {
+function ProgressSnackbar({ task, setTask }: Props): ReactElement {
   const classes = useStyle();
 
   const handleClose = () => {
@@ -31,7 +31,6 @@ function ProgressSnackbar({ task, setTask }: Props) {
     <BaseSnackbar
       open={task.isLoading}
       handleClose={handleClose}
-      transition={Slide}
       message={
         <div className={classes.messageContainer}>
           {`${task.description} in progress, please wait..`}

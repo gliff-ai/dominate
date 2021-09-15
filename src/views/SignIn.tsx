@@ -1,4 +1,4 @@
-import { useState, ComponentType } from "react";
+import { useState, ComponentType, ReactElement } from "react";
 import {
   TextField,
   Link,
@@ -6,20 +6,15 @@ import {
   makeStyles,
   IconButton,
   InputAdornment,
-  Slide,
 } from "@material-ui/core";
-import { useAuth } from "@/hooks/use-auth";
 import { useNavigate } from "react-router-dom";
-import { theme, TransitionProps } from "@gliff-ai/style";
+import { theme } from "@gliff-ai/style";
 import SVG from "react-inlinesvg";
+import { useAuth } from "@/hooks/use-auth";
 import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
 import { imgSrc } from "@/imgSrc";
 
 const useStyles = makeStyles(() => ({
-  form: {
-    width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
   forgotPasswordText: {
     marginBottom: "44px",
     marginTop: "13px",
@@ -35,10 +30,6 @@ const useStyles = makeStyles(() => ({
     display: "inline",
     marginRight: "10px",
   },
-
-  textFieldBackground: {
-    background: theme.palette.primary.light,
-  },
   svgSmall: {
     width: "22px",
     height: "100%",
@@ -49,23 +40,21 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export function SignIn(): JSX.Element {
+export function SignIn(): ReactElement | null {
   const classes = useStyles();
   const auth = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-
-  const [transition, setTransition] =
-    useState<ComponentType<TransitionProps> | null>(null);
-
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState("");
-  const [etebaseError, setEtebaseError] = useState({});
+  const [storeError, setStoreError] = useState({});
   const [login, setLogin] = useState({
     email: "",
     password: "",
     showPassword: false,
   });
+
+  if (!auth) return null;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = event.target;
@@ -75,13 +64,7 @@ export function SignIn(): JSX.Element {
     }));
   };
 
-  const TransitionUp = (props: TransitionProps) => (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <Slide {...props} direction="up" />
-  );
-
-  const handleSnackbar = (Transition: React.ComponentType<TransitionProps>) => {
-    setTransition(() => Transition);
+  const handleSnackbar = () => {
     setOpen(true);
   };
 
@@ -118,13 +101,13 @@ export function SignIn(): JSX.Element {
           navigate("/");
         })
         .catch((e) => {
-          handleSnackbar(TransitionUp);
+          handleSnackbar();
           setLoading(false);
           setLogin({ email: "", password: "", showPassword: false });
 
           if (e instanceof Error) {
             // eslint-disable-next-line no-console
-            setEtebaseError(e.message);
+            setStoreError(e.message);
           }
         });
     }
@@ -132,11 +115,10 @@ export function SignIn(): JSX.Element {
 
   return (
     <>
-      <form className={classes.form} onSubmit={onFormSubmit}>
+      <form onSubmit={onFormSubmit}>
         <TextField
           variant="outlined"
           margin="normal"
-          className={classes.textFieldBackground}
           required
           fullWidth
           id="email"
@@ -154,7 +136,6 @@ export function SignIn(): JSX.Element {
           margin="normal"
           required
           fullWidth
-          className={classes.textFieldBackground}
           name="password"
           type={login.showPassword ? "text" : "password"}
           id="password"
@@ -174,7 +155,9 @@ export function SignIn(): JSX.Element {
                     src={imgSrc("show-or-hide-password")}
                     className={classes.svgSmall}
                     fill={
-                      login.showPassword ? theme.palette.primary.main : null
+                      login.showPassword
+                        ? theme.palette.primary.main
+                        : undefined
                     }
                   />
                 </IconButton>
@@ -203,9 +186,8 @@ export function SignIn(): JSX.Element {
       <MessageSnackbar
         open={open}
         handleClose={handleClose}
-        transition={transition}
         messageText={
-          String(etebaseError).includes("Wrong password for user.")
+          String(storeError).includes("Wrong password for user.")
             ? "Login Failed. Your username and/or password do not match"
             : "There was an error logging you in. Please try again"
         }

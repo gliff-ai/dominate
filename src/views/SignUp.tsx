@@ -5,8 +5,9 @@ import {
   useEffect,
   useState,
   ComponentType,
+  ReactElement,
 } from "react";
-import { loadStripe, Stripe } from "@stripe/stripe-js";
+import { loadStripe } from "@stripe/stripe-js";
 import {
   TextField,
   Link,
@@ -16,31 +17,29 @@ import {
   FormControlLabel,
 } from "@material-ui/core";
 import Slide from "@material-ui/core/Slide";
-import { useNavigate } from "react-router-dom";
-import { theme, TransitionProps } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
 import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
+import { VerificationSent } from "@/views/VerificationSent";
 
-const stripePromise = loadStripe(
-  "pk_test_51IVYtvFauXVlvS5w0UZBrzMK5jOZStppHYgoCBLXsZjOKkyqLWC9ICe5biwlYcDZ8THoXtOlPXXPX4zptGjJa1J400IAI0fEAo"
-);
+const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY;
+
+const stripePromise = loadStripe(STRIPE_KEY);
 
 const query = new URLSearchParams(window.location.search);
 
+type SignupForm = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  teamId: number | null;
+  inviteId: string | null;
+  acceptedTermsAndConditions: boolean;
+};
+
 const useStyles = makeStyles(() => ({
-  avatar: {
-    margin: theme.spacing(1),
-    backgroundColor: theme.palette.secondary.main,
-  },
-  form: {
-    width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
-  textFieldBackground: {
-    background: theme.palette.primary.light,
-  },
   haveAccount: {
     width: "fit-content",
     marginRight: "auto",
@@ -53,40 +52,43 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export const SignUp = (): JSX.Element => {
+type State =
+  | "1-Signup"
+  | "2-RecoveryKey"
+  | "3-BillingFailed"
+  | "4-VerificationSent";
+
+interface Props {
+  // eslint-disable-next-line react/require-default-props
+  state?: State;
+}
+export const SignUp = (props: Props): ReactElement | null => {
   const classes = useStyles();
   const auth = useAuth();
-  const navigate = useNavigate();
 
+  const [state, setState] = useState<State>(props.state || "1-Signup");
   const [open, setOpen] = useState(false);
-  const [transition, setTransition] =
-    useState<ComponentType<TransitionProps> | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [etebaseError, setEtebaseError] = useState({});
+  const [storeError, setStoreError] = useState({});
   const [termsAndConditionsError, setTermsAndConditionsError] = useState("");
   const [recoveryKey, setRecoveryKey] = useState<string[] | null>(null);
-
-  const [signUp, setSignUp] = useState({
+  const [user, setUser] = useState<{ email: string; id: number } | null>(null);
+  const [signUp, setSignUp] = useState<SignupForm>({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    teamId: null as number,
-    inviteId: null as string,
+    teamId: null,
+    inviteId: null,
     acceptedTermsAndConditions: false,
   });
+  if (!auth) return null;
 
-  const TransitionUp = (props: TransitionProps) => (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <Slide {...props} direction="up" />
-  );
-
-  const handleSnackbar = (Transition: ComponentType<TransitionProps>) => {
-    setTransition(() => Transition);
+  const handleSnackbar = () => {
     setOpen(true);
   };
 
@@ -124,67 +126,30 @@ export const SignUp = (): JSX.Element => {
     return true;
   };
 
+  const clearErrors = () => {
+    setEmailError("");
+    setPasswordError("");
+    setNameError("");
+    setTermsAndConditionsError("");
+  };
+
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
-    const { id, value, checked } = event.target;
-    if (id === "acceptedTermsAndConditions") {
-      // in this case use the checkbox
-      setSignUp({
-        ...signUp,
-        [id]: checked,
-      });
-    } else {
-      setSignUp({
-        ...signUp,
-        [id]: value,
-      });
-    }
+    const { id, value, checked, type } = event.target;
+    setSignUp({
+      ...signUp,
+      [id]: type === "checkbox" ? checked : value,
+    });
   };
 
   const handleClose = () => {
     setOpen(false);
   };
 
-  const redirectUser = async (): Promise<void> => {
-    try {
-      // Create and update their profile
-      setLoading(false);
-
-      if (!tierId || inviteId) {
-        navigate("/"); // It's the free plan or an invite so don't bill them
-        return;
-      }
-
-      const stripe = await stripePromise;
-
-      const { id: sessionId } = await createCheckoutSession(tierId);
-
-      // When the customer clicks on the button, redirect them to Checkout.
-      const result = await stripe.redirectToCheckout({
-        sessionId,
-      });
-
-      if (result.error) {
-        // If `redirectToCheckout` fails due to a browser or network
-        // error, display the localized error message to your customer
-        // using `result.error.message`.
-      }
-    } catch (e) {
-      setRecoveryKey(null);
-
-      if (e instanceof Error) {
-        setEtebaseError(e.message);
-      }
-    }
-  };
-
   const onSubmitForm = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
     // Reset any errors
-    setEmailError("");
-    setPasswordError("");
-    setNameError("");
-    setTermsAndConditionsError("");
+    clearErrors();
     setLoading(true);
 
     const isValid = validate();
@@ -195,43 +160,69 @@ export const SignUp = (): JSX.Element => {
     }
 
     try {
-      const user = await auth.signup(signUp.email, signUp.password);
+      await auth.signup(signUp.email, signUp.password);
 
-      const { profile, recoveryKey: keys } = await auth.createProfile(
+      const profile = await auth.createProfile(
         signUp.name,
-        signUp.teamId,
-        signUp.inviteId,
+        signUp.teamId as number,
+        signUp.inviteId as string,
         signUp.acceptedTermsAndConditions
       );
-      setRecoveryKey(keys);
+      if (profile) {
+        setUser(profile.profile);
+        setRecoveryKey(profile.recoveryKey);
+        setState("2-RecoveryKey");
+      }
     } catch (e) {
-      handleSnackbar(TransitionUp);
+      handleSnackbar();
       setLoading(false);
       setSignUp({
         ...signUp,
         password: "",
         confirmPassword: "",
       });
-      setEmailError("");
-      setNameError("");
-      setPasswordError("");
-      setTermsAndConditionsError("");
+      clearErrors();
 
       if (e instanceof Error) {
-        setEtebaseError(e.message);
+        setStoreError(e.message);
       }
     }
   };
 
-  return recoveryKey ? (
-    <RecoveryKey recoveryKey={recoveryKey} callback={redirectUser} />
-  ) : (
+  const billing = async () => {
+    if (!tierId || inviteId) {
+      setState("4-VerificationSent");
+      return;
+    }
+
+    const stripe = await stripePromise;
+
+    if (!user || !stripe) {
+      return;
+    }
+
+    const { id: sessionId } = await createCheckoutSession(
+      tierId,
+      user.id,
+      user.email
+    );
+
+    // When the customer clicks on the button, redirect them to Checkout.
+    const result = await stripe.redirectToCheckout({
+      sessionId,
+    });
+
+    if (result.error) {
+      console.error(result.error);
+    }
+  };
+
+  const signupForm = (
     <>
-      <form className={classes.form} onSubmit={onSubmitForm}>
+      <form onSubmit={onSubmitForm}>
         <TextField
           variant="outlined"
           margin="normal"
-          className={classes.textFieldBackground}
           required
           fullWidth
           id="email"
@@ -247,7 +238,6 @@ export const SignUp = (): JSX.Element => {
         <TextField
           variant="outlined"
           margin="normal"
-          className={classes.textFieldBackground}
           required
           fullWidth
           id="name"
@@ -262,13 +252,12 @@ export const SignUp = (): JSX.Element => {
         <TextField
           variant="outlined"
           margin="normal"
-          className={classes.textFieldBackground}
           required
           fullWidth
           name="password"
           type="password"
           id="password"
-          autoComplete="current-password"
+          autoComplete="new-password"
           value={signUp.password}
           onChange={handleChange}
           placeholder="Password *"
@@ -277,13 +266,12 @@ export const SignUp = (): JSX.Element => {
         <TextField
           variant="outlined"
           margin="normal"
-          className={classes.textFieldBackground}
           required
           fullWidth
           name="confirmPassword"
           type="password"
           id="confirmPassword"
-          autoComplete="current-password"
+          autoComplete="off"
           value={signUp.confirmPassword}
           onChange={handleChange}
           placeholder="Confirm Password *"
@@ -301,7 +289,7 @@ export const SignUp = (): JSX.Element => {
           }
           label={
             <Typography variant="body2">
-              I agree to the gliff.ai{" "}
+              I agree to the gliff.ai&nbsp;
               <Link
                 color="secondary"
                 target="_blank"
@@ -309,8 +297,8 @@ export const SignUp = (): JSX.Element => {
                 href="https://gliff.ai/platform-terms-and-conditions/"
               >
                 terms and conditions
-              </Link>{" "}
-              and{" "}
+              </Link>
+              &nbsp;and&nbsp;
               <Link
                 color="secondary"
                 target="_blank"
@@ -341,13 +329,43 @@ export const SignUp = (): JSX.Element => {
       <MessageSnackbar
         open={open}
         handleClose={handleClose}
-        transition={transition}
         messageText={
-          String(etebaseError).includes("duplicate key")
+          String(storeError).includes("duplicate key")
             ? "Looks like that account already exists, try another email!"
             : "There was an error creating an account"
         }
       />
     </>
   );
+
+  if (state === "1-Signup") {
+    return signupForm;
+  }
+
+  if (state === "2-RecoveryKey" && recoveryKey) {
+    return <RecoveryKey recoveryKey={recoveryKey} callback={billing} />;
+  }
+
+  if (state === "3-BillingFailed") {
+    // This should be infrequent as Stripe will normally catch errors within Checkout
+    return (
+      <>
+        <p>
+          There was an error processing your payment. Please&nbsp;
+          <Link color="secondary" href="/signin">
+            Sign In
+          </Link>
+          &nbsp; and upgrade your account from the billing page
+        </p>
+
+        <p>Alternatively, contact us at contact@gliff.ai for help</p>
+      </>
+    );
+  }
+
+  if (state === "4-VerificationSent") {
+    return <VerificationSent />;
+  }
+
+  return <></>;
 };

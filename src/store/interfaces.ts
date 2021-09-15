@@ -14,8 +14,8 @@ interface GalleryTile {
   thumbnail: string; // base64
   id: string; // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
   imageUID: string;
-  annotationUID: string;
-  auditUID: string;
+  annotationUID: string | null;
+  auditUID: string | null;
 }
 
 interface MetaItem {
@@ -50,6 +50,7 @@ interface ImageMeta {
   resolution_y: number;
   resolution_z: number;
   format?: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
+  content_hash?: string; // we use this for making sure we don't have duplicate images in a dataset
   customMeta?: string; // JSON of custom metadata
 }
 
@@ -62,4 +63,4 @@ interface AnnotationItemMeta {
   createdTime?: number;
 }
 
-export { GalleryMeta, GalleryTile, MetaItem, Image, Slices, ImageMeta };
+export type { GalleryMeta, GalleryTile, MetaItem, Image, Slices, ImageMeta };

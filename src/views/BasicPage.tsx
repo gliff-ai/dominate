@@ -1,17 +1,31 @@
-import { Container, makeStyles, Typography } from "@material-ui/core";
+import { Container, makeStyles, Typography, Button } from "@material-ui/core";
+import { useNavigate } from "react-router-dom";
 import { theme, lightGrey } from "@gliff-ai/style";
 import { imgSrc } from "@/imgSrc";
 
 const squiggles = imgSrc("squig-black", "png");
 
 const useStyles = makeStyles(() => ({
+  // eslint-disable-next-line mui-unused-classes/unused-classes
   "@global": {
     body: {
       backgroundImage: `url(${squiggles}),url(${squiggles})`,
       backgroundColor: lightGrey,
       backgroundRepeat: "no-repeat",
       backgroundPosition: "-350px -320px, 1400px 650px",
+      "& form": {
+        width: "100%", // Fix IE 11 issue.
+        marginTop: theme.spacing(1),
+        "& label": {
+          marginTop: "10px",
+        },
+      },
     },
+  },
+  backButton: {
+    position: "absolute",
+    left: "100px",
+    top: "100px",
   },
   typogragphyTitle: {
     width: "100%",
@@ -39,16 +53,37 @@ const useStyles = makeStyles(() => ({
 interface Props {
   view: JSX.Element;
   title: JSX.Element;
+  // eslint-disable-next-line react/require-default-props
+  showBackButton?: boolean;
 }
-export const BasicPage = (props: Props): JSX.Element => {
+
+export const BasicPage = ({
+  view,
+  title,
+  showBackButton = false,
+}: Props): JSX.Element => {
   const classes = useStyles();
+  const navigate = useNavigate();
 
   return (
     <Container
       component="main"
-      maxWidth="xs"
+      maxWidth="sm"
       style={{ display: "flex", flexDirection: "column", marginTop: 0 }}
     >
+      {showBackButton ? (
+        <Button
+          type="button"
+          onClick={() => navigate(-1)}
+          className={classes.backButton}
+          color="primary"
+          variant="contained"
+        >
+          BACK
+        </Button>
+      ) : (
+        ""
+      )}
       <div className={classes.logo}>
         <img
           src={imgSrc("gliff-web-master-black")}
@@ -58,11 +93,9 @@ export const BasicPage = (props: Props): JSX.Element => {
         />
       </div>
       <div className={classes.mainBlock}>
-        <Typography className={classes.typogragphyTitle}>
-          {props.title}
-        </Typography>
+        <Typography className={classes.typogragphyTitle}>{title}</Typography>
 
-        <div className={classes.paper}>{props.view}</div>
+        <div className={classes.paper}>{view}</div>
       </div>
     </Container>
   );

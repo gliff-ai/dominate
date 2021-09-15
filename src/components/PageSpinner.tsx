@@ -25,7 +25,7 @@ interface Props {
 function PageSpinner(props: Props): ReactElement | null {
   const classes = useStyle();
   const auth = useAuth();
-  if (!auth.user || !props.isLoading) return null;
+  if (!auth || !auth.user || !props.isLoading) return null;
 
   return (
     <div className={classes.mainDiv}>

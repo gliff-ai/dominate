@@ -1,18 +1,13 @@
 import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
-import { getRecoverySession } from "@/services/user";
-import { DominateEtebase } from "@/etebase";
 import { theme } from "@gliff-ai/style";
 import { TextField, Link, Typography, makeStyles } from "@material-ui/core";
+import { getRecoverySession } from "@/services/user";
+import { DominateStore } from "@/store";
 import { MessageAlert, SubmitButton } from "@/components";
 
 const useStyles = makeStyles(() => ({
-  form: {
-    width: "100%", // Fix IE 11 issue.
-    marginTop: theme.spacing(1),
-  },
-
   forgotPasswordText: {
     marginBottom: "44px",
     marginTop: "13px",
@@ -28,58 +23,17 @@ const useStyles = makeStyles(() => ({
     display: "inline",
     marginRight: "10px",
   },
-  home: {
-    height: "53px",
-    backgroundColor: theme.palette.primary.light,
-    width: "61px",
-    top: "22px",
-    right: "20px",
-  },
-
-  textFieldBackground: {
-    background: theme.palette.primary.light,
-  },
-  snackbar: {
-    background: theme.palette.info.light,
-  },
-  svgSmall: {
-    width: "22px",
-    height: "100%",
-    marginLeft: "7px",
-    marginRight: "9px",
-    marginTop: "0px",
-    marginBottom: "-4px",
-    fill: theme.palette.primary.light,
-  },
-  svgSmallClose: {
-    width: "15px",
-    height: "100%",
-    marginLeft: "11px",
-    marginRight: "0px",
-    marginTop: "-3px",
-    marginBottom: "0px",
-    fill: theme.palette.primary.light,
-  },
-  message: {
-    display: "inline-block",
-    marginRight: "5px",
-    marginLeft: "5px",
-    fontSize: "16px",
-  },
-  iconButton: {
-    color: theme.palette.primary.light,
-  },
 }));
 
 const query = new URLSearchParams(window.location.search);
 
 interface Props {
-  etebaseInstance: DominateEtebase;
+  storeInstance: DominateStore;
 }
 
 export const RecoverAccount = (props: Props): JSX.Element => {
   const classes = useStyles();
-  const { etebaseInstance } = props;
+  const { storeInstance } = props;
   const navigate = useNavigate();
   const [recoverySession, setRecoverySession] = useState("");
   const [loading, setLoading] = useState(false);
@@ -90,11 +44,13 @@ export const RecoverAccount = (props: Props): JSX.Element => {
   });
 
   useEffect(() => {
-    if (query.get("uid")) {
-      void getRecoverySession(query.get("uid")).then(({ recovery_key }) => {
+    const queryUid = query.get("uid");
+    if (!queryUid) return;
+    void getRecoverySession(query.get("uid") as string).then(
+      ({ recovery_key }) => {
         setRecoverySession(recovery_key);
-      });
-    }
+      }
+    );
   }, []);
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
@@ -114,7 +70,7 @@ export const RecoverAccount = (props: Props): JSX.Element => {
 
     // Convert their input to the format we expect
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const restoredSession = await etebaseInstance.restoreSession(
+    const restoredSession = await storeInstance.restoreSession(
       recoverySession,
       recover.recoveryKey,
       recover.newPassword
@@ -139,11 +95,10 @@ export const RecoverAccount = (props: Props): JSX.Element => {
 
   return (
     <>
-      <form className={classes.form} onSubmit={onSubmitForm}>
+      <form onSubmit={onSubmitForm}>
         <TextField
           variant="outlined"
           margin="normal"
-          className={classes.textFieldBackground}
           required
           fullWidth
           name="recoveryKey"
@@ -158,7 +113,6 @@ export const RecoverAccount = (props: Props): JSX.Element => {
           type="password"
           required
           fullWidth
-          className={classes.textFieldBackground}
           name="newPassword"
           id="newPassword"
           autoComplete="new-password"

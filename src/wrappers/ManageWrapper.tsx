@@ -5,31 +5,57 @@ import {
   UserInterface as Manage,
   ProvideAuth /* TODO export Services */,
 } from "@gliff-ai/manage";
-import { DominateEtebase } from "@/etebase";
+import { DominateStore, API_URL } from "@/store";
 import { useAuth } from "@/hooks/use-auth";
-import { inviteNewUser } from "@/services/user";
-
-declare const STORE_URL: string;
-export const API_URL = `${STORE_URL}django/api`;
+import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
 
 interface Props {
-  etebaseInstance: DominateEtebase;
+  storeInstance: DominateStore;
 }
 
 export const ManageWrapper = (props: Props): ReactElement | null => {
   const auth = useAuth();
   const navigate = useNavigate();
 
-  if (!props.etebaseInstance || !auth.user) return null;
+  if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
+    return null;
 
   const getProjects = async () => {
-    const projects = await props.etebaseInstance.getCollectionsMeta();
+    const projects = await props.storeInstance.getCollectionsMeta();
 
     return projects;
   };
 
+  const getCollaboratorProject = async ({ name }) => {
+    const projects = await props.storeInstance.getCollectionsMeta();
+
+    // get all members of all team projects
+    const membersPromises: Promise<string[] | null>[] = [];
+    for (let p = 0; p < projects.length; p += 1) {
+      const { uid } = projects[p];
+      membersPromises.push(props.storeInstance.getCollectionMembers(uid));
+    }
+    const allMembers: (string[] | null)[] = await Promise.all<string[] | null>(
+      membersPromises
+    );
+
+    // for each project, go through members and return the first that matches
+    for (let p = 0; p < projects.length; p += 1) {
+      const members = allMembers[p];
+      if (members) {
+        for (let m = 0; p < members.length; m += 1) {
+          if (members[m] === name) {
+            return projects[p].uid;
+          }
+        }
+      }
+    }
+
+    return null;
+  };
+
   const createProject = async ({ name }) => {
-    const project = await props.etebaseInstance.createCollection(name);
+    const result = await props.storeInstance.createCollection(name);
 
     return true; // Maybe not always true...
   };
@@ -42,8 +68,16 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     // Share collections with them?
   };
 
+  const inviteCollaborator = async ({ email }) => {
+    // Invite them to create a gliff account
+    const result = await inviteNewCollaborator(email);
+
+    return true;
+    // Share collections with them?
+  };
+
   const inviteToProject = async ({ email, projectId }) => {
-    const result = await props.etebaseInstance.inviteUserToCollection(
+    const result = await props.storeInstance.inviteUserToCollection(
       projectId,
       email
     );
@@ -55,13 +89,20 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     // Open the selected project in curate
     navigate(`/curate/${projectUid}`);
 
+  const launchAudit = (projectUid: string): void =>
+    // Open the selected project in audit
+    navigate(`/audit/${projectUid}`);
+
+  // These require trailing slashes otherwise Safari won't send the Auth Token (as django will 301)
   const services = {
-    queryTeam: "GET /team",
+    queryTeam: "GET /team/",
     loginUser: "POST /user/login", // Not used, we pass an authd user down
     getProjects,
-    getProject: "GET /project", // TODO
+    getProject: "GET /project/", // TODO
+    getCollaboratorProject,
     createProject,
     inviteUser,
+    inviteCollaborator,
     inviteToProject,
   };
 
@@ -74,6 +115,9 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
         services={services}
         apiUrl={API_URL}
         launchCurateCallback={launchCurate}
+        launchAuditCallback={
+          auth?.userProfile.team.tier.id > 1 ? launchAudit : null
+        }
       />
     </ProvideAuth>
   );
