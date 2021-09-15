@@ -47,23 +47,16 @@ interface Props {
 }
 
 export const CurateWrapper = (props: Props): ReactElement | null => {
-  if (!props.storeInstance) return null;
   const navigate = useNavigate();
   const auth = useAuth();
 
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
-  const { collectionUid } = useParams(); // uid of selected gallery, from URL
+  const { collectionUid = "" } = useParams<string>(); // uid of selected gallery, from URL
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
   const [multi, setMulti] = useState<boolean>(false);
   const [showDialog, setShowDialog] = useState<boolean>(false);
 
-  if (!auth) return null;
-
-  if (!collectionUid) return null;
-
-  useEffect(() => {
-    props.setIsLoading(true);
-  }, []);
+  const classes = useStyles()();
 
   const fetchImageItems = (): void => {
     // fetches images via DominateStore, and assigns them to imageItems state
@@ -273,14 +266,16 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   useEffect(() => {
+    props.setIsLoading(true);
+  }, []);
+
+  useEffect(() => {
     if (collectionUid) {
       fetchImageItems();
     }
   }, [collectionUid]);
 
-  if (!props.storeInstance || !auth.user || !collectionUid) return null;
-
-  const classes = useStyles()();
+  if (!props.storeInstance || !auth?.user || !collectionUid) return null;
 
   return (
     <>

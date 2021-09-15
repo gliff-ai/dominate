@@ -12,6 +12,7 @@ import { DominateStore, API_URL } from "@/store";
 import UserInterface from "@/ui";
 import { ProvideAuth } from "@/hooks/use-auth";
 import { ProvideTrustedService } from "@/hooks/use-trustedService";
+import { BrowserRouter } from "react-router-dom";
 
 const IS_MONITORED = import.meta.env.VITE_IS_MONITORED === "true";
 
@@ -71,7 +72,9 @@ ReactDOM.render(
     <ProvideAuth storeInstance={storeInstance}>
       <ProvideTrustedService>
         <StylesProvider generateClassName={generateClassName("dominate")}>
-          <UserInterface storeInstance={storeInstance} />
+          <BrowserRouter>
+            <UserInterface storeInstance={storeInstance} />
+          </BrowserRouter>
         </StylesProvider>
       </ProvideTrustedService>
     </ProvideAuth>
