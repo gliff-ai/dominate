@@ -66,10 +66,9 @@ if (IS_MONITORED) {
 }
 
 const storeInstance = new DominateStore();
-const fallbackPage = <SentryErrorPage />;
 
 ReactDOM.render(
-  <Sentry.ErrorBoundary fallback={SentryErrorPage} showDialog>
+  <Sentry.ErrorBoundary fallback={<SentryErrorPage />} showDialog>
     <ProvideAuth storeInstance={storeInstance}>
       <ProvideTrustedService>
         <StylesProvider generateClassName={generateClassName("dominate")}>

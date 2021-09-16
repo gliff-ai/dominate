@@ -27,7 +27,6 @@ const useStyles = makeStyles(() => ({
 
 export function SentryErrorPage(): ReactElement {
   const classes = useStyles();
-  const navigate = useNavigate();
 
   return (
     <>
@@ -41,7 +40,7 @@ export function SentryErrorPage(): ReactElement {
           text="Report Error"
           onClick={() => window.open("https://gliff.ai/privacy-policy/")}
         />
-        <BaseTextButton text="Reload App" onClick={() => navigate("/manage")} />
+        <BaseTextButton text="Reload App" onClick={() => {window.location.reload(); return false;}} />
       </div>
     </>
   );
