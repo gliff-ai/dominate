@@ -1,6 +1,6 @@
 import { ReactElement, useEffect, useState } from "react";
 import { Route, Routes, Navigate, useLocation } from "react-router-dom";
-import { CssBaseline, ThemeProvider } from "@material-ui/core";
+import { CssBaseline, ThemeProvider, makeStyles } from "@material-ui/core";
 import { theme } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
 import { Annotate, Audit, Curate, Manage } from "@/wrappers";
@@ -29,6 +29,17 @@ interface Props {
   storeInstance: DominateStore;
 }
 
+const useStyles = makeStyles(() => ({
+  overflow: {
+    height: "calc(100% - 90px)",
+    overflow: "auto",
+  },
+  noOverflow: {
+    height: "calc(100% - 90px)",
+    overflow: "hidden",
+  },
+}));
+
 const UserInterface = (props: Props): ReactElement | null => {
   const { storeInstance } = props;
   const [task, setTask] = useState<Task>({
@@ -39,30 +50,28 @@ const UserInterface = (props: Props): ReactElement | null => {
   const location = useLocation();
   const [isOverflow, setIsOverflow] = useState(true);
 
-  // Paths we never scroll on because it messes with canvases etc
-  const noScroll = ["annotate"];
-  const shouldOverflow = (pathname: string): boolean =>
-    noScroll.reduce((o, path) => {
-      if (pathname.includes(path) || !o) {
-        return false;
-      }
-      return true;
-    }, true);
-
   useEffect(() => {
+    // Paths we never scroll on because it messes with canvases etc
+    const noScroll = ["annotate"];
+    const shouldOverflow = (pathname: string): boolean =>
+      noScroll.reduce((o, path) => {
+        if (pathname.includes(path) || !o) {
+          return false;
+        }
+        return true;
+      }, true);
     setIsOverflow(shouldOverflow(location.pathname));
   }, [location]);
+
+  const classes = useStyles(isOverflow);
 
   return (
     <ThemeProvider theme={theme}>
       <ProgressSnackbar task={task} setTask={setTask} />
       <CssBaseline />
-
-      <div
-        style={{ height: "100%", overflow: isOverflow ? "auto" : "no-scroll" }}
-      >
+      <NavBar />
+      <div className={isOverflow ? classes.overflow : classes.noOverflow}>
         <PageSpinner isLoading={isLoading} />
-        <NavBar />
         <Routes>
           <Routes>
             <Route

@@ -1,4 +1,4 @@
-import { ReactElement, useState, MouseEvent, useEffect } from "react";
+import { ReactElement, useState, MouseEvent } from "react";
 import { makeStyles, Popover, TooltipProps } from "@material-ui/core";
 import { BaseIconButton } from "@gliff-ai/style";
 import { useTrustedService } from "@/hooks/use-trustedService";

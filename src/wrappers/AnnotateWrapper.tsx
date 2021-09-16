@@ -10,6 +10,7 @@ import {
   parseStringifiedSlices,
   getImageFileInfoFromImageMeta,
 } from "@/imageConversions";
+import { useMountEffect } from "@/hooks/use-mountEffect";
 
 interface Props {
   storeInstance: DominateStore;
@@ -17,40 +18,16 @@ interface Props {
 }
 
 export const AnnotateWrapper = (props: Props): ReactElement | null => {
-  if (!props.storeInstance) return null;
-
-  const { collectionUid, imageUid } = useParams();
+  const { collectionUid = "", imageUid = "" } = useParams();
   const [imageItem, setImageItem] = useState<Image | null>(null);
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
   const [imageFileInfo, setImageFileInfo] = useState<ImageFileInfo>();
   const [annotationsObject, setAnnotationsObject] =
     useState<Annotations | undefined>(undefined);
 
-  if (!collectionUid || !imageUid) return null;
-
-  useEffect(() => {
+  useMountEffect(() => {
     props.setIsLoading(true);
-  }, []);
-
-  const getImage = (): void => {
-    // Retrieve image item and set it as state
-    props.storeInstance
-      .getImage(collectionUid, imageUid)
-      .then((image) => {
-        setImageItem(image);
-      })
-      .catch((e) => console.log(e));
-  };
-
-  const getAnnotationsObject = (): void => {
-    // Set state for annotation items.
-    props.storeInstance
-      .getAnnotationsObject(collectionUid, imageUid)
-      .then((retrievedAnnotationsObject) => {
-        setAnnotationsObject(retrievedAnnotationsObject);
-      })
-      .catch((e) => console.log(e));
-  };
+  });
 
   const saveAnnotation = (newAnnotationsObject: Annotations): void => {
     // Save annotations data
@@ -71,10 +48,30 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   };
 
   useEffect(() => {
+    const getImage = (): void => {
+      // Retrieve image item and set it as state
+      props.storeInstance
+        .getImage(collectionUid, imageUid)
+        .then((image) => {
+          setImageItem(image);
+        })
+        .catch((e) => console.log(e));
+    };
+
+    const getAnnotationsObject = (): void => {
+      // Set state for annotation items.
+      props.storeInstance
+        .getAnnotationsObject(collectionUid, imageUid)
+        .then((retrievedAnnotationsObject) => {
+          setAnnotationsObject(retrievedAnnotationsObject);
+        })
+        .catch((e) => console.log(e));
+    };
+
     // launches image and annotation retrieval on page load
     getImage();
     getAnnotationsObject();
-  }, [collectionUid, imageUid]);
+  }, [collectionUid, imageUid, props.storeInstance, props.storeInstance.ready]);
 
   useEffect(() => {
     if (imageItem) {
@@ -96,6 +93,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       setImageFileInfo(fileInfo);
     }
   }, [imageItem]);
+
+  if (!collectionUid || !imageUid) return null;
 
   return slicesData ? (
     <UserInterface
