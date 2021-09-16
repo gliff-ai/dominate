@@ -31,7 +31,6 @@ export const useTrustedService = (): Context | null =>
 // Provider hook that creates auth object and handles state
 function useProviderTrustedService() {
   const auth = useAuth(); // TODO: get this out of here!
-  if (!auth) return null;
   const [trustedServices, setTrustedServices] =
     useState<TrustedService[] | null>(null);
   const [uiElements, setUiElements] =
@@ -40,9 +39,10 @@ function useProviderTrustedService() {
 
   useEffect(() => {
     // Retrive the list of trusted services for the user's team
-    if (!auth.ready || trustedServices || !auth.userProfile) return;
+    if (auth === null || !auth.ready || trustedServices || !auth.userProfile)
+      return;
     void getTrustedService(auth.userProfile.team.id).then(setTrustedServices);
-  }, [auth]);
+  }, [auth, trustedServices]);
 
   const unpackUiElements = (
     apiUrl: string,
@@ -100,12 +100,15 @@ function useProviderTrustedService() {
           )
         );
     });
-  }, [trustedServices]);
+    setUiElements(elements);
+  }, [trustedServices, uiElements]);
 
   useEffect(() => {
     if (!uiElements) return;
     setReady(true);
   }, [uiElements]);
+
+  if (!auth) return null;
 
   return {
     uiElements,

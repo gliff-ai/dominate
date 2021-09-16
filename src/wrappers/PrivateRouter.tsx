@@ -5,13 +5,12 @@ import { useAuth } from "@/hooks/use-auth";
 export const PrivateRoute = (props: RouteProps): ReactElement | null => {
   const auth = useAuth();
   const [element, setElement] = useState<ReactElement>(<></>);
-  if (!auth) return null;
 
   useEffect(() => {
     // catch the situation where the effect
     // has switched from true to false
     // and just return (this shouldn't happen)
-    if (auth.ready === false) {
+    if (!auth?.ready) {
       return;
     }
 
@@ -29,7 +28,9 @@ export const PrivateRoute = (props: RouteProps): ReactElement | null => {
     ) {
       setElement(<Navigate to="/request-verify-email" />);
     }
-  }, [auth.ready]);
+  }, [auth, props.path]);
+
+  if (!auth) return null;
 
   // default to just following the route
   /* eslint-disable react/jsx-props-no-spreading */

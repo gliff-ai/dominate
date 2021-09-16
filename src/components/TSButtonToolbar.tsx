@@ -1,6 +1,7 @@
 import { ReactElement, useEffect, useState } from "react";
-import { Card, TooltipProps } from "@material-ui/core";
+import { makeStyles, Popover, TooltipProps } from "@material-ui/core";
 import { BaseIconButton, BasePopover, theme } from "@gliff-ai/style";
+
 import { useTrustedService } from "@/hooks/use-trustedService";
 import { TrustedServiceClass } from "@/services/trustedServices";
 import { imgSrc } from "@/imgSrc";
