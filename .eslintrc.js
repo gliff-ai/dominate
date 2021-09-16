@@ -18,8 +18,6 @@ module.exports = {
       {
           files: ["*.ts", "*.tsx"],
           rules: {
-"no-console": 0,
-
               "global-require": 0,
               "import/extensions": 0,
               "@typescript-eslint/no-var-requires": 0,
