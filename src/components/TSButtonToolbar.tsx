@@ -1,7 +1,6 @@
 import { ReactElement, useEffect, useState } from "react";
-import { TooltipProps, Card, makeStyles } from "@material-ui/core";
-import { BaseIconButton } from "@gliff-ai/style";
-import { BasePopover } from "./BasePopover";
+import { Card, TooltipProps } from "@material-ui/core";
+import { BaseIconButton, BasePopover, theme } from "@gliff-ai/style";
 import { useTrustedService } from "@/hooks/use-trustedService";
 import { TrustedServiceClass } from "@/services/trustedServices";
 import { imgSrc } from "@/imgSrc";
@@ -51,24 +50,33 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
         name: "Trusted Services",
         icon: imgSrc("trusted-services"),
       }}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "right",
+      }}
+      transformOrigin={{
+        vertical: "top",
+        horizontal: "left",
+      }}
       enabled={enabled}
       tooltipPlacement={props.tooltipPlacement}
-      childrens={
-        elements
-          ? elements.map((ts) => (
-              <BaseIconButton
-                key={`ts-${ts.tooltip}`}
-                tooltip={{
-                  name: ts.tooltip,
-                  icon: imgSrc(ts.icon),
-                }}
-                onClick={() => ts.onClick(props.collectionUid, props.imageUid)}
-                tooltipPlacement={props.tooltipPlacement}
-              />
-            ))
-          : null
-      }
-    />
+    >
+      {elements ? (
+        <Card color={theme.palette.primary.light}>
+          {elements.map((ts) => (
+            <BaseIconButton
+              key={`ts-${ts.tooltip}`}
+              tooltip={{
+                name: ts.tooltip,
+                icon: imgSrc(ts.icon),
+              }}
+              onClick={() => ts.onClick(props.collectionUid, props.imageUid)}
+              tooltipPlacement={props.tooltipPlacement}
+            />
+          ))}
+        </Card>
+      ) : null}
+    </BasePopover>
   );
 };
 
