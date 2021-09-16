@@ -37,7 +37,7 @@ const UserInterface = (props: Props): ReactElement | null => {
     description: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-
+  throw Error("oh no");
   return (
     <ThemeProvider theme={theme}>
       <ProgressSnackbar task={task} setTask={setTask} />

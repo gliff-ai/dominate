@@ -6,6 +6,7 @@ import { CaptureConsole } from "@sentry/integrations";
 import LogRocket from "logrocket";
 import setupLogRocketReact from "logrocket-react";
 import { StylesProvider } from "@material-ui/core";
+import { SentryErrorPage } from "@/views";
 import { generateClassName } from "@gliff-ai/style";
 
 import { DominateStore, API_URL } from "@/store";
@@ -65,9 +66,10 @@ if (IS_MONITORED) {
 }
 
 const storeInstance = new DominateStore();
+const fallbackPage = <SentryErrorPage />;
 
 ReactDOM.render(
-  <Sentry.ErrorBoundary fallback={<>An error has occurred</>} showDialog>
+  <Sentry.ErrorBoundary fallback={SentryErrorPage} showDialog>
     <ProvideAuth storeInstance={storeInstance}>
       <ProvideTrustedService>
         <StylesProvider generateClassName={generateClassName("dominate")}>
