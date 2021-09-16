@@ -1,5 +1,5 @@
 import { ReactElement, useEffect, useState } from "react";
-import { makeStyles, Popover, TooltipProps } from "@material-ui/core";
+import { TooltipProps, Card } from "@material-ui/core";
 import { BaseIconButton, BasePopover, theme } from "@gliff-ai/style";
 
 import { useTrustedService } from "@/hooks/use-trustedService";
