@@ -6,7 +6,8 @@ import reactJsx from "vite-react-jsx";
 // https://vitejs.dev/config/
 export default defineConfig(({ command, mode }) => ({
   build: {
-    minify: mode !== "development"
+    minify: mode !== "development",
+    sourcemap: true
   },
   resolve: {
     dedupe: [

@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { theme } from "@gliff-ai/style";
@@ -6,6 +6,7 @@ import { TextField, Link, Typography, makeStyles } from "@material-ui/core";
 import { getRecoverySession } from "@/services/user";
 import { DominateStore } from "@/store";
 import { MessageAlert, SubmitButton } from "@/components";
+import { useMountEffect } from "@/hooks/use-mountEffect";
 
 const useStyles = makeStyles(() => ({
   forgotPasswordText: {
@@ -43,7 +44,7 @@ export const RecoverAccount = (props: Props): JSX.Element => {
     recoveryKey: "",
   });
 
-  useEffect(() => {
+  useMountEffect(() => {
     const queryUid = query.get("uid");
     if (!queryUid) return;
     void getRecoverySession(query.get("uid") as string).then(
@@ -51,7 +52,7 @@ export const RecoverAccount = (props: Props): JSX.Element => {
         setRecoverySession(recovery_key);
       }
     );
-  }, []);
+  });
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;

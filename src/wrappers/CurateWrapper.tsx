@@ -1,4 +1,4 @@
-import { ReactElement, ReactNode, useEffect, useState } from "react";
+import { ReactElement, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import {
@@ -25,6 +25,8 @@ import {
   getImageMetaFromImageFileInfo,
 } from "@/imageConversions";
 import { useAuth } from "@/hooks/use-auth";
+import { useMountEffect } from "@/hooks/use-mountEffect";
+import { useStore } from "@/hooks/use-store";
 
 const useStyles = () =>
   makeStyles((theme: Theme) => ({
@@ -47,44 +49,43 @@ interface Props {
 }
 
 export const CurateWrapper = (props: Props): ReactElement | null => {
-  if (!props.storeInstance) return null;
   const navigate = useNavigate();
   const auth = useAuth();
 
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
-  const { collectionUid } = useParams(); // uid of selected gallery, from URL
+  const { collectionUid = "" } = useParams<string>(); // uid of selected gallery, from URL
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
   const [multi, setMulti] = useState<boolean>(false);
   const [showDialog, setShowDialog] = useState<boolean>(false);
 
-  if (!auth) return null;
+  const classes = useStyles()();
 
-  useEffect(() => {
-    props.setIsLoading(true);
-  }, []);
+  const fetchImageItems = useStore(
+    props,
+    (storeInstance) => {
+      // fetches images via DominateStore, and assigns them to imageItems state
+      storeInstance
+        .getImagesMeta(collectionUid)
+        .then((items) => {
+          setCollectionContent(items);
+          // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
+          const wrangled = items.map(
+            ({ thumbnail, imageLabels, id, metadata }) => ({
+              thumbnail,
+              imageLabels,
+              id,
+              ...metadata,
+            })
+          );
 
-  const fetchImageItems = (): void => {
-    // fetches images via DominateStore, and assigns them to imageItems state
-    props.storeInstance
-      .getImagesMeta(collectionUid)
-      .then((items) => {
-        setCollectionContent(items);
-        // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
-        const wrangled = items.map(
-          ({ thumbnail, imageLabels, id, metadata }) => ({
-            thumbnail,
-            imageLabels,
-            id,
-            ...metadata,
-          })
-        );
-
-        setCurateInput(wrangled);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
+          setCurateInput(wrangled);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    [collectionUid]
+  );
 
   const addImageToGallery = async (
     imageFileInfo: ImageFileInfo,
@@ -270,15 +271,17 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     void downloadDataset();
   };
 
+  useMountEffect(() => {
+    props.setIsLoading(true);
+  });
+
   useEffect(() => {
     if (collectionUid) {
       fetchImageItems();
     }
-  }, [collectionUid]);
+  }, [collectionUid, fetchImageItems]);
 
-  if (!props.storeInstance || !auth.user || !collectionUid) return null;
-
-  const classes = useStyles()();
+  if (!props.storeInstance || !auth?.user || !collectionUid) return null;
 
   return (
     <>
@@ -294,10 +297,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         setTask={props.setTask}
         trustedServiceButtonToolbar={(imageUid: string, enabled: boolean) => (
           <TSButtonToolbar
-            placement="curate"
-            tooltipPlacement="top"
             collectionUid={collectionUid}
             imageUid={imageUid}
+            tooltipPlacement="top"
             enabled={enabled}
           />
         )}

@@ -48,6 +48,8 @@ interface Props {
   tool: string;
   customUrlPath?: string;
   linkDisabled?: boolean;
+  // TODO: support target?
+  // eslint-disable-next-line react/no-unused-prop-types
   target?: string;
   extraStyleAvatar?: string;
   extraStyleSvg?: string;
@@ -60,7 +62,6 @@ function BaseProductIcon({
   tool,
   customUrlPath,
   linkDisabled,
-  target,
   extraStyleAvatar,
   extraStyleSvg,
   extraStyleName,

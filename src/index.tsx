@@ -5,6 +5,7 @@ import { Integrations } from "@sentry/tracing";
 import { CaptureConsole } from "@sentry/integrations";
 import LogRocket from "logrocket";
 import setupLogRocketReact from "logrocket-react";
+import { BrowserRouter } from "react-router-dom";
 import { StylesProvider } from "@material-ui/core";
 import { generateClassName } from "@gliff-ai/style";
 import { SentryErrorPage, BasicPage } from "@/views";
@@ -75,10 +76,13 @@ ReactDOM.render(
     <ProvideAuth storeInstance={storeInstance}>
       <ProvideTrustedService>
         <StylesProvider generateClassName={generateClassName("dominate")}>
-          <UserInterface storeInstance={storeInstance} />
+          <BrowserRouter>
+            <UserInterface storeInstance={storeInstance} />
+          </BrowserRouter>
         </StylesProvider>
       </ProvideTrustedService>
     </ProvideAuth>
   </Sentry.ErrorBoundary>,
+
   document.getElementById("react-container")
 );
