@@ -32,7 +32,6 @@ export function PluginModal(props: Props): ReactElement | null {
       marginTop: "60px",
       height: "100%",
       width: "100%",
-      backgroundColor: "red",
     },
   })(props);
 
