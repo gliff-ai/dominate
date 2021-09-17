@@ -19,6 +19,7 @@ import JSZip from "jszip";
 import { DominateStore } from "@/store";
 import { Slices, MetaItem, GalleryTile, Image } from "@/store/interfaces";
 import { Task, TSButtonToolbar } from "@/components";
+import { Plugins } from "@/plugins/Plugins";
 
 import {
   stringifySlices,
@@ -301,6 +302,13 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             enabled={enabled}
           />
         )}
+        plugins={
+          // TODO: replace with list of plugins retrieved from STORE
+          <Plugins
+            plugins={["SamplePlugin", "geolocation-map"]}
+            metadata={curateInput}
+          />
+        }
       />
       <Dialog open={showDialog}>
         <Card>
