@@ -66,7 +66,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                   view={<SignUp state="3-BillingFailed" />}
                   title={<>Payment Failed</>}
                 />
-            />
+            </Route>
 
             <PrivateRoute
               path="curate/:collectionUid"
