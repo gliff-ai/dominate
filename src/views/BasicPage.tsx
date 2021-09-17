@@ -1,5 +1,4 @@
 import { Container, makeStyles, Typography, Button } from "@material-ui/core";
-import { useNavigate } from "react-router-dom";
 import { theme, lightGrey } from "@gliff-ai/style";
 import { imgSrc } from "@/imgSrc";
 
@@ -63,7 +62,6 @@ export const BasicPage = ({
   showBackButton = false,
 }: Props): JSX.Element => {
   const classes = useStyles();
-  const navigate = useNavigate();
 
   return (
     <Container
@@ -74,7 +72,7 @@ export const BasicPage = ({
       {showBackButton ? (
         <Button
           type="button"
-          onClick={() => navigate(-1)}
+          onClick={() => window.history.back()}
           className={classes.backButton}
           color="primary"
           variant="contained"

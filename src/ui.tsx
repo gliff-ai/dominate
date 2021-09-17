@@ -14,7 +14,6 @@ import {
   VerifyEmail,
   RequestEmailVerification,
   Billing,
-  SentryErrorPage,
 } from "@/views";
 import {
   NavBar,
@@ -37,7 +36,6 @@ const UserInterface = (props: Props): ReactElement | null => {
     description: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  throw Error("oh no");
   return (
     <ThemeProvider theme={theme}>
       <ProgressSnackbar task={task} setTask={setTask} />
@@ -54,21 +52,22 @@ const UserInterface = (props: Props): ReactElement | null => {
             <Route path="/signup">
               <BasicPage view={<SignUp />} title={<>Create an Account</>} />
             </Route>
-            <Route path="/sentry-error">
-              <BasicPage view={<SentryErrorPage />} title={<>Opps!</>} />
-            </Route>
+
             <Route path="/signup/success">
               <BasicPage
                 view={<SignUp state="4-VerificationSent" />}
                 title={<>Verify Email</>}
               />
             </Route>
-            <Route path="/signup/failure">
-              <BasicPage
-                view={<SignUp state="3-BillingFailed" />}
-                title={<>Payment Failed</>}
-              />
-            </Route>
+
+            <Route
+              path="signup/failure"
+                <BasicPage
+                  view={<SignUp state="3-BillingFailed" />}
+                  title={<>Payment Failed</>}
+                />
+            />
+
             <PrivateRoute
               path="curate/:collectionUid"
               element={

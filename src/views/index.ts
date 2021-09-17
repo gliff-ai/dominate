@@ -9,3 +9,4 @@ export { VerifyEmail } from "./VerifyEmail";
 export { RequestEmailVerification } from "./RequestEmailVerification";
 export { Billing } from "./Billing";
 export { SentryErrorPage } from "./SentryErrorPage";
+export { BasicPage } from "./BasicPage";

@@ -1,16 +1,15 @@
 import { ReactElement } from "react";
 import { Typography, makeStyles, Card, Link } from "@material-ui/core";
-import { theme, BaseTextButton } from "@gliff-ai/style";
-import { useNavigate } from "react-router-dom";
+import { BaseTextButton } from "@gliff-ai/style";
 
 const useStyles = makeStyles(() => ({
   divButtons: {
-    display: "flex",
     marginTop: "50px",
     "& $button": {
       marginRight: "80px",
       marginLeft: "50px",
     },
+    textAlign: "center",
   },
 
   subHeading: {
@@ -40,7 +39,13 @@ export function SentryErrorPage(): ReactElement {
           text="Report Error"
           onClick={() => window.open("https://gliff.ai/privacy-policy/")}
         />
-        <BaseTextButton text="Reload App" onClick={() => {window.location.reload(); return false;}} />
+        <BaseTextButton
+          text="Reload App"
+          onClick={() => {
+            window.open("/manage");
+            return false;
+          }}
+        />
       </div>
     </>
   );
