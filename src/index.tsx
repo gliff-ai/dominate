@@ -6,10 +6,8 @@ import { CaptureConsole } from "@sentry/integrations";
 import LogRocket from "logrocket";
 import setupLogRocketReact from "logrocket-react";
 import { StylesProvider } from "@material-ui/core";
-import { SentryErrorPage } from "@/views";
-import { BasicPage } from "@/views";
-
 import { generateClassName } from "@gliff-ai/style";
+import { SentryErrorPage, BasicPage } from "@/views";
 
 import { DominateStore, API_URL } from "@/store";
 import UserInterface from "@/ui";

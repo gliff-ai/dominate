@@ -37,7 +37,7 @@ export function SentryErrorPage(): ReactElement {
       <div className={classes.divButtons}>
         <BaseTextButton
           text="Report Error"
-          onClick={() => window.open("https://gliff.ai/privacy-policy/")}
+          onClick={() => window.open("https://gliff.ai/contact/")}
         />
         <BaseTextButton
           text="Reload App"
