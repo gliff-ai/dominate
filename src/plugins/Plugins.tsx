@@ -16,6 +16,7 @@ interface State {
   isModalVisible: boolean;
   modalContainer: ReactElement | null;
 }
+
 export class Plugins extends Component<Props, State> {
   static defaultProps = {
     plugins: null,
