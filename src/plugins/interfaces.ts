@@ -1,4 +1,3 @@
-import { ReactElement } from "react";
 import { MetaItem } from "@/store/interfaces";
 
 interface IPlugin {
@@ -6,7 +5,7 @@ interface IPlugin {
   name: string;
   tooltip: string;
   usesModal: boolean;
-  onClick: (metadata?: MetaItem[] | null) => ReactElement | null;
+  onClick: (metadata?: MetaItem[] | null) => JSX.Element | null | void;
 }
 
 interface IPluginConstructor {

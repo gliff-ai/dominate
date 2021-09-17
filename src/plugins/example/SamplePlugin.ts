@@ -16,8 +16,7 @@ export class SamplePlugin implements IPlugin {
     this.usesModal = false;
   }
 
-  onClick = (): null => {
+  onClick = (): void => {
     alert("Hello! This is a sample plugin.");
-    return null;
   };
 }
