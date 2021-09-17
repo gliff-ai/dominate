@@ -60,12 +60,11 @@ const UserInterface = (props: Props): ReactElement | null => {
               />
             </Route>
 
-            <Route
-              path="signup/failure"
-                <BasicPage
-                  view={<SignUp state="3-BillingFailed" />}
-                  title={<>Payment Failed</>}
-                />
+            <Route path="signup/failure">
+              <BasicPage
+                view={<SignUp state="3-BillingFailed" />}
+                title={<>Payment Failed</>}
+              />
             </Route>
 
             <PrivateRoute
