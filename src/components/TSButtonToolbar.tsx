@@ -1,20 +1,12 @@
-import { ReactElement, useState, MouseEvent } from "react";
-import { makeStyles, Popover, TooltipProps } from "@material-ui/core";
-import { BaseIconButton } from "@gliff-ai/style";
-import { useTrustedService } from "@/hooks/use-trustedService";
-import { imgSrc } from "@/imgSrc";
-import { TrustedServiceClass } from "@/services/trustedServices";
+import { ReactElement, useEffect, useState } from "react";
+import { TooltipProps, Card } from "@material-ui/core";
+import { BaseIconButton, BasePopover, theme } from "@gliff-ai/style";
 
-const useStyle = makeStyles(() => ({
-  popoverPaper: {
-    padding: "5px",
-    maxWidth: "200px",
-    height: "auto",
-  },
-}));
+import { useTrustedService } from "@/hooks/use-trustedService";
+import { TrustedServiceClass } from "@/services/trustedServices";
+import { imgSrc } from "@/imgSrc";
 
 interface Props {
-  placement: string;
   collectionUid: string;
   imageUid: string;
   enabled?: boolean;
@@ -23,68 +15,70 @@ interface Props {
 
 export const TSButtonToolbar = (props: Props): ReactElement | null => {
   const trustedService = useTrustedService();
-  const [anchorEl, setAnchorEl] = useState<HTMLButtonElement | null>(null);
-  const classes = useStyle();
+  const [elements, setElements] = useState<TrustedServiceClass[] | null>(null);
+  const [enabled, setEnabled] = useState<boolean>(false);
 
-  if (!trustedService || !trustedService.uiElements) return null;
-
-  const handleClick =
-    (isEnabled: boolean) =>
-    (event: MouseEvent<HTMLButtonElement>): void => {
-      if (!isEnabled) return;
-      setAnchorEl(event.currentTarget);
-    };
-
-  const handleClose = (): void => {
-    setAnchorEl(null);
+  const getPlacement = (): string | null => {
+    const path = window.location.href;
+    for (const placement of ["annotate", "curate"]) {
+      if (path.includes(placement)) {
+        return placement;
+      }
+    }
+    return null;
   };
 
-  const selectedElements = (): TrustedServiceClass[] =>
+  useEffect(() => {
+    const currPlacement = getPlacement();
+    if (!trustedService?.ready || !currPlacement || !trustedService?.uiElements)
+      return;
     // Select ui elements for the active product
-    (trustedService.uiElements as TrustedServiceClass[]).filter((ts) =>
-      ts.placement.includes(props.placement)
+    setElements(
+      trustedService?.uiElements.filter(({ placement }) =>
+        placement.includes(currPlacement)
+      )
     );
+  }, [trustedService?.ready]);
 
-  if (trustedService.ready) {
-    const isEnabled = Boolean(selectedElements().length > 0 && props.enabled);
-    return (
-      <>
-        <BaseIconButton
-          tooltip={{
-            name: "Trusted Services",
-            icon: imgSrc("annotate"),
-          }} // TODO: replace icon!
-          onClick={handleClick(isEnabled)}
-          enabled={isEnabled}
-          tooltipPlacement={props.tooltipPlacement}
-        />
-        <Popover
-          id="trusted-service-popover"
-          open={Boolean(anchorEl)}
-          anchorEl={anchorEl}
-          onClose={handleClose}
-          classes={{ paper: classes.popoverPaper }}
-        >
-          {selectedElements().map((ts) => (
+  useEffect(() => {
+    if (!elements) return;
+    setEnabled(Boolean(elements.length > 0 && props.enabled));
+  }, [elements, props.enabled]);
+
+  return (
+    <BasePopover
+      tooltip={{
+        name: "Trusted Services",
+        icon: imgSrc("trusted-services"),
+      }}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "right",
+      }}
+      transformOrigin={{
+        vertical: "top",
+        horizontal: "left",
+      }}
+      enabled={enabled}
+      tooltipPlacement={props.tooltipPlacement}
+    >
+      {elements ? (
+        <Card color={theme.palette.primary.light}>
+          {elements.map((ts) => (
             <BaseIconButton
-              key={ts.tooltip}
+              key={`ts-${ts.tooltip}`}
               tooltip={{
                 name: ts.tooltip,
                 icon: imgSrc(ts.icon),
               }}
-              onClick={() => {
-                if (!isEnabled) return;
-                ts.onClick(props.collectionUid, props.imageUid);
-              }}
-              enabled={isEnabled}
+              onClick={() => ts.onClick(props.collectionUid, props.imageUid)}
               tooltipPlacement={props.tooltipPlacement}
             />
           ))}
-        </Popover>
-      </>
-    );
-  }
-  return null;
+        </Card>
+      ) : null}
+    </BasePopover>
+  );
 };
 
 TSButtonToolbar.defaultProps = {

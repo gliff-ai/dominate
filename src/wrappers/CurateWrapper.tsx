@@ -297,10 +297,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         setTask={props.setTask}
         trustedServiceButtonToolbar={(imageUid: string, enabled: boolean) => (
           <TSButtonToolbar
-            placement="curate"
-            tooltipPlacement="top"
             collectionUid={collectionUid}
             imageUid={imageUid}
+            tooltipPlacement="top"
             enabled={enabled}
           />
         )}
