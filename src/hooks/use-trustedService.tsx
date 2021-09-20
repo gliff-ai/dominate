@@ -38,10 +38,10 @@ function useProviderTrustedService() {
   const [ready, setReady] = useState<boolean>(false);
 
   useEffect(() => {
-    // Retrive the list of trusted services for the user's team
+    // Retreive the list of trusted services for the user's team
     if (auth === null || !auth.ready || trustedServices || !auth.userProfile)
       return;
-    void getTrustedService(auth.userProfile.team.id).then(setTrustedServices);
+    void getTrustedService().then(setTrustedServices);
   }, [auth, trustedServices]);
 
   const unpackUiElements = (
