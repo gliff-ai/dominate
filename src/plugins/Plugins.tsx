@@ -37,19 +37,20 @@ export class Plugins extends Component<Props, State> {
     // Are there any plugins to load?
     const pluginList = this.props.plugins || [];
     const promisePlugins: Promise<IPluginConstructor | null>[] = [];
-    const initialisedToolPlugins: IPlugin[] = [];
-
     for (const pluginName of pluginList) {
       promisePlugins.push(loadPlugin(pluginName));
     }
 
-    let loadedPlugins: Array<IPluginConstructor | null> = [];
-    await Promise.all(promisePlugins)
-      .then((data) => {
-        loadedPlugins = data;
+    const loadedPlugins: Array<IPluginConstructor | null> = [];
+    await Promise.allSettled(promisePlugins).then((results) =>
+      results.forEach((result) => {
+        if (result.status === "fulfilled") {
+          loadedPlugins.push(result.value);
+        }
       })
-      .catch((e) => console.error(e));
+    );
 
+    const initialisedToolPlugins: IPlugin[] = [];
     for (const PluginConstructor of loadedPlugins) {
       if (PluginConstructor !== null) {
         try {
