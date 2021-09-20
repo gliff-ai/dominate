@@ -20,15 +20,13 @@ function useProviderPlugins() {
   const [plugins, setPlugins] = useState<Plugin[] | null>(null);
   const [ready, setReady] = useState<boolean>(false);
 
-  if (!auth) return null;
-
   useEffect(() => {
-    if (!auth.ready || plugins || !auth.userProfile) return;
-
-    // fetch list of registered plugins from STORE
-    void getPlugins(auth.userProfile.team.id)
-      .then(setPlugins)
-      .catch((e) => console.error(e));
+    if (auth && auth.ready && plugins && auth.userProfile) {
+      // fetch list of registered plugins from STORE
+      void getPlugins(auth.userProfile.team.id)
+        .then(setPlugins)
+        .catch((e) => console.error(e));
+    }
   }, [auth, plugins]);
 
   useEffect(() => {
@@ -36,15 +34,17 @@ function useProviderPlugins() {
     setReady(true);
   }, [plugins]);
 
+  if (!auth) return null;
+
   return {
     ready,
   };
 }
 
 export function ProvidePlugins(props: Props): React.ReactElement {
-  const pugins = useProviderPlugins();
+  const plugins = useProviderPlugins();
   return (
-    <pluginContext.Provider value={pugins}>
+    <pluginContext.Provider value={plugins}>
       {props.children}
     </pluginContext.Provider>
   );
