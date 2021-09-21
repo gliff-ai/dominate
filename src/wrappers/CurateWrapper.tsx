@@ -17,7 +17,13 @@ import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import { DominateStore } from "@/store";
-import { Slices, MetaItem, GalleryTile, Image } from "@/store/interfaces";
+import {
+  Slices,
+  MetaItem,
+  GalleryTile,
+  Image,
+  ImageMeta,
+} from "@/store/interfaces";
 import { Task, TSButtonToolbar } from "@/components";
 
 import {
@@ -87,32 +93,41 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   const addImageToGallery = async (
-    imageFileInfo: ImageFileInfo,
-    slicesData: Slices
+    imageFileInfo: ImageFileInfo[],
+    slicesData: Slices[]
   ): Promise<void> => {
-    // Stringify slices data and get image metadata
-    const stringfiedSlices = stringifySlices(slicesData);
-    const imageMeta = getImageMetaFromImageFileInfo(imageFileInfo);
+    const imageMetas: ImageMeta[] = [];
+    const thumbnails: string[] = [];
+    const stringifiedSlices: string[] = [];
 
-    // make thumbnail:
-    const canvas = document.createElement("canvas");
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext("2d");
-    if (ctx) {
-      ctx.drawImage(slicesData[0][0], 0, 0, 128, 128);
-      const thumbnailB64 = canvas.toDataURL();
+    for (let i = 0; i < imageFileInfo.length; i += 1) {
+      // Stringify slices data and get image metadata
+      stringifiedSlices.push(stringifySlices(slicesData[i]));
+      imageMetas.push(getImageMetaFromImageFileInfo(imageFileInfo[i]));
+      console.log(imageMetas);
 
-      // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
-      await props.storeInstance.createImage(
-        collectionUid,
-        imageMeta,
-        thumbnailB64,
-        stringfiedSlices
-      );
-
-      fetchImageItems();
+      // make thumbnail:
+      const canvas = document.createElement("canvas");
+      canvas.width = 128;
+      canvas.height = 128;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(slicesData[i][0][0], 0, 0, 128, 128);
+        thumbnails.push(canvas.toDataURL());
+      }
     }
+
+    // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
+    console.log(imageFileInfo);
+    console.log(imageFileInfo.length);
+    await props.storeInstance.createImage(
+      collectionUid,
+      imageMetas,
+      thumbnails,
+      stringifiedSlices
+    );
+
+    fetchImageItems();
   };
 
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
