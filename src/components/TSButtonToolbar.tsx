@@ -30,15 +30,22 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
 
   useEffect(() => {
     const currPlacement = getPlacement();
-    if (!trustedService?.ready || !currPlacement || !trustedService?.uiElements)
+    if (
+      trustedService === null ||
+      !currPlacement ||
+      !trustedService?.uiElements
+    )
       return;
+
     // Select ui elements for the active product
-    setElements(
-      trustedService?.uiElements.filter(({ placement }) =>
-        placement.includes(currPlacement)
-      )
+    const newElements = trustedService?.uiElements.filter(({ placement }) =>
+      placement.includes(currPlacement)
     );
-  }, [trustedService?.ready]);
+
+    if (newElements.length !== 0) {
+      setElements(newElements);
+    }
+  }, [trustedService, props.imageUid]);
 
   useEffect(() => {
     if (!elements) return;
