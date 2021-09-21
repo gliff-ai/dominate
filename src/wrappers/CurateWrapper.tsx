@@ -20,6 +20,7 @@ import { DominateStore } from "@/store";
 import { Slices, MetaItem, GalleryTile, Image } from "@/store/interfaces";
 import { Task, TSButtonToolbar } from "@/components";
 import { Plugins } from "@/plugins/Plugins";
+import { usePlugins } from "@/hooks";
 
 import {
   stringifySlices,
@@ -52,12 +53,14 @@ interface Props {
 export const CurateWrapper = (props: Props): ReactElement | null => {
   const navigate = useNavigate();
   const auth = useAuth();
+  const plugins = usePlugins();
 
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
   const { collectionUid = "" } = useParams<string>(); // uid of selected gallery, from URL
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
   const [multi, setMulti] = useState<boolean>(false);
   const [showDialog, setShowDialog] = useState<boolean>(false);
+  const [pluginUrls, setPluginUrls] = useState<string[] | null>(null);
 
   const classes = useStyles()();
 
@@ -282,8 +285,19 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     }
   }, [collectionUid, fetchImageItems]);
 
-  if (!props.storeInstance || !auth?.user || !collectionUid) return null;
+  useEffect(() => {
+    if (plugins === null || !plugins?.plugins || pluginUrls) return;
 
+    const urls = plugins.plugins
+      .filter(({ product }) => product === "CURATE")
+      .map(({ url }) => url);
+
+    if (urls.length !== 0) {
+      setPluginUrls(urls);
+    }
+  }, [plugins, pluginUrls]);
+
+  if (!props.storeInstance || !auth?.user || !collectionUid) return null;
   return (
     <>
       <Curate
@@ -305,11 +319,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           />
         )}
         plugins={
-          // TODO: replace with list of plugins retrieved from STORE
-          <Plugins
-            plugins={["SamplePlugin", "geolocation-map"]}
-            metadata={curateInput}
-          />
+          pluginUrls ? (
+            <Plugins plugins={pluginUrls} metadata={curateInput} />
+          ) : null
         }
       />
       <Dialog open={showDialog}>
