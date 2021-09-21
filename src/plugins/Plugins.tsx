@@ -10,6 +10,7 @@ import { imgSrc } from "@/imgSrc";
 interface Props {
   plugins?: string[] | null;
   metadata?: MetaItem[] | null;
+  enabled?: boolean;
 }
 interface State {
   pluginInstances: IPlugin[];
@@ -21,6 +22,7 @@ export class Plugins extends Component<Props, State> {
   static defaultProps = {
     plugins: null,
     metadata: null,
+    enabled: true,
   };
 
   constructor(props: Props) {
@@ -101,7 +103,8 @@ export class Plugins extends Component<Props, State> {
         </PluginModal>
         <BasePopover
           tooltip={{ name: "Plugins", icon: imgSrc("plugins") }}
-          tooltipPlacement="top-start"
+          enabled={this.props.enabled}
+          tooltipPlacement="top"
           anchorOrigin={{
             vertical: "bottom",
             horizontal: "center",
