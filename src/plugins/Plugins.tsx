@@ -66,9 +66,9 @@ export class Plugins extends Component<Props, State> {
     this.setState({ pluginInstances: initialisedToolPlugins });
   }
 
-  hideModal = () => this.setState({ isModalVisible: false });
+  hideModal = (): void => this.setState({ isModalVisible: false });
 
-  showModal = () => this.setState({ isModalVisible: true });
+  showModal = (): void => this.setState({ isModalVisible: true });
 
   render(): ReactElement | null {
     const buttons = (
