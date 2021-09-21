@@ -10,32 +10,33 @@ interface Props {
 }
 
 export const AuditWrapper = (props: Props): ReactElement | null => {
-  const { collectionUid } = useParams(); // uid of selected gallery, from URL
+  const { collectionUid = "" } = useParams(); // uid of selected gallery, from URL
   const auth = useAuth();
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<AnnotationSession[] | null>(null);
 
-  if (!auth) return null;
-
-  const fetchAudit = async () => {
-    const sessionsData = await props.storeInstance.getAudits(collectionUid);
-    setSessions(sessionsData);
-  };
-
   useEffect(() => {
+    const fetchAudit = async () => {
+      const sessionsData = await props.storeInstance.getAudits(collectionUid);
+      setSessions(sessionsData);
+    };
+
     // fetch latest ANNOTATE audit from store on page load:
     fetchAudit().catch((err) => {
       console.log(err);
     });
-  }, [props.storeInstance.ready]);
+  }, [collectionUid, props.storeInstance]);
 
   useEffect(() => {
-    const tier = auth.userProfile?.team.tier;
+    const tier = auth?.userProfile?.team.tier;
     if (tier && tier.id < 2) {
       // no AUDIT on free tier
       navigate("/manage");
     }
-  }, [auth.ready]);
+  }, [auth, navigate]);
+
+  if (!auth) return null;
+  if (!collectionUid) return null;
 
   return sessions !== null ? (
     <UserInterface sessions={sessions} showAppBar={false} />

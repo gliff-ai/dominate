@@ -80,8 +80,6 @@ export const NavBar = (): ReactElement | null => {
   const [userInitials, setUserInitials] = useState("");
   const [anchorElement, setAnchorEl] = useState<null | HTMLElement>(null);
 
-  if (!auth) return null;
-
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -108,6 +106,7 @@ export const NavBar = (): ReactElement | null => {
       "/recover",
     ].includes(window.location.pathname);
 
+  if (!auth) return null;
   if (!hasNavbar()) return null;
 
   // TODO: owners who are on free plan should still be able to upgrade

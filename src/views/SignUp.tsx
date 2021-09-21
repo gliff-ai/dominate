@@ -1,12 +1,5 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import {
-  ChangeEvent,
-  FormEvent,
-  useEffect,
-  useState,
-  ComponentType,
-  ReactElement,
-} from "react";
+import { ChangeEvent, FormEvent, useState, ReactElement } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   TextField,
@@ -16,12 +9,12 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@material-ui/core";
-import Slide from "@material-ui/core/Slide";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
 import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
 import { VerificationSent } from "@/views/VerificationSent";
+import { useMountEffect } from "@/hooks/use-mountEffect";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY;
 
@@ -86,7 +79,6 @@ export const SignUp = (props: Props): ReactElement | null => {
     inviteId: null,
     acceptedTermsAndConditions: false,
   });
-  if (!auth) return null;
 
   const handleSnackbar = () => {
     setOpen(true);
@@ -95,7 +87,7 @@ export const SignUp = (props: Props): ReactElement | null => {
   const tierId = query.get("tier_id") || null;
   const inviteId = query.get("invite_id") || null;
 
-  useEffect(() => {
+  useMountEffect(() => {
     if (inviteId) {
       // We have an invite, so we know their email, add this to the request
       void getInvite(inviteId).then(({ email, team_id }) => {
@@ -110,7 +102,9 @@ export const SignUp = (props: Props): ReactElement | null => {
         });
       });
     }
-  }, []);
+  });
+
+  if (!auth) return null;
 
   const validate = () => {
     if (signUp.password !== signUp.confirmPassword) {
