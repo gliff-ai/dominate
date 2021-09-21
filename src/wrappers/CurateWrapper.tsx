@@ -105,7 +105,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       // Stringify slices data and get image metadata
       stringifiedSlices.push(stringifySlices(slicesData[i]));
       imageMetas.push(getImageMetaFromImageFileInfo(imageFileInfo[i]));
-      console.log(imageMetas);
 
       // make thumbnail:
       const canvas = document.createElement("canvas");
@@ -119,8 +118,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     }
 
     // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
-    console.log(imageFileInfo);
-    console.log(imageFileInfo.length);
     await props.storeInstance.createImage(
       collectionUid,
       imageMetas,

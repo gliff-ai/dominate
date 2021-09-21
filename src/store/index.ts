@@ -363,43 +363,45 @@ export class DominateStore {
       // Retrieve itemManager
       const itemManager = await this.getItemManager(collectionUid);
 
-      const newItems: Item[] = [];
-      const newTiles: GalleryTile[] = [];
+      const itemPromises: Promise<Item>[] = [];
 
       for (let i = 0; i < imageMetas.length; i += 1) {
         const imageMeta = imageMetas[i];
-        const thumbnail = thumbnails[i];
         const imageContent = imageContents[i];
 
         // Create new image item and add it to the collection
-        const newImageItem = await itemManager.create(
-          {
-            type: "gliff.image",
-            name: imageMeta.imageName,
-            createdTime,
-            modifiedTime: createdTime,
-            width: imageMeta.width,
-            height: imageMeta.height,
-          },
-          imageContent
+        const newImageItem = itemPromises.push(
+          itemManager.create(
+            {
+              type: "gliff.image",
+              name: imageMeta.imageName,
+              createdTime,
+              modifiedTime: createdTime,
+              width: imageMeta.width,
+              height: imageMeta.height,
+            },
+            imageContent
+          )
         );
-        // await itemManager.batch([newImageItem]);
-        newItems.push(newImageItem);
+      }
 
+      // save new image items:
+      const newItems = await Promise.all(itemPromises);
+      await itemManager.batch(newItems);
+
+      const newTiles: GalleryTile[] = [];
+      for (let i = 0; i < imageMetas.length; i += 1) {
         // Add the image's metadata/thumbnail and a pointer to the image item to the gallery's content:
         newTiles.push({
-          id: newImageItem.uid, // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
-          thumbnail,
+          id: newItems[i].uid, // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
+          thumbnail: thumbnails[i],
           imageLabels: [],
-          metadata: imageMeta,
-          imageUID: newImageItem.uid,
+          metadata: imageMetas[i],
+          imageUID: newItems[i].uid,
           annotationUID: null,
           auditUID: null,
         });
       }
-
-      // save new image items:
-      await itemManager.batch(newItems);
 
       // save new gallery tiles:
       const collectionManager = this.etebaseInstance.getCollectionManager();
