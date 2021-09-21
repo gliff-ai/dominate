@@ -15,7 +15,8 @@ interface Props {
 interface State {
   pluginInstances: IPlugin[];
   isModalVisible: boolean;
-  modalContainer: ReactElement | null;
+  modalContent: ReactElement | null;
+  triggerClosing: number;
 }
 
 export class Plugins extends Component<Props, State> {
@@ -31,7 +32,8 @@ export class Plugins extends Component<Props, State> {
     this.state = {
       pluginInstances: [],
       isModalVisible: false,
-      modalContainer: null,
+      modalContent: null,
+      triggerClosing: 0,
     };
   }
 
@@ -84,7 +86,10 @@ export class Plugins extends Component<Props, State> {
                 if (plugin.usesModal) this.showModal();
                 const element = plugin.onClick(this.props?.metadata);
                 if (element) {
-                  this.setState({ modalContainer: element });
+                  this.setState((prevState) => ({
+                    modalContent: element,
+                    triggerClosing: prevState.triggerClosing + 1,
+                  }));
                 }
               }}
             />
@@ -95,12 +100,6 @@ export class Plugins extends Component<Props, State> {
 
     return (
       <>
-        <PluginModal
-          isVisible={this.state.isModalVisible}
-          hide={this.hideModal}
-        >
-          {this.state.modalContainer}
-        </PluginModal>
         <BasePopover
           tooltip={{ name: "Plugins", icon: imgSrc("plugins") }}
           enabled={this.props.enabled}
@@ -113,9 +112,16 @@ export class Plugins extends Component<Props, State> {
             vertical: "top",
             horizontal: "left",
           }}
+          triggerClosing={this.state.triggerClosing}
         >
           {buttons}
         </BasePopover>
+        <PluginModal
+          isVisible={this.state.isModalVisible}
+          hide={this.hideModal}
+        >
+          {this.state.modalContent}
+        </PluginModal>
       </>
     );
   }
