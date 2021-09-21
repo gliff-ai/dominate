@@ -64,7 +64,6 @@ const UserInterface = (props: Props): ReactElement | null => {
   }, [location]);
 
   const classes = useStyles(isOverflow);
-
   return (
     <ThemeProvider theme={theme}>
       <ProgressSnackbar task={task} setTask={setTask} />
