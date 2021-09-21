@@ -15,7 +15,7 @@ export async function loadPlugin(
     // Try to load the plugin
     const module = (await import(
       /* @vite-ignore */
-      `/${pluginName}`
+      `${pluginName}`
     )) as {
       default: IPluginConstructor;
     };
