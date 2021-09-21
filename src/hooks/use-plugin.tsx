@@ -9,6 +9,7 @@ interface Props {
 
 interface Context {
   ready: boolean;
+  plugins: Plugin[] | null;
 }
 
 const pluginContext = createContext<Context | null>(null);
@@ -17,16 +18,15 @@ export const usePlugins = (): Context | null => useContext(pluginContext);
 
 function useProviderPlugins() {
   const auth = useAuth();
-  const [plugins, setPlugins] = useState<Plugin[] | null>(null);
   const [ready, setReady] = useState<boolean>(false);
+  const [plugins, setPlugins] = useState<Plugin[] | null>(null);
 
   useEffect(() => {
-    if (auth && auth.ready && plugins && auth.userProfile) {
-      // fetch list of registered plugins from STORE
-      void getPlugins(auth.userProfile.team.id)
-        .then(setPlugins)
-        .catch((e) => console.error(e));
-    }
+    if (auth === null || !auth?.userProfile || plugins) return;
+    // fetch list of registered plugins from STORE
+    void getPlugins(auth.userProfile.team.id)
+      .then(setPlugins)
+      .catch((e) => console.error(e));
   }, [auth, plugins]);
 
   useEffect(() => {
@@ -38,6 +38,7 @@ function useProviderPlugins() {
 
   return {
     ready,
+    plugins,
   };
 }
 
