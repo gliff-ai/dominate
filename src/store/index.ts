@@ -126,16 +126,8 @@ export class DominateStore {
       SERVER_URL
     );
 
-    console.log(account);
-
     return { key, email };
   };
-
-  registerTrustedServiceUser = async (
-    email: string,
-    url: string,
-    name: string
-  ): Promise<any> => {};
 
   signup = async (email: string, password: string): Promise<User> => {
     this.etebaseInstance = await Account.signup(
