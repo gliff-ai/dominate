@@ -11,6 +11,7 @@ interface Props {
   imageUid: string;
   enabled?: boolean;
   tooltipPlacement?: TooltipProps["placement"];
+  callback: (() => void) | null;
 }
 
 export const TSButtonToolbar = (props: Props): ReactElement | null => {
@@ -78,7 +79,14 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
                 name: ts.tooltip,
                 icon: imgSrc(ts.icon),
               }}
-              onClick={() => ts.onClick(props.collectionUid, props.imageUid)}
+              onClick={() => {
+                ts.onClick(props.collectionUid, props.imageUid)
+                  .then((response) => {
+                    console.log(`${response.message}`); // TODO: turn this into an alert message!
+                    if (props.callback) props.callback();
+                  })
+                  .catch((e) => console.error(e));
+              }}
               tooltipPlacement={props.tooltipPlacement}
             />
           ))}
@@ -91,4 +99,5 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
 TSButtonToolbar.defaultProps = {
   enabled: true,
   tooltipPlacement: "right",
+  callback: null,
 };

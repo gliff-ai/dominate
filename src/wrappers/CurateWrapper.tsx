@@ -61,6 +61,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [multi, setMulti] = useState<boolean>(false);
   const [showDialog, setShowDialog] = useState<boolean>(false);
   const [pluginUrls, setPluginUrls] = useState<string[] | null>(null);
+  const [triggeredFetchImages, setTriggeredFetchImages] = useState<number>(0);
 
   const classes = useStyles()();
 
@@ -279,11 +280,15 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.setIsLoading(true);
   });
 
+  const triggerFetchImageItems = () => {
+    setTriggeredFetchImages((count) => count + 1);
+  };
+
   useEffect(() => {
     if (collectionUid) {
       fetchImageItems();
     }
-  }, [collectionUid, fetchImageItems]);
+  }, [collectionUid, fetchImageItems, triggeredFetchImages]);
 
   useEffect(() => {
     if (plugins === null || !plugins?.plugins || pluginUrls) return;
@@ -316,6 +321,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             imageUid={imageUid}
             tooltipPlacement="top"
             enabled={enabled}
+            callback={triggerFetchImageItems}
           />
         )}
         plugins={
