@@ -13,7 +13,8 @@ interface TrustedServiceInterface {
 }
 
 interface ApiResponse {
-  message: string;
+  status: string;
+  message?: string;
 }
 
 export class TrustedServiceClass implements TrustedServiceInterface {
@@ -53,11 +54,12 @@ export class TrustedServiceClass implements TrustedServiceInterface {
     collectionUid: string,
     imageUid: string
   ): Promise<ApiResponse> => {
-    return await apiRequest<ApiResponse>(
+    const response = await apiRequest<ApiResponse>(
       this.apiEndpoint,
       "POST",
       { collectionUid, imageUid },
       this.baseUrl
     );
+    return response;
   };
 }

@@ -1,6 +1,7 @@
 import { ReactElement, useEffect, useState } from "react";
 import { TooltipProps, Card } from "@material-ui/core";
 import { BaseIconButton, BasePopover, theme } from "@gliff-ai/style";
+import { MessageSnackbar } from "@/components";
 
 import { useTrustedService } from "@/hooks/use-trustedService";
 import { TrustedServiceClass } from "@/services/trustedServices";
@@ -11,13 +12,15 @@ interface Props {
   imageUid: string;
   enabled?: boolean;
   tooltipPlacement?: TooltipProps["placement"];
-  callback: (() => void) | null;
+  callback?: (() => void) | null;
 }
 
 export const TSButtonToolbar = (props: Props): ReactElement | null => {
   const trustedService = useTrustedService();
   const [elements, setElements] = useState<TrustedServiceClass[] | null>(null);
   const [enabled, setEnabled] = useState<boolean>(false);
+  const [message, setMessage] = useState<string>("");
+  const [open, setOpen] = useState<boolean>(false);
 
   const getPlacement = (): string | null => {
     const path = window.location.href;
@@ -71,26 +74,37 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
       tooltipPlacement={props.tooltipPlacement}
     >
       {elements ? (
-        <Card color={theme.palette.primary.light}>
-          {elements.map((ts) => (
-            <BaseIconButton
-              key={`ts-${ts.tooltip}`}
-              tooltip={{
-                name: ts.tooltip,
-                icon: imgSrc(ts.icon),
-              }}
-              onClick={() => {
-                ts.onClick(props.collectionUid, props.imageUid)
-                  .then((response) => {
-                    console.log(`${response.message}`); // TODO: turn this into an alert message!
-                    if (props.callback) props.callback();
-                  })
-                  .catch((e) => console.error(e));
-              }}
-              tooltipPlacement={props.tooltipPlacement}
-            />
-          ))}
-        </Card>
+        <>
+          <Card color={theme.palette.primary.light}>
+            {elements.map((ts) => (
+              <BaseIconButton
+                key={`ts-${ts.tooltip}`}
+                tooltip={{
+                  name: ts.tooltip,
+                  icon: imgSrc(ts.icon),
+                }}
+                onClick={() => {
+                  ts.onClick(props.collectionUid, props.imageUid)
+                    .then((response) => {
+                      if (response.status === "failure" && response?.message) {
+                        setMessage(response.message);
+                        setOpen(true);
+                      } else if (props.callback) {
+                        props.callback();
+                      }
+                    })
+                    .catch((e) => console.error(e));
+                }}
+                tooltipPlacement={props.tooltipPlacement}
+              />
+            ))}
+          </Card>
+          <MessageSnackbar
+            open={open}
+            handleClose={() => setOpen(false)}
+            messageText={message}
+          />
+        </>
       ) : null}
     </BasePopover>
   );
