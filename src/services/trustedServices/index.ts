@@ -1,18 +1,18 @@
 import { apiRequest } from "@/api";
 import type { TrustedService, UiTemplate } from "./interfaces";
 
-export const getTrustedService = (teamId: number): Promise<TrustedService[]> =>
-  apiRequest<TrustedService[]>(`/trusted_service/${teamId}`, "GET");
+export const getTrustedService = (): Promise<TrustedService[]> =>
+  apiRequest<TrustedService[]>(`/trusted_service/`, "GET");
 
 export const createTrustedService = (
-  teamId: number,
+  id: string,
   name: string,
-  baseUrl: string
+  base_url: string
 ): Promise<number> =>
   apiRequest<number>("/trusted_service/", "POST", {
-    team_id: teamId,
+    id,
     name,
-    base_url: baseUrl,
+    base_url,
   });
 
 export const getUiTemplate = (apiUrl: string): Promise<UiTemplate> =>
