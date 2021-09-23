@@ -63,11 +63,11 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
         icon: imgSrc("trusted-services"),
       }}
       anchorOrigin={{
-        vertical: "bottom",
+        vertical: "center",
         horizontal: "right",
       }}
       transformOrigin={{
-        vertical: "top",
+        vertical: "center",
         horizontal: "left",
       }}
       enabled={enabled}
