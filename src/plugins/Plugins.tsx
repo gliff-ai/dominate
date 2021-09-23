@@ -6,6 +6,7 @@ import { MetaItem } from "@/store/interfaces";
 import { loadPlugin } from "./index";
 import { PluginModal } from "./PluginModal";
 import { imgSrc } from "@/imgSrc";
+import { MessageSnackbar } from "@/components";
 
 interface Props {
   plugins?: string[] | null;
@@ -17,6 +18,7 @@ interface State {
   isModalVisible: boolean;
   modalContent: ReactElement | null;
   triggerClosing: number;
+  snackbarOpen: boolean;
 }
 
 export class Plugins extends Component<Props, State> {
@@ -34,6 +36,7 @@ export class Plugins extends Component<Props, State> {
       isModalVisible: false,
       modalContent: null,
       triggerClosing: 0,
+      snackbarOpen: false,
     };
   }
 
@@ -68,10 +71,6 @@ export class Plugins extends Component<Props, State> {
     this.setState({ pluginInstances: initialisedToolPlugins });
   }
 
-  hideModal = (): void => this.setState({ isModalVisible: false });
-
-  showModal = (): void => this.setState({ isModalVisible: true });
-
   render(): ReactElement | null {
     const buttons = (
       <Card>
@@ -83,13 +82,19 @@ export class Plugins extends Component<Props, State> {
               fill={undefined}
               tooltipPlacement="top-start"
               onClick={() => {
-                if (plugin.usesModal) this.showModal();
                 const element = plugin.onClick(this.props?.metadata);
-                if (element) {
-                  this.setState((prevState) => ({
-                    modalContent: element,
-                    triggerClosing: prevState.triggerClosing + 1,
-                  }));
+
+                // if plugin uses modal
+                if (plugin.usesModal) {
+                  if (element)
+                    // if element is set, display this inside modal
+                    this.setState((prevState) => ({
+                      isModalVisible: true,
+                      modalContent: element,
+                      triggerClosing: prevState.triggerClosing + 1,
+                    }));
+                  // otherwise, display error message
+                  else this.setState({ snackbarOpen: true });
                 }
               }}
             />
@@ -118,10 +123,15 @@ export class Plugins extends Component<Props, State> {
         </BasePopover>
         <PluginModal
           isVisible={this.state.isModalVisible}
-          hide={this.hideModal}
+          hide={() => this.setState({ isModalVisible: false })}
         >
           {this.state.modalContent}
         </PluginModal>
+        <MessageSnackbar
+          open={this.state.snackbarOpen}
+          handleClose={() => this.setState({ snackbarOpen: false })}
+          messageText="Oops, something went wrong."
+        />
       </>
     );
   }
