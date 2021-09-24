@@ -1,5 +1,5 @@
 import { Component, ReactElement } from "react";
-import { Card } from "@material-ui/core";
+import { WithStyles, withStyles } from "@material-ui/core";
 import { BaseIconButton, BasePopover } from "@gliff-ai/style";
 import { IPlugin, IPluginConstructor } from "./interfaces";
 import { MetaItem } from "@/store/interfaces";
@@ -8,7 +8,8 @@ import { PluginModal } from "./PluginModal";
 import { imgSrc } from "@/imgSrc";
 import { MessageSnackbar } from "@/components";
 
-interface Props {
+const styles = { card: { padding: "0 5px" } };
+interface Props extends WithStyles<typeof styles> {
   plugins?: string[] | null;
   metadata?: MetaItem[] | null;
   enabled?: boolean;
@@ -20,8 +21,7 @@ interface State {
   triggerClosing: number;
   snackbarOpen: boolean;
 }
-
-export class Plugins extends Component<Props, State> {
+class Plugins extends Component<Props, State> {
   static defaultProps = {
     plugins: null,
     metadata: null,
@@ -72,15 +72,17 @@ export class Plugins extends Component<Props, State> {
   }
 
   render(): ReactElement | null {
+    const { classes } = this.props;
+
     const buttons = (
-      <Card>
+      <div className={classes.card}>
         {this.state.pluginInstances.map((plugin) =>
           plugin ? (
             <BaseIconButton
               key={`plugin-${plugin.name}`}
               tooltip={{ name: plugin.tooltip, icon: imgSrc(plugin.icon) }}
               fill={undefined}
-              tooltipPlacement="top-start"
+              tooltipPlacement="top"
               onClick={() => {
                 const element = plugin.onClick(this.props?.metadata);
 
@@ -100,7 +102,7 @@ export class Plugins extends Component<Props, State> {
             />
           ) : null
         )}
-      </Card>
+      </div>
     );
 
     return (
@@ -110,11 +112,11 @@ export class Plugins extends Component<Props, State> {
           enabled={this.props.enabled}
           tooltipPlacement="top"
           anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
+            vertical: "center",
+            horizontal: "right",
           }}
           transformOrigin={{
-            vertical: "top",
+            vertical: "center",
             horizontal: "left",
           }}
           triggerClosing={this.state.triggerClosing}
@@ -136,3 +138,6 @@ export class Plugins extends Component<Props, State> {
     );
   }
 }
+
+const StyledPlugins = withStyles(styles)(Plugins);
+export { StyledPlugins as Plugins };
