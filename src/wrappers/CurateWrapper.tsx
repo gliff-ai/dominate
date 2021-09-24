@@ -316,6 +316,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             imageUid={imageUid}
             tooltipPlacement="top"
             enabled={enabled}
+            callback={fetchImageItems}
           />
         )}
         plugins={

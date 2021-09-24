@@ -1,13 +1,17 @@
 import { Component, ReactElement } from "react";
-import { Card } from "@material-ui/core";
-import { BaseIconButton, BasePopover } from "@gliff-ai/style";
+import { WithStyles, withStyles } from "@material-ui/core";
+import { BaseIconButton, BasePopover, theme } from "@gliff-ai/style";
 import { IPlugin, IPluginConstructor } from "./interfaces";
 import { MetaItem } from "@/store/interfaces";
 import { loadPlugin } from "./index";
 import { PluginModal } from "./PluginModal";
 import { imgSrc } from "@/imgSrc";
+import { MessageSnackbar } from "@/components";
 
-interface Props {
+const styles = {
+  card: { padding: "0 5px", backgroundColor: theme.palette.primary.light },
+};
+interface Props extends WithStyles<typeof styles> {
   plugins?: string[] | null;
   metadata?: MetaItem[] | null;
   enabled?: boolean;
@@ -17,9 +21,9 @@ interface State {
   isModalVisible: boolean;
   modalContent: ReactElement | null;
   triggerClosing: number;
+  snackbarOpen: boolean;
 }
-
-export class Plugins extends Component<Props, State> {
+class Plugins extends Component<Props, State> {
   static defaultProps = {
     plugins: null,
     metadata: null,
@@ -34,6 +38,7 @@ export class Plugins extends Component<Props, State> {
       isModalVisible: false,
       modalContent: null,
       triggerClosing: 0,
+      snackbarOpen: false,
     };
   }
 
@@ -68,34 +73,38 @@ export class Plugins extends Component<Props, State> {
     this.setState({ pluginInstances: initialisedToolPlugins });
   }
 
-  hideModal = (): void => this.setState({ isModalVisible: false });
-
-  showModal = (): void => this.setState({ isModalVisible: true });
-
   render(): ReactElement | null {
+    const { classes } = this.props;
+
     const buttons = (
-      <Card>
+      <div className={classes.card}>
         {this.state.pluginInstances.map((plugin) =>
           plugin ? (
             <BaseIconButton
               key={`plugin-${plugin.name}`}
               tooltip={{ name: plugin.tooltip, icon: imgSrc(plugin.icon) }}
               fill={undefined}
-              tooltipPlacement="top-start"
+              tooltipPlacement="top"
               onClick={() => {
-                if (plugin.usesModal) this.showModal();
                 const element = plugin.onClick(this.props?.metadata);
-                if (element) {
-                  this.setState((prevState) => ({
-                    modalContent: element,
-                    triggerClosing: prevState.triggerClosing + 1,
-                  }));
+
+                // if plugin uses modal
+                if (plugin.usesModal) {
+                  if (element)
+                    // if element is set, display this inside modal
+                    this.setState((prevState) => ({
+                      isModalVisible: true,
+                      modalContent: element,
+                      triggerClosing: prevState.triggerClosing + 1,
+                    }));
+                  // otherwise, display error message
+                  else this.setState({ snackbarOpen: true });
                 }
               }}
             />
           ) : null
         )}
-      </Card>
+      </div>
     );
 
     return (
@@ -105,11 +114,11 @@ export class Plugins extends Component<Props, State> {
           enabled={this.props.enabled}
           tooltipPlacement="top"
           anchorOrigin={{
-            vertical: "bottom",
-            horizontal: "center",
+            vertical: "center",
+            horizontal: "right",
           }}
           transformOrigin={{
-            vertical: "top",
+            vertical: "center",
             horizontal: "left",
           }}
           triggerClosing={this.state.triggerClosing}
@@ -118,11 +127,19 @@ export class Plugins extends Component<Props, State> {
         </BasePopover>
         <PluginModal
           isVisible={this.state.isModalVisible}
-          hide={this.hideModal}
+          hide={() => this.setState({ isModalVisible: false })}
         >
           {this.state.modalContent}
         </PluginModal>
+        <MessageSnackbar
+          open={this.state.snackbarOpen}
+          handleClose={() => this.setState({ snackbarOpen: false })}
+          messageText="Oops, something went wrong."
+        />
       </>
     );
   }
 }
+
+const StyledPlugins = withStyles(styles)(Plugins);
+export { StyledPlugins as Plugins };
