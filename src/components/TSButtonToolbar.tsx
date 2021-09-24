@@ -1,5 +1,5 @@
 import { ReactElement, useEffect, useState } from "react";
-import { TooltipProps, Card } from "@material-ui/core";
+import { TooltipProps, makeStyles } from "@material-ui/core";
 import { BaseIconButton, BasePopover, theme } from "@gliff-ai/style";
 import { MessageSnackbar } from "@/components";
 
@@ -7,6 +7,9 @@ import { useTrustedService } from "@/hooks/use-trustedService";
 import { TrustedServiceClass } from "@/services/trustedServices";
 import { imgSrc } from "@/imgSrc";
 
+const useStyle = makeStyles({
+  card: { padding: "0 5px", backgroundColor: theme.palette.primary.light },
+});
 interface Props {
   collectionUid: string;
   imageUid: string;
@@ -21,6 +24,7 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
   const [enabled, setEnabled] = useState<boolean>(false);
   const [message, setMessage] = useState<string>("");
   const [open, setOpen] = useState<boolean>(false);
+  const classes = useStyle();
 
   const getPlacement = (): string | null => {
     const path = window.location.href;
@@ -75,7 +79,7 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
     >
       {elements ? (
         <>
-          <Card color={theme.palette.primary.light}>
+          <div className={classes.card}>
             {elements.map((ts) => (
               <BaseIconButton
                 key={`ts-${ts.tooltip}`}
@@ -98,7 +102,7 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
                 tooltipPlacement={props.tooltipPlacement}
               />
             ))}
-          </Card>
+          </div>
           <MessageSnackbar
             open={open}
             handleClose={() => setOpen(false)}
