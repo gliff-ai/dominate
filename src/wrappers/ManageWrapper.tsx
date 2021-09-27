@@ -8,6 +8,10 @@ import {
 import { DominateStore, API_URL } from "@/store";
 import { useAuth } from "@/hooks/use-auth";
 import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
+import {
+  createTrustedService,
+  getTrustedService,
+} from "@/services/trustedServices";
 
 interface Props {
   storeInstance: DominateStore;
@@ -85,6 +89,22 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return true;
   };
 
+  const addTrustedService = async ({ url, name }) => {
+    // First create a trusted service base user
+    const { key, email } = await props.storeInstance.createTrustedServiceUser();
+
+    // Set the user profile
+    const res = await createTrustedService(email, name, url);
+
+    return key;
+  };
+
+  const getTrustedServices = async () => {
+    const result = await getTrustedService();
+
+    return result;
+  };
+
   const launchCurate = (projectUid: string): void =>
     // Open the selected project in curate
     navigate(`/curate/${projectUid}`);
@@ -104,6 +124,8 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     inviteUser,
     inviteCollaborator,
     inviteToProject,
+    createTrustedService: addTrustedService,
+    getTrustedServices,
   };
 
   const user = { email: auth.user.username, authToken: auth.user.authToken };

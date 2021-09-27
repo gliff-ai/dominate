@@ -9,11 +9,12 @@ interface TrustedServiceInterface {
   tooltip?: string; // tooltip of ui element
   value?: string; // value for ui element
   message?: string; // message returned in the response
-  onClick: (collectionUid: string, imageUid: string) => void;
+  onClick: (collectionUid: string, imageUid: string) => Promise<ApiResponse>;
 }
 
 interface ApiResponse {
-  message: string;
+  status: string;
+  message?: string;
 }
 
 export class TrustedServiceClass implements TrustedServiceInterface {
@@ -31,8 +32,6 @@ export class TrustedServiceClass implements TrustedServiceInterface {
 
   value: string;
 
-  message: string;
-
   constructor(
     trustedService: string,
     placement: string[],
@@ -49,15 +48,18 @@ export class TrustedServiceClass implements TrustedServiceInterface {
     this.icon = icon;
     this.tooltip = tooltip;
     this.value = value || "";
-    this.message = "";
   }
 
-  onClick = (collectionUid: string, imageUid: string): void => {
-    void apiRequest<ApiResponse>(
+  onClick = async (
+    collectionUid: string,
+    imageUid: string
+  ): Promise<ApiResponse> => {
+    const response = await apiRequest<ApiResponse>(
       this.apiEndpoint,
       "POST",
       { collectionUid, imageUid },
       this.baseUrl
-    ).then(({ message }) => console.log(message));
+    );
+    return response;
   };
 }

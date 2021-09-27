@@ -12,8 +12,7 @@ import { SentryErrorPage, BasicPage } from "@/views";
 
 import { DominateStore, API_URL } from "@/store";
 import UserInterface from "@/ui";
-import { ProvideAuth } from "@/hooks/use-auth";
-import { ProvideTrustedService } from "@/hooks/use-trustedService";
+import { ProvideAuth, ProvideTrustedService, ProvidePlugins } from "@/hooks";
 
 const IS_MONITORED = import.meta.env.VITE_IS_MONITORED === "true";
 
@@ -76,9 +75,11 @@ ReactDOM.render(
     >
       <ProvideAuth storeInstance={storeInstance}>
         <ProvideTrustedService>
-          <StylesProvider generateClassName={generateClassName("dominate")}>
-            <UserInterface storeInstance={storeInstance} />
-          </StylesProvider>
+          <ProvidePlugins>
+            <StylesProvider generateClassName={generateClassName("dominate")}>
+              <UserInterface storeInstance={storeInstance} />
+            </StylesProvider>
+          </ProvidePlugins>
         </ProvideTrustedService>
       </ProvideAuth>
     </Sentry.ErrorBoundary>

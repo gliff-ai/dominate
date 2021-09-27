@@ -109,6 +109,26 @@ export class DominateStore {
     };
   };
 
+  createTrustedServiceUser = async (): Promise<{
+    key: string;
+    email: string;
+  }> => {
+    const email = `${sodium.randombytes_random()}@trustedservice.gliff.app`;
+    const password = sodium.randombytes_buf(64, "base64");
+    const key = toBase64(`${email}:${password}`);
+
+    const account = await Account.signup(
+      {
+        username: toBase64(email),
+        email,
+      },
+      password,
+      SERVER_URL
+    );
+
+    return { key, email };
+  };
+
   signup = async (email: string, password: string): Promise<User> => {
     this.etebaseInstance = await Account.signup(
       {
