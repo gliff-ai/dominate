@@ -225,7 +225,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }
 
       // put unlabelled images in their own folder:
-      if (collectionContent.filter((tile) => tile.imageLabels === [])) {
+      if (collectionContent.filter((tile) => (tile.imageLabels.length = 0))) {
         const unlabelledFolder = zip.folder("unlabelled");
 
         if (unlabelledFolder) {
