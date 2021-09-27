@@ -113,9 +113,8 @@ export class DominateStore {
     key: string;
     email: string;
   }> => {
-
-    function base64AddPadding(str) {
-        return str + Array((4 - str.length % 4) % 4 + 1).join('=');
+    function base64AddPadding(str: string) {
+      return `${str}${Array(((4 - (str.length % 4)) % 4) + 1).join("=")}`;
     }
 
     const email = `${sodium.randombytes_random()}@trustedservice.gliff.app`;
