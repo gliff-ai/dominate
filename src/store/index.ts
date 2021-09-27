@@ -373,9 +373,9 @@ export class DominateStore {
 
   createImage = async (
     collectionUid: string,
-    imageMeta: ImageMeta,
-    thumbnail: string,
-    imageContent: string | Uint8Array
+    imageMetas: ImageMeta[],
+    thumbnails: string[],
+    imageContents: string[] | Uint8Array[]
   ): Promise<void> => {
     try {
       // Create/upload new store item for the image:
@@ -383,35 +383,55 @@ export class DominateStore {
       // Retrieve itemManager
       const itemManager = await this.getItemManager(collectionUid);
 
-      // Create new image item and add it to the collection
-      const newImageItem = await itemManager.create(
-        {
-          type: "gliff.image",
-          name: imageMeta.imageName,
-          createdTime,
-          modifiedTime: createdTime,
-          width: imageMeta.width,
-          height: imageMeta.height,
-        },
-        imageContent
-      );
-      await itemManager.batch([newImageItem]);
+      const itemPromises: Promise<Item>[] = [];
 
-      // Add the image's metadata/thumbnail and a pointer to the image item to the gallery's content:
-      const newTile: GalleryTile = {
-        id: newImageItem.uid, // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
-        thumbnail,
-        imageLabels: [],
-        metadata: imageMeta,
-        imageUID: newImageItem.uid,
-        annotationUID: null,
-        auditUID: null,
-      };
-      await this.appendGalleryTile(
-        this.etebaseInstance.getCollectionManager(),
-        collectionUid,
-        newTile
+      for (let i = 0; i < imageMetas.length; i += 1) {
+        const imageMeta = imageMetas[i];
+        const imageContent = imageContents[i];
+
+        // Create new image item and add it to the collection
+        const newImageItem = itemPromises.push(
+          itemManager.create(
+            {
+              type: "gliff.image",
+              name: imageMeta.imageName,
+              createdTime,
+              modifiedTime: createdTime,
+              width: imageMeta.width,
+              height: imageMeta.height,
+            },
+            imageContent
+          )
+        );
+      }
+
+      // save new image items:
+      const newItems = await Promise.all(itemPromises);
+      await itemManager.batch(newItems);
+
+      const newTiles: GalleryTile[] = [];
+      for (let i = 0; i < imageMetas.length; i += 1) {
+        // Add the image's metadata/thumbnail and a pointer to the image item to the gallery's content:
+        newTiles.push({
+          id: newItems[i].uid, // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
+          thumbnail: thumbnails[i],
+          imageLabels: [],
+          metadata: imageMetas[i],
+          imageUID: newItems[i].uid,
+          annotationUID: null,
+          auditUID: null,
+        });
+      }
+
+      // save new gallery tiles:
+      const collectionManager = this.etebaseInstance.getCollectionManager();
+      const collection = await collectionManager.fetch(collectionUid);
+      const oldContent = await collection.getContent(OutputFormat.String);
+      const newContent = JSON.stringify(
+        (JSON.parse(oldContent) as GalleryTile[]).concat(newTiles)
       );
+      await collection.setContent(newContent);
+      await collectionManager.upload(collection);
     } catch (err) {
       console.error(err);
     }
