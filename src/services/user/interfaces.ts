@@ -23,6 +23,7 @@ export interface UserProfile {
   team: Team;
   email_verified: boolean;
   email: string;
+  is_collaborator: boolean;
 }
 
 export interface Invite {
