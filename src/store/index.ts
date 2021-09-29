@@ -113,9 +113,13 @@ export class DominateStore {
     key: string;
     email: string;
   }> => {
+    function base64AddPadding(str: string) {
+      return `${str}${Array(((4 - (str.length % 4)) % 4) + 1).join("=")}`;
+    }
+
     const email = `${sodium.randombytes_random()}@trustedservice.gliff.app`;
     const password = sodium.randombytes_buf(64, "base64");
-    const key = toBase64(`${email}:${password}`);
+    const key = base64AddPadding(toBase64(`${email}:${password}`));
 
     const account = await Account.signup(
       {
