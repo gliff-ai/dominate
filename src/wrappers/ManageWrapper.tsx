@@ -128,7 +128,11 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     getTrustedServices,
   };
 
-  const user = { email: auth.user.username, authToken: auth.user.authToken };
+  const user = {
+    email: auth.user.username,
+    authToken: auth.user.authToken,
+    isOwner: auth.userProfile.id === auth.userProfile.team.owner_id,
+  };
 
   return (
     <ProvideAuth>
