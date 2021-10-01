@@ -15,12 +15,13 @@ const useStyles = makeStyles(() => ({
   subHeading: {
     fontSize: "28px",
     fontWeight: 700,
-    margin: "-40px,72px",
+    marginTop: "-40px",
   },
 
   typography: {
     fontSize: "20px",
     textAlign: "center",
+    marginTop: "40px",
   },
 }));
 
