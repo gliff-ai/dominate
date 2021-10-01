@@ -28,7 +28,7 @@
     "@types/react-dom": "^17.0.1",
     "@types/resize-observer-browser": "^0.1.5",
     "eslint": "^7.25.0",
-    "jest": "^27.0.3",
+    "jest": "^27.2.4",
     "prettier": "=2.3.0",
     "typescript": "^4.2.5",
     "vite": "^2.5.3",
@@ -40,7 +40,7 @@
     "@gliff-ai/annotate": "^0.26.0",
     "@gliff-ai/audit": "^0.2.2",
     "@gliff-ai/curate": "^0.19.0",
-    "@gliff-ai/manage": "^0.6.0",
+    "@gliff-ai/manage": "^0.6.1",
     "@gliff-ai/style": "^1.0.1",
     "@gliff-ai/upload": "^0.3.2",
     "@material-ui/core": "^4.11.3",
@@ -64,6 +64,6 @@
     "react-cookie-consent": "^6.2.4",
     "react-dom": "^17.0.1",
     "react-inlinesvg": "^2.3.0",
-    "react-router-dom": "^6.0.0-beta.4"
+    "react-router-dom": "==6.0.0-beta.4"
   }
 }
