@@ -1,6 +1,7 @@
 {
   "name": "@gliff-ai/dominate",
-  "version": "1.6.2",
+  "version": "1.6.3",
+  "version": "1.6.1",
   "description": "gliff.ai DOMINATE",
   "repository": "git://github.com/gliff-ai/dominate.git",
   "main": "dist/main.js",
