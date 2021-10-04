@@ -24,7 +24,7 @@ export const addAddons = (
   projects: number,
   collaborators: number
 ): Promise<boolean> =>
-  apiRequest<boolean>("/billing/addon", "POST", {
+  apiRequest<boolean>("/billing/addon/", "POST", {
     users,
     projects,
     collaborators,

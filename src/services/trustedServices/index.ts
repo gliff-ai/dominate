@@ -16,7 +16,7 @@ export const createTrustedService = (
   });
 
 export const getUiTemplate = (apiUrl: string): Promise<UiTemplate> =>
-  apiRequest<UiTemplate>("/ui-template", "POST", {}, apiUrl);
+  apiRequest<UiTemplate>("/ui-template/", "POST", {}, apiUrl);
 
 export { TrustedService };
 export { TrustedServiceClass } from "./TrustedServiceClass";
