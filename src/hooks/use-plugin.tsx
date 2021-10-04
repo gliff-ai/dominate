@@ -24,7 +24,7 @@ function useProviderPlugins() {
   useEffect(() => {
     if (auth === null || !auth?.userProfile || plugins) return;
     // fetch list of registered plugins from STORE
-    void getPlugins(auth.userProfile.team.id)
+    void getPlugins()
       .then(setPlugins)
       .catch((e) => console.error(e));
   }, [auth, plugins]);
