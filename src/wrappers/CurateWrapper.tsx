@@ -105,7 +105,13 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           setCollectionContent(items);
           // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
           let wrangled = items.map(
-            ({ thumbnail, imageLabels, assignees, id, metadata }) => ({
+            ({
+              thumbnail,
+              imageLabels = [],
+              assignees = [],
+              id,
+              metadata,
+            }) => ({
               thumbnail,
               imageLabels,
               id,
