@@ -70,7 +70,7 @@ const storeInstance = new DominateStore();
 ReactDOM.render(
   <BrowserRouter>
     <Sentry.ErrorBoundary
-      fallback={<BasicPage view={<SentryErrorPage />} title={<>Opps!</>} />}
+      fallback={<BasicPage view={<SentryErrorPage />} title={<>Oops!</>} />}
       showDialog
     >
       <ProvideAuth storeInstance={storeInstance}>

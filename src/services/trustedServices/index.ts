@@ -9,7 +9,7 @@ export const createTrustedService = (
   name: string,
   base_url: string
 ): Promise<number> =>
-  apiRequest<number>("/trusted_service/", "POST", {
+  apiRequest<number>("/trusted_service", "POST", {
     id,
     name,
     base_url,

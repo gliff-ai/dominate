@@ -1,10 +1,10 @@
 import { ReactElement } from "react";
-import { Typography, makeStyles, Card, Link } from "@material-ui/core";
+import { makeStyles, Typography } from "@material-ui/core";
 import { BaseTextButton } from "@gliff-ai/style";
 
 const useStyles = makeStyles(() => ({
   divButtons: {
-    marginTop: "50px",
+    marginTop: "70px",
     "& $button": {
       marginRight: "80px",
       marginLeft: "50px",
@@ -21,6 +21,7 @@ const useStyles = makeStyles(() => ({
   typography: {
     fontSize: "20px",
     textAlign: "center",
+    marginTop: "40px",
   },
 }));
 
@@ -29,11 +30,15 @@ export function SentryErrorPage(): ReactElement {
 
   return (
     <>
-      <p className={classes.subHeading}>An Unexpected Error has Occurred</p>
-      <p className={classes.typography}>
+      <Typography variant="h3" className={classes.subHeading}>
+        An Unexpected Error Has Occurred
+      </Typography>
+
+      <Typography className={classes.typography}>
         Please report the problem to us below if it persists or alternatively
         try reloading the application.
-      </p>
+      </Typography>
+
       <div className={classes.divButtons}>
         <BaseTextButton
           text="Report Error"

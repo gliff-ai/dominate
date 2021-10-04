@@ -6,7 +6,7 @@ export const createCheckoutSession = (
   user_id: number,
   user_email: string
 ): Promise<CheckoutSession> =>
-  apiRequest<CheckoutSession>("/billing/create-checkout-session", "POST", {
+  apiRequest<CheckoutSession>("/billing/create-checkout-session/", "POST", {
     tier_id,
     user_id,
     user_email,
@@ -31,10 +31,10 @@ export const getUserProfile = (): Promise<UserProfile> =>
   apiRequest<UserProfile>("/user/", "GET");
 
 export const inviteNewUser = (email: string): Promise<unknown> =>
-  apiRequest<unknown>("/user/invite", "POST", { email });
+  apiRequest<unknown>("/user/invite/", "POST", { email });
 
 export const inviteNewCollaborator = (email: string): Promise<unknown> =>
-  apiRequest<unknown>("/user/invite/collaborator", "POST", { email });
+  apiRequest<unknown>("/user/invite/collaborator/", "POST", { email });
 
 export const getInvite = (inviteId: string): Promise<Invite> =>
   apiRequest<Invite>(`/user/invite?invite_id=${inviteId}`, "GET");
