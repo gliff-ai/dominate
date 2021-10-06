@@ -408,6 +408,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           ) : null
         }
         collaborators={collaborators}
+        userIsOwner={isOwner()}
       />
       <Dialog open={showDialog}>
         <Card>
