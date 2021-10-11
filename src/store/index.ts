@@ -15,6 +15,8 @@ import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
 import type { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
 
+const logger = console;
+
 const getRandomValueFromArrayOrString = (
   dictionary: string | string[],
   count: number
@@ -72,7 +74,7 @@ export class DominateStore {
 
     this.isLoggedIn = !!this.etebaseInstance?.user?.username;
 
-    void this.getPendingInvites().catch((e) => console.log(e));
+    void this.getPendingInvites().catch((e) => logger.error(e));
 
     return {
       username: this.etebaseInstance.user.username,
@@ -92,7 +94,7 @@ export class DominateStore {
 
       this.ready = true;
 
-      void this.getPendingInvites().catch((e) => console.log(e));
+      void this.getPendingInvites().catch((e) => logger.log(e));
 
       const newSession = await this.etebaseInstance.save();
 
@@ -121,7 +123,7 @@ export class DominateStore {
     const password = sodium.randombytes_buf(64, "base64");
     const key = base64AddPadding(toBase64(`${email}:${password}`));
 
-    const account = await Account.signup(
+    await Account.signup(
       {
         username: toBase64(email),
         email,
@@ -185,7 +187,7 @@ export class DominateStore {
 
       return true;
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       return false;
     }
   };
@@ -213,7 +215,7 @@ export class DominateStore {
     );
 
     for (const invite of invitations) {
-      void invitationManager.accept(invite).catch((e) => console.log(e));
+      void invitationManager.accept(invite).catch((e) => logger.log(e));
     }
   };
 
@@ -303,7 +305,7 @@ export class DominateStore {
     for (const member of members.data) {
       // Check if user already has access
       if (member.username === userEmail) {
-        console.log("User already has access");
+        logger.log("User already has access");
         return false;
       }
     }
@@ -314,13 +316,13 @@ export class DominateStore {
     const user2 = await invitationManager.fetchUserProfile(userEmail);
 
     if (!user2) {
-      console.log("User doesn't exist");
+      logger.log("User doesn't exist");
     }
     // Verify user2.pubkey is indeed the pubkey you expect.!!!
 
     try {
       // Assuming the pubkey is as expected, send the invitation
-      const res = await invitationManager.invite(
+      await invitationManager.invite(
         collection,
         userEmail,
         user2.pubkey,
@@ -329,15 +331,15 @@ export class DominateStore {
 
       return true;
     } catch (e) {
-      console.log(e);
+      logger.log(e);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (e?.content?.code) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        console.error(e?.content?.code);
+        logger.error(e?.content?.code);
         return false;
       }
 
-      console.error("Unknown Invite Error");
+      logger.error("Unknown Invite Error");
       return false;
     }
   };
@@ -370,7 +372,7 @@ export class DominateStore {
 
     return collectionManager.transaction(collection).catch((e) => {
       // TODO: if it's not a conflict something bad had happened so maybe don't retry?, else
-      console.error(e);
+      logger.error(e);
       return this.appendGalleryTile(collectionManager, collectionUid, tile);
     });
   };
@@ -394,7 +396,7 @@ export class DominateStore {
         const imageContent = imageContents[i];
 
         // Create new image item and add it to the collection
-        const newImageItem = itemPromises.push(
+        itemPromises.push(
           itemManager.create(
             {
               type: "gliff.image",
@@ -438,7 +440,7 @@ export class DominateStore {
       await collection.setContent(newContent);
       await collectionManager.upload(collection);
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     }
   };
 
