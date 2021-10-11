@@ -420,6 +420,7 @@ export class DominateStore {
           id: newItems[i].uid, // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
           thumbnail: thumbnails[i],
           imageLabels: [],
+          assignees: [],
           metadata: imageMetas[i],
           imageUID: newItems[i].uid,
           annotationUID: null,
@@ -693,6 +694,27 @@ export class DominateStore {
     }));
 
     return sessions;
+  };
+
+  setAssignees = async (
+    collectionUid: string,
+    imageUid: string,
+    newAssignees: string[]
+  ): Promise<void> => {
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const oldContent = await collection.getContent(OutputFormat.String);
+
+    let newContent: GalleryTile[] = JSON.parse(oldContent) as GalleryTile[];
+    newContent = newContent.map((item) => {
+      if (item.imageUID === imageUid) {
+        return { ...item, assignees: newAssignees };
+      }
+      return item;
+    });
+
+    await collection.setContent(JSON.stringify(newContent));
+    await collectionManager.upload(collection);
   };
 }
 

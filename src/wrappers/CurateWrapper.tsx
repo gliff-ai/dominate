@@ -35,6 +35,26 @@ import {
 import { useAuth } from "@/hooks/use-auth";
 import { useMountEffect } from "@/hooks/use-mountEffect";
 import { useStore } from "@/hooks/use-store";
+import { apiRequest } from "@/api";
+
+// NOTE: Profile and Team are taken from MANAGE
+interface Profile {
+  email: string;
+  name: string;
+  is_collaborator: boolean;
+  is_trusted_service: boolean;
+}
+
+interface Team {
+  profiles: Profile[];
+  pending_invites: Array<{
+    email: string;
+    sent_date: string;
+    is_collaborator: boolean;
+  }>;
+}
+
+type Collaborator = { name: string; email: string };
 
 const useStyles = () =>
   makeStyles((theme: Theme) => ({
@@ -67,8 +87,13 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [multi, setMulti] = useState<boolean>(false);
   const [showDialog, setShowDialog] = useState<boolean>(false);
   const [pluginUrls, setPluginUrls] = useState<string[] | null>(null);
+  const [collaborators, setCollaborators] =
+    useState<Collaborator[] | null>(null);
 
   const classes = useStyles()();
+
+  const isOwner = (): boolean =>
+    auth?.userProfile?.id === auth?.userProfile?.team?.owner_id;
 
   const fetchImageItems = useStore(
     props,
@@ -79,14 +104,28 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         .then((items) => {
           setCollectionContent(items);
           // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
-          const wrangled = items.map(
-            ({ thumbnail, imageLabels, id, metadata }) => ({
+          let wrangled = items.map(
+            ({
+              thumbnail,
+              imageLabels = [],
+              assignees = [],
+              id,
+              metadata,
+            }) => ({
               thumbnail,
               imageLabels,
               id,
               ...metadata,
+              assignees,
             })
           );
+
+          // If user is collaborator, include only images assigned to them
+          if (!isOwner()) {
+            wrangled = wrangled.filter((item) =>
+              item.assignees.includes(auth?.user?.username as string)
+            );
+          }
 
           setCurateInput(wrangled);
         })
@@ -135,6 +174,18 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
     props.storeInstance
       .setImageLabels(collectionUid, imageUid, newLabels)
+      .then(fetchImageItems)
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
+  const saveAssigneesCallback = (
+    imageUid: string,
+    newAssignees: string[]
+  ): void => {
+    props.storeInstance
+      .setAssignees(collectionUid, imageUid, newAssignees)
       .then(fetchImageItems)
       .catch((error) => {
         console.log(error);
@@ -291,6 +342,25 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.setIsLoading(true);
   });
 
+  const getCollaborators = (): void => {
+    if (!isOwner()) return;
+    void apiRequest("/team/", "GET")
+      .then((team: Team) => {
+        const newCollaborators = team.profiles
+          .filter(({ is_collaborator }) => is_collaborator)
+          .map(({ name, email }) => ({ name, email }));
+        if (newCollaborators.length !== 0) {
+          setCollaborators(newCollaborators);
+        }
+      })
+      .catch((e) => console.error(e));
+  };
+
+  useEffect(() => {
+    if (!auth?.ready || collaborators) return;
+    getCollaborators();
+  }, [auth, collaborators]);
+
   useEffect(() => {
     if (collectionUid) {
       fetchImageItems();
@@ -316,6 +386,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         metadata={curateInput}
         saveImageCallback={addImageToGallery}
         saveLabelsCallback={saveLabelsCallback}
+        saveAssigneesCallback={saveAssigneesCallback}
         deleteImagesCallback={deleteImageCallback}
         annotateCallback={annotateCallback}
         downloadDatasetCallback={downloadDatasetCallback}
@@ -336,6 +407,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             <Plugins plugins={pluginUrls} metadata={curateInput} />
           ) : null
         }
+        collaborators={collaborators}
+        userIsOwner={isOwner()}
       />
       <Dialog open={showDialog}>
         <Card>

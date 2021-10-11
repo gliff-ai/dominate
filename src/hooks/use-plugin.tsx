@@ -22,7 +22,7 @@ function useProviderPlugins() {
   const [plugins, setPlugins] = useState<Plugin[] | null>(null);
 
   useEffect(() => {
-    if (auth === null || !auth?.userProfile || plugins) return;
+    if (!auth || !auth.ready || plugins) return;
     // fetch list of registered plugins from STORE
     void getPlugins()
       .then(setPlugins)
