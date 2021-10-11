@@ -487,7 +487,7 @@ export class DominateStore {
       .forEach((item) => {
         imageUIDs.push(item.imageUID);
         if (item.annotationUID !== null) {
-          annotationUIDs.concat(item.annotationUID);
+          annotationUIDs.push(item.annotationUID);
         }
         if (item.auditUID !== null) {
           auditUIDs.push(item.auditUID);
@@ -505,26 +505,19 @@ export class DominateStore {
 
     // delete image, annotation and audit items:
     const itemManager = collectionManager.getItemManager(collection);
-    const promises: Promise<{
+    const allItems: {
       data: Item[];
       stoken: string;
       done: boolean;
-    }>[] = [itemManager.fetchMulti(imageUIDs)];
-    if (annotationUIDs.length > 0) {
-      promises.push(itemManager.fetchMulti(annotationUIDs));
-    }
-    if (auditUIDs.length > 0) {
-      promises.push(itemManager.fetchMulti(auditUIDs));
-    }
+    } = await itemManager.fetchMulti(
+      imageUIDs.concat(annotationUIDs).concat(auditUIDs)
+    );
 
-    const resolved = await Promise.all(promises);
-    const allItems: Item[] = resolved.map((batch) => batch.data).flat();
-
-    allItems.forEach((item) => {
+    allItems.data.forEach((item) => {
       item.delete();
     });
 
-    await itemManager.batch(allItems);
+    await itemManager.batch(allItems.data);
   };
 
   getAnnotationsObject = async (
