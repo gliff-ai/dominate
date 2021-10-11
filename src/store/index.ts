@@ -478,14 +478,18 @@ export class DominateStore {
 
     // cache UIDs of images, annotations and audits to be deleted:
     const imageUIDs: string[] = [];
-    const annotationUIDs: Array<string | null> = [];
-    const auditUIDs: Array<string | null> = [];
+    const annotationUIDs: string[] = [];
+    const auditUIDs: string[] = [];
     oldContent
       .filter((item) => imageUids.includes(item.imageUID))
       .forEach((item) => {
         imageUIDs.push(item.imageUID);
-        annotationUIDs.concat(item.annotationUID);
-        auditUIDs.push(item.auditUID);
+        if (item.annotationUID !== null) {
+          annotationUIDs.concat(item.annotationUID);
+        }
+        if (item.auditUID !== null) {
+          auditUIDs.push(item.auditUID);
+        }
       });
 
     // remove GalleryTile's whose imageUID is in imageUids:
@@ -499,33 +503,26 @@ export class DominateStore {
 
     // delete image, annotation and audit items:
     const itemManager = collectionManager.getItemManager(collection);
-    const imagePromises: Promise<Item>[] = [];
-    const annotationPromises: Promise<Item>[] = [];
-    const auditPromises: Promise<Item>[] = [];
-    for (let i = 0; i < imageUIDs.length; i += 1) {
-      imagePromises.push(itemManager.fetch(imageUIDs[i]));
-
-      if (annotationUIDs[i]) {
-        // annotationUID and auditUID are initialised as null in createImage, and will still be null unless they've been set
-        annotationPromises.push(itemManager.fetch(annotationUIDs[i] as string));
-      }
-
-      if (auditUIDs[i]) {
-        auditPromises.push(itemManager.fetch(auditUIDs[i] as string));
-      }
+    const promises: Promise<{
+      data: Item[];
+      stoken: string;
+      done: boolean;
+    }>[] = [itemManager.fetchMulti(imageUIDs)];
+    if (annotationUIDs.length > 0) {
+      promises.push(itemManager.fetchMulti(annotationUIDs));
+    }
+    if (auditUIDs.length > 0) {
+      promises.push(itemManager.fetchMulti(auditUIDs));
     }
 
-    const images = await Promise.all(imagePromises);
-    const annotations = await Promise.all(annotationPromises);
-    const audits = await Promise.all(auditPromises);
+    const resolved = await Promise.all(promises);
+    const allItems: Item[] = resolved.map((batch) => batch.data).flat();
 
-    for (let i = 0; i < images.length; i += 1) {
-      images[i].delete();
-      annotations[i]?.delete();
-      audits[i]?.delete();
-    }
+    allItems.forEach((item) => {
+      item.delete();
+    });
 
-    await itemManager.batch(images.concat(annotations).concat(audits));
+    await itemManager.batch(allItems);
   };
 
   getAnnotationsObject = async (
