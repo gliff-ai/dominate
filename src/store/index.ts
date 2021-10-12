@@ -698,19 +698,28 @@ export class DominateStore {
 
   setAssignees = async (
     collectionUid: string,
-    imageUid: string,
-    newAssignees: string[]
+    imageUids: string[],
+    newAssignees: string[][]
   ): Promise<void> => {
+    if (imageUids.length !== newAssignees.length) {
+      console.error(
+        `Parameters "imageUids" and "newAssignees" should be of equal length.`
+      );
+      return;
+    }
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const oldContent = await collection.getContent(OutputFormat.String);
 
     let newContent: GalleryTile[] = JSON.parse(oldContent) as GalleryTile[];
-    newContent = newContent.map((item) => {
-      if (item.imageUID === imageUid) {
-        return { ...item, assignees: newAssignees };
-      }
-      return item;
+
+    imageUids.forEach((imageUid, i) => {
+      newContent = newContent.map((item) => {
+        if (item.imageUID === imageUid) {
+          return { ...item, assignees: newAssignees[i] };
+        }
+        return item;
+      });
     });
 
     await collection.setContent(JSON.stringify(newContent));
