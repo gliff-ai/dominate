@@ -1,19 +1,15 @@
 import { ReactElement, useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
-
 import {
-  CssBaseline,
   TextField,
-  Typography,
   makeStyles,
-  Container,
   IconButton,
   InputAdornment,
 } from "@material-ui/core";
 import { theme } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
-import { DominateEtebase } from "@/etebase";
+import { DominateStore } from "@/store";
 import { MessageAlert, SubmitButton } from "@/components";
 import { imgSrc } from "@/imgSrc";
 
@@ -35,24 +31,24 @@ const useStyles = makeStyles(() => ({
 }));
 
 interface Props {
-  etebaseInstance: DominateEtebase;
+  storeInstance: DominateStore;
 }
 
-export const ResetPassword = (props: Props): ReactElement => {
+export const ResetPassword = (props: Props): ReactElement | null => {
   const classes = useStyles();
   const auth = useAuth();
-
   const navigate = useNavigate();
-
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
-  const [etebaseError, setEtebaseError] = useState({});
+  const [storeError, setStoreError] = useState({});
   const [password, setPassword] = useState({
     newPassword: "",
     confirmPassword: "",
     showNewPassword: false,
     showConfirmPassword: false,
   });
+
+  if (!auth) return null;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = event.target;
@@ -110,13 +106,13 @@ export const ResetPassword = (props: Props): ReactElement => {
           });
 
           if (e instanceof Error) {
-            setEtebaseError(e.message);
+            setStoreError(e.message);
           }
         });
     }
   };
 
-  if (!props.etebaseInstance) {
+  if (!props.storeInstance) {
     return <Navigate to="/signin" />;
   }
 
@@ -152,7 +148,7 @@ export const ResetPassword = (props: Props): ReactElement => {
                     fill={
                       password.showNewPassword
                         ? theme.palette.primary.main
-                        : null
+                        : undefined
                     }
                   />
                 </IconButton>
@@ -188,7 +184,7 @@ export const ResetPassword = (props: Props): ReactElement => {
                     fill={
                       password.showConfirmPassword
                         ? theme.palette.primary.main
-                        : null
+                        : undefined
                     }
                   />
                 </IconButton>

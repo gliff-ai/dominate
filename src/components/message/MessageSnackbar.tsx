@@ -1,3 +1,4 @@
+import { ReactElement } from "react";
 import SVG from "react-inlinesvg";
 import { IconButton, makeStyles } from "@material-ui/core";
 import { BaseSnackbar, BaseSnackbarProps, theme } from "@gliff-ai/style";
@@ -40,14 +41,12 @@ function MessageSnackbar({
   open,
   handleClose,
   messageText,
-  transition,
-}: Props) {
+}: Props): ReactElement {
   const classes = useStyle();
   return (
     <BaseSnackbar
       open={open}
       handleClose={handleClose}
-      transition={transition}
       message={
         <span>
           <SVG src={imgSrc("warning")} className={classes.svgSmall} />

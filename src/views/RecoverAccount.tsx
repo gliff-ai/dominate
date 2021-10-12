@@ -1,11 +1,12 @@
-import { ChangeEvent, FormEvent, useEffect, useState } from "react";
+import { ChangeEvent, FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { theme } from "@gliff-ai/style";
 import { TextField, Link, Typography, makeStyles } from "@material-ui/core";
 import { getRecoverySession } from "@/services/user";
-import { DominateEtebase } from "@/etebase";
+import { DominateStore } from "@/store";
 import { MessageAlert, SubmitButton } from "@/components";
+import { useMountEffect } from "@/hooks/use-mountEffect";
 
 const useStyles = makeStyles(() => ({
   forgotPasswordText: {
@@ -28,12 +29,12 @@ const useStyles = makeStyles(() => ({
 const query = new URLSearchParams(window.location.search);
 
 interface Props {
-  etebaseInstance: DominateEtebase;
+  storeInstance: DominateStore;
 }
 
 export const RecoverAccount = (props: Props): JSX.Element => {
   const classes = useStyles();
-  const { etebaseInstance } = props;
+  const { storeInstance } = props;
   const navigate = useNavigate();
   const [recoverySession, setRecoverySession] = useState("");
   const [loading, setLoading] = useState(false);
@@ -43,13 +44,15 @@ export const RecoverAccount = (props: Props): JSX.Element => {
     recoveryKey: "",
   });
 
-  useEffect(() => {
-    if (query.get("uid")) {
-      void getRecoverySession(query.get("uid")).then(({ recovery_key }) => {
+  useMountEffect(() => {
+    const queryUid = query.get("uid");
+    if (!queryUid) return;
+    void getRecoverySession(query.get("uid") as string).then(
+      ({ recovery_key }) => {
         setRecoverySession(recovery_key);
-      });
-    }
-  }, []);
+      }
+    );
+  });
 
   const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = event.target;
@@ -68,7 +71,7 @@ export const RecoverAccount = (props: Props): JSX.Element => {
 
     // Convert their input to the format we expect
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const restoredSession = await etebaseInstance.restoreSession(
+    const restoredSession = await storeInstance.restoreSession(
       recoverySession,
       recover.recoveryKey,
       recover.newPassword

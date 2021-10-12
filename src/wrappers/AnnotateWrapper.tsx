@@ -1,77 +1,77 @@
 import { ReactElement, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 
-import Annotate, { Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
+import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
 import { ImageFileInfo } from "@gliff-ai/upload";
-import { DominateEtebase } from "@/etebase";
-import { Image } from "@/etebase/interfaces";
+import { DominateStore } from "@/store";
+import { Image } from "@/store/interfaces";
+import { TSButtonToolbar } from "@/components";
 import {
   parseStringifiedSlices,
   getImageFileInfoFromImageMeta,
 } from "@/imageConversions";
+import { useMountEffect } from "@/hooks/use-mountEffect";
 
 interface Props {
-  etebaseInstance: DominateEtebase;
+  storeInstance: DominateStore;
   setIsLoading: (isLoading: boolean) => void;
 }
 
 export const AnnotateWrapper = (props: Props): ReactElement | null => {
-  if (!props.etebaseInstance) return null;
-
-  const { collectionUid, imageUid } = useParams();
+  const { collectionUid = "", imageUid = "" } = useParams();
   const [imageItem, setImageItem] = useState<Image | null>(null);
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
-  const [imageFileInfo, setImageFileInfo] =
-    useState<ImageFileInfo | null>(null);
-  const [annotationsObject, setAnnotationsObject] = useState<Annotations>(null);
+  const [imageFileInfo, setImageFileInfo] = useState<ImageFileInfo>();
+  const [annotationsObject, setAnnotationsObject] =
+    useState<Annotations | undefined>(undefined);
 
-  useEffect(() => {
+  useMountEffect(() => {
     props.setIsLoading(true);
-  }, []);
-
-  const getImage = (): void => {
-    // Retrieve image item and set it as state
-    props.etebaseInstance
-      .getImage(collectionUid, imageUid)
-      .then((image) => {
-        setImageItem(image);
-      })
-      .catch((e) => console.log(e));
-  };
-
-  const getAnnotationsObject = (): void => {
-    // Set state for annotation items.
-    props.etebaseInstance
-      .getAnnotationsObject(collectionUid, imageUid)
-      .then((retrievedAnnotationsObject) => {
-        console.log("Setting annotationsObject");
-        setAnnotationsObject(retrievedAnnotationsObject);
-      })
-      .catch((e) => console.log(e));
-  };
+  });
 
   const saveAnnotation = (newAnnotationsObject: Annotations): void => {
     // Save annotations data
     const annotationsData = newAnnotationsObject.getAllAnnotations();
+    const auditData = newAnnotationsObject.getAuditObject();
 
     if (annotationsObject === null) {
       // If an annotation item for the given image does not exist, create one.
-      props.etebaseInstance
-        .createAnnotation(collectionUid, imageUid, annotationsData)
+      props.storeInstance
+        .createAnnotation(collectionUid, imageUid, annotationsData, auditData)
         .catch((e) => console.log(e));
     } else {
       // Otherwise update it.
-      props.etebaseInstance
-        .updateAnnotation(collectionUid, imageUid, annotationsData)
+      props.storeInstance
+        .updateAnnotation(collectionUid, imageUid, annotationsData, auditData)
         .catch((e) => console.log(e));
     }
   };
 
   useEffect(() => {
+    const getImage = (): void => {
+      // Retrieve image item and set it as state
+      props.storeInstance
+        .getImage(collectionUid, imageUid)
+        .then((image) => {
+          setImageItem(image);
+        })
+        .catch((e) => console.log(e));
+    };
+
+    const getAnnotationsObject = (): void => {
+      // Set state for annotation items.
+      props.storeInstance
+        .getAnnotationsObject(collectionUid, imageUid)
+        .then((retrievedAnnotationsObject) => {
+          setAnnotationsObject(retrievedAnnotationsObject);
+        })
+        .catch((e) => console.log(e));
+    };
+
     // launches image and annotation retrieval on page load
     getImage();
     getAnnotationsObject();
-  }, [collectionUid, imageUid]);
+  }, [collectionUid, imageUid, props.storeInstance, props.storeInstance.ready]);
 
   useEffect(() => {
     if (imageItem) {
@@ -94,14 +94,19 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     }
   }, [imageItem]);
 
+  if (!collectionUid || !imageUid) return null;
+
   return slicesData ? (
-    <Annotate
+    <UserInterface
       showAppBar={false}
       slicesData={slicesData}
       imageFileInfo={imageFileInfo}
       annotationsObject={annotationsObject}
       saveAnnotationsCallback={saveAnnotation}
       setIsLoading={props.setIsLoading}
+      trustedServiceButtonToolbar={
+        <TSButtonToolbar collectionUid={collectionUid} imageUid={imageUid} />
+      }
     />
   ) : null;
 };

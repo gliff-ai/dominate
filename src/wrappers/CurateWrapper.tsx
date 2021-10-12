@@ -16,15 +16,45 @@ import Curate from "@gliff-ai/curate";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
-import { DominateEtebase } from "@/etebase";
-import { Slices, MetaItem, GalleryTile, Image } from "@/etebase/interfaces";
-import { Task } from "@/components";
+import { DominateStore } from "@/store";
+import {
+  Slices,
+  MetaItem,
+  GalleryTile,
+  Image,
+  ImageMeta,
+} from "@/store/interfaces";
+import { Task, TSButtonToolbar } from "@/components";
+import { Plugins } from "@/plugins/Plugins";
+import { usePlugins } from "@/hooks";
 
 import {
   stringifySlices,
   getImageMetaFromImageFileInfo,
 } from "@/imageConversions";
 import { useAuth } from "@/hooks/use-auth";
+import { useMountEffect } from "@/hooks/use-mountEffect";
+import { useStore } from "@/hooks/use-store";
+import { apiRequest } from "@/api";
+
+// NOTE: Profile and Team are taken from MANAGE
+interface Profile {
+  email: string;
+  name: string;
+  is_collaborator: boolean;
+  is_trusted_service: boolean;
+}
+
+interface Team {
+  profiles: Profile[];
+  pending_invites: Array<{
+    email: string;
+    sent_date: string;
+    is_collaborator: boolean;
+  }>;
+}
+
+type Collaborator = { name: string; email: string };
 
 const useStyles = () =>
   makeStyles((theme: Theme) => ({
@@ -41,85 +71,108 @@ const useStyles = () =>
   }));
 
 interface Props {
-  etebaseInstance: DominateEtebase;
+  storeInstance: DominateStore;
   setIsLoading: (isLoading: boolean) => void;
   setTask: (task: Task) => void;
 }
 
 export const CurateWrapper = (props: Props): ReactElement | null => {
-  if (!props.etebaseInstance) return null;
   const navigate = useNavigate();
   const auth = useAuth();
+  const plugins = usePlugins();
 
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
-  const { collectionUid } = useParams(); // uid of selected gallery, from URL ( === galleryItems[something].uid)
+  const { collectionUid = "" } = useParams<string>(); // uid of selected gallery, from URL
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
   const [multi, setMulti] = useState<boolean>(false);
   const [showDialog, setShowDialog] = useState<boolean>(false);
+  const [pluginUrls, setPluginUrls] = useState<string[] | null>(null);
+  const [collaborators, setCollaborators] =
+    useState<Collaborator[] | null>(null);
 
-  useEffect(() => {
-    props.setIsLoading(true);
-  }, []);
+  const classes = useStyles()();
 
-  const fetchImageItems = (): void => {
-    // fetches images via DominateEtebase, and assigns them to imageItems state
-    props.etebaseInstance
-      .getImagesMeta(collectionUid)
-      .then((items) => {
-        setCollectionContent(items);
-        // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
-        const wrangled = items.map(
-          ({ thumbnail, imageLabels, id, metadata }) => ({
-            thumbnail,
-            imageLabels,
-            id,
-            ...metadata,
-          })
-        );
+  const isOwner = (): boolean =>
+    auth?.userProfile?.id === auth?.userProfile?.team?.owner_id;
 
-        setCurateInput(wrangled);
-      })
-      .catch((err) => {
-        console.log(err);
-      });
-  };
+  const fetchImageItems = useStore(
+    props,
+    (storeInstance) => {
+      // fetches images via DominateStore, and assigns them to imageItems state
+      storeInstance
+        .getImagesMeta(collectionUid)
+        .then((items) => {
+          setCollectionContent(items);
+          // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
+          let wrangled = items.map(
+            ({
+              thumbnail,
+              imageLabels = [],
+              assignees = [],
+              id,
+              metadata,
+            }) => ({
+              thumbnail,
+              imageLabels,
+              id,
+              ...metadata,
+              assignees,
+            })
+          );
 
-  const fetchGalleries = (): void => {
-    // fetches galleries via DominateEtebase, and assigns them to galleryItems state
-    props.etebaseInstance.getCollectionsMeta("gliff.gallery").catch((err) => {
-      console.log(err);
-    });
-  };
+          // If user is collaborator, include only images assigned to them
+          if (!isOwner()) {
+            wrangled = wrangled.filter((item) =>
+              item.assignees.includes(auth?.user?.username as string)
+            );
+          }
+
+          setCurateInput(wrangled);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    },
+    [collectionUid]
+  );
 
   const addImageToGallery = async (
-    imageFileInfo: ImageFileInfo,
-    slicesData: Slices
+    imageFileInfo: ImageFileInfo[],
+    slicesData: Slices[]
   ): Promise<void> => {
-    // Stringify slices data and get image metadata
-    const stringfiedSlices = stringifySlices(slicesData);
-    const imageMeta = getImageMetaFromImageFileInfo(imageFileInfo);
+    const imageMetas: ImageMeta[] = [];
+    const thumbnails: string[] = [];
+    const stringifiedSlices: string[] = [];
 
-    // make thumbnail:
-    const canvas = document.createElement("canvas");
-    canvas.width = 128;
-    canvas.height = 128;
-    const ctx = canvas.getContext("2d");
-    ctx.drawImage(slicesData[0][0], 0, 0, 128, 128);
-    const thumbnailB64 = canvas.toDataURL();
+    for (let i = 0; i < imageFileInfo.length; i += 1) {
+      // Stringify slices data and get image metadata
+      stringifiedSlices.push(stringifySlices(slicesData[i]));
+      imageMetas.push(getImageMetaFromImageFileInfo(imageFileInfo[i]));
+
+      // make thumbnail:
+      const canvas = document.createElement("canvas");
+      canvas.width = 128;
+      canvas.height = 128;
+      const ctx = canvas.getContext("2d");
+      if (ctx) {
+        ctx.drawImage(slicesData[i][0][0], 0, 0, 128, 128);
+        thumbnails.push(canvas.toDataURL());
+      }
+    }
 
     // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
-    await props.etebaseInstance.createImage(
+    await props.storeInstance.createImage(
       collectionUid,
-      imageMeta,
-      thumbnailB64,
-      stringfiedSlices
+      imageMetas,
+      thumbnails,
+      stringifiedSlices
     );
 
     fetchImageItems();
   };
 
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
-    props.etebaseInstance
+    props.storeInstance
       .setImageLabels(collectionUid, imageUid, newLabels)
       .then(fetchImageItems)
       .catch((error) => {
@@ -127,8 +180,20 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       });
   };
 
+  const saveAssigneesCallback = (
+    imageUid: string,
+    newAssignees: string[]
+  ): void => {
+    props.storeInstance
+      .setAssignees(collectionUid, imageUid, newAssignees)
+      .then(fetchImageItems)
+      .catch((error) => {
+        console.log(error);
+      });
+  };
+
   const deleteImageCallback = (imageUids: string[]): void => {
-    props.etebaseInstance
+    props.storeInstance
       .deleteImages(collectionUid, imageUids)
       .catch((error) => {
         console.log(error);
@@ -142,15 +207,13 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const downloadDataset = async (): Promise<void> => {
     const zip = new JSZip();
 
-    // retrieve Image items and their names from etebase:
+    // retrieve Image items and their names from store:
     // TODO: store image names in Image items!
     const imagePromises: Promise<Image>[] = [];
     const imageNames: string[] = [];
     for (const tile of collectionContent) {
       const imageUid = tile.imageUID;
-      imagePromises.push(
-        props.etebaseInstance.getImage(collectionUid, imageUid)
-      );
+      imagePromises.push(props.storeInstance.getImage(collectionUid, imageUid));
       imageNames.push(tile.metadata.imageName);
     }
     const images: Image[] = await Promise.all(imagePromises);
@@ -172,7 +235,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }
     }
 
-    console.log(multi);
     if (multi) {
       // put them all in the root of the zip along with a JSON file describing labels:
       type JSONImage = { name: string; labels: string[] };
@@ -201,29 +263,33 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       // add label folders to zip:
       for (const label of allLabels) {
         const labelFolder = zip.folder(label);
-        // add images to label folder in zip:
-        for (let i = 0; i < images.length; i += 1) {
-          if (collectionContent[i].imageLabels.includes(label)) {
-            labelFolder.file(allnames[i], images[i].content, {
-              base64: true,
-            });
+        if (labelFolder) {
+          // add images to label folder in zip:
+          for (let i = 0; i < images.length; i += 1) {
+            if (collectionContent[i].imageLabels.includes(label)) {
+              labelFolder.file(allnames[i], images[i].content, {
+                base64: true,
+              });
+            }
           }
         }
       }
 
       // put unlabelled images in their own folder:
-      if (collectionContent.filter((tile) => tile.imageLabels === [])) {
+      if (collectionContent.filter((tile) => tile.imageLabels.length === 0)) {
         const unlabelledFolder = zip.folder("unlabelled");
 
-        for (let i = 0; i < images.length; i += 1) {
-          if (collectionContent[i].imageLabels.length === 0) {
-            unlabelledFolder.file(
-              collectionContent[i].metadata.imageName,
-              images[i].content,
-              {
-                base64: true,
-              }
-            );
+        if (unlabelledFolder) {
+          for (let i = 0; i < images.length; i += 1) {
+            if (collectionContent[i].imageLabels.length === 0) {
+              unlabelledFolder.file(
+                collectionContent[i].metadata.imageName,
+                images[i].content,
+                {
+                  base64: true,
+                }
+              );
+            }
           }
         }
       }
@@ -231,7 +297,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
     // compress data and save to disk:
     const date = new Date();
-    const projectName = await props.etebaseInstance
+    const projectName = await props.storeInstance
       .getCollectionsMeta()
       .then(
         (collections) =>
@@ -272,35 +338,77 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     void downloadDataset();
   };
 
-  // runs once on page load, would have been a componentDidMount if this were a class component:
+  useMountEffect(() => {
+    props.setIsLoading(true);
+  });
+
+  const getCollaborators = (): void => {
+    if (!isOwner()) return;
+    void apiRequest("/team/", "GET")
+      .then((team: Team) => {
+        const newCollaborators = team.profiles
+          .filter(({ is_collaborator }) => is_collaborator)
+          .map(({ name, email }) => ({ name, email }));
+        if (newCollaborators.length !== 0) {
+          setCollaborators(newCollaborators);
+        }
+      })
+      .catch((e) => console.error(e));
+  };
+
   useEffect(() => {
-    if (props.etebaseInstance.ready) {
-      fetchGalleries();
-    }
-  }, [props.etebaseInstance.ready]);
+    if (!auth?.ready || collaborators) return;
+    getCollaborators();
+  }, [auth, collaborators]);
 
   useEffect(() => {
     if (collectionUid) {
       fetchImageItems();
     }
-  }, [collectionUid]);
+  }, [collectionUid, fetchImageItems]);
 
-  if (!props.etebaseInstance || !auth.user || !collectionUid) return null;
+  useEffect(() => {
+    if (plugins === null || !plugins?.plugins || pluginUrls) return;
 
-  const classes = useStyles()();
+    const urls = plugins.plugins
+      .filter(({ product }) => product === "CURATE")
+      .map(({ url }) => url);
 
+    if (urls.length !== 0) {
+      setPluginUrls(urls);
+    }
+  }, [plugins, pluginUrls]);
+
+  if (!props.storeInstance || !auth?.user || !collectionUid) return null;
   return (
     <>
       <Curate
         metadata={curateInput}
         saveImageCallback={addImageToGallery}
         saveLabelsCallback={saveLabelsCallback}
+        saveAssigneesCallback={saveAssigneesCallback}
         deleteImagesCallback={deleteImageCallback}
         annotateCallback={annotateCallback}
         downloadDatasetCallback={downloadDatasetCallback}
         showAppBar={false}
         setIsLoading={props.setIsLoading}
         setTask={props.setTask}
+        trustedServiceButtonToolbar={(imageUid: string, enabled: boolean) => (
+          <TSButtonToolbar
+            collectionUid={collectionUid}
+            imageUid={imageUid}
+            tooltipPlacement="top"
+            enabled={enabled}
+            callback={fetchImageItems}
+          />
+        )}
+        plugins={
+          pluginUrls ? (
+            <Plugins plugins={pluginUrls} metadata={curateInput} />
+          ) : null
+        }
+        collaborators={collaborators}
+        userIsOwner={isOwner()}
       />
       <Dialog open={showDialog}>
         <Card>

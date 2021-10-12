@@ -1,9 +1,14 @@
 import { ReactElement } from "react";
-import { Avatar, makeStyles, Link, Theme } from "@material-ui/core";
+import { Avatar, makeStyles, Theme, Button } from "@material-ui/core";
+import { useNavigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
 import { imgSrc } from "@/imgSrc";
 
 const useStyles = makeStyles((theme: Theme) => ({
+  productButton: {
+    minWidth: "unset",
+    padding: 0,
+  },
   productSvg: {
     width: "39px",
     height: "39px",
@@ -36,7 +41,6 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
-    marginTop: "20px",
   },
 }));
 
@@ -44,33 +48,45 @@ interface Props {
   tool: string;
   customUrlPath?: string;
   linkDisabled?: boolean;
+  // TODO: support target?
+  // eslint-disable-next-line react/no-unused-prop-types
   target?: string;
-  extraStyleAvatar?: string | null;
-  extraStyleSvg?: string | null;
-  extraStyleName?: string | null;
-  extraStyleTrailSvg?: string | null;
+  extraStyleAvatar?: string;
+  extraStyleSvg?: string;
+  extraStyleName?: string;
+  extraStyleTrailSvg?: string;
+  auditEnabled?: boolean;
 }
 
 function BaseProductIcon({
   tool,
   customUrlPath,
   linkDisabled,
-  target,
   extraStyleAvatar,
   extraStyleSvg,
   extraStyleName,
   extraStyleTrailSvg,
+  auditEnabled,
 }: Props): ReactElement {
   const classes = useStyles();
+  const navigate = useNavigate();
 
   const avatar = (
     <Avatar
       variant="circular"
-      className={`${classes.productAvatar} ${extraStyleAvatar}`}
+      className={
+        extraStyleAvatar !== undefined
+          ? `${classes.productAvatar} ${extraStyleAvatar}`
+          : classes.productAvatar
+      }
     >
       <SVG
         src={imgSrc(tool)}
-        className={`${classes.productSvg} ${extraStyleSvg}`}
+        className={
+          extraStyleSvg !== undefined
+            ? `${classes.productSvg} ${extraStyleSvg}`
+            : classes.productSvg
+        }
       />
     </Avatar>
   );
@@ -78,21 +94,35 @@ function BaseProductIcon({
   return (
     <div className={classes.outerDiv}>
       <div className={classes.iconDiv}>
-        {linkDisabled ? (
-          avatar
-        ) : (
-          <Link href={customUrlPath || `/${tool}`} target={target}>
-            {avatar}
-          </Link>
-        )}
-        <p className={`${classes.productName} ${extraStyleName}`}>{tool}</p>
+        <Button
+          className={classes.productButton}
+          onClick={() => navigate(customUrlPath || `/${tool}`)}
+          disabled={linkDisabled}
+        >
+          {avatar}
+        </Button>
+        <p
+          className={
+            extraStyleName !== undefined
+              ? `${classes.productName} ${extraStyleName}`
+              : classes.productName
+          }
+        >
+          {tool}
+        </p>
       </div>
-      {tool !== "annotate" && tool !== "document" && (
-        <SVG
-          src={imgSrc("breadcrumb-trail")}
-          className={`${classes.trailSvg} ${extraStyleTrailSvg}`}
-        />
-      )}
+      {tool !== "audit" &&
+        tool !== "document" &&
+        !(tool === "annotate" && !auditEnabled) && ( // don't put an arrow after ANNOTATE if AUDIT is absent from the navbar
+          <SVG
+            src={imgSrc("breadcrumb-trail")}
+            className={
+              extraStyleTrailSvg !== undefined
+                ? `${classes.trailSvg} ${extraStyleTrailSvg}`
+                : classes.trailSvg
+            }
+          />
+        )}
     </div>
   );
 }
@@ -100,11 +130,12 @@ function BaseProductIcon({
 BaseProductIcon.defaultProps = {
   linkDisabled: false,
   target: "_self",
-  extraStyleAvatar: null,
-  extraStyleSvg: null,
-  extraStyleName: null,
-  extraStyleTrailSvg: null,
+  extraStyleAvatar: undefined,
+  extraStyleSvg: undefined,
+  extraStyleName: undefined,
+  extraStyleTrailSvg: undefined,
   customUrlPath: null,
+  auditEnabled: false,
 };
 
 export { BaseProductIcon };

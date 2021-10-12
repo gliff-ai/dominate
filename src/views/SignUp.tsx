@@ -1,11 +1,5 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import {
-  ChangeEvent,
-  FormEvent,
-  useEffect,
-  useState,
-  ComponentType,
-} from "react";
+import { ChangeEvent, FormEvent, useState, ReactElement } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import {
   TextField,
@@ -15,19 +9,28 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@material-ui/core";
-import Slide from "@material-ui/core/Slide";
-import { TransitionProps } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
 import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
 import { VerificationSent } from "@/views/VerificationSent";
+import { useMountEffect } from "@/hooks/use-mountEffect";
 
-declare const STRIPE_KEY: string;
+const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY;
 
 const stripePromise = loadStripe(STRIPE_KEY);
 
 const query = new URLSearchParams(window.location.search);
+
+type SignupForm = {
+  name: string;
+  email: string;
+  password: string;
+  confirmPassword: string;
+  teamId: number | null;
+  inviteId: string | null;
+  acceptedTermsAndConditions: boolean;
+};
 
 const useStyles = makeStyles(() => ({
   haveAccount: {
@@ -52,48 +55,39 @@ interface Props {
   // eslint-disable-next-line react/require-default-props
   state?: State;
 }
-export const SignUp = (props: Props): JSX.Element => {
+export const SignUp = (props: Props): ReactElement | null => {
   const classes = useStyles();
   const auth = useAuth();
 
   const [state, setState] = useState<State>(props.state || "1-Signup");
   const [open, setOpen] = useState(false);
-  const [transition, setTransition] =
-    useState<ComponentType<TransitionProps> | null>(null);
 
   const [loading, setLoading] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [nameError, setNameError] = useState("");
   const [passwordError, setPasswordError] = useState("");
-  const [etebaseError, setEtebaseError] = useState({});
+  const [storeError, setStoreError] = useState({});
   const [termsAndConditionsError, setTermsAndConditionsError] = useState("");
   const [recoveryKey, setRecoveryKey] = useState<string[] | null>(null);
   const [user, setUser] = useState<{ email: string; id: number } | null>(null);
-
-  const [signUp, setSignUp] = useState({
+  const [signUp, setSignUp] = useState<SignupForm>({
     name: "",
     email: "",
     password: "",
     confirmPassword: "",
-    teamId: null as number,
-    inviteId: null as string,
+    teamId: null,
+    inviteId: null,
     acceptedTermsAndConditions: false,
   });
 
-  const TransitionUp = (p: TransitionProps) => (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <Slide {...p} direction="up" />
-  );
-
-  const handleSnackbar = (Transition: ComponentType<TransitionProps>) => {
-    setTransition(() => Transition);
+  const handleSnackbar = () => {
     setOpen(true);
   };
 
   const tierId = query.get("tier_id") || null;
   const inviteId = query.get("invite_id") || null;
 
-  useEffect(() => {
+  useMountEffect(() => {
     if (inviteId) {
       // We have an invite, so we know their email, add this to the request
       void getInvite(inviteId).then(({ email, team_id }) => {
@@ -108,7 +102,9 @@ export const SignUp = (props: Props): JSX.Element => {
         });
       });
     }
-  }, []);
+  });
+
+  if (!auth) return null;
 
   const validate = () => {
     if (signUp.password !== signUp.confirmPassword) {
@@ -160,18 +156,19 @@ export const SignUp = (props: Props): JSX.Element => {
     try {
       await auth.signup(signUp.email, signUp.password);
 
-      const { profile, recoveryKey: keys } = await auth.createProfile(
+      const profile = await auth.createProfile(
         signUp.name,
-        signUp.teamId,
-        signUp.inviteId,
+        signUp.teamId as number,
+        signUp.inviteId as string,
         signUp.acceptedTermsAndConditions
       );
-
-      setUser(profile);
-      setRecoveryKey(keys);
-      setState("2-RecoveryKey");
+      if (profile) {
+        setUser(profile.profile);
+        setRecoveryKey(profile.recoveryKey);
+        setState("2-RecoveryKey");
+      }
     } catch (e) {
-      handleSnackbar(TransitionUp);
+      handleSnackbar();
       setLoading(false);
       setSignUp({
         ...signUp,
@@ -181,7 +178,7 @@ export const SignUp = (props: Props): JSX.Element => {
       clearErrors();
 
       if (e instanceof Error) {
-        setEtebaseError(e.message);
+        setStoreError(e.message);
       }
     }
   };
@@ -193,6 +190,10 @@ export const SignUp = (props: Props): JSX.Element => {
     }
 
     const stripe = await stripePromise;
+
+    if (!user || !stripe) {
+      return;
+    }
 
     const { id: sessionId } = await createCheckoutSession(
       tierId,
@@ -250,7 +251,7 @@ export const SignUp = (props: Props): JSX.Element => {
           name="password"
           type="password"
           id="password"
-          autoComplete="current-password"
+          autoComplete="new-password"
           value={signUp.password}
           onChange={handleChange}
           placeholder="Password *"
@@ -264,7 +265,7 @@ export const SignUp = (props: Props): JSX.Element => {
           name="confirmPassword"
           type="password"
           id="confirmPassword"
-          autoComplete="current-password"
+          autoComplete="off"
           value={signUp.confirmPassword}
           onChange={handleChange}
           placeholder="Confirm Password *"
@@ -322,9 +323,8 @@ export const SignUp = (props: Props): JSX.Element => {
       <MessageSnackbar
         open={open}
         handleClose={handleClose}
-        transition={transition}
         messageText={
-          String(etebaseError).includes("duplicate key")
+          String(storeError).includes("duplicate key")
             ? "Looks like that account already exists, try another email!"
             : "There was an error creating an account"
         }
@@ -336,7 +336,7 @@ export const SignUp = (props: Props): JSX.Element => {
     return signupForm;
   }
 
-  if (state === "2-RecoveryKey") {
+  if (state === "2-RecoveryKey" && recoveryKey) {
     return <RecoveryKey recoveryKey={recoveryKey} callback={billing} />;
   }
 

@@ -1,4 +1,4 @@
-import { useState, ComponentType } from "react";
+import { useState, ReactElement } from "react";
 import {
   TextField,
   Link,
@@ -6,10 +6,9 @@ import {
   makeStyles,
   IconButton,
   InputAdornment,
-  Slide,
 } from "@material-ui/core";
 import { useNavigate } from "react-router-dom";
-import { theme, TransitionProps } from "@gliff-ai/style";
+import { theme } from "@gliff-ai/style";
 import SVG from "react-inlinesvg";
 import { useAuth } from "@/hooks/use-auth";
 import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
@@ -41,23 +40,21 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-export function SignIn(): JSX.Element {
+export function SignIn(): ReactElement | null {
   const classes = useStyles();
   const auth = useAuth();
   const navigate = useNavigate();
   const [open, setOpen] = useState(false);
-
-  const [transition, setTransition] =
-    useState<ComponentType<TransitionProps> | null>(null);
-
   const [loading, setLoading] = useState(false);
   const [nameError, setNameError] = useState("");
-  const [etebaseError, setEtebaseError] = useState({});
+  const [storeError, setStoreError] = useState({});
   const [login, setLogin] = useState({
     email: "",
     password: "",
     showPassword: false,
   });
+
+  if (!auth) return null;
 
   const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const { id, value } = event.target;
@@ -67,13 +64,7 @@ export function SignIn(): JSX.Element {
     }));
   };
 
-  const TransitionUp = (props: TransitionProps) => (
-    // eslint-disable-next-line react/jsx-props-no-spreading
-    <Slide {...props} direction="up" />
-  );
-
-  const handleSnackbar = (Transition: React.ComponentType<TransitionProps>) => {
-    setTransition(() => Transition);
+  const handleSnackbar = () => {
     setOpen(true);
   };
 
@@ -110,13 +101,13 @@ export function SignIn(): JSX.Element {
           navigate("/");
         })
         .catch((e) => {
-          handleSnackbar(TransitionUp);
+          handleSnackbar();
           setLoading(false);
           setLogin({ email: "", password: "", showPassword: false });
 
           if (e instanceof Error) {
             // eslint-disable-next-line no-console
-            setEtebaseError(e.message);
+            setStoreError(e.message);
           }
         });
     }
@@ -164,7 +155,9 @@ export function SignIn(): JSX.Element {
                     src={imgSrc("show-or-hide-password")}
                     className={classes.svgSmall}
                     fill={
-                      login.showPassword ? theme.palette.primary.main : null
+                      login.showPassword
+                        ? theme.palette.primary.main
+                        : undefined
                     }
                   />
                 </IconButton>
@@ -193,9 +186,8 @@ export function SignIn(): JSX.Element {
       <MessageSnackbar
         open={open}
         handleClose={handleClose}
-        transition={transition}
         messageText={
-          String(etebaseError).includes("Wrong password for user.")
+          String(storeError).includes("Wrong password for user.")
             ? "Login Failed. Your username and/or password do not match"
             : "There was an error logging you in. Please try again"
         }

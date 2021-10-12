@@ -72,13 +72,12 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 
-export const NavBar = (): ReactElement => {
+export const NavBar = (): ReactElement | null => {
   // Get auth state and re-render anytime it changes
   const auth = useAuth();
   const navigate = useNavigate();
   const classes = useStyles();
   const [userInitials, setUserInitials] = useState("");
-
   const [anchorElement, setAnchorEl] = useState<null | HTMLElement>(null);
 
   const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
@@ -98,7 +97,7 @@ export const NavBar = (): ReactElement => {
     setUserInitials(initials);
   }, [auth]);
 
-  const hasNavbar = () =>
+  const hasNavbar = (): boolean =>
     ![
       "/signin",
       "/signup",
@@ -107,6 +106,7 @@ export const NavBar = (): ReactElement => {
       "/recover",
     ].includes(window.location.pathname);
 
+  if (!auth) return null;
   if (!hasNavbar()) return null;
 
   // TODO: owners who are on free plan should still be able to upgrade

@@ -1,10 +1,9 @@
-import { ReactElement, useState } from "react";
-import { BrowserRouter, Route, Routes, Navigate } from "react-router-dom";
-import { CssBaseline, ThemeProvider } from "@material-ui/core";
-import CookieConsent from "react-cookie-consent";
+import { ReactElement, useEffect, useState } from "react";
+import { Route, Routes, Navigate, useLocation } from "react-router-dom";
+import { CssBaseline, ThemeProvider, makeStyles } from "@material-ui/core";
 import { theme } from "@gliff-ai/style";
-import { DominateEtebase } from "@/etebase";
-import { Annotate, Curate, Manage } from "@/wrappers";
+import { DominateStore } from "@/store";
+import { Annotate, Audit, Curate, Manage } from "@/wrappers";
 import {
   Account,
   RecoverAccount,
@@ -17,61 +16,98 @@ import {
   Billing,
 } from "@/views";
 import {
-  MessageAlert,
   NavBar,
   PageSpinner,
   ProgressSnackbar,
   Task,
+  CookieConsent,
 } from "@/components";
 import { BasicPage } from "@/views/BasicPage";
 import { PrivateRoute } from "./wrappers/PrivateRouter";
 
 interface Props {
-  etebaseInstance: DominateEtebase;
+  storeInstance: DominateStore;
 }
 
+const useStyles = makeStyles(() => ({
+  overflow: {
+    height: "calc(100% - 90px)",
+    overflow: "auto",
+  },
+  noOverflow: {
+    height: "calc(100% - 90px)",
+    overflow: "hidden",
+  },
+}));
+
 const UserInterface = (props: Props): ReactElement | null => {
-  const { etebaseInstance } = props;
+  const { storeInstance } = props;
   const [task, setTask] = useState<Task>({
     isLoading: false,
     description: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [isCookiesConsented, setIsCookiesConsented] = useState("");
+  const location = useLocation();
+  const [isOverflow, setIsOverflow] = useState(true);
 
+  useEffect(() => {
+    // Paths we never scroll on because it messes with canvases etc
+    const noScroll = ["annotate"];
+    const shouldOverflow = (pathname: string): boolean =>
+      noScroll.reduce((o, path) => {
+        if (pathname.includes(path) || !o) {
+          return false;
+        }
+        return true;
+      }, true);
+    setIsOverflow(shouldOverflow(location.pathname));
+  }, [location]);
+
+  const classes = useStyles(isOverflow);
   return (
     <ThemeProvider theme={theme}>
       <ProgressSnackbar task={task} setTask={setTask} />
       <CssBaseline />
-      <BrowserRouter>
-        <div style={{ height: "100%" }}>
-          <PageSpinner isLoading={isLoading} />
-          <NavBar />
-          <MessageAlert severity="error" message={isCookiesConsented} />
+      <NavBar />
+      <div className={isOverflow ? classes.overflow : classes.noOverflow}>
+        <PageSpinner isLoading={isLoading} />
+        <Routes>
           <Routes>
-            <Route path="/signin">
-              <BasicPage view={<SignIn />} title={<>Login</>} />
-            </Route>
-            <Route path="/signup">
-              <BasicPage view={<SignUp />} title={<>Create an Account</>} />
-            </Route>
-            <Route path="/signup/success">
-              <BasicPage
-                view={<SignUp state="4-VerificationSent" />}
-                title={<>Verify Email</>}
-              />
-            </Route>
-            <Route path="/signup/failure">
-              <BasicPage
-                view={<SignUp state="3-BillingFailed" />}
-                title={<>Payment Failed</>}
-              />
-            </Route>
+            <Route
+              path="signin"
+              element={<BasicPage view={<SignIn />} title={<>Login</>} />}
+            />
+            <Route
+              path="signup"
+              element={
+                <BasicPage view={<SignUp />} title={<>Create an Account</>} />
+              }
+            />
+            <Route
+              path="signup/success"
+              element={
+                <BasicPage
+                  view={<SignUp state="4-VerificationSent" />}
+                  title={<>Verify Email</>}
+                />
+              }
+            />
+
+            <Route
+              path="signup/failure"
+              element={
+                <BasicPage
+                  view={<SignUp state="3-BillingFailed" />}
+                  title={<>Payment Failed</>}
+                />
+              }
+            />
+
             <PrivateRoute
               path="curate/:collectionUid"
               element={
                 <Curate
-                  etebaseInstance={etebaseInstance}
+                  storeInstance={storeInstance}
                   setIsLoading={setIsLoading}
                   setTask={setTask}
                 />
@@ -81,20 +117,29 @@ const UserInterface = (props: Props): ReactElement | null => {
               path="annotate/:collectionUid/:imageUid"
               element={
                 <Annotate
-                  etebaseInstance={etebaseInstance}
+                  storeInstance={storeInstance}
                   setIsLoading={setIsLoading}
                 />
               }
             />
             <PrivateRoute
               path="manage/*"
-              element={<Manage etebaseInstance={etebaseInstance} />}
+              element={<Manage storeInstance={storeInstance} />}
+            />
+            <PrivateRoute
+              path="audit/:collectionUid"
+              element={
+                <Audit
+                  storeInstance={storeInstance}
+                  // setIsLoading={setIsLoading}
+                />
+              }
             />
             <Route
               path="recover/*"
               element={
                 <BasicPage
-                  view={<RecoverAccount etebaseInstance={etebaseInstance} />}
+                  view={<RecoverAccount storeInstance={storeInstance} />}
                   title={<>Recover my Account</>}
                 />
               }
@@ -109,12 +154,16 @@ const UserInterface = (props: Props): ReactElement | null => {
                 />
               }
             />
-            <Route path="/verify_email/:uid">
-              <BasicPage
-                view={<VerifyEmail />}
-                title={<>Verify Email Address</>}
-              />
-            </Route>
+            <Route
+              path="verify_email/:uid"
+              element={
+                <BasicPage
+                  view={<VerifyEmail />}
+                  title={<>Verify Email Address</>}
+                />
+              }
+            />
+
             <Route
               path="request-verify-email"
               element={
@@ -125,73 +174,26 @@ const UserInterface = (props: Props): ReactElement | null => {
               }
             />
 
-            <PrivateRoute path="/">
-              <Navigate to="/manage" />
-            </PrivateRoute>
+            <PrivateRoute path="" element={<Navigate to="manage/projects" />} />
 
             <PrivateRoute
-              path="/reset-password"
+              path="reset-password"
               element={
                 <BasicPage
-                  view={<ResetPassword etebaseInstance={etebaseInstance} />}
+                  view={<ResetPassword storeInstance={storeInstance} />}
                   title={<>Change Password</>}
                   showBackButton
                 />
               }
             />
-            <PrivateRoute path="/account">
-              <Account />
-            </PrivateRoute>
-            <PrivateRoute path="/billing">
-              <Billing />
-            </PrivateRoute>
-          </Routes>
-        </div>
-      </BrowserRouter>
+            <PrivateRoute path="account" element={<Account />} />
 
-      <CookieConsent
-        location="bottom"
-        cookieName="gliff-ai-consent-cookie"
-        expires={999}
-        overlay
-        style={{
-          backgroundColor: "#ffffff",
-          color: "#000000",
-        }}
-        buttonStyle={{
-          backgroundColor: theme.palette.primary.main,
-          color: theme.palette.text.primary,
-          textTransform: "none",
-          fontWeight: 700,
-          fontSize: "15px",
-          width: "169px",
-          marginBottom: "20px",
-          marginTop: "20px",
-          borderRadius: "9px",
-        }}
-        declineButtonStyle={{
-          backgroundColor: theme.palette.secondary.main,
-          color: theme.palette.text.primary,
-          textTransform: "none",
-          fontWeight: 700,
-          fontSize: "15px",
-          width: "169px",
-          marginBottom: "20px",
-          marginTop: "20px",
-          borderRadius: "9px",
-        }}
-        enableDeclineButton
-        setDeclineCookie={false}
-        onDecline={() => {
-          setIsCookiesConsented(
-            "Without cookies this app will not work, redirecting you to our homepage."
-          );
-          setTimeout(() => window.location.replace("https://gliff.ai"), 1500);
-        }}
-      >
-        This website uses cookies to enhance the user experience (we don&apos;t
-        use tracking or advertising cookies).
-      </CookieConsent>
+            <PrivateRoute path="billing" element={<Billing />} />
+          </Routes>
+        </Routes>
+      </div>
+
+      <CookieConsent />
     </ThemeProvider>
   );
 };

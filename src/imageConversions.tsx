@@ -1,5 +1,5 @@
 import { ImageFileInfo } from "@gliff-ai/upload";
-import { ImageMeta } from "@/etebase/interfaces";
+import { ImageMeta } from "@/store/interfaces";
 
 function getImageMetaFromImageFileInfo(
   imageFileInfo: ImageFileInfo
@@ -35,6 +35,7 @@ function stringifySlices(slicesData: ImageBitmap[][]): string {
   const { width, height } = slicesData[0][0];
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
+  if (!ctx) return "";
   canvas.width = width;
   canvas.height = height;
 
@@ -61,12 +62,8 @@ function convertBase64ToImageBitmap(
 
     image.onload = () => {
       createImageBitmap(image, 0, 0, width, height).then(
-        (imageBitmap) => {
-          resolve(imageBitmap);
-        },
-        (e) => {
-          console.log(e);
-        }
+        (imageBitmap) => resolve(imageBitmap),
+        (e) => console.log(e)
       );
     };
     image.src = `data:image/png;base64,${base64}`;
@@ -117,6 +114,7 @@ function convertImageBitmapToUint8Array(
   const { width, height } = slicesData[0][0];
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
+  if (!ctx) return [];
   canvas.width = width;
   canvas.height = height;
 
@@ -142,6 +140,8 @@ async function convertUint8ArrayToImageBitmap(
 
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
+  if (!ctx) return [];
+
   canvas.width = width;
   canvas.height = height;
   const imageData = ctx.createImageData(width, height);

@@ -3,8 +3,8 @@ export interface CheckoutSession {
 }
 
 export interface User {
-  username: string;
-  authToken: string;
+  username: string | null;
+  authToken: string | null;
 }
 
 interface Team {
@@ -23,6 +23,7 @@ export interface UserProfile {
   team: Team;
   email_verified: boolean;
   email: string;
+  is_collaborator: boolean;
 }
 
 export interface Invite {
