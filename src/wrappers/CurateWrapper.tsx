@@ -37,6 +37,8 @@ import { useMountEffect } from "@/hooks/use-mountEffect";
 import { useStore } from "@/hooks/use-store";
 import { apiRequest } from "@/api";
 
+const logger = console;
+
 // NOTE: Profile and Team are taken from MANAGE
 interface Profile {
   email: string;
@@ -131,7 +133,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           setCurateInput(wrangled);
         })
         .catch((err) => {
-          console.log(err);
+          logger.log(err);
         });
     },
     [collectionUid]
@@ -183,7 +185,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       .setImageLabels(collectionUid, imageUid, newLabels)
       .then(fetchImageItems)
       .catch((error) => {
-        console.log(error);
+        logger.log(error);
       });
   };
 
@@ -195,7 +197,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       .setAssignees(collectionUid, imageUid, newAssignees)
       .then(fetchImageItems)
       .catch((error) => {
-        console.log(error);
+        logger.log(error);
       });
   };
 
@@ -203,7 +205,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.storeInstance
       .deleteImages(collectionUid, imageUids)
       .catch((error) => {
-        console.log(error);
+        logger.log(error);
       });
   };
 
@@ -311,7 +313,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           collections.filter((c) => c.uid === collectionUid)[0].name
       )
       .catch((err) => {
-        console.log(err);
+        logger.log(err);
         return "";
       });
     const month = `0${date.getMonth() + 1}`.slice(-2);
@@ -328,7 +330,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         );
       })
       .catch((err) => {
-        console.log(err);
+        logger.log(err);
       });
   };
 
@@ -360,7 +362,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           setCollaborators(newCollaborators);
         }
       })
-      .catch((e) => console.error(e));
+      .catch((e) => logger.error(e));
   };
 
   useEffect(() => {
