@@ -38,7 +38,7 @@ function ProgressSnackbar({ task, setTask }: Props): ReactElement {
       handleClose={handleClose}
       message={
         <div className={classes.messageContainer}>
-          {`${task.description} in progress, please wait..`}
+          {`${task.description} in progress, please wait...`}
           <Box style={{ position: "relative", display: "inline-flex" }}>
             <CircularProgress
               variant={
