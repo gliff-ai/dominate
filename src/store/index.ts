@@ -16,6 +16,8 @@ import { wordlist } from "@/wordlist";
 import type { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
 import { Task } from "@/components";
 
+const logger = console;
+
 const getRandomValueFromArrayOrString = (
   dictionary: string | string[],
   count: number
@@ -73,7 +75,7 @@ export class DominateStore {
 
     this.isLoggedIn = !!this.etebaseInstance?.user?.username;
 
-    void this.getPendingInvites().catch((e) => console.log(e));
+    void this.getPendingInvites().catch((e) => logger.error(e));
 
     return {
       username: this.etebaseInstance.user.username,
@@ -93,7 +95,7 @@ export class DominateStore {
 
       this.ready = true;
 
-      void this.getPendingInvites().catch((e) => console.log(e));
+      void this.getPendingInvites().catch((e) => logger.log(e));
 
       const newSession = await this.etebaseInstance.save();
 
@@ -122,7 +124,7 @@ export class DominateStore {
     const password = sodium.randombytes_buf(64, "base64");
     const key = base64AddPadding(toBase64(`${email}:${password}`));
 
-    const account = await Account.signup(
+    await Account.signup(
       {
         username: toBase64(email),
         email,
@@ -186,7 +188,7 @@ export class DominateStore {
 
       return true;
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       return false;
     }
   };
@@ -214,7 +216,7 @@ export class DominateStore {
     );
 
     for (const invite of invitations) {
-      void invitationManager.accept(invite).catch((e) => console.log(e));
+      void invitationManager.accept(invite).catch((e) => logger.log(e));
     }
   };
 
@@ -304,7 +306,7 @@ export class DominateStore {
     for (const member of members.data) {
       // Check if user already has access
       if (member.username === userEmail) {
-        console.log("User already has access");
+        logger.log("User already has access");
         return false;
       }
     }
@@ -315,13 +317,13 @@ export class DominateStore {
     const user2 = await invitationManager.fetchUserProfile(userEmail);
 
     if (!user2) {
-      console.log("User doesn't exist");
+      logger.log("User doesn't exist");
     }
     // Verify user2.pubkey is indeed the pubkey you expect.!!!
 
     try {
       // Assuming the pubkey is as expected, send the invitation
-      const res = await invitationManager.invite(
+      await invitationManager.invite(
         collection,
         userEmail,
         user2.pubkey,
@@ -330,15 +332,15 @@ export class DominateStore {
 
       return true;
     } catch (e) {
-      console.log(e);
+      logger.log(e);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (e?.content?.code) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        console.error(e?.content?.code);
+        logger.error(e?.content?.code);
         return false;
       }
 
-      console.error("Unknown Invite Error");
+      logger.error("Unknown Invite Error");
       return false;
     }
   };
@@ -371,7 +373,7 @@ export class DominateStore {
 
     return collectionManager.transaction(collection).catch((e) => {
       // TODO: if it's not a conflict something bad had happened so maybe don't retry?, else
-      console.error(e);
+      logger.error(e);
       return this.appendGalleryTile(collectionManager, collectionUid, tile);
     });
   };
@@ -397,7 +399,7 @@ export class DominateStore {
         const imageContent = imageContents[i];
 
         // Create new image item and add it to the collection
-        const newImageItem = itemPromises.push(
+        itemPromises.push(
           itemManager.create(
             {
               type: "gliff.image",
@@ -450,7 +452,7 @@ export class DominateStore {
       await collectionManager.upload(collection);
       setTask({ ...task, progress: 100 });
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     }
   };
 
@@ -490,14 +492,18 @@ export class DominateStore {
 
     // cache UIDs of images, annotations and audits to be deleted:
     const imageUIDs: string[] = [];
-    const annotationUIDs: Array<string | null> = [];
-    const auditUIDs: Array<string | null> = [];
+    const annotationUIDs: string[] = [];
+    const auditUIDs: string[] = [];
     oldContent
       .filter((item) => imageUids.includes(item.imageUID))
       .forEach((item) => {
         imageUIDs.push(item.imageUID);
-        annotationUIDs.concat(item.annotationUID);
-        auditUIDs.push(item.auditUID);
+        if (item.annotationUID !== null) {
+          annotationUIDs.push(item.annotationUID);
+        }
+        if (item.auditUID !== null) {
+          auditUIDs.push(item.auditUID);
+        }
       });
 
     // remove GalleryTile's whose imageUID is in imageUids:
@@ -511,33 +517,19 @@ export class DominateStore {
 
     // delete image, annotation and audit items:
     const itemManager = collectionManager.getItemManager(collection);
-    const imagePromises: Promise<Item>[] = [];
-    const annotationPromises: Promise<Item>[] = [];
-    const auditPromises: Promise<Item>[] = [];
-    for (let i = 0; i < imageUIDs.length; i += 1) {
-      imagePromises.push(itemManager.fetch(imageUIDs[i]));
+    const allItems: {
+      data: Item[];
+      stoken: string;
+      done: boolean;
+    } = await itemManager.fetchMulti(
+      imageUIDs.concat(annotationUIDs).concat(auditUIDs)
+    );
 
-      if (annotationUIDs[i]) {
-        // annotationUID and auditUID are initialised as null in createImage, and will still be null unless they've been set
-        annotationPromises.push(itemManager.fetch(annotationUIDs[i] as string));
-      }
+    allItems.data.forEach((item) => {
+      item.delete();
+    });
 
-      if (auditUIDs[i]) {
-        auditPromises.push(itemManager.fetch(auditUIDs[i] as string));
-      }
-    }
-
-    const images = await Promise.all(imagePromises);
-    const annotations = await Promise.all(annotationPromises);
-    const audits = await Promise.all(auditPromises);
-
-    for (let i = 0; i < images.length; i += 1) {
-      images[i].delete();
-      annotations[i]?.delete();
-      audits[i]?.delete();
-    }
-
-    await itemManager.batch(images.concat(annotations).concat(audits));
+    await itemManager.batch(allItems.data);
   };
 
   getAnnotationsObject = async (
