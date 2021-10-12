@@ -109,6 +109,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                 <Curate
                   storeInstance={storeInstance}
                   setIsLoading={setIsLoading}
+                  task={task}
                   setTask={setTask}
                 />
               }

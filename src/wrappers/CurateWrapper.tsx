@@ -73,6 +73,7 @@ const useStyles = () =>
 interface Props {
   storeInstance: DominateStore;
   setIsLoading: (isLoading: boolean) => void;
+  task: Task;
   setTask: (task: Task) => void;
 }
 
@@ -136,13 +137,15 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     [collectionUid]
   );
 
-  const addImageToGallery = async (
+  const addImagesToGallery = async (
     imageFileInfo: ImageFileInfo[],
     slicesData: Slices[]
   ): Promise<void> => {
     const imageMetas: ImageMeta[] = [];
     const thumbnails: string[] = [];
     const stringifiedSlices: string[] = [];
+
+    props.setTask({ ...props.task, progress: 0 });
 
     for (let i = 0; i < imageFileInfo.length; i += 1) {
       // Stringify slices data and get image metadata
@@ -160,12 +163,16 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }
     }
 
+    props.setTask({ ...props.task, progress: 20 });
+
     // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
     await props.storeInstance.createImage(
       collectionUid,
       imageMetas,
       thumbnails,
-      stringifiedSlices
+      stringifiedSlices,
+      props.task,
+      props.setTask
     );
 
     fetchImageItems();
@@ -384,7 +391,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     <>
       <Curate
         metadata={curateInput}
-        saveImageCallback={addImageToGallery}
+        saveImageCallback={addImagesToGallery}
         saveLabelsCallback={saveLabelsCallback}
         saveAssigneesCallback={saveAssigneesCallback}
         deleteImagesCallback={deleteImageCallback}

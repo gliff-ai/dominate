@@ -13,7 +13,7 @@ const useStyle = makeStyles({
   progress: { marginLeft: "5px", color: "#ffffff" },
 });
 
-type Task = { isLoading: boolean; description: string };
+type Task = { isLoading: boolean; description: string; progress?: number };
 
 interface Props {
   task: Task;
@@ -34,7 +34,12 @@ function ProgressSnackbar({ task, setTask }: Props): ReactElement {
       message={
         <div className={classes.messageContainer}>
           {`${task.description} in progress, please wait..`}
-          <CircularProgress size="2rem" className={classes.progress} />
+          <CircularProgress
+            variant={task.progress !== null ? "determinate" : "indeterminate"}
+            value={task.progress}
+            size="2rem"
+            className={classes.progress}
+          />
         </div>
       }
     />
