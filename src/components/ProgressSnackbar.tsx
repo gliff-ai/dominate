@@ -35,7 +35,9 @@ function ProgressSnackbar({ task, setTask }: Props): ReactElement {
         <div className={classes.messageContainer}>
           {`${task.description} in progress, please wait..`}
           <CircularProgress
-            variant={task.progress !== null ? "determinate" : "indeterminate"}
+            variant={
+              task.progress !== undefined ? "determinate" : "indeterminate"
+            }
             value={task.progress}
             size="2rem"
             className={classes.progress}
