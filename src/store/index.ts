@@ -18,8 +18,6 @@ import { Task } from "@/components";
 
 const logger = console;
 
-const logger = console;
-
 const getRandomValueFromArrayOrString = (
   dictionary: string | string[],
   count: number
