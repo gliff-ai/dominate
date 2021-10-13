@@ -34,7 +34,5 @@ jobs:
           skip_app_build: true
           ###### End of Repository/Build Configurations ######
         env:
-          NODE_VERSION: 15.3.0
-        env:
           API_URL: https://store.gliff.ai
           NODE_VERSION: 15.3.0
