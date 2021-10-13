@@ -655,8 +655,8 @@ export class DominateStore {
       description: "Saving annotation...",
       progress: 70,
     });
-    const annotationItem = items.data[0] as Item;
-    const auditItem = items.data[1] as Item;
+    const annotationItem = items.data[0];
+    const auditItem = items.data[1];
 
     // Update annotationItem:
     const modifiedTime = new Date().getTime();
