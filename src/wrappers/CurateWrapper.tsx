@@ -147,7 +147,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }
     }
 
-    props.setTask({ ...props.task, progress: 20 });
+    props.setTask({ ...props.task, progress: 10 });
 
     // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
     await props.storeInstance.createImage(
