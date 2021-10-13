@@ -410,17 +410,15 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       <ConfirmationDialog
         open={showMultilabelConfirm}
         setOpen={setShowMultilabelConfirm}
-        heading={"Warning"}
-        message={
-          "Dataset contains multilabel images, this will export as a flat directory with a JSON file for labels. Continue?"
-        }
+        heading="Warning"
+        message="Dataset contains multilabel images, this will export as a flat directory with a JSON file for labels. Continue?"
         okCallback={downloadDataset}
       />
 
       <ConfirmationDialog
         open={showDeleteConfirm}
         setOpen={setShowDeleteConfirm}
-        heading={"Warning"}
+        heading="Warning"
         message={`Delete ${imagesToDelete.length} images?`}
         okCallback={() => {
           deleteImages(imagesToDelete);
