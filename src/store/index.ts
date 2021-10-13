@@ -623,8 +623,8 @@ export class DominateStore {
     // Retrieve items
     const itemManager = await this.getItemManager(collectionUid);
     const items = await itemManager.fetchMulti([annotationUid, auditUid]);
-    const annotationItem = items[0] as Item;
-    const auditItem = items[1] as Item;
+    const annotationItem = items.data[0] as Item;
+    const auditItem = items.data[1] as Item;
 
     // Update annotationItem:
     const modifiedTime = new Date().getTime();
