@@ -34,7 +34,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     const annotationsData = newAnnotationsObject.getAllAnnotations();
     const auditData = newAnnotationsObject.getAuditObject();
 
-    if (annotationsObject === null) {
+    if (annotationsObject === undefined) {
       // If an annotation item for the given image does not exist, create one.
       props.storeInstance
         .createAnnotation(collectionUid, imageUid, annotationsData, auditData)
