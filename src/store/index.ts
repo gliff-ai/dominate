@@ -482,13 +482,19 @@ export class DominateStore {
 
   deleteImages = async (
     collectionUid: string,
-    imageUids: string[]
+    imageUids: string[],
+    task: Task,
+    setTask: (task: Task) => void
   ): Promise<void> => {
+    setTask({ isLoading: true, description: "Image deletion", progress: 0 });
+
     // get gallery items metadata from gallery collection:
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const oldContentString = await collection.getContent(OutputFormat.String);
     const oldContent = JSON.parse(oldContentString) as GalleryTile[];
+
+    setTask({ isLoading: true, description: "Image deletion", progress: 20 });
 
     // cache UIDs of images, annotations and audits to be deleted:
     const imageUIDs: string[] = [];
@@ -515,6 +521,8 @@ export class DominateStore {
     await collection.setContent(JSON.stringify(newContent));
     await collectionManager.upload(collection);
 
+    setTask({ isLoading: true, description: "Image deletion", progress: 50 });
+
     // delete image, annotation and audit items:
     const itemManager = collectionManager.getItemManager(collection);
     const allItems: {
@@ -525,11 +533,15 @@ export class DominateStore {
       imageUIDs.concat(annotationUIDs).concat(auditUIDs)
     );
 
+    setTask({ isLoading: true, description: "Image deletion", progress: 75 });
+
     allItems.data.forEach((item) => {
       item.delete();
     });
 
     await itemManager.batch(allItems.data);
+
+    setTask({ isLoading: false, description: "Image deletion", progress: 100 });
   };
 
   getAnnotationsObject = async (

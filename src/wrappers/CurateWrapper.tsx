@@ -201,9 +201,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       });
   };
 
-  const deleteImageCallback = (imageUids: string[]): void => {
+  const deleteImagesCallback = (imageUids: string[]): void => {
     props.storeInstance
-      .deleteImages(collectionUid, imageUids)
+      .deleteImages(collectionUid, imageUids, props.task, props.setTask)
       .catch((error) => {
         logger.log(error);
       });
@@ -396,7 +396,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         saveImageCallback={addImagesToGallery}
         saveLabelsCallback={saveLabelsCallback}
         saveAssigneesCallback={saveAssigneesCallback}
-        deleteImagesCallback={deleteImageCallback}
+        deleteImagesCallback={deleteImagesCallback}
         annotateCallback={annotateCallback}
         downloadDatasetCallback={downloadDatasetCallback}
         showAppBar={false}
