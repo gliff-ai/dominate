@@ -5,7 +5,7 @@ import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annota
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { DominateStore } from "@/store";
 import { Image } from "@/store/interfaces";
-import { TSButtonToolbar } from "@/components";
+import { Task, TSButtonToolbar } from "@/components";
 import {
   parseStringifiedSlices,
   getImageFileInfoFromImageMeta,
@@ -15,6 +15,8 @@ import { useMountEffect } from "@/hooks/use-mountEffect";
 interface Props {
   storeInstance: DominateStore;
   setIsLoading: (isLoading: boolean) => void;
+  task: Task;
+  setTask: (task: Task) => void;
 }
 
 export const AnnotateWrapper = (props: Props): ReactElement | null => {
@@ -31,18 +33,43 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
 
   const saveAnnotation = (newAnnotationsObject: Annotations): void => {
     // Save annotations data
+    props.setTask({
+      isLoading: true,
+      description: "Saving annotation...",
+      progress: 0,
+    });
     const annotationsData = newAnnotationsObject.getAllAnnotations();
     const auditData = newAnnotationsObject.getAuditObject();
 
     if (annotationsObject === undefined) {
       // If an annotation item for the given image does not exist, create one.
       props.storeInstance
-        .createAnnotation(collectionUid, imageUid, annotationsData, auditData)
+        .createAnnotation(
+          collectionUid,
+          imageUid,
+          annotationsData,
+          auditData,
+          props.task,
+          props.setTask
+        )
+        .then(() => {
+          props.setTask({ isLoading: false, description: "" });
+        })
         .catch((e) => console.log(e));
     } else {
       // Otherwise update it.
       props.storeInstance
-        .updateAnnotation(collectionUid, imageUid, annotationsData, auditData)
+        .updateAnnotation(
+          collectionUid,
+          imageUid,
+          annotationsData,
+          auditData,
+          props.task,
+          props.setTask
+        )
+        .then(() => {
+          props.setTask({ isLoading: false, description: "" });
+        })
         .catch((e) => console.log(e));
     }
   };

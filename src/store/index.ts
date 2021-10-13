@@ -560,7 +560,9 @@ export class DominateStore {
     collectionUid: string,
     imageUid: string,
     annotationData: Annotation[],
-    auditData: AuditAction[]
+    auditData: AuditAction[],
+    task: Task,
+    setTask: (task: Task) => void
   ): Promise<void> => {
     // Store annotations object in a new item.
 
@@ -588,8 +590,20 @@ export class DominateStore {
       JSON.stringify(auditData)
     );
 
+    setTask({
+      isLoading: true,
+      description: "Saving annotation...",
+      progress: 30,
+    });
+
     // Store annotationsItem and auditItem inside the collection:
     await itemManager.batch([annotationsItem, auditItem]);
+
+    setTask({
+      isLoading: true,
+      description: "Saving annotation...",
+      progress: 65,
+    });
 
     // Update collection content JSON:
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -603,16 +617,29 @@ export class DominateStore {
     galleryTiles[tileIdx].auditUID = auditItem.uid;
     await collection.setContent(JSON.stringify(galleryTiles));
     await collectionManager.upload(collection);
+
+    setTask({
+      isLoading: true,
+      description: "Saving annotation...",
+      progress: 100,
+    });
   };
 
   updateAnnotation = async (
     collectionUid: string,
     imageUid: string,
     annotationData: Annotation[],
-    auditData: AuditAction[]
+    auditData: AuditAction[],
+    task: Task,
+    setTask: (task: Task) => void
   ): Promise<void> => {
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
+    setTask({
+      isLoading: true,
+      description: "Saving annotation...",
+      progress: 35,
+    });
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
     const tile = galleryTiles.find((item) => item.imageUID === imageUid);
@@ -623,6 +650,11 @@ export class DominateStore {
     // Retrieve items
     const itemManager = await this.getItemManager(collectionUid);
     const items = await itemManager.fetchMulti([annotationUid, auditUid]);
+    setTask({
+      isLoading: true,
+      description: "Saving annotation...",
+      progress: 70,
+    });
     const annotationItem = items.data[0] as Item;
     const auditItem = items.data[1] as Item;
 
@@ -641,6 +673,12 @@ export class DominateStore {
 
     // Save changes
     await itemManager.batch([annotationItem, auditItem]);
+
+    setTask({
+      isLoading: true,
+      description: "Saving annotation...",
+      progress: 100,
+    });
   };
 
   getItem = async (collectionUid: string, itemUid: string): Promise<Item> => {
