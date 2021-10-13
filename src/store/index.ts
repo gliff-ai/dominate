@@ -14,6 +14,7 @@ import { AnnotationSession } from "@gliff-ai/audit";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
 import type { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
+import { Task } from "@/components";
 
 const logger = console;
 
@@ -381,7 +382,9 @@ export class DominateStore {
     collectionUid: string,
     imageMetas: ImageMeta[],
     thumbnails: string[],
-    imageContents: string[] | Uint8Array[]
+    imageContents: string[] | Uint8Array[],
+    task: Task,
+    setTask: (task: Task) => void
   ): Promise<void> => {
     try {
       // Create/upload new store item for the image:
@@ -411,9 +414,13 @@ export class DominateStore {
         );
       }
 
+      setTask({ ...task, progress: 30 });
+
       // save new image items:
       const newItems = await Promise.all(itemPromises);
       await itemManager.batch(newItems);
+
+      setTask({ ...task, progress: 50 });
 
       const newTiles: GalleryTile[] = [];
       for (let i = 0; i < imageMetas.length; i += 1) {
@@ -430,15 +437,20 @@ export class DominateStore {
         });
       }
 
+      setTask({ ...task, progress: 55 });
+
       // save new gallery tiles:
       const collectionManager = this.etebaseInstance.getCollectionManager();
       const collection = await collectionManager.fetch(collectionUid);
+      setTask({ ...task, progress: 70 });
       const oldContent = await collection.getContent(OutputFormat.String);
       const newContent = JSON.stringify(
         (JSON.parse(oldContent) as GalleryTile[]).concat(newTiles)
       );
       await collection.setContent(newContent);
+      setTask({ ...task, progress: 80 });
       await collectionManager.upload(collection);
+      setTask({ ...task, progress: 100 });
     } catch (err) {
       logger.error(err);
     }
