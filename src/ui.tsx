@@ -120,6 +120,8 @@ const UserInterface = (props: Props): ReactElement | null => {
                 <Annotate
                   storeInstance={storeInstance}
                   setIsLoading={setIsLoading}
+                  task={task}
+                  setTask={setTask}
                 />
               }
             />
