@@ -98,14 +98,12 @@ function useProvideAuth(storeInstance: DominateStore) {
     const { readable: recoveryKey, hashed } =
       storeInstance.generateRecoveryKey();
 
-    const savedSession = await storeInstance.etebaseInstance.save(hashed);
-
     const profile = await createUserProfile(
       name,
       teamId,
       inviteId,
       acceptedTermsAndConditions,
-      savedSession
+      recoveryKey.join(" ")
     );
 
     return {
