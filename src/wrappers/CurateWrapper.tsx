@@ -191,6 +191,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const deleteImages = (imageUids: string[]): void => {
     props.storeInstance
       .deleteImages(collectionUid, imageUids, props.task, props.setTask)
+      .then(() => {
+        fetchImageItems();
+      })
       .catch((error) => {
         logger.log(error);
       });
