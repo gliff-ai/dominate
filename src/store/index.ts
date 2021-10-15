@@ -14,6 +14,9 @@ import { AnnotationSession } from "@gliff-ai/audit";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
 import type { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
+import { Task } from "@/components";
+
+const logger = console;
 
 const getRandomValueFromArrayOrString = (
   dictionary: string | string[],
@@ -72,7 +75,7 @@ export class DominateStore {
 
     this.isLoggedIn = !!this.etebaseInstance?.user?.username;
 
-    void this.getPendingInvites().catch((e) => console.log(e));
+    void this.getPendingInvites().catch((e) => logger.error(e));
 
     return {
       username: this.etebaseInstance.user.username,
@@ -92,7 +95,7 @@ export class DominateStore {
 
       this.ready = true;
 
-      void this.getPendingInvites().catch((e) => console.log(e));
+      void this.getPendingInvites().catch((e) => logger.log(e));
 
       const newSession = await this.etebaseInstance.save();
 
@@ -121,7 +124,7 @@ export class DominateStore {
     const password = sodium.randombytes_buf(64, "base64");
     const key = base64AddPadding(toBase64(`${email}:${password}`));
 
-    const account = await Account.signup(
+    await Account.signup(
       {
         username: toBase64(email),
         email,
@@ -185,7 +188,7 @@ export class DominateStore {
 
       return true;
     } catch (e) {
-      console.error(e);
+      logger.error(e);
       return false;
     }
   };
@@ -213,7 +216,7 @@ export class DominateStore {
     );
 
     for (const invite of invitations) {
-      void invitationManager.accept(invite).catch((e) => console.log(e));
+      void invitationManager.accept(invite).catch((e) => logger.log(e));
     }
   };
 
@@ -303,7 +306,7 @@ export class DominateStore {
     for (const member of members.data) {
       // Check if user already has access
       if (member.username === userEmail) {
-        console.log("User already has access");
+        logger.log("User already has access");
         return false;
       }
     }
@@ -314,13 +317,13 @@ export class DominateStore {
     const user2 = await invitationManager.fetchUserProfile(userEmail);
 
     if (!user2) {
-      console.log("User doesn't exist");
+      logger.log("User doesn't exist");
     }
     // Verify user2.pubkey is indeed the pubkey you expect.!!!
 
     try {
       // Assuming the pubkey is as expected, send the invitation
-      const res = await invitationManager.invite(
+      await invitationManager.invite(
         collection,
         userEmail,
         user2.pubkey,
@@ -329,15 +332,15 @@ export class DominateStore {
 
       return true;
     } catch (e) {
-      console.log(e);
+      logger.log(e);
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       if (e?.content?.code) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        console.error(e?.content?.code);
+        logger.error(e?.content?.code);
         return false;
       }
 
-      console.error("Unknown Invite Error");
+      logger.error("Unknown Invite Error");
       return false;
     }
   };
@@ -370,7 +373,7 @@ export class DominateStore {
 
     return collectionManager.transaction(collection).catch((e) => {
       // TODO: if it's not a conflict something bad had happened so maybe don't retry?, else
-      console.error(e);
+      logger.error(e);
       return this.appendGalleryTile(collectionManager, collectionUid, tile);
     });
   };
@@ -379,7 +382,9 @@ export class DominateStore {
     collectionUid: string,
     imageMetas: ImageMeta[],
     thumbnails: string[],
-    imageContents: string[] | Uint8Array[]
+    imageContents: string[] | Uint8Array[],
+    task: Task,
+    setTask: (task: Task) => void
   ): Promise<void> => {
     try {
       // Create/upload new store item for the image:
@@ -394,7 +399,7 @@ export class DominateStore {
         const imageContent = imageContents[i];
 
         // Create new image item and add it to the collection
-        const newImageItem = itemPromises.push(
+        itemPromises.push(
           itemManager.create(
             {
               type: "gliff.image",
@@ -408,6 +413,8 @@ export class DominateStore {
           )
         );
       }
+
+      setTask({ ...task, progress: 30 });
 
       // save new image items:
       const newItems = await Promise.all(itemPromises);
@@ -428,6 +435,8 @@ export class DominateStore {
         });
       }
 
+      setTask({ ...task, progress: 65 });
+
       // save new gallery tiles:
       const collectionManager = this.etebaseInstance.getCollectionManager();
       const collection = await collectionManager.fetch(collectionUid);
@@ -436,9 +445,11 @@ export class DominateStore {
         (JSON.parse(oldContent) as GalleryTile[]).concat(newTiles)
       );
       await collection.setContent(newContent);
+      setTask({ ...task, progress: 75 });
       await collectionManager.upload(collection);
+      setTask({ ...task, progress: 100 });
     } catch (err) {
-      console.error(err);
+      logger.error(err);
     }
   };
 
@@ -468,24 +479,34 @@ export class DominateStore {
 
   deleteImages = async (
     collectionUid: string,
-    imageUids: string[]
+    imageUids: string[],
+    task: Task,
+    setTask: (task: Task) => void
   ): Promise<void> => {
+    setTask({ isLoading: true, description: "Image deletion", progress: 0 });
+
     // get gallery items metadata from gallery collection:
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const oldContentString = await collection.getContent(OutputFormat.String);
     const oldContent = JSON.parse(oldContentString) as GalleryTile[];
 
+    setTask({ isLoading: true, description: "Image deletion", progress: 20 });
+
     // cache UIDs of images, annotations and audits to be deleted:
     const imageUIDs: string[] = [];
-    const annotationUIDs: Array<string | null> = [];
-    const auditUIDs: Array<string | null> = [];
+    const annotationUIDs: string[] = [];
+    const auditUIDs: string[] = [];
     oldContent
       .filter((item) => imageUids.includes(item.imageUID))
       .forEach((item) => {
         imageUIDs.push(item.imageUID);
-        annotationUIDs.concat(item.annotationUID);
-        auditUIDs.push(item.auditUID);
+        if (item.annotationUID !== null) {
+          annotationUIDs.push(item.annotationUID);
+        }
+        if (item.auditUID !== null) {
+          auditUIDs.push(item.auditUID);
+        }
       });
 
     // remove GalleryTile's whose imageUID is in imageUids:
@@ -497,35 +518,27 @@ export class DominateStore {
     await collection.setContent(JSON.stringify(newContent));
     await collectionManager.upload(collection);
 
+    setTask({ isLoading: true, description: "Image deletion", progress: 50 });
+
     // delete image, annotation and audit items:
     const itemManager = collectionManager.getItemManager(collection);
-    const imagePromises: Promise<Item>[] = [];
-    const annotationPromises: Promise<Item>[] = [];
-    const auditPromises: Promise<Item>[] = [];
-    for (let i = 0; i < imageUIDs.length; i += 1) {
-      imagePromises.push(itemManager.fetch(imageUIDs[i]));
+    const allItems: {
+      data: Item[];
+      stoken: string;
+      done: boolean;
+    } = await itemManager.fetchMulti(
+      imageUIDs.concat(annotationUIDs).concat(auditUIDs)
+    );
 
-      if (annotationUIDs[i]) {
-        // annotationUID and auditUID are initialised as null in createImage, and will still be null unless they've been set
-        annotationPromises.push(itemManager.fetch(annotationUIDs[i] as string));
-      }
+    setTask({ isLoading: true, description: "Image deletion", progress: 75 });
 
-      if (auditUIDs[i]) {
-        auditPromises.push(itemManager.fetch(auditUIDs[i] as string));
-      }
-    }
+    allItems.data.forEach((item) => {
+      item.delete();
+    });
 
-    const images = await Promise.all(imagePromises);
-    const annotations = await Promise.all(annotationPromises);
-    const audits = await Promise.all(auditPromises);
+    await itemManager.batch(allItems.data);
 
-    for (let i = 0; i < images.length; i += 1) {
-      images[i].delete();
-      annotations[i]?.delete();
-      audits[i]?.delete();
-    }
-
-    await itemManager.batch(images.concat(annotations).concat(audits));
+    setTask({ isLoading: false, description: "Image deletion", progress: 100 });
   };
 
   getAnnotationsObject = async (
@@ -556,7 +569,9 @@ export class DominateStore {
     collectionUid: string,
     imageUid: string,
     annotationData: Annotation[],
-    auditData: AuditAction[]
+    auditData: AuditAction[],
+    task: Task,
+    setTask: (task: Task) => void
   ): Promise<void> => {
     // Store annotations object in a new item.
 
@@ -584,8 +599,20 @@ export class DominateStore {
       JSON.stringify(auditData)
     );
 
+    setTask({
+      isLoading: true,
+      description: "Saving annotation...",
+      progress: 30,
+    });
+
     // Store annotationsItem and auditItem inside the collection:
     await itemManager.batch([annotationsItem, auditItem]);
+
+    setTask({
+      isLoading: true,
+      description: "Saving annotation...",
+      progress: 65,
+    });
 
     // Update collection content JSON:
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -599,16 +626,29 @@ export class DominateStore {
     galleryTiles[tileIdx].auditUID = auditItem.uid;
     await collection.setContent(JSON.stringify(galleryTiles));
     await collectionManager.upload(collection);
+
+    setTask({
+      isLoading: true,
+      description: "Saving annotation...",
+      progress: 100,
+    });
   };
 
   updateAnnotation = async (
     collectionUid: string,
     imageUid: string,
     annotationData: Annotation[],
-    auditData: AuditAction[]
+    auditData: AuditAction[],
+    task: Task,
+    setTask: (task: Task) => void
   ): Promise<void> => {
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
+    setTask({
+      isLoading: true,
+      description: "Saving annotation...",
+      progress: 35,
+    });
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
     const tile = galleryTiles.find((item) => item.imageUID === imageUid);
@@ -619,8 +659,13 @@ export class DominateStore {
     // Retrieve items
     const itemManager = await this.getItemManager(collectionUid);
     const items = await itemManager.fetchMulti([annotationUid, auditUid]);
-    const annotationItem = items[0] as Item;
-    const auditItem = items[1] as Item;
+    setTask({
+      isLoading: true,
+      description: "Saving annotation...",
+      progress: 70,
+    });
+    const annotationItem = items.data[0];
+    const auditItem = items.data[1];
 
     // Update annotationItem:
     const modifiedTime = new Date().getTime();
@@ -637,6 +682,12 @@ export class DominateStore {
 
     // Save changes
     await itemManager.batch([annotationItem, auditItem]);
+
+    setTask({
+      isLoading: true,
+      description: "Saving annotation...",
+      progress: 100,
+    });
   };
 
   getItem = async (collectionUid: string, itemUid: string): Promise<Item> => {

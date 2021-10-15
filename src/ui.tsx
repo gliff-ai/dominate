@@ -109,6 +109,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                 <Curate
                   storeInstance={storeInstance}
                   setIsLoading={setIsLoading}
+                  task={task}
                   setTask={setTask}
                 />
               }
@@ -119,6 +120,8 @@ const UserInterface = (props: Props): ReactElement | null => {
                 <Annotate
                   storeInstance={storeInstance}
                   setIsLoading={setIsLoading}
+                  task={task}
+                  setTask={setTask}
                 />
               }
             />
