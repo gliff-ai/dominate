@@ -440,7 +440,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         open={showNoImageMessage}
         setOpen={setShowNoImageMessage}
         heading="Warning"
-        message={"There are no images to download!"}
+        message="There are no images to download!"
       />
     </>
   );

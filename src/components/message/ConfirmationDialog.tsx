@@ -110,3 +110,5 @@ export function MessageDialog(props: {
     </Dialog>
   );
 }
+
+MessageDialog.defaultProps = { okCallback: null };
