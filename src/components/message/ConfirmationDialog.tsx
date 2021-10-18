@@ -23,15 +23,13 @@ const useStyles = () =>
     },
   }));
 
-interface Props {
+export function ConfirmationDialog(props: {
   open: boolean;
   setOpen: (open: boolean) => void;
   heading: string;
   message: string;
   okCallback: () => void;
-}
-
-export function ConfirmationDialog(props: Props) {
+}) {
   const classes = useStyles()();
 
   return (
@@ -65,6 +63,47 @@ export function ConfirmationDialog(props: Props) {
             color="primary"
           >
             Cancel
+          </Button>
+        </DialogActions>
+      </Card>
+    </Dialog>
+  );
+}
+
+export function MessageDialog(props: {
+  open: boolean;
+  setOpen: (open: boolean) => void;
+  heading: string;
+  message: string;
+  okCallback?: () => void;
+}) {
+  const classes = useStyles()();
+
+  return (
+    <Dialog open={props.open}>
+      <Card>
+        <Paper
+          elevation={0}
+          variant="outlined"
+          square
+          className={classes.paperHeader}
+        >
+          <Typography className={classes.projectsTypography}>
+            {props.heading}
+          </Typography>
+        </Paper>
+        <Typography style={{ margin: "10px" }}>{props.message}</Typography>
+        <DialogActions>
+          <Button
+            onClick={() => {
+              props.setOpen(false);
+              if (props.okCallback) {
+                void props.okCallback();
+              }
+            }}
+            color="primary"
+          >
+            OK
           </Button>
         </DialogActions>
       </Card>

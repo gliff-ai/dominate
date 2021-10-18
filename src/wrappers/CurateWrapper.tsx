@@ -14,7 +14,10 @@ import {
   ImageMeta,
 } from "@/store/interfaces";
 import { Task, TSButtonToolbar } from "@/components";
-import { ConfirmationDialog } from "@/components/message/ConfirmationDialog";
+import {
+  ConfirmationDialog,
+  MessageDialog,
+} from "@/components/message/ConfirmationDialog";
 import { Plugins } from "@/plugins/Plugins";
 import { usePlugins } from "@/hooks";
 
@@ -72,6 +75,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   // image deletion dialog state:
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
   const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+
+  // no images to download message state:
+  const [showNoImageMessage, setShowNoImageMessage] = useState<boolean>(false);
 
   const [pluginUrls, setPluginUrls] = useState<string[] | null>(null);
   const [collaborators, setCollaborators] =
@@ -252,11 +258,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     } else {
       // get set of all labels:
       const allLabels = new Set<string>(
-        collectionContent
-          .map((tile) => tile.imageLabels)
-          .reduce((acc: string[], thisLabels: string[]) =>
-            acc.concat(thisLabels)
-          )
+        collectionContent.map((tile) => tile.imageLabels).flat()
       );
 
       // add label folders to zip:
@@ -325,6 +327,12 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   const downloadDatasetCallback = (): void => {
+    // check the collection has images:
+    if (collectionContent.length === 0) {
+      setShowNoImageMessage(true);
+      return;
+    }
+
     // check for multi-labelled images:
     for (const tile of collectionContent) {
       if (tile.imageLabels.length > 1) {
@@ -426,6 +434,13 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         okCallback={() => {
           deleteImages(imagesToDelete);
         }}
+      />
+
+      <MessageDialog
+        open={showNoImageMessage}
+        setOpen={setShowNoImageMessage}
+        heading="Warning"
+        message={"There are no images to download!"}
       />
     </>
   );
