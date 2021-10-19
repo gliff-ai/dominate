@@ -1,10 +1,12 @@
 import { ReactElement, useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
+import { Card, makeStyles } from "@material-ui/core";
 
 import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
 import { ImageFileInfo } from "@gliff-ai/upload";
+import { icons, IconButton } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
-import { Image } from "@/store/interfaces";
+import { AnnotationMeta, Image } from "@/store/interfaces";
 import { Task, TSButtonToolbar } from "@/components";
 import {
   parseStringifiedSlices,
@@ -17,7 +19,30 @@ interface Props {
   setIsLoading: (isLoading: boolean) => void;
   task: Task;
   setTask: (task: Task) => void;
+  productSection: JSX.Element | null;
+  setProductSection: (productSection: JSX.Element | null) => void;
 }
+
+const useStyle = makeStyles({
+  sectionContainer: {
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+    height: "100%",
+  },
+  cardSize: {
+    width: 40,
+    height: 40,
+    borderRadius: 0,
+    display: "flex",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+  cardLeft: {
+    borderRadius: "6px 0 0 6px",
+  },
+  cardRight: { borderRadius: "0 6px 6px 0" },
+});
 
 export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const { collectionUid = "", imageUid = "" } = useParams();
@@ -26,10 +51,44 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [imageFileInfo, setImageFileInfo] = useState<ImageFileInfo>();
   const [annotationsObject, setAnnotationsObject] =
     useState<Annotations | undefined>(undefined);
+  const [isComplete, setIsComplete] = useState<boolean>(false);
+  const classes = useStyle();
 
   useMountEffect(() => {
     props.setIsLoading(true);
   });
+
+  function updateProductSection(): void {
+    props.setProductSection(
+      <div className={classes.sectionContainer}>
+        <Card className={`${classes.cardSize} ${classes.cardLeft}`}>
+          <IconButton
+            icon={icons.add}
+            tooltip={{ name: "Previous Image" }}
+            onClick={() => console.log("load previous image")}
+            tooltipPlacement="bottom"
+          />
+        </Card>
+        <Card className={classes.cardSize}>
+          <IconButton
+            icon={icons.add}
+            tooltip={{ name: "Mark Annotation As Complete" }}
+            onClick={() => setIsComplete((prevIsComplete) => !prevIsComplete)}
+            fill={isComplete}
+            tooltipPlacement="bottom"
+          />
+        </Card>
+        <Card className={`${classes.cardSize} ${classes.cardRight}`}>
+          <IconButton
+            icon={icons.add}
+            tooltip={{ name: "Next Image" }}
+            onClick={() => console.log("load next image")}
+            tooltipPlacement="bottom"
+          />
+        </Card>
+      </div>
+    );
+  }
 
   const saveAnnotation = (newAnnotationsObject: Annotations): void => {
     // Save annotations data
@@ -49,6 +108,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
           imageUid,
           annotationsData,
           auditData,
+          isComplete,
           props.task,
           props.setTask
         )
@@ -64,6 +124,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
           imageUid,
           annotationsData,
           auditData,
+          isComplete,
           props.task,
           props.setTask
         )
@@ -73,6 +134,10 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .catch((e) => console.log(e));
     }
   };
+
+  useEffect(() => {
+    updateProductSection();
+  }, [isComplete]);
 
   useEffect(() => {
     const getImage = (): void => {
@@ -89,9 +154,14 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       // Set state for annotation items.
       props.storeInstance
         .getAnnotationsObject(collectionUid, imageUid)
-        .then((retrievedAnnotationsObject) => {
-          setAnnotationsObject(retrievedAnnotationsObject);
-        })
+        .then(
+          (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
+            if (data) {
+              setAnnotationsObject(data.annotations);
+              setIsComplete(data.meta.isComplete);
+            }
+          }
+        )
         .catch((e) => console.log(e));
     };
 
