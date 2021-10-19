@@ -129,7 +129,6 @@ const UserInterface = (props: Props): ReactElement | null => {
                   setIsLoading={setIsLoading}
                   task={task}
                   setTask={setTask}
-                  productSection={productSection}
                   setProductSection={setProductSection}
                 />
               }

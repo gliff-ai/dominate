@@ -19,7 +19,6 @@ interface Props {
   setIsLoading: (isLoading: boolean) => void;
   task: Task;
   setTask: (task: Task) => void;
-  productSection: JSX.Element | null;
   setProductSection: (productSection: JSX.Element | null) => void;
 }
 
