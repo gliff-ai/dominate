@@ -13,7 +13,13 @@ import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
-import type { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
+import type {
+  GalleryMeta,
+  GalleryTile,
+  Image,
+  ImageMeta,
+  AnnotationMeta,
+} from "./interfaces";
 import { Task } from "@/components";
 
 const logger = console;
@@ -544,7 +550,7 @@ export class DominateStore {
   getAnnotationsObject = async (
     collectionUid: string,
     imageUid: string
-  ): Promise<Annotations | undefined> => {
+  ): Promise<{ meta: AnnotationMeta; annotations: Annotations } | null> => {
     // retrieves the Annotations object for the specified image
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -554,7 +560,7 @@ export class DominateStore {
     ) as GalleryTile[];
     const galleryTile = content.find((item) => item.imageUID === imageUid);
 
-    if (!galleryTile?.annotationUID) return undefined;
+    if (!galleryTile?.annotationUID) return null;
 
     const itemManager = collectionManager.getItemManager(collection);
     const annotationItem = await itemManager.fetch(galleryTile.annotationUID);
@@ -562,7 +568,12 @@ export class DominateStore {
       OutputFormat.String
     );
 
-    return new Annotations(JSON.parse(annotationContent));
+    const annotationMeta = annotationItem.getMeta() as AnnotationMeta;
+
+    return {
+      meta: annotationMeta,
+      annotations: new Annotations(JSON.parse(annotationContent)),
+    };
   };
 
   createAnnotation = async (
@@ -570,6 +581,7 @@ export class DominateStore {
     imageUid: string,
     annotationData: Annotation[],
     auditData: AuditAction[],
+    isComplete = false,
     task: Task,
     setTask: (task: Task) => void
   ): Promise<void> => {
@@ -584,6 +596,7 @@ export class DominateStore {
       {
         type: "gliff.annotation",
         mtime: createdTime,
+        isComplete,
         createdTime,
       },
       JSON.stringify(annotationData)
@@ -639,6 +652,7 @@ export class DominateStore {
     imageUid: string,
     annotationData: Annotation[],
     auditData: AuditAction[],
+    isComplete: boolean,
     task: Task,
     setTask: (task: Task) => void
   ): Promise<void> => {
@@ -668,16 +682,18 @@ export class DominateStore {
     const auditItem = items.data[1];
 
     // Update annotationItem:
-    const modifiedTime = new Date().getTime();
     let meta = annotationItem.getMeta();
-    delete meta.mtime;
-    annotationItem.setMeta({ ...meta, modifiedTime });
+    const mtime = new Date().getTime();
+    annotationItem.setMeta({
+      ...meta,
+      mtime,
+      isComplete,
+    });
     await annotationItem.setContent(JSON.stringify(annotationData));
 
     // Update auditItem:
     meta = auditItem.getMeta();
-    delete meta.mtime;
-    auditItem.setMeta({ ...meta, modifiedTime });
+    auditItem.setMeta({ ...meta, mtime });
     await auditItem.setContent(JSON.stringify(auditData));
 
     // Save changes
