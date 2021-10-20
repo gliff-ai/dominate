@@ -41,6 +41,7 @@ const useStyle = makeStyles({
     borderRadius: "6px 0 0 6px",
   },
   cardRight: { borderRadius: "0 6px 6px 0" },
+  rotateIcon: { transform: "rotate(180deg)" },
 });
 
 export const AnnotateWrapper = (props: Props): ReactElement | null => {
@@ -66,7 +67,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       <div className={classes.sectionContainer}>
         <Card className={`${classes.cardSize} ${classes.cardLeft}`}>
           <IconButton
-            icon={icons.add}
+            icon={icons.nextPrevious}
             tooltip={{ name: "Previous Image" }}
             onClick={() => cycleImage(false)}
             tooltipPlacement="bottom"
@@ -75,7 +76,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         </Card>
         <Card className={classes.cardSize}>
           <IconButton
-            icon={icons.add}
+            icon={icons.tick}
             tooltip={{ name: "Mark Annotation As Complete" }}
             onClick={() => setIsComplete((prevIsComplete) => !prevIsComplete)}
             fill={isComplete}
@@ -84,7 +85,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         </Card>
         <Card className={`${classes.cardSize} ${classes.cardRight}`}>
           <IconButton
-            icon={icons.add}
+            className={classes.rotateIcon}
+            icon={icons.nextPrevious}
             tooltip={{ name: "Next Image" }}
             onClick={() => cycleImage()}
             tooltipPlacement="bottom"
