@@ -54,7 +54,12 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginBottom: "5px",
     marginTop: "7px",
   },
-  productSectionGrid: { marginLeft: "auto" },
+  productSectionGrid: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+  },
   navGrid: {
     marginLeft: "auto",
     height: "90px",
