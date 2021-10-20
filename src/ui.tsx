@@ -1,5 +1,5 @@
 import { ReactElement, useEffect, useState } from "react";
-import { Route, Routes, Navigate, useLocation } from "react-router-dom";
+import { Route, Routes, Navigate, useLocation, Prompt } from "react-router-dom";
 import { CssBaseline, ThemeProvider, makeStyles } from "@material-ui/core";
 import { theme } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
@@ -113,24 +113,36 @@ const UserInterface = (props: Props): ReactElement | null => {
             <PrivateRoute
               path="curate/:collectionUid"
               element={
-                <Curate
-                  storeInstance={storeInstance}
-                  setIsLoading={setIsLoading}
-                  task={task}
-                  setTask={setTask}
-                />
+                <>
+                  <Curate
+                    storeInstance={storeInstance}
+                    setIsLoading={setIsLoading}
+                    task={task}
+                    setTask={setTask}
+                  />
+                  <Prompt
+                    when={task.isLoading}
+                    message="Operations are still pending, are you sure you want to leave the page?"
+                  />
+                </>
               }
             />
             <PrivateRoute
               path="annotate/:collectionUid/:imageUid"
               element={
-                <Annotate
-                  storeInstance={storeInstance}
-                  setIsLoading={setIsLoading}
-                  task={task}
-                  setTask={setTask}
-                  setProductSection={setProductSection}
-                />
+                <>
+                  <Annotate
+                    storeInstance={storeInstance}
+                    setIsLoading={setIsLoading}
+                    task={task}
+                    setTask={setTask}
+                    setProductSection={setProductSection}
+                  />
+                  <Prompt
+                    when={task.isLoading}
+                    message="Operations are still pending, are you sure you want to leave the page?"
+                  />
+                </>
               }
             />
             <PrivateRoute
