@@ -62,41 +62,6 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     props.setIsLoading(true);
   });
 
-  function updateProductSection(): void {
-    props.setProductSection(
-      <div className={classes.sectionContainer}>
-        <Card className={`${classes.cardSize} ${classes.cardLeft}`}>
-          <IconButton
-            icon={icons.nextPrevious}
-            tooltip={{ name: "Previous Image" }}
-            onClick={() => cycleImage(false)}
-            tooltipPlacement="bottom"
-            disabled={!canCycle()}
-          />
-        </Card>
-        <Card className={classes.cardSize}>
-          <IconButton
-            icon={icons.tick}
-            tooltip={{ name: "Mark Annotation As Complete" }}
-            onClick={() => setIsComplete((prevIsComplete) => !prevIsComplete)}
-            fill={isComplete}
-            tooltipPlacement="bottom"
-          />
-        </Card>
-        <Card className={`${classes.cardSize} ${classes.cardRight}`}>
-          <IconButton
-            className={classes.rotateIcon}
-            icon={icons.nextPrevious}
-            tooltip={{ name: "Next Image" }}
-            onClick={() => cycleImage()}
-            tooltipPlacement="bottom"
-            disabled={!canCycle()}
-          />
-        </Card>
-      </div>
-    );
-  }
-
   const canCycle = (): boolean =>
     Boolean(imageUids && currImageIdx !== null && imageUids?.length > 1);
 
@@ -133,6 +98,41 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     },
     [collectionUid]
   );
+
+  function updateProductSection(): void {
+    props.setProductSection(
+      <div className={classes.sectionContainer}>
+        <Card className={`${classes.cardSize} ${classes.cardLeft}`}>
+          <IconButton
+            icon={icons.previousNext}
+            tooltip={{ name: "Previous Image" }}
+            onClick={() => cycleImage(false)}
+            tooltipPlacement="bottom"
+            disabled={!canCycle()}
+          />
+        </Card>
+        <Card className={classes.cardSize}>
+          <IconButton
+            icon={icons.tick}
+            tooltip={{ name: "Mark Annotation As Complete" }}
+            onClick={() => setIsComplete((prevIsComplete) => !prevIsComplete)}
+            fill={isComplete}
+            tooltipPlacement="bottom"
+          />
+        </Card>
+        <Card className={`${classes.cardSize} ${classes.cardRight}`}>
+          <IconButton
+            className={classes.rotateIcon}
+            icon={icons.previousNext}
+            tooltip={{ name: "Next Image" }}
+            onClick={() => cycleImage()}
+            tooltipPlacement="bottom"
+            disabled={!canCycle()}
+          />
+        </Card>
+      </div>
+    );
+  }
 
   useEffect(() => {
     if (!collectionUid) return;
