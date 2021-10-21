@@ -178,11 +178,11 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   const saveAssigneesCallback = (
-    imageUid: string,
-    newAssignees: string[]
+    imageUids: string[],
+    newAssignees: string[][]
   ): void => {
     props.storeInstance
-      .setAssignees(collectionUid, imageUid, newAssignees)
+      .setAssignees(collectionUid, imageUids, newAssignees)
       .then(fetchImageItems)
       .catch((error) => {
         logger.log(error);
