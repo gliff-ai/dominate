@@ -209,15 +209,15 @@ export function Billing(): JSX.Element {
                 style={{ width: "100%", padding: "75px", textAlign: "center" }}
               >
                 <SVG
-                  src={plansMap["CUSTOM"].icon}
+                  src={plansMap.CUSTOM.icon}
                   style={{ width: "100px", height: "100px", margin: "auto" }}
                 />
               </div>
               <h6
                 style={{ width: "100%", textAlign: "center", fontSize: "14px" }}
               >
-                You are on a custom plan. Please contact us for for information
-                and invoicing
+                You are on a custom plan. Please contact us for information and
+                invoicing
               </h6>
             </Grid>
           )
