@@ -196,11 +196,7 @@ export const SignUp = (props: Props): ReactElement | null => {
     }
 
     try {
-      const session = await createCheckoutSession(
-          tierId,
-          user.id,
-          user.email
-      );
+      const session = await createCheckoutSession(tierId, user.id, user.email);
 
       if (!session) {
         // There's no need to use Stripe for this tier
@@ -208,7 +204,7 @@ export const SignUp = (props: Props): ReactElement | null => {
         return;
       }
 
-      const {id: sessionId} = session;
+      const { id: sessionId } = session;
 
       // When the customer clicks on the button, redirect them to Checkout.
       const result = await stripe.redirectToCheckout({
@@ -218,23 +214,24 @@ export const SignUp = (props: Props): ReactElement | null => {
       if (result.error) {
         console.error(result.error);
       }
-    } catch(error) {
+    } catch (error) {
       console.error(error);
       setStoreError(error);
       setOpen(true);
     }
   };
 
-  const err =
-      <MessageSnackbar
-        open={open}
-        handleClose={handleClose}
-        messageText={
-          String(storeError).includes("duplicate key")
-            ? "Looks like that account already exists, try another email!"
-            : "There was an error creating an account"
-        }
-      />
+  const err = (
+    <MessageSnackbar
+      open={open}
+      handleClose={handleClose}
+      messageText={
+        String(storeError).includes("duplicate key")
+          ? "Looks like that account already exists, try another email!"
+          : "There was an error creating an account"
+      }
+    />
+  );
 
   const signupForm = (
     <>
@@ -353,7 +350,12 @@ export const SignUp = (props: Props): ReactElement | null => {
   }
 
   if (state === "2-RecoveryKey" && recoveryKey) {
-    return <><RecoveryKey recoveryKey={recoveryKey} callback={billing} />{err}</>;
+    return (
+      <>
+        <RecoveryKey recoveryKey={recoveryKey} callback={billing} />
+        {err}
+      </>
+    );
   }
 
   if (state === "3-BillingFailed") {
@@ -374,7 +376,12 @@ export const SignUp = (props: Props): ReactElement | null => {
   }
 
   if (state === "4-VerificationSent") {
-    return <><VerificationSent />{err}</>;
+    return (
+      <>
+        <VerificationSent />
+        {err}
+      </>
+    );
   }
 
   return <></>;
