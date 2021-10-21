@@ -26,6 +26,7 @@ import {
 import { imgSrc } from "@/imgSrc";
 import { useInput } from "@/hooks/use-input";
 import { SubmitButton, GliffCard, LoadingSpinner } from "@/components";
+import { useAuth } from "@/hooks/use-auth";
 
 type FormState = {
   [key in "user" | "project" | "collaborator"]: {
@@ -63,10 +64,11 @@ const toTitleCase = (s: string): string =>
 
 export function Billing(): JSX.Element {
   const classes = useStyle();
+  const auth = useAuth();
   const [limits, setLimits] = useState<Limits | null>(null);
-  const [plan, setPlan] = useState<Plan | null>(null);
-  const [payment, setPayment] = useState<Payment | null>(null);
-  const [invoices, setInvoices] = useState<Invoice[] | null>(null);
+  const [plan, setPlan] = useState<Plan | null | "CUSTOM">(null);
+  const [payment, setPayment] = useState<Payment | null | false>(null);
+  const [invoices, setInvoices] = useState<Invoice[] | null | false>(null);
 
   const [addonPrices, setAddonPrices] = useState<AddonPrices | null>(null);
   const [addonFormLoading, setAddonFormLoading] = useState(false);
@@ -83,16 +85,31 @@ export function Billing(): JSX.Element {
     COMMUNITY: { icon: imgSrc("essential-plan"), name: "Essential" },
     PRO: { icon: imgSrc("small-team-plan"), name: "Small Team" },
     TEAM: { icon: imgSrc("growing-team-plan"), name: "Growing Team" },
+    CUSTOM: { icon: imgSrc("growing-team-plan"), name: "Custom Plan" },
   } as const;
 
   const addonTypes = ["user", "project", "collaborator"] as const;
 
   useEffect(() => {
+    if (auth?.user) {
     void getLimits().then(setLimits);
-    void getPlan().then(setPlan);
-    void getInvoices().then(setInvoices);
-    void getPayment().then(setPayment);
-  }, [addonFormLoading]);
+      void getPlan().then(p => {
+
+          if(p) {
+              setPlan(p)
+                    void getInvoices().then(setInvoices);
+      void getPayment().then(setPayment);
+          } else {
+              setPlan("CUSTOM")
+              setInvoices(false)
+              setPayment(false)
+          }
+      });
+
+
+
+    }
+  }, [addonFormLoading, auth]);
 
   const usageElement = (
     <GliffCard
@@ -142,51 +159,71 @@ export function Billing(): JSX.Element {
     />
   );
 
-  const planElement = (
-    <GliffCard
-      title="Plan"
-      el={
-        !plan ? (
-          <LoadingSpinner />
-        ) : (
-          <Grid container spacing={3}>
-            <Grid item xs={3}>
-              <div
-                style={{ width: "100%", padding: "75px", textAlign: "center" }}
-              >
-                <SVG
-                  src={plansMap[plan.tier_name].icon}
-                  style={{ width: "100px", height: "100px", margin: "auto" }}
-                />
-              </div>
-              Your current plan is{" "}
-              <strong>{plansMap[plan.tier_name].name}</strong> with{" "}
-              <strong>{Object.values(plan.addons).length}</strong> addons
-              <br />
-              The current period ends on:{" "}
-              {new Date(plan.current_period_end * 1000).toLocaleDateString()}
-            </Grid>
-            <Grid item xs={6}>
-              <table className={classes.baseTable}>
-                <thead>
-                  <tr>
-                    <th>Description</th>
-                    <th>Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>{plansMap[plan.tier_name].name}</td>
-                    <td>£{plan.base_price / 100}</td>
-                  </tr>
-                </tbody>
-              </table>
-            </Grid>
-          </Grid>
-        )
-      }
-    />
-  );
+  let planElement: JSX.Element;
+    if (!plan) {
+        planElement = (
+            <GliffCard
+                title="Plan"
+                el={
+                    <LoadingSpinner/>
+                }
+            />
+        );
+    } else {
+        planElement = (
+            <GliffCard
+                title="Plan"
+                el={
+                    plan !== "CUSTOM" ?
+                        (<Grid container spacing={3}>
+                            <Grid item xs={3}>
+                                <div
+                                    style={{width: "100%", padding: "75px", textAlign: "center"}}
+                                >
+                                    <SVG
+                                        src={plansMap[plan.tier_name].icon}
+                                        style={{width: "100px", height: "100px", margin: "auto"}}
+                                    />
+                                </div>
+                                Your current plan is{" "}
+                                <strong>{plansMap[plan.tier_name].name}</strong> with{" "}
+                                <strong>{Object.values(plan.addons).length}</strong> addons
+                                <br/>
+                                The current period ends on:{" "}
+                                {new Date(plan.current_period_end * 1000).toLocaleDateString()}
+                            </Grid>
+                            <Grid item xs={6}>
+                                <table className={classes.baseTable}>
+                                    <thead>
+                                    <tr>
+                                        <th>Description</th>
+                                        <th>Amount</th>
+                                    </tr>
+                                    </thead>
+                                    <tbody>
+                                    <tr>
+                                        <td>{plansMap[plan.tier_name].name}</td>
+                                        <td>£{plan.base_price / 100}</td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+                            </Grid>
+                        </Grid>) : (
+                            <Grid container spacing={3}>      <div
+                                    style={{width: "100%", padding: "75px", textAlign: "center"}}
+                                >
+                                    <SVG
+                                        src={plansMap["CUSTOM"].icon}
+                                        style={{width: "100px", height: "100px", margin: "auto"}}
+                                    />
+                                </div><h6 style={  { width: "100%",
+    textAlign: "center",
+    fontSize: "14px"}}>You are on a custom plan. Please contact us for for information
+                                and invoicing</h6></Grid>)
+                }
+            />
+        );
+    }
 
   const paymentElement = (
     <GliffCard
@@ -300,6 +337,8 @@ export function Billing(): JSX.Element {
     </form>
   );
 
+  if (!auth?.user) return <></>;
+
   return (
     <div style={{ margin: "20px" }}>
       <Grid container spacing={3}>
@@ -310,10 +349,10 @@ export function Billing(): JSX.Element {
           {usageElement}
         </Grid>
         <Grid item xs={9}>
-          {invoicesElement}
+          {invoices === false ? null : invoicesElement}
         </Grid>
         <Grid item xs={3}>
-          {paymentElement}
+          {payment === false ? null : paymentElement}
         </Grid>
 
         <Dialog
