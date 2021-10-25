@@ -24,8 +24,8 @@
     "@types/jest": "^26.0.21",
     "@types/libsodium-wrappers": "^0.7.9",
     "@types/logrocket-react": "^3.0.0",
-    "@types/react": "^17.0.3",
-    "@types/react-dom": "^17.0.1",
+    "@types/react": "^17.0.31",
+    "@types/react-dom": "^17.0.2",
     "@types/resize-observer-browser": "^0.1.5",
     "eslint": "^7.25.0",
     "jest": "^27.0.3",
@@ -37,7 +37,7 @@
     "vite-react-jsx": "^1.1.2"
   },
   "dependencies": {
-    "@gliff-ai/annotate": "^0.29.5",
+    "@gliff-ai/annotate": "^0.29.7",
     "@gliff-ai/audit": "^0.2.2",
     "@gliff-ai/curate": "^0.22.0",
     "@gliff-ai/manage": "^0.7.0",
@@ -46,6 +46,7 @@
     "@material-ui/core": "^4.11.3",
     "@material-ui/icons": "^4.11.2",
     "@material-ui/lab": "^4.0.0-alpha.58",
+    "@material-ui/types": "^5.1.0",
     "@sentry/integrations": "^6.6.0",
     "@sentry/react": "^6.6.0",
     "@sentry/tracing": "^6.6.0",
