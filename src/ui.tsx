@@ -49,6 +49,8 @@ const UserInterface = (props: Props): ReactElement | null => {
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const [isOverflow, setIsOverflow] = useState(true);
+  const [productSection, setProductSection] =
+    useState<JSX.Element | null>(null);
 
   useEffect(() => {
     // Paths we never scroll on because it messes with canvases etc
@@ -63,12 +65,17 @@ const UserInterface = (props: Props): ReactElement | null => {
     setIsOverflow(shouldOverflow(location.pathname));
   }, [location]);
 
+  useEffect(() => {
+    if (!productSection) return;
+    setProductSection(null); // clear product section
+  }, [window.location.pathname]);
+
   const classes = useStyles(isOverflow);
   return (
     <ThemeProvider theme={theme}>
       <ProgressSnackbar task={task} setTask={setTask} />
       <CssBaseline />
-      <NavBar />
+      <NavBar productSection={productSection} />
       <div className={isOverflow ? classes.overflow : classes.noOverflow}>
         <PageSpinner isLoading={isLoading} />
         <Routes>
@@ -129,6 +136,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                     setIsLoading={setIsLoading}
                     task={task}
                     setTask={setTask}
+                    setProductSection={setProductSection}
                   />
                   <Prompt
                     when={task.isLoading}
