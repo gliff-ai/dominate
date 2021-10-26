@@ -15,6 +15,7 @@ import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
 import type { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
 import { Task } from "@/components";
+import { useAuth } from "@/hooks/use-auth";
 
 const logger = console;
 
@@ -430,8 +431,8 @@ export class DominateStore {
           assignees: [],
           metadata: imageMetas[i],
           imageUID: newItems[i].uid,
-          annotationUID: null,
-          auditUID: null,
+          annotationUID: {},
+          auditUID: {},
         });
       }
 
@@ -479,7 +480,7 @@ export class DominateStore {
 
   deleteImages = async (
     collectionUid: string,
-    imageUids: string[],
+    uidsToDelete: string[],
     task: Task,
     setTask: (task: Task) => void
   ): Promise<void> => {
@@ -498,20 +499,28 @@ export class DominateStore {
     const annotationUIDs: string[] = [];
     const auditUIDs: string[] = [];
     oldContent
-      .filter((item) => imageUids.includes(item.imageUID))
+      .filter((item) => uidsToDelete.includes(item.imageUID))
       .forEach((item) => {
         imageUIDs.push(item.imageUID);
-        if (item.annotationUID !== null) {
-          annotationUIDs.push(item.annotationUID);
+        if (Object.keys(item.annotationUID).length > 0) {
+          // collect UIDs of all annotations for this image:
+          Object.entries(item.annotationUID).forEach(
+            ([username, annotationUID]) => {
+              annotationUIDs.push(annotationUID);
+            }
+          );
         }
-        if (item.auditUID !== null) {
-          auditUIDs.push(item.auditUID);
+        if (Object.keys(item.auditUID).length > 0) {
+          // collect UIDs of all audits for this image:
+          Object.entries(item.auditUID).forEach(([username, auditUID]) => {
+            auditUIDs.push(auditUID);
+          });
         }
       });
 
-    // remove GalleryTile's whose imageUID is in imageUids:
+    // remove GalleryTile's whose imageUID is in uidsToDelete:
     const newContent: GalleryTile[] = oldContent.filter(
-      (item) => !imageUids.includes(item.imageUID)
+      (item) => !uidsToDelete.includes(item.imageUID)
     );
 
     // save updated metadata in store:
@@ -547,6 +556,8 @@ export class DominateStore {
   ): Promise<Annotations | undefined> => {
     // retrieves the Annotations object for the specified image
 
+    const auth = useAuth();
+
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const content = JSON.parse(
@@ -554,10 +565,17 @@ export class DominateStore {
     ) as GalleryTile[];
     const galleryTile = content.find((item) => item.imageUID === imageUid);
 
-    if (!galleryTile?.annotationUID) return undefined;
+    if (
+      !galleryTile?.annotationUID ||
+      !auth?.user?.username ||
+      galleryTile.annotationUID[auth.user.username] === undefined
+    )
+      return undefined;
 
     const itemManager = collectionManager.getItemManager(collection);
-    const annotationItem = await itemManager.fetch(galleryTile.annotationUID);
+    const annotationItem = await itemManager.fetch(
+      galleryTile.annotationUID[auth?.user?.username]
+    );
     const annotationContent = await annotationItem.getContent(
       OutputFormat.String
     );
@@ -574,6 +592,9 @@ export class DominateStore {
     setTask: (task: Task) => void
   ): Promise<void> => {
     // Store annotations object in a new item.
+
+    const auth = useAuth();
+    if (!auth?.user?.username) return;
 
     // Retrieve itemManager
     const itemManager = await this.getItemManager(collectionUid);
@@ -622,8 +643,9 @@ export class DominateStore {
     const tileIdx = galleryTiles.findIndex(
       (item) => item.imageUID === imageUid
     );
-    galleryTiles[tileIdx].annotationUID = annotationsItem.uid;
-    galleryTiles[tileIdx].auditUID = auditItem.uid;
+    galleryTiles[tileIdx].annotationUID[auth.user.username] =
+      annotationsItem.uid;
+    galleryTiles[tileIdx].auditUID[auth.user.username] = auditItem.uid;
     await collection.setContent(JSON.stringify(galleryTiles));
     await collectionManager.upload(collection);
 
@@ -642,6 +664,9 @@ export class DominateStore {
     task: Task,
     setTask: (task: Task) => void
   ): Promise<void> => {
+    const auth = useAuth();
+    if (!auth?.user?.username) return;
+
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     setTask({
@@ -653,9 +678,10 @@ export class DominateStore {
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
     const tile = galleryTiles.find((item) => item.imageUID === imageUid);
     if (tile === undefined) return;
-    const annotationUid = tile.annotationUID;
-    const auditUid = tile.auditUID;
+    const annotationUid = tile.annotationUID[auth.user.username];
+    const auditUid = tile.auditUID[auth.user.username];
     if (!annotationUid || !auditUid) return;
+
     // Retrieve items
     const itemManager = await this.getItemManager(collectionUid);
     const items = await itemManager.fetchMulti([annotationUid, auditUid]);
@@ -716,20 +742,15 @@ export class DominateStore {
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const collectionContent = await collection.getContent(OutputFormat.String);
-    // pick out the items that have audits:
-    const tiles = (JSON.parse(collectionContent) as GalleryTile[]).filter(
-      (tile) => tile.auditUID !== null
-    );
+    // get tiles:
+    const tiles = JSON.parse(collectionContent) as GalleryTile[];
 
     // fetch the audits and parse as JSON:
     const itemManager = collectionManager.getItemManager(collection);
-    const auditItems = (
-      await itemManager.fetchMulti(
-        tiles
-          .filter((tile) => tile.auditUID)
-          .map((tile) => tile.auditUID as string)
-      )
-    ).data;
+    const auditUIDs = tiles.map((tile) => Object.values(tile.auditUID)).flat();
+    if (auditUIDs.length === 0) return [];
+
+    const auditItems = (await itemManager.fetchMulti(auditUIDs)).data;
     const auditStrings: string[] = await Promise.all(
       auditItems.map((audit) => audit.getContent(OutputFormat.String))
     );
