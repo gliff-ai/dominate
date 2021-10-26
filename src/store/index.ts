@@ -426,8 +426,6 @@ export class DominateStore {
       const newItems = await Promise.all(itemPromises);
       await itemManager.batch(newItems);
 
-      setTask({ ...task, progress: 50 });
-
       const newTiles: GalleryTile[] = [];
       for (let i = 0; i < imageMetas.length; i += 1) {
         // Add the image's metadata/thumbnail and a pointer to the image item to the gallery's content:
@@ -448,7 +446,6 @@ export class DominateStore {
       // save new gallery tiles:
       const collectionManager = this.etebaseInstance.getCollectionManager();
       const collection = await collectionManager.fetch(collectionUid);
-      setTask({ ...task, progress: 70 });
       const oldContent = await collection.getContent(OutputFormat.String);
       const newContent = JSON.stringify(
         (JSON.parse(oldContent) as GalleryTile[]).concat(newTiles)
