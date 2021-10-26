@@ -1,17 +1,6 @@
 import { ReactElement, useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
-import {
-  Dialog,
-  Button,
-  Typography,
-  Card,
-  Paper,
-  makeStyles,
-  Theme,
-  DialogActions,
-} from "@material-ui/core";
-
 import Curate from "@gliff-ai/curate";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
@@ -25,6 +14,10 @@ import {
   ImageMeta,
 } from "@/store/interfaces";
 import { Task, TSButtonToolbar } from "@/components";
+import {
+  ConfirmationDialog,
+  MessageDialog,
+} from "@/components/message/ConfirmationDialog";
 import { Plugins } from "@/plugins/Plugins";
 import { usePlugins } from "@/hooks";
 
@@ -58,20 +51,6 @@ interface Team {
 
 type Collaborator = { name: string; email: string };
 
-const useStyles = () =>
-  makeStyles((theme: Theme) => ({
-    paperHeader: {
-      padding: "10px",
-      backgroundColor: theme.palette.primary.main,
-    },
-    projectsTypography: {
-      color: "#000000",
-      display: "inline",
-      fontSize: "21px",
-      marginRight: "125px",
-    },
-  }));
-
 interface Props {
   storeInstance: DominateStore;
   setIsLoading: (isLoading: boolean) => void;
@@ -87,13 +66,22 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
   const { collectionUid = "" } = useParams<string>(); // uid of selected gallery, from URL
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
+
+  // multi-label image download dialog state:
+  const [showMultilabelConfirm, setShowMultilabelConfirm] =
+    useState<boolean>(false);
   const [multi, setMulti] = useState<boolean>(false);
-  const [showDialog, setShowDialog] = useState<boolean>(false);
+
+  // image deletion dialog state:
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
+  const [imagesToDelete, setImagesToDelete] = useState<string[]>([]);
+
+  // no images to download message state:
+  const [showNoImageMessage, setShowNoImageMessage] = useState<boolean>(false);
+
   const [pluginUrls, setPluginUrls] = useState<string[] | null>(null);
   const [collaborators, setCollaborators] =
     useState<Collaborator[] | null>(null);
-
-  const classes = useStyles()();
 
   const isOwner = (): boolean =>
     auth?.userProfile?.id === auth?.userProfile?.team?.owner_id;
@@ -165,7 +153,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }
     }
 
-    props.setTask({ ...props.task, progress: 20 });
+    props.setTask({ ...props.task, progress: 10 });
 
     // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
     await props.storeInstance.createImage(
@@ -190,20 +178,28 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   const saveAssigneesCallback = (
-    imageUid: string,
-    newAssignees: string[]
+    imageUids: string[],
+    newAssignees: string[][]
   ): void => {
     props.storeInstance
-      .setAssignees(collectionUid, imageUid, newAssignees)
+      .setAssignees(collectionUid, imageUids, newAssignees)
       .then(fetchImageItems)
       .catch((error) => {
         logger.log(error);
       });
   };
 
-  const deleteImageCallback = (imageUids: string[]): void => {
+  const deleteImagesCallback = (imageUids: string[]): void => {
+    setImagesToDelete(imageUids);
+    setShowDeleteConfirm(true);
+  };
+
+  const deleteImages = (imageUids: string[]): void => {
     props.storeInstance
-      .deleteImages(collectionUid, imageUids)
+      .deleteImages(collectionUid, imageUids, props.task, props.setTask)
+      .then(() => {
+        fetchImageItems();
+      })
       .catch((error) => {
         logger.log(error);
       });
@@ -262,11 +258,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     } else {
       // get set of all labels:
       const allLabels = new Set<string>(
-        collectionContent
-          .map((tile) => tile.imageLabels)
-          .reduce((acc: string[], thisLabels: string[]) =>
-            acc.concat(thisLabels)
-          )
+        collectionContent.map((tile) => tile.imageLabels).flat()
       );
 
       // add label folders to zip:
@@ -335,11 +327,17 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   };
 
   const downloadDatasetCallback = (): void => {
+    // check the collection has images:
+    if (collectionContent.length === 0) {
+      setShowNoImageMessage(true);
+      return;
+    }
+
     // check for multi-labelled images:
     for (const tile of collectionContent) {
       if (tile.imageLabels.length > 1) {
         setMulti(true);
-        setShowDialog(true);
+        setShowMultilabelConfirm(true);
         return;
       }
     }
@@ -396,7 +394,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         saveImageCallback={addImagesToGallery}
         saveLabelsCallback={saveLabelsCallback}
         saveAssigneesCallback={saveAssigneesCallback}
-        deleteImagesCallback={deleteImageCallback}
+        deleteImagesCallback={deleteImagesCallback}
         annotateCallback={annotateCallback}
         downloadDatasetCallback={downloadDatasetCallback}
         showAppBar={false}
@@ -419,43 +417,31 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         collaborators={collaborators}
         userIsOwner={isOwner()}
       />
-      <Dialog open={showDialog}>
-        <Card>
-          <Paper
-            elevation={0}
-            variant="outlined"
-            square
-            className={classes.paperHeader}
-          >
-            <Typography className={classes.projectsTypography}>
-              Warning
-            </Typography>
-          </Paper>
-          <Typography style={{ margin: "10px" }}>
-            Dataset contains multilabel images, this will export as a flat
-            directory with a JSON file for labels. Continue?
-          </Typography>
-          <DialogActions>
-            <Button
-              onClick={() => {
-                setShowDialog(false);
-                void downloadDataset();
-              }}
-              color="primary"
-            >
-              OK
-            </Button>
-            <Button
-              onClick={() => {
-                setShowDialog(false);
-              }}
-              color="primary"
-            >
-              Cancel
-            </Button>
-          </DialogActions>
-        </Card>
-      </Dialog>
+
+      <ConfirmationDialog
+        open={showMultilabelConfirm}
+        setOpen={setShowMultilabelConfirm}
+        heading="Warning"
+        message="Dataset contains multilabel images, this will export as a flat directory with a JSON file for labels. Continue?"
+        okCallback={downloadDataset}
+      />
+
+      <ConfirmationDialog
+        open={showDeleteConfirm}
+        setOpen={setShowDeleteConfirm}
+        heading="Warning"
+        message={`Delete ${imagesToDelete.length} images?`}
+        okCallback={() => {
+          deleteImages(imagesToDelete);
+        }}
+      />
+
+      <MessageDialog
+        open={showNoImageMessage}
+        setOpen={setShowNoImageMessage}
+        heading="Warning"
+        message="There are no images to download!"
+      />
     </>
   );
 };

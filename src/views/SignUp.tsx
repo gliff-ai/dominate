@@ -112,7 +112,7 @@ export const SignUp = (props: Props): ReactElement | null => {
       return false;
     }
 
-    if (signUp.acceptedTermsAndConditions === false) {
+    if (!signUp.acceptedTermsAndConditions) {
       setTermsAndConditionsError("You must accept our terms and conditions");
       return false;
     }
@@ -195,21 +195,43 @@ export const SignUp = (props: Props): ReactElement | null => {
       return;
     }
 
-    const { id: sessionId } = await createCheckoutSession(
-      tierId,
-      user.id,
-      user.email
-    );
+    try {
+      const session = await createCheckoutSession(tierId, user.id, user.email);
 
-    // When the customer clicks on the button, redirect them to Checkout.
-    const result = await stripe.redirectToCheckout({
-      sessionId,
-    });
+      if (!session) {
+        // There's no need to use Stripe for this tier
+        setState("4-VerificationSent");
+        return;
+      }
 
-    if (result.error) {
-      console.error(result.error);
+      const { id: sessionId } = session;
+
+      // When the customer clicks on the button, redirect them to Checkout.
+      const result = await stripe.redirectToCheckout({
+        sessionId,
+      });
+
+      if (result.error) {
+        console.error(result.error);
+      }
+    } catch (error) {
+      console.error(error);
+      setStoreError(error);
+      setOpen(true);
     }
   };
+
+  const err = (
+    <MessageSnackbar
+      open={open}
+      handleClose={handleClose}
+      messageText={
+        String(storeError).includes("duplicate key")
+          ? "Looks like that account already exists, try another email!"
+          : "There was an error creating an account"
+      }
+    />
+  );
 
   const signupForm = (
     <>
@@ -319,16 +341,7 @@ export const SignUp = (props: Props): ReactElement | null => {
         </div>
       </form>
 
-      {/* Looks like that account already exists, try another email! */}
-      <MessageSnackbar
-        open={open}
-        handleClose={handleClose}
-        messageText={
-          String(storeError).includes("duplicate key")
-            ? "Looks like that account already exists, try another email!"
-            : "There was an error creating an account"
-        }
-      />
+      {err}
     </>
   );
 
@@ -337,7 +350,12 @@ export const SignUp = (props: Props): ReactElement | null => {
   }
 
   if (state === "2-RecoveryKey" && recoveryKey) {
-    return <RecoveryKey recoveryKey={recoveryKey} callback={billing} />;
+    return (
+      <>
+        <RecoveryKey recoveryKey={recoveryKey} callback={billing} />
+        {err}
+      </>
+    );
   }
 
   if (state === "3-BillingFailed") {
@@ -358,7 +376,12 @@ export const SignUp = (props: Props): ReactElement | null => {
   }
 
   if (state === "4-VerificationSent") {
-    return <VerificationSent />;
+    return (
+      <>
+        <VerificationSent />
+        {err}
+      </>
+    );
   }
 
   return <></>;
