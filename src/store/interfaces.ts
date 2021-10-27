@@ -55,7 +55,8 @@ interface ImageMeta {
   customMeta?: string; // JSON of custom metadata
 }
 
-interface AnnotationItemMeta {
+interface AnnotationMeta {
+  isComplete: boolean;
   type?: string;
   name?: string;
   mtime?: number;
@@ -64,4 +65,12 @@ interface AnnotationItemMeta {
   createdTime?: number;
 }
 
-export type { GalleryMeta, GalleryTile, MetaItem, Image, Slices, ImageMeta };
+export type {
+  GalleryMeta,
+  GalleryTile,
+  MetaItem,
+  Image,
+  Slices,
+  ImageMeta,
+  AnnotationMeta,
+};

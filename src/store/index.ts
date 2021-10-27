@@ -13,7 +13,13 @@ import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
-import type { GalleryMeta, GalleryTile, Image, ImageMeta } from "./interfaces";
+import type {
+  GalleryMeta,
+  GalleryTile,
+  Image,
+  ImageMeta,
+  AnnotationMeta,
+} from "./interfaces";
 import { Task } from "@/components";
 import { useAuth } from "@/hooks/use-auth";
 
@@ -554,7 +560,7 @@ export class DominateStore {
     collectionUid: string,
     imageUid: string,
     username: string
-  ): Promise<Annotations | undefined> => {
+  ): Promise<{ meta: AnnotationMeta; annotations: Annotations } | null> => {
     // retrieves the Annotations object for the specified image
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -568,7 +574,7 @@ export class DominateStore {
       !galleryTile?.annotationUID ||
       galleryTile.annotationUID[username] === undefined
     )
-      return undefined;
+      return null;
 
     const itemManager = collectionManager.getItemManager(collection);
     const annotationItem = await itemManager.fetch(
@@ -578,7 +584,12 @@ export class DominateStore {
       OutputFormat.String
     );
 
-    return new Annotations(JSON.parse(annotationContent));
+    const annotationMeta = annotationItem.getMeta() as AnnotationMeta;
+
+    return {
+      meta: annotationMeta,
+      annotations: new Annotations(JSON.parse(annotationContent)),
+    };
   };
 
   createAnnotation = async (
@@ -586,6 +597,7 @@ export class DominateStore {
     imageUid: string,
     annotationData: Annotation[],
     auditData: AuditAction[],
+    isComplete = false,
     task: Task,
     setTask: (task: Task) => void,
     username: string
@@ -601,6 +613,7 @@ export class DominateStore {
       {
         type: "gliff.annotation",
         mtime: createdTime,
+        isComplete,
         createdTime,
       },
       JSON.stringify(annotationData)
@@ -656,6 +669,7 @@ export class DominateStore {
     imageUid: string,
     annotationData: Annotation[],
     auditData: AuditAction[],
+    isComplete: boolean,
     task: Task,
     setTask: (task: Task) => void,
     username: string
@@ -687,16 +701,18 @@ export class DominateStore {
     const auditItem = items.data[1];
 
     // Update annotationItem:
-    const modifiedTime = new Date().getTime();
     let meta = annotationItem.getMeta();
-    delete meta.mtime;
-    annotationItem.setMeta({ ...meta, modifiedTime });
+    const mtime = new Date().getTime();
+    annotationItem.setMeta({
+      ...meta,
+      mtime,
+      isComplete,
+    });
     await annotationItem.setContent(JSON.stringify(annotationData));
 
     // Update auditItem:
     meta = auditItem.getMeta();
-    delete meta.mtime;
-    auditItem.setMeta({ ...meta, modifiedTime });
+    auditItem.setMeta({ ...meta, mtime });
     await auditItem.setContent(JSON.stringify(auditData));
 
     // Save changes
@@ -763,19 +779,28 @@ export class DominateStore {
 
   setAssignees = async (
     collectionUid: string,
-    imageUid: string,
-    newAssignees: string[]
+    imageUids: string[],
+    newAssignees: string[][]
   ): Promise<void> => {
+    if (imageUids.length !== newAssignees.length) {
+      console.error(
+        `Parameters "imageUids" and "newAssignees" should be of equal length.`
+      );
+      return;
+    }
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const oldContent = await collection.getContent(OutputFormat.String);
 
     let newContent: GalleryTile[] = JSON.parse(oldContent) as GalleryTile[];
-    newContent = newContent.map((item) => {
-      if (item.imageUID === imageUid) {
-        return { ...item, assignees: newAssignees };
-      }
-      return item;
+
+    imageUids.forEach((imageUid, i) => {
+      newContent = newContent.map((item) => {
+        if (item.imageUID === imageUid) {
+          return { ...item, assignees: newAssignees[i] };
+        }
+        return item;
+      });
     });
 
     await collection.setContent(JSON.stringify(newContent));

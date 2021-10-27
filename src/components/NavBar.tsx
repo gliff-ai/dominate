@@ -54,9 +54,14 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginBottom: "5px",
     marginTop: "7px",
   },
+  productSectionGrid: {
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    transform: "translate(-50%, -50%)",
+  },
   navGrid: {
     marginLeft: "auto",
-    alignItems: "center",
     height: "90px",
   },
   navLinks: {
@@ -71,8 +76,10 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: "#000000",
   },
 }));
-
-export const NavBar = (): ReactElement | null => {
+interface Props {
+  productSection: JSX.Element | null;
+}
+export const NavBar = (props: Props): ReactElement | null => {
   // Get auth state and re-render anytime it changes
   const auth = useAuth();
   const navigate = useNavigate();
@@ -195,6 +202,9 @@ export const NavBar = (): ReactElement | null => {
               height="60px"
               alt="gliff logo"
             />
+          </Grid>
+          <Grid className={classes.productSectionGrid}>
+            {props.productSection}
           </Grid>
           <Grid className={classes.navGrid}>
             <nav className={classes.navLinks}>

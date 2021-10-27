@@ -5,12 +5,16 @@ export const createCheckoutSession = (
   tier_id: string,
   user_id: number,
   user_email: string
-): Promise<CheckoutSession> =>
-  apiRequest<CheckoutSession>("/billing/create-checkout-session/", "POST", {
-    tier_id,
-    user_id,
-    user_email,
-  });
+): Promise<CheckoutSession | null> =>
+  apiRequest<CheckoutSession | null>(
+    "/billing/create-checkout-session/",
+    "POST",
+    {
+      tier_id,
+      user_id,
+      user_email,
+    }
+  );
 
 export const createUserProfile = (
   name: string,
