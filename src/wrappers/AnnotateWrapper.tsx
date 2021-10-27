@@ -11,6 +11,7 @@ import {
   getImageFileInfoFromImageMeta,
 } from "@/imageConversions";
 import { useMountEffect } from "@/hooks/use-mountEffect";
+import { useAuth } from "@/hooks/use-auth";
 
 interface Props {
   storeInstance: DominateStore;
@@ -27,11 +28,15 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [annotationsObject, setAnnotationsObject] =
     useState<Annotations | undefined>(undefined);
 
+  const auth = useAuth();
+
   useMountEffect(() => {
     props.setIsLoading(true);
   });
 
   const saveAnnotation = (newAnnotationsObject: Annotations): void => {
+    if (!auth?.user?.username) return;
+
     // Save annotations data
     props.setTask({
       isLoading: true,
@@ -50,7 +55,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
           annotationsData,
           auditData,
           props.task,
-          props.setTask
+          props.setTask,
+          auth.user.username
         )
         .then(() => {
           props.setTask({ isLoading: false, description: "" });
@@ -65,7 +71,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
           annotationsData,
           auditData,
           props.task,
-          props.setTask
+          props.setTask,
+          auth.user.username
         )
         .then(() => {
           props.setTask({ isLoading: false, description: "" });
@@ -86,9 +93,11 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     };
 
     const getAnnotationsObject = (): void => {
+      if (!auth?.user?.username) return;
+
       // Set state for annotation items.
       props.storeInstance
-        .getAnnotationsObject(collectionUid, imageUid)
+        .getAnnotationsObject(collectionUid, imageUid, auth?.user.username)
         .then((retrievedAnnotationsObject) => {
           setAnnotationsObject(retrievedAnnotationsObject);
         })

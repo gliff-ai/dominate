@@ -552,11 +552,10 @@ export class DominateStore {
 
   getAnnotationsObject = async (
     collectionUid: string,
-    imageUid: string
+    imageUid: string,
+    username: string
   ): Promise<Annotations | undefined> => {
     // retrieves the Annotations object for the specified image
-
-    const auth = useAuth();
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
@@ -567,14 +566,13 @@ export class DominateStore {
 
     if (
       !galleryTile?.annotationUID ||
-      !auth?.user?.username ||
-      galleryTile.annotationUID[auth.user.username] === undefined
+      galleryTile.annotationUID[username] === undefined
     )
       return undefined;
 
     const itemManager = collectionManager.getItemManager(collection);
     const annotationItem = await itemManager.fetch(
-      galleryTile.annotationUID[auth?.user?.username]
+      galleryTile.annotationUID[username]
     );
     const annotationContent = await annotationItem.getContent(
       OutputFormat.String
@@ -589,12 +587,10 @@ export class DominateStore {
     annotationData: Annotation[],
     auditData: AuditAction[],
     task: Task,
-    setTask: (task: Task) => void
+    setTask: (task: Task) => void,
+    username: string
   ): Promise<void> => {
     // Store annotations object in a new item.
-
-    const auth = useAuth();
-    if (!auth?.user?.username) return;
 
     // Retrieve itemManager
     const itemManager = await this.getItemManager(collectionUid);
@@ -643,9 +639,8 @@ export class DominateStore {
     const tileIdx = galleryTiles.findIndex(
       (item) => item.imageUID === imageUid
     );
-    galleryTiles[tileIdx].annotationUID[auth.user.username] =
-      annotationsItem.uid;
-    galleryTiles[tileIdx].auditUID[auth.user.username] = auditItem.uid;
+    galleryTiles[tileIdx].annotationUID[username] = annotationsItem.uid;
+    galleryTiles[tileIdx].auditUID[username] = auditItem.uid;
     await collection.setContent(JSON.stringify(galleryTiles));
     await collectionManager.upload(collection);
 
@@ -662,11 +657,9 @@ export class DominateStore {
     annotationData: Annotation[],
     auditData: AuditAction[],
     task: Task,
-    setTask: (task: Task) => void
+    setTask: (task: Task) => void,
+    username: string
   ): Promise<void> => {
-    const auth = useAuth();
-    if (!auth?.user?.username) return;
-
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     setTask({
@@ -678,8 +671,8 @@ export class DominateStore {
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
     const tile = galleryTiles.find((item) => item.imageUID === imageUid);
     if (tile === undefined) return;
-    const annotationUid = tile.annotationUID[auth.user.username];
-    const auditUid = tile.auditUID[auth.user.username];
+    const annotationUid = tile.annotationUID[username];
+    const auditUid = tile.auditUID[username];
     if (!annotationUid || !auditUid) return;
 
     // Retrieve items
