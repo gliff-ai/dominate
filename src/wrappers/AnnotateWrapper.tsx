@@ -77,8 +77,9 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const fetchImageItems = useStore(
     props,
     (storeInstance) => {
+      if (!auth?.user?.username) return;
       storeInstance
-        .getImagesMeta(collectionUid)
+        .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
           const userIsOwner =
             auth?.userProfile?.id === auth?.userProfile?.team?.owner_id;

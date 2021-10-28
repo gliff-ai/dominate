@@ -21,7 +21,6 @@ import type {
   AnnotationMeta,
 } from "./interfaces";
 import { Task } from "@/components";
-import { useAuth } from "@/hooks/use-auth";
 
 const logger = console;
 
@@ -240,14 +239,45 @@ export class DominateStore {
     } as GalleryMeta;
   };
 
-  getImagesMeta = async (collectionUid: string): Promise<GalleryTile[]> => {
+  getImagesMeta = async (
+    collectionUid: string,
+    username: string
+  ): Promise<GalleryTile[]> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     const collection = await collectionManager.fetch(collectionUid);
-    const json = await collection.getContent(OutputFormat.String);
-    return JSON.parse(json) as GalleryTile[];
+    const jsonString = await collection.getContent(OutputFormat.String);
+
+    type OldGalleryTile = Omit<GalleryTile, "annotationUID" | "auditUID"> & {
+      annotationUID: string;
+      auditUID: string;
+    };
+    let json = JSON.parse(jsonString) as GalleryTile[] | OldGalleryTile[];
+
+    // migrate GalleryTiles to new format if necessary:
+    if (
+      json.length > 0 &&
+      (typeof json[0].annotationUID === "string" ||
+        json[0].annotationUID === null)
+    ) {
+      // migrate to new format:
+      for (let i = 0; i < json.length; i += 1) {
+        const annotationUID = json[i].annotationUID;
+        const auditUID = json[i].auditUID;
+        json[i].annotationUID = {};
+        json[i].auditUID = {};
+        if (annotationUID !== null)
+          json[i].annotationUID[username] = annotationUID;
+        if (auditUID !== null) json[i].auditUID[username] = auditUID;
+      }
+
+      // update in store:
+      await collection.setContent(JSON.stringify(json));
+      await collectionManager.upload(collection);
+    }
+    return json as GalleryTile[];
   };
 
   getCollectionsMeta = async (
