@@ -254,7 +254,7 @@ export class DominateStore {
       annotationUID: string;
       auditUID: string;
     };
-    let json = JSON.parse(jsonString) as GalleryTile[] | OldGalleryTile[];
+    const json = JSON.parse(jsonString) as GalleryTile[] | OldGalleryTile[];
 
     // migrate GalleryTiles to new format if necessary:
     if (
@@ -264,8 +264,8 @@ export class DominateStore {
     ) {
       // migrate to new format:
       for (let i = 0; i < json.length; i += 1) {
-        const annotationUID = json[i].annotationUID;
-        const auditUID = json[i].auditUID;
+        const { annotationUID } = json[i];
+        const { auditUID } = json[i];
         json[i].annotationUID = {};
         json[i].auditUID = {};
         if (annotationUID !== null)
@@ -813,7 +813,7 @@ export class DominateStore {
     newAssignees: string[][]
   ): Promise<void> => {
     if (imageUids.length !== newAssignees.length) {
-      console.error(
+      logger.error(
         `Parameters "imageUids" and "newAssignees" should be of equal length.`
       );
       return;
