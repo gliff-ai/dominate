@@ -37,7 +37,7 @@
     "vite-react-jsx": "^1.1.2"
   },
   "dependencies": {
-    "@gliff-ai/annotate": "^0.29.7",
+    "@gliff-ai/annotate": "^1.2.0",
     "@gliff-ai/audit": "^0.2.2",
     "@gliff-ai/curate": "^0.22.0",
     "@gliff-ai/manage": "^0.7.0",
