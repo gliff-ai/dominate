@@ -77,8 +77,9 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const fetchImageItems = useStore(
     props,
     (storeInstance) => {
+      if (!auth?.user?.username) return;
       storeInstance
-        .getImagesMeta(collectionUid)
+        .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
           const userIsOwner =
             auth?.userProfile?.id === auth?.userProfile?.team?.owner_id;
@@ -145,6 +146,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   }, [imageUids, imageUid]);
 
   const saveAnnotation = (newAnnotationsObject: Annotations): void => {
+    if (!auth?.user?.username) return;
+
     // Save annotations data
     props.setTask({
       isLoading: true,
@@ -164,7 +167,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
           auditData,
           isComplete,
           props.task,
-          props.setTask
+          props.setTask,
+          auth.user.username
         )
         .then(() => {
           props.setTask({ isLoading: false, description: "" });
@@ -180,7 +184,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
           auditData,
           isComplete,
           props.task,
-          props.setTask
+          props.setTask,
+          auth.user.username
         )
         .then(() => {
           props.setTask({ isLoading: false, description: "" });
@@ -205,9 +210,11 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     };
 
     const getAnnotationsObject = (): void => {
+      if (!auth?.user?.username) return;
+
       // Set state for annotation items.
       props.storeInstance
-        .getAnnotationsObject(collectionUid, imageUid)
+        .getAnnotationsObject(collectionUid, imageUid, auth?.user.username)
         .then(
           (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
             setAnnotationsObject(data?.annotations || undefined);
