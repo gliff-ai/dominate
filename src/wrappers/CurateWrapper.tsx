@@ -90,8 +90,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props,
     (storeInstance) => {
       // fetches images via DominateStore, and assigns them to imageItems state
+      if (!auth?.user?.username) return;
       storeInstance
-        .getImagesMeta(collectionUid)
+        .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
           setCollectionContent(items);
           // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
