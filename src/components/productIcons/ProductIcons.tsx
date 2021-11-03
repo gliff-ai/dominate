@@ -80,6 +80,9 @@ function ProductIcons(): ReactElement | null {
       ];
       return `/${tool}/${galleryUid}`;
     }
+    if (tool === "manage") {
+      return `/${tool}/projects`;
+    }
     return undefined;
   };
 
