@@ -38,7 +38,7 @@
   },
   "dependencies": {
     "@gliff-ai/annotate": "^1.2.1",
-    "@gliff-ai/audit": "^0.2.5",
+    "@gliff-ai/audit": "^1.0.0",
     "@gliff-ai/curate": "^0.23.3",
     "@gliff-ai/manage": "^0.7.1",
     "@gliff-ai/style": "^2.4.2",
