@@ -799,7 +799,7 @@ export class DominateStore {
       (audit) => JSON.parse(audit) as AuditAction[]
     );
 
-    // fetchMulti takes a flat list of UIDs and returns a flat list of items, so we need to 
+    // fetchMulti takes a flat list of UIDs and returns a flat list of items, so we need to
     // splice the audits, usernames and imageNames back together:
 
     let sessions = tiles
@@ -812,7 +812,9 @@ export class DominateStore {
       .flat();
 
     if (sessions.length !== audits.length) {
-      console.error("Assertion error: sessions and audits are different lengths");
+      console.error(
+        "Assertion error: sessions and audits are different lengths"
+      );
     }
 
     sessions = sessions.map((session, i) => ({
