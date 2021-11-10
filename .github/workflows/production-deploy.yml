@@ -19,3 +19,10 @@ jobs:
           PULL_REQUEST_TITLE: "chore: prod deploy"
           CONTENT_COMPARISON: true
           TEAM_REVIEWERS: '["techteam"]'
+      - name: Enable Automerge
+        if: steps.pull.outputs.PULL_REQUEST_NUMBER > 1
+        uses: peter-evans/enable-pull-request-automerge@v1
+        with:
+          token: ${{ secrets.AUTOMERGE_PAT }}
+          pull-request-number: ${{ steps.pull.outputs.PULL_REQUEST_NUMBER }}
+          merge-method: merge
