@@ -63,7 +63,7 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
   return (
     <BasePopover
       tooltip={{
-        name: "Trusted Services",
+        name: "AI-in-the-loop",
         icon: imgSrc("trusted-services"),
       }}
       anchorOrigin={{
