@@ -93,8 +93,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             .map((item) => item.imageUID);
           setImageUids(wrangled);
         })
-        .catch((err) => {
-          console.log(err);
+        .catch((e) => {
+          console.error(e);
         });
     },
     [collectionUid]
@@ -173,7 +173,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .then(() => {
           props.setTask({ isLoading: false, description: "" });
         })
-        .catch((e) => console.log(e));
+        .catch((e) => console.error(e));
     } else {
       // Otherwise update it.
       props.storeInstance
@@ -190,7 +190,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .then(() => {
           props.setTask({ isLoading: false, description: "" });
         })
-        .catch((e) => console.log(e));
+        .catch((e) => console.error(e));
     }
   };
 
@@ -206,7 +206,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .then((image) => {
           setImageItem(image);
         })
-        .catch((e) => console.log(e));
+        .catch((e) => console.error(e));
     };
 
     const getAnnotationsObject = (): void => {
@@ -221,7 +221,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             setIsComplete(data?.meta?.isComplete || false);
           }
         )
-        .catch((e) => console.log(e));
+        .catch((e) => console.error(e));
     };
 
     // launches image and annotation retrieval on page load
@@ -240,7 +240,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .then((newSlicesData) => {
           setSlicesData(newSlicesData);
         })
-        .catch((e) => console.log(e));
+        .catch((e) => console.error(e));
       // Set imageFileInfo
       const fileInfo = getImageFileInfoFromImageMeta(
         imageItem.uid,

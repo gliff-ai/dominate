@@ -125,8 +125,8 @@ function useProvideAuth(storeInstance: DominateStore) {
           updateUser(null);
         }
       })
-      .catch((err) => {
-        console.log(err);
+      .catch((e) => {
+        console.error(e);
       });
   });
 
