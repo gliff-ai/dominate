@@ -56,7 +56,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [isComplete, setIsComplete] = useState<boolean>(false);
   const [imageUids, setImageUids] = useState<string[] | null>(null);
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
-  const mountedRef = useRef(false);
+  const isMounted = useRef(false);
   const classes = useStyle();
 
   const canCycle = (): boolean =>
@@ -88,14 +88,14 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
                 item.imageUID
             )
             .map((item) => item.imageUID);
-          if (!mountedRef.current) return; // update state only if component still mounted
+          if (!isMounted.current) return; // update state only if component still mounted
           setImageUids(wrangled);
         })
         .catch((e) => {
           console.error(e);
         });
     },
-    [collectionUid, mountedRef]
+    [collectionUid, isMounted]
   );
 
   function updateProductSection(): void {
@@ -135,11 +135,11 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
 
   useEffect(() => {
     // run at mout
-    mountedRef.current = true;
+    isMounted.current = true;
     props.setIsLoading(true);
     return () => {
       // run at dismount
-      mountedRef.current = false;
+      isMounted.current = false;
     };
   }, []);
 
@@ -212,7 +212,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       props.storeInstance
         .getImage(collectionUid, imageUid)
         .then((image) => {
-          if (!mountedRef.current) return; // update state only if component still mounted
+          if (!isMounted.current) return; // update state only if component still mounted
           setImageItem(image);
         })
         .catch((e) => console.error(e));
@@ -226,7 +226,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .getAnnotationsObject(collectionUid, imageUid, auth?.user.username)
         .then(
           (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
-            if (!mountedRef.current) return; // update state only if component still mounted
+            if (!isMounted.current) return; // update state only if component still mounted
             setAnnotationsObject(data?.annotations || undefined);
             setIsComplete(data?.meta?.isComplete || false);
           }
@@ -243,7 +243,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     props.storeInstance,
     props.storeInstance.ready,
     auth,
-    mountedRef,
+    isMounted,
   ]);
 
   useEffect(() => {
