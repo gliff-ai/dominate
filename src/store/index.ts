@@ -790,18 +790,37 @@ export class DominateStore {
     if (auditUIDs.length === 0) return [];
 
     const auditItems = (await itemManager.fetchMulti(auditUIDs)).data;
+
     const auditStrings: string[] = await Promise.all(
       auditItems.map((audit) => audit.getContent(OutputFormat.String))
     );
+
     const audits = auditStrings.map(
       (audit) => JSON.parse(audit) as AuditAction[]
     );
 
-    const sessions = tiles.map((tile, i) => ({
-      imagename: tile.metadata.imageName,
-      username: this.getUser()?.username as string,
-      timestamp: audits[i][0].timestamp,
+    // fetchMulti takes a flat list of UIDs and returns a flat list of items, so we need to
+    // splice the audits, usernames and imageNames back together:
+
+    let sessions = tiles
+      .map((tile) =>
+        Object.keys(tile.auditUID).map((username) => ({
+          username,
+          imageName: tile.metadata.imageName,
+        }))
+      )
+      .flat();
+
+    if (sessions.length !== audits.length) {
+      console.error(
+        "Assertion error: sessions and audits are different lengths"
+      );
+    }
+
+    sessions = sessions.map((session, i) => ({
+      ...session,
       audit: audits[i],
+      timestamp: audits[i][0].timestamp, // timestamp of the first action in the ANNOTATE session
     }));
 
     return sessions;
