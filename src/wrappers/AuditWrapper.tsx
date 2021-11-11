@@ -4,6 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import UserInterface, { AnnotationSession } from "@gliff-ai/audit";
 import { DominateStore } from "@/store";
 import { useAuth } from "@/hooks/use-auth";
+import { setStateIfMounted } from "@/helpers";
 
 interface Props {
   storeInstance: DominateStore;
@@ -19,8 +20,7 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
   useEffect(() => {
     const fetchAudit = async () => {
       const sessionsData = await props.storeInstance.getAudits(collectionUid);
-      if (!isMounted.current) return; // update state only if component still mounted
-      setSessions(sessionsData);
+      setStateIfMounted(sessionsData, setSessions, isMounted.current);
     };
 
     // fetch latest ANNOTATE audit from store on page load:
@@ -30,10 +30,10 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
   }, [collectionUid, props.storeInstance]);
 
   useEffect(() => {
-    // run at mout
+    // runs at mounted
     isMounted.current = true;
     return () => {
-      // run at dismount
+      // runs at dismount
       isMounted.current = false;
     };
   }, []);

@@ -13,6 +13,7 @@ import {
   getImageFileInfoFromImageMeta,
 } from "@/imageConversions";
 import { useAuth, useStore } from "@/hooks";
+import { setStateIfMounted } from "@/helpers";
 
 interface Props {
   storeInstance: DominateStore;
@@ -88,8 +89,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
                 item.imageUID
             )
             .map((item) => item.imageUID);
-          if (!isMounted.current) return; // update state only if component still mounted
-          setImageUids(wrangled);
+          setStateIfMounted(wrangled, setImageUids, isMounted.current);
         })
         .catch((e) => {
           console.error(e);
@@ -134,11 +134,11 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   }
 
   useEffect(() => {
-    // run at mout
+    // runs at mount
     isMounted.current = true;
     props.setIsLoading(true);
     return () => {
-      // run at dismount
+      // runs at dismount
       isMounted.current = false;
     };
   }, []);
@@ -212,8 +212,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       props.storeInstance
         .getImage(collectionUid, imageUid)
         .then((image) => {
-          if (!isMounted.current) return; // update state only if component still mounted
-          setImageItem(image);
+          setStateIfMounted(image, setImageItem, isMounted.current);
         })
         .catch((e) => console.error(e));
     };
@@ -226,9 +225,16 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .getAnnotationsObject(collectionUid, imageUid, auth?.user.username)
         .then(
           (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
-            if (!isMounted.current) return; // update state only if component still mounted
-            setAnnotationsObject(data?.annotations || undefined);
-            setIsComplete(data?.meta?.isComplete || false);
+            setStateIfMounted(
+              data?.annotations || undefined,
+              setAnnotationsObject,
+              isMounted.current
+            );
+            setStateIfMounted(
+              data?.meta?.isComplete || false,
+              setIsComplete,
+              isMounted.current
+            );
           }
         )
         .catch((e) => console.error(e));
