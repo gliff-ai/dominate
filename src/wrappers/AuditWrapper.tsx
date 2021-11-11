@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import UserInterface, { AnnotationSession } from "@gliff-ai/audit";
@@ -14,10 +14,12 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
   const auth = useAuth();
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<AnnotationSession[] | null>(null);
+  const isMounted = useRef(false);
 
   useEffect(() => {
     const fetchAudit = async () => {
       const sessionsData = await props.storeInstance.getAudits(collectionUid);
+      if (!isMounted.current) return; // update state only if component still mounted
       setSessions(sessionsData);
     };
 
@@ -26,6 +28,15 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
       console.error(e);
     });
   }, [collectionUid, props.storeInstance]);
+
+  useEffect(() => {
+    // run at mout
+    isMounted.current = true;
+    return () => {
+      // run at dismount
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     const tier = auth?.userProfile?.team.tier;

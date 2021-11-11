@@ -1,4 +1,4 @@
-import { ReactElement, useState, useEffect } from "react";
+import { ReactElement, useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, makeStyles } from "@material-ui/core";
 
@@ -12,7 +12,7 @@ import {
   parseStringifiedSlices,
   getImageFileInfoFromImageMeta,
 } from "@/imageConversions";
-import { useAuth, useStore, useMountEffect } from "@/hooks";
+import { useAuth, useStore } from "@/hooks";
 
 interface Props {
   storeInstance: DominateStore;
@@ -56,11 +56,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [isComplete, setIsComplete] = useState<boolean>(false);
   const [imageUids, setImageUids] = useState<string[] | null>(null);
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
+  const mountedRef = useRef(false);
   const classes = useStyle();
-
-  useMountEffect(() => {
-    props.setIsLoading(true);
-  });
 
   const canCycle = (): boolean =>
     Boolean(imageUids && currImageIdx !== null && imageUids?.length > 1);
@@ -91,13 +88,14 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
                 item.imageUID
             )
             .map((item) => item.imageUID);
+          if (!mountedRef.current) return; // update state only if component still mounted
           setImageUids(wrangled);
         })
         .catch((e) => {
           console.error(e);
         });
     },
-    [collectionUid]
+    [collectionUid, mountedRef]
   );
 
   function updateProductSection(): void {
@@ -134,6 +132,16 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       </div>
     );
   }
+
+  useEffect(() => {
+    // run at mout
+    mountedRef.current = true;
+    props.setIsLoading(true);
+    return () => {
+      // run at dismount
+      mountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!collectionUid) return;
@@ -204,6 +212,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       props.storeInstance
         .getImage(collectionUid, imageUid)
         .then((image) => {
+          if (!mountedRef.current) return; // update state only if component still mounted
           setImageItem(image);
         })
         .catch((e) => console.error(e));
@@ -217,6 +226,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .getAnnotationsObject(collectionUid, imageUid, auth?.user.username)
         .then(
           (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
+            if (!mountedRef.current) return; // update state only if component still mounted
             setAnnotationsObject(data?.annotations || undefined);
             setIsComplete(data?.meta?.isComplete || false);
           }
@@ -227,7 +237,14 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     // launches image and annotation retrieval on page load
     getImage();
     getAnnotationsObject();
-  }, [collectionUid, imageUid, props.storeInstance, props.storeInstance.ready]);
+  }, [
+    collectionUid,
+    imageUid,
+    props.storeInstance,
+    props.storeInstance.ready,
+    auth,
+    mountedRef,
+  ]);
 
   useEffect(() => {
     if (imageItem) {
