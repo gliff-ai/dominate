@@ -22,8 +22,8 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
     };
 
     // fetch latest ANNOTATE audit from store on page load:
-    fetchAudit().catch((err) => {
-      console.log(err);
+    fetchAudit().catch((e) => {
+      console.error(e);
     });
   }, [collectionUid, props.storeInstance]);
 
