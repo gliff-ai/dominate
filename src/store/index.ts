@@ -806,7 +806,7 @@ export class DominateStore {
       .map((tile) =>
         Object.keys(tile.auditUID).map((username) => ({
           username,
-          imageName: tile.metadata.imageName,
+          imagename: tile.metadata.imageName,
         }))
       )
       .flat();
