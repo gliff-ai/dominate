@@ -1,4 +1,4 @@
-import { ReactElement, useState, useEffect } from "react";
+import { ReactElement, useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, makeStyles } from "@material-ui/core";
 
@@ -12,7 +12,8 @@ import {
   parseStringifiedSlices,
   getImageFileInfoFromImageMeta,
 } from "@/imageConversions";
-import { useAuth, useStore, useMountEffect } from "@/hooks";
+import { useAuth, useStore } from "@/hooks";
+import { setStateIfMounted } from "@/helpers";
 
 interface Props {
   storeInstance: DominateStore;
@@ -56,11 +57,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [isComplete, setIsComplete] = useState<boolean>(false);
   const [imageUids, setImageUids] = useState<string[] | null>(null);
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
+  const isMounted = useRef(false);
   const classes = useStyle();
-
-  useMountEffect(() => {
-    props.setIsLoading(true);
-  });
 
   const canCycle = (): boolean =>
     Boolean(imageUids && currImageIdx !== null && imageUids?.length > 1);
@@ -91,13 +89,13 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
                 item.imageUID
             )
             .map((item) => item.imageUID);
-          setImageUids(wrangled);
+          setStateIfMounted(wrangled, setImageUids, isMounted.current);
         })
         .catch((e) => {
           console.error(e);
         });
     },
-    [collectionUid]
+    [collectionUid, isMounted]
   );
 
   function updateProductSection(): void {
@@ -134,6 +132,16 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       </div>
     );
   }
+
+  useEffect(() => {
+    // runs at mount
+    isMounted.current = true;
+    props.setIsLoading(true);
+    return () => {
+      // runs at dismount
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (!collectionUid) return;
@@ -204,7 +212,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       props.storeInstance
         .getImage(collectionUid, imageUid)
         .then((image) => {
-          setImageItem(image);
+          setStateIfMounted(image, setImageItem, isMounted.current);
         })
         .catch((e) => console.error(e));
     };
@@ -217,8 +225,16 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .getAnnotationsObject(collectionUid, imageUid, auth?.user.username)
         .then(
           (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
-            setAnnotationsObject(data?.annotations || undefined);
-            setIsComplete(data?.meta?.isComplete || false);
+            setStateIfMounted(
+              data?.annotations || undefined,
+              setAnnotationsObject,
+              isMounted.current
+            );
+            setStateIfMounted(
+              data?.meta?.isComplete || false,
+              setIsComplete,
+              isMounted.current
+            );
           }
         )
         .catch((e) => console.error(e));
@@ -227,7 +243,14 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     // launches image and annotation retrieval on page load
     getImage();
     getAnnotationsObject();
-  }, [collectionUid, imageUid, props.storeInstance, props.storeInstance.ready]);
+  }, [
+    collectionUid,
+    imageUid,
+    props.storeInstance,
+    props.storeInstance.ready,
+    auth,
+    isMounted,
+  ]);
 
   useEffect(() => {
     if (imageItem) {

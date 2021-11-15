@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import Curate from "@gliff-ai/curate";
@@ -29,6 +29,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { useMountEffect } from "@/hooks/use-mountEffect";
 import { useStore } from "@/hooks/use-store";
 import { apiRequest } from "@/api";
+import { setStateIfMounted } from "@/helpers";
 
 const logger = console;
 
@@ -82,6 +83,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [pluginUrls, setPluginUrls] = useState<string[] | null>(null);
   const [collaborators, setCollaborators] =
     useState<Collaborator[] | null>(null);
+  const isMounted = useRef(false);
 
   const isOwner = (): boolean =>
     auth?.userProfile?.id === auth?.userProfile?.team?.owner_id;
@@ -94,7 +96,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       storeInstance
         .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
-          setCollectionContent(items);
+          setStateIfMounted(items, setCollectionContent, isMounted.current);
           // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
           let wrangled = items.map(
             ({
@@ -358,22 +360,34 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           .filter(({ is_collaborator }) => is_collaborator)
           .map(({ name, email }) => ({ name, email }));
         if (newCollaborators.length !== 0) {
-          setCollaborators(newCollaborators);
+          setStateIfMounted(
+            newCollaborators,
+            setCollaborators,
+            isMounted.current
+          );
         }
       })
       .catch((e) => logger.error(e));
   };
 
   useEffect(() => {
-    if (!auth?.ready || collaborators) return;
-    getCollaborators();
-  }, [auth, collaborators]);
+    // runs at mount
+    isMounted.current = true;
+    return () => {
+      // runs at dismount
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
-    if (collectionUid) {
-      fetchImageItems();
-    }
-  }, [collectionUid, fetchImageItems]);
+    if (!auth?.ready || collaborators) return;
+    getCollaborators();
+  }, [auth, collaborators, isMounted]);
+
+  useEffect(() => {
+    if (!collectionUid) return;
+    fetchImageItems();
+  }, [collectionUid, fetchImageItems, isMounted]);
 
   useEffect(() => {
     if (plugins === null || !plugins?.plugins || pluginUrls) return;
@@ -383,9 +397,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       .map(({ url }) => url);
 
     if (urls.length !== 0) {
-      setPluginUrls(urls);
+      setStateIfMounted(urls, setPluginUrls, isMounted.current);
     }
-  }, [plugins, pluginUrls]);
+  }, [plugins, pluginUrls, isMounted]);
 
   if (!props.storeInstance || !auth?.user || !collectionUid) return null;
   return (
