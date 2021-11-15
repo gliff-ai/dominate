@@ -132,6 +132,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     email: auth.user.username,
     authToken: auth.user.authToken,
     isOwner: auth.userProfile.id === auth.userProfile.team.owner_id,
+    tierID: auth?.userProfile.team.tier.id,
   };
 
   return (
