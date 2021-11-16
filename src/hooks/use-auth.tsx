@@ -42,7 +42,7 @@ function useProvideAuth(storeInstance: DominateStore) {
   const [isOwner, setIsOwner] = useState<boolean>(false);
 
   const getIsOwner = (profile: UserProfile): boolean => {
-    if (!profile?.id || profile?.team?.owner_id) return false;
+    if (!profile?.id || !profile?.team?.owner_id) return false;
     return Boolean(profile.id === profile.team.owner_id);
   };
 

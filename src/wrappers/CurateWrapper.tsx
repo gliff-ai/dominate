@@ -85,9 +85,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     useState<Collaborator[] | null>(null);
   const isMounted = useRef(false);
 
-  const isOwner = (): boolean =>
-    auth?.userProfile?.id === auth?.userProfile?.team?.owner_id;
-
   const fetchImageItems = useStore(
     props,
     (storeInstance) => {
@@ -98,7 +95,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         .then((items) => {
           setStateIfMounted(items, setCollectionContent, isMounted.current);
           // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
-
           const wrangled = items
             .map(
               ({
@@ -388,7 +384,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   useEffect(() => {
     if (!collectionUid) return;
     fetchImageItems();
-  }, [collectionUid, fetchImageItems, isMounted]);
+  }, [collectionUid, fetchImageItems, isMounted, auth]);
 
   useEffect(() => {
     if (plugins === null || !plugins?.plugins || pluginUrls) return;
@@ -431,7 +427,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           ) : null
         }
         collaborators={collaborators}
-        userIsOwner={isOwner()}
+        userIsOwner={auth.isOwner}
       />
 
       <ConfirmationDialog
