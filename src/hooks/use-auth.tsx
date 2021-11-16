@@ -14,6 +14,7 @@ interface Context {
   user: User | null;
   userProfile: UserProfile | null;
   ready: boolean;
+  isOwner: boolean;
   getInstance: () => DominateStore;
   changePassword: (newPassword: string) => Promise<boolean>;
   signin: (username: string, password: string) => Promise<User>;
@@ -38,6 +39,7 @@ function useProvideAuth(storeInstance: DominateStore) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [ready, setReady] = useState<boolean>(false);
+  const [isOwner, setIsOwner] = useState<boolean>(false);
 
   // Wrapper to the set hook to add the auth token
   const updateUser = (authedUser: User | null) => {
@@ -52,6 +54,7 @@ function useProvideAuth(storeInstance: DominateStore) {
         (profile) => {
           setUserProfile(profile);
           setReady(true);
+          setIsOwner(getIsOwner(profile));
         },
         () => {
           // 401 / 403 error, so clear saved session:
@@ -65,6 +68,11 @@ function useProvideAuth(storeInstance: DominateStore) {
   };
 
   const getInstance = (): DominateStore => storeInstance;
+
+  const getIsOwner = (profile: UserProfile): boolean => {
+    if (!profile?.id || profile?.team?.owner_id) return false;
+    return Boolean(profile.id === profile.team.owner_id);
+  };
 
   const signin = (username, password): Promise<User> =>
     storeInstance.login(username, password).then((storeUser) => {
@@ -135,6 +143,7 @@ function useProvideAuth(storeInstance: DominateStore) {
     user,
     userProfile,
     ready,
+    isOwner,
     signin,
     signout,
     signup,

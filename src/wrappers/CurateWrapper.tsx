@@ -98,28 +98,29 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         .then((items) => {
           setStateIfMounted(items, setCollectionContent, isMounted.current);
           // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
-          let wrangled = items.map(
-            ({
-              thumbnail,
-              imageLabels = [],
-              assignees = [],
-              id,
-              metadata,
-            }) => ({
-              thumbnail,
-              imageLabels,
-              id,
-              ...metadata,
-              assignees,
-            })
-          );
 
-          // If user is collaborator, include only images assigned to them
-          if (!isOwner()) {
-            wrangled = wrangled.filter((item) =>
-              item.assignees.includes(auth?.user?.username as string)
+          const wrangled = items
+            .map(
+              ({
+                thumbnail,
+                imageLabels = [],
+                assignees = [],
+                id,
+                metadata,
+              }) => ({
+                thumbnail,
+                imageLabels,
+                id,
+                ...metadata,
+                assignees,
+              })
+            )
+            .filter(
+              ({ assignees }) =>
+                // If user is not an owner, include only images assigned to them
+                auth?.isOwner ||
+                assignees.includes(auth?.user?.username as string)
             );
-          }
 
           setCurateInput(wrangled);
         })
@@ -353,7 +354,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   });
 
   const getCollaborators = (): void => {
-    if (!isOwner()) return;
+    if (auth?.isOwner) return;
     void apiRequest("/team/", "GET")
       .then((team: Team) => {
         const newCollaborators = team.profiles
