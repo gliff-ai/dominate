@@ -41,6 +41,11 @@ function useProvideAuth(storeInstance: DominateStore) {
   const [ready, setReady] = useState<boolean>(false);
   const [isOwner, setIsOwner] = useState<boolean>(false);
 
+  const getIsOwner = (profile: UserProfile): boolean => {
+    if (!profile?.id || profile?.team?.owner_id) return false;
+    return Boolean(profile.id === profile.team.owner_id);
+  };
+
   // Wrapper to the set hook to add the auth token
   const updateUser = (authedUser: User | null) => {
     if (authedUser?.authToken) {
@@ -68,11 +73,6 @@ function useProvideAuth(storeInstance: DominateStore) {
   };
 
   const getInstance = (): DominateStore => storeInstance;
-
-  const getIsOwner = (profile: UserProfile): boolean => {
-    if (!profile?.id || profile?.team?.owner_id) return false;
-    return Boolean(profile.id === profile.team.owner_id);
-  };
 
   const signin = (username, password): Promise<User> =>
     storeInstance.login(username, password).then((storeUser) => {
