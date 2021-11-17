@@ -1,6 +1,7 @@
 name: Scheduled Batch of Minor/Patch Updates
-schedule:
-  - cron:  '0 06 * * 1'
+on:
+  schedule:
+    - cron:  '0 06 * * 1'
 
 jobs:
   Update:
@@ -27,22 +28,9 @@ jobs:
           npm run lint
           npm run format
           git commit -am "chore: lint and format" --allow-empty
-      - name: Setup python
-        uses: palewire/install-python-pipenv-pipfile@v2
-        with:
-          python-version: 3.8
-      - name: Update pipenv dependecies
+      - name: Push changes
         run: |
-          pipenv update --dev
-          pipenv lock -r --dev > requirements.txt
-          sed -i -e 's/file:\/\/\/home\/chas\/gliff-ai\/store/\./g' Pipfile.lock
-          sed -i -e 's/file:\/\/\/home\/chas\/gliff-ai\/store/\./g' requirements.txt
-          git commit -am "build(deps): update minor pipenv dependencies" --allow-empty
-      - name: Lint and format
-        run: |
-          pipenv run lint
-          pipenv run format
-          git commit -am "chore: lint and format" --allow-empty
+          git push --set-upstream origin
       - name: Open Pull Request
         id: pull
         uses: tretuna/sync-branches@1.4.0
