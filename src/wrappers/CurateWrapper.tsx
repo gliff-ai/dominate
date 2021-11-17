@@ -350,7 +350,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   });
 
   const getCollaborators = (): void => {
-    if (auth?.isOwner) return;
+    if (!auth?.isOwner) return;
     void apiRequest("/team/", "GET")
       .then((team: Team) => {
         const newCollaborators = team.profiles
