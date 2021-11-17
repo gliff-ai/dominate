@@ -79,12 +79,10 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       storeInstance
         .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
-          const userIsOwner =
-            auth?.userProfile?.id === auth?.userProfile?.team?.owner_id;
           const wrangled = items
             .filter(
               (item) =>
-                (userIsOwner ||
+                (auth.isOwner ||
                   item.assignees.includes(auth?.user?.username as string)) &&
                 item.imageUID
             )
@@ -95,7 +93,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
           console.error(e);
         });
     },
-    [collectionUid, isMounted]
+    [collectionUid, isMounted, auth]
   );
 
   function updateProductSection(): void {
@@ -286,6 +284,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       trustedServiceButtonToolbar={
         <TSButtonToolbar collectionUid={collectionUid} imageUid={imageUid} />
       }
+      isUserOwner={auth?.isOwner}
     />
   );
 };
