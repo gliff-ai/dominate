@@ -1,7 +1,7 @@
 name: Scheduled Batch of Minor/Patch Updates
 on:
   schedule:
-    - cron:  '30 * * * *'
+    - cron:  '0 06 * * *'
 
 jobs:
   Update:
@@ -21,16 +21,21 @@ jobs:
       - name: Update node dependencies
         run: | 
           npm update --dev
-          git commit -am "build(deps): update minor node dependencies" --allow-empty
+      - name: Commit updates
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_options: "-am --allow-empty"
+          commit_message: "build(deps): update minor node dependencies"
       - name: Lint and format
         run: |
           npm i -g eslint prettier
           npm run lint
           npm run format
-          git commit -am "chore: lint and format" --allow-empty
-      - name: Push changes
-        run: |
-          git push --set-upstream origin
+      - name: Commit updates
+        uses: stefanzweifel/git-auto-commit-action@v4
+        with:
+          commit_options: "-am --allow-empty"
+          commit_message: "chore: lint and format"
       - name: Open Pull Request
         id: pull
         uses: tretuna/sync-branches@1.4.0
