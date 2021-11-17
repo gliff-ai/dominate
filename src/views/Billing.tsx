@@ -7,7 +7,7 @@ import {
   Grid,
   makeStyles,
 } from "@material-ui/core";
-import { theme, BaseIconButton } from "@gliff-ai/style";
+import { theme, BaseIconButton, LoadingSpinner } from "@gliff-ai/style";
 
 import {
   addAddons,
@@ -25,7 +25,8 @@ import {
 
 import { imgSrc } from "@/imgSrc";
 import { useInput } from "@/hooks/use-input";
-import { SubmitButton, GliffCard, LoadingSpinner } from "@/components";
+import { SubmitButton, GliffCard } from "@/components";
+
 import { useAuth } from "@/hooks/use-auth";
 
 type FormState = {
