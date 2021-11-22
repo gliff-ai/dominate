@@ -21,8 +21,7 @@ jobs:
           TEAM_REVIEWERS: '["gliff-ai/techteam"]'
       - name: Enable Automerge
         if: steps.pull.outputs.PULL_REQUEST_NUMBER > 1
-        uses: peter-evans/enable-pull-request-automerge@v1
-        with:
-          token: ${{ secrets.AUTOMERGE_PAT }}
-          pull-request-number: ${{ steps.pull.outputs.PULL_REQUEST_NUMBER }}
-          merge-method: merge
+        run: gh pr merge --auto --merge "$PR_URL"
+        env:
+          PR_URL: ${{steps.pull.outputs.PULL_REQUEST_URL}}
+          GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
