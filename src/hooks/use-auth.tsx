@@ -46,13 +46,30 @@ function useProvideAuth(storeInstance: DominateStore) {
 
   // Wrapper to the set hook to add the auth token
   const updateUser = (authedUser: User | null) => {
+    console.log("updatedUser")
     if (authedUser?.authToken) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       axios.defaults.headers.common.Authorization = `Token ${authedUser.authToken}`;
     }
 
     setUser(authedUser);
+
     if (authedUser) {
+      const IS_MONITORED = import.meta.env.VITE_IS_MONITORED === "true";
+
+      if(IS_MONITORED && authedUser.username) {
+        void import("@sentry/react")
+        .then((Sentry) => {
+          Sentry.setUser({ email: authedUser.username || "" });
+        });
+
+        void import("logrocket")
+        .then((Logrocket: any) => {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, no-underscore-dangle
+          Logrocket?._logger?.identify(authedUser.username)
+        });
+      }
+
       void getUserProfile().then(
         (profile) => {
           setUserProfile(profile);
