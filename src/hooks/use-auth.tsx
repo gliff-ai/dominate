@@ -46,7 +46,6 @@ function useProvideAuth(storeInstance: DominateStore) {
 
   // Wrapper to the set hook to add the auth token
   const updateUser = (authedUser: User | null) => {
-    console.log("updatedUser")
     if (authedUser?.authToken) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       axios.defaults.headers.common.Authorization = `Token ${authedUser.authToken}`;
