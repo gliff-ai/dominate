@@ -14,6 +14,7 @@ import {
   VerifyEmail,
   RequestEmailVerification,
   Billing,
+  UnsupportedScreenSizeErrorPage,
 } from "@/views";
 import {
   NavBar,
@@ -73,6 +74,7 @@ const UserInterface = (props: Props): ReactElement | null => {
   const classes = useStyles(isOverflow);
   return (
     <ThemeProvider theme={theme}>
+      <BasicPage view={<UnsupportedScreenSizeErrorPage />} title={<>Oops!</>} />
       <ProgressSnackbar task={task} setTask={setTask} />
       <CssBaseline />
       <NavBar productSection={productSection} />
