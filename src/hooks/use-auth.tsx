@@ -56,16 +56,14 @@ function useProvideAuth(storeInstance: DominateStore) {
     if (authedUser) {
       const IS_MONITORED = import.meta.env.VITE_IS_MONITORED === "true";
 
-      if(IS_MONITORED && authedUser.username) {
-        void import("@sentry/react")
-        .then((Sentry) => {
+      if (IS_MONITORED && authedUser.username) {
+        void import("@sentry/react").then((Sentry) => {
           Sentry.setUser({ email: authedUser.username || "" });
         });
 
-        void import("logrocket")
-        .then((Logrocket: any) => {
+        void import("logrocket").then((Logrocket: any) => {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, no-underscore-dangle
-          Logrocket?._logger?.identify(authedUser.username)
+          Logrocket?._logger?.identify(authedUser.username);
         });
       }
 
