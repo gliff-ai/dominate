@@ -28,16 +28,22 @@ jobs:
         with:
           commit_options: "-am --allow-empty"
           commit_message: "build(deps): update minor node dependencies"
+          commit_user_name: ChasNelson1990
+          commit_user_email: chas@gliff.ai
       - name: Lint and format
+        if: steps.auto-commit-action.outputs.changes_detected == 'true'
         run: |
           npm i -g eslint prettier
           npm run lint
           npm run format
       - name: Commit updates
+        if: steps.auto-commit-action.outputs.changes_detected == 'true'
         uses: stefanzweifel/git-auto-commit-action@v4
         with:
           commit_options: "-am --allow-empty"
           commit_message: "chore: lint and format"
+          commit_user_name: ChasNelson1990
+          commit_user_email: chas@gliff.ai
       - name: Open Pull Request
         id: pull
         uses: tretuna/sync-branches@1.4.0
