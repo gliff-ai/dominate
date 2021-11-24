@@ -71,10 +71,26 @@ const UserInterface = (props: Props): ReactElement | null => {
     setProductSection(null); // clear product section
   }, [window.location.pathname]);
 
+  const [dimensions, setDimensions] = useState({
+    height: window.innerHeight,
+    width: window.innerWidth,
+  });
+  useEffect(() => {
+    function handleResize() {
+      setDimensions({
+        height: window.innerHeight,
+        width: window.innerWidth,
+      });
+    }
+
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  });
+
   const classes = useStyles(isOverflow);
   return (
     <ThemeProvider theme={theme}>
-      {window.innerWidth < 700 ? (
+      {dimensions.width < 700 || dimensions.height < 300 ? (
         <BasicPage
           view={<UnsupportedScreenSizeErrorPage />}
           title={<>Oops!</>}
