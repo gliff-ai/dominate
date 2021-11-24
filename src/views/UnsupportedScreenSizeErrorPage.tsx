@@ -4,7 +4,7 @@ import { BaseTextButton } from "@gliff-ai/style";
 
 const useStyles = makeStyles(() => ({
   divButtons: {
-    marginTop: "70px",
+    marginTop: "40px",
     "& $button": {
       marginRight: "80px",
       marginLeft: "50px",
@@ -16,6 +16,7 @@ const useStyles = makeStyles(() => ({
     fontSize: "28px",
     fontWeight: 700,
     marginTop: "-40px",
+    textAlign: "center",
   },
 
   typography: {
