@@ -6,10 +6,8 @@ const useStyles = makeStyles(() => ({
   divButtons: {
     marginTop: "40px",
     "& $button": {
-      marginRight: "80px",
-      marginLeft: "50px",
+      textAlign: "center",
     },
-    textAlign: "center",
   },
 
   subHeading: {
