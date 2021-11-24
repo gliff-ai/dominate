@@ -113,8 +113,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             )
             .filter(
               ({ assignees }) =>
-                // If user is not an owner, include only images assigned to them
-                auth?.isOwner ||
+                // If user is a collaborator, include only images assigned to them
+                !auth?.userProfile?.is_collaborator ||
                 assignees.includes(auth?.user?.username as string)
             );
 
