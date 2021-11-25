@@ -13,12 +13,16 @@ const useStyles = makeStyles(() => ({
       backgroundColor: lightGrey,
       backgroundRepeat: "no-repeat",
       backgroundPosition: "-350px -320px, 1400px 650px",
+
       "& form": {
         width: "100%", // Fix IE 11 issue.
         marginTop: theme.spacing(1),
         "& label": {
           marginTop: "10px",
         },
+      },
+      "@media (max-width: 700px)": {
+        backgroundPosition: "-500px -500px, 300px 400px",
       },
     },
   },

@@ -9,4 +9,6 @@ export { VerifyEmail } from "./VerifyEmail";
 export { RequestEmailVerification } from "./RequestEmailVerification";
 export { Billing } from "./Billing";
 export { SentryErrorPage } from "./SentryErrorPage";
+export { UnsupportedScreenSizeErrorPage } from "./UnsupportedScreenSizeErrorPage";
+
 export { BasicPage } from "./BasicPage";
