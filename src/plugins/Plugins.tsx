@@ -1,12 +1,16 @@
 import { Component, ReactElement } from "react";
 import { WithStyles, withStyles } from "@material-ui/core";
-import { BaseIconButton, BasePopover, theme } from "@gliff-ai/style";
+import {
+  BaseIconButton,
+  BasePopover,
+  theme,
+  MessageSnackbar,
+} from "@gliff-ai/style";
 import { IPlugin, IPluginConstructor } from "./interfaces";
 import { MetaItem } from "@/store/interfaces";
 import { loadPlugin } from "./index";
 import { PluginModal } from "./PluginModal";
 import { imgSrc } from "@/imgSrc";
-import { MessageSnackbar } from "@/components";
 
 const styles = {
   card: { padding: "0 5px", backgroundColor: theme.palette.primary.light },

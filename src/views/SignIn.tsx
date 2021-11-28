@@ -8,10 +8,10 @@ import {
   InputAdornment,
 } from "@material-ui/core";
 import { useNavigate } from "react-router-dom";
-import { theme } from "@gliff-ai/style";
+import { theme, MessageSnackbar } from "@gliff-ai/style";
 import SVG from "react-inlinesvg";
 import { useAuth } from "@/hooks/use-auth";
-import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
+import { MessageAlert, SubmitButton } from "@/components";
 import { imgSrc } from "@/imgSrc";
 
 const useStyles = makeStyles(() => ({

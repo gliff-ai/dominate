@@ -9,10 +9,11 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@material-ui/core";
+import { MessageSnackbar } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
-import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
+import { MessageAlert, SubmitButton } from "@/components";
 import { VerificationSent } from "@/views/VerificationSent";
 import { useMountEffect } from "@/hooks/use-mountEffect";
 
