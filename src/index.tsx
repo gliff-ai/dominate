@@ -16,6 +16,7 @@ import { ProvideAuth, ProvideTrustedService, ProvidePlugins } from "@/hooks";
 
 const IS_MONITORED = import.meta.env.VITE_IS_MONITORED === "true";
 
+// User info is added in the `use-auth` hook
 if (IS_MONITORED) {
   const VERSION = import.meta.env.VITE_VERSION;
   const SENTRY_ENVIRONMENT = import.meta.env.VITE_SENTRY_ENVIRONMENT;
