@@ -14,6 +14,7 @@ import {
 } from "@/imageConversions";
 import { useAuth, useStore } from "@/hooks";
 import { setStateIfMounted } from "@/helpers";
+import { UserAccess } from "@/hooks/use-auth";
 
 interface Props {
   storeInstance: DominateStore;
@@ -76,13 +77,17 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     props,
     (storeInstance) => {
       if (!auth?.user?.username) return;
+      const canViewAllImages =
+        auth.userAccess === UserAccess.Owner ||
+        auth.userAccess === UserAccess.Member;
+
       storeInstance
         .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
           const wrangled = items
             .filter(
               (item) =>
-                (auth.isOwner ||
+                (canViewAllImages ||
                   item.assignees.includes(auth?.user?.username as string)) &&
                 item.imageUID
             )
@@ -271,7 +276,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     }
   }, [imageItem]);
 
-  if (!props.storeInstance || !collectionUid || !imageUid) return null;
+  if (!props.storeInstance || !collectionUid || !imageUid || !auth) return null;
 
   return (
     <UserInterface
@@ -284,7 +289,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       trustedServiceButtonToolbar={
         <TSButtonToolbar collectionUid={collectionUid} imageUid={imageUid} />
       }
-      isUserOwner={auth?.isOwner}
+      userAccess={auth.userAccess}
     />
   );
 };
