@@ -185,7 +185,7 @@ export function SignIn(): ReactElement | null {
 
       <MessageSnackbar
         open={open}
-        handleClose={handleClose}
+        onClose={handleClose}
         messageText={
           String(storeError).includes("Wrong password for user.")
             ? "Login Failed. Your username and/or password do not match"

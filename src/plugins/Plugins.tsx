@@ -137,7 +137,7 @@ class Plugins extends Component<Props, State> {
         </PluginModal>
         <MessageSnackbar
           open={this.state.snackbarOpen}
-          handleClose={() => this.setState({ snackbarOpen: false })}
+          onClose={() => this.setState({ snackbarOpen: false })}
           messageText="Oops, something went wrong."
         />
       </>

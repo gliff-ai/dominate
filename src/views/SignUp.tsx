@@ -225,7 +225,7 @@ export const SignUp = (props: Props): ReactElement | null => {
   const err = (
     <MessageSnackbar
       open={open}
-      handleClose={handleClose}
+      onClose={handleClose}
       messageText={
         String(storeError).includes("duplicate key")
           ? "Looks like that account already exists, try another email!"

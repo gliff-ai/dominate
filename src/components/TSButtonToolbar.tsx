@@ -109,7 +109,7 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
           </div>
           <MessageSnackbar
             open={open}
-            handleClose={() => setOpen(false)}
+            onClose={() => setOpen(false)}
             messageText={message}
           />
         </>
