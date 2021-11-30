@@ -628,9 +628,8 @@ export class DominateStore {
     annotationData: Annotation[],
     auditData: AuditAction[],
     isComplete = false,
-    task: Task,
-    setTask: (task: Task) => void,
-    username: string
+    username: string,
+    setTask?: (task: Task) => void
   ): Promise<void> => {
     // Store annotations object in a new item.
 
@@ -659,20 +658,24 @@ export class DominateStore {
       JSON.stringify(auditData)
     );
 
-    setTask({
-      isLoading: true,
-      description: "Saving annotation...",
-      progress: 30,
-    });
+    if (setTask) {
+      setTask({
+        isLoading: true,
+        description: "Saving annotation...",
+        progress: 30,
+      });
+    }
 
     // Store annotationsItem and auditItem inside the collection:
     await itemManager.batch([annotationsItem, auditItem]);
 
-    setTask({
-      isLoading: true,
-      description: "Saving annotation...",
-      progress: 65,
-    });
+    if (setTask) {
+      setTask({
+        isLoading: true,
+        description: "Saving annotation...",
+        progress: 65,
+      });
+    }
 
     // Update collection content JSON:
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -687,11 +690,13 @@ export class DominateStore {
     await collection.setContent(JSON.stringify(galleryTiles));
     await collectionManager.upload(collection);
 
-    setTask({
-      isLoading: true,
-      description: "Saving annotation...",
-      progress: 100,
-    });
+    if (setTask) {
+      setTask({
+        isLoading: true,
+        description: "Saving annotation...",
+        progress: 100,
+      });
+    }
   };
 
   updateAnnotation = async (
