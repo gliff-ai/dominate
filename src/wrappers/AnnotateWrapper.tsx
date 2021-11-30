@@ -69,6 +69,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     const newIndex = (currImageIdx + inc + imageUids.length) % imageUids.length;
     setImageItem(null);
     setSlicesData(null);
+    setImageFileInfo(undefined);
+    setAnnotationsObject(undefined);
     navigate(`/annotate/${collectionUid}/${imageUids[newIndex]}`);
   }
 
