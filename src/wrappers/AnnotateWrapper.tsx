@@ -168,41 +168,21 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     const annotationsData = newAnnotationsObject.getAllAnnotations();
     const auditData = newAnnotationsObject.getAuditObject();
 
-    if (annotationsObject === undefined) {
-      // If an annotation item for the given image does not exist, create one.
-      props.storeInstance
-        .createAnnotation(
-          collectionUid,
-          imageUid,
-          annotationsData,
-          auditData,
-          isComplete,
-          props.task,
-          props.setTask,
-          auth.user.username
-        )
-        .then(() => {
-          props.setTask({ isLoading: false, description: "" });
-        })
-        .catch((e) => console.error(e));
-    } else {
-      // Otherwise update it.
-      props.storeInstance
-        .updateAnnotation(
-          collectionUid,
-          imageUid,
-          annotationsData,
-          auditData,
-          isComplete,
-          props.task,
-          props.setTask,
-          auth.user.username
-        )
-        .then(() => {
-          props.setTask({ isLoading: false, description: "" });
-        })
-        .catch((e) => console.error(e));
-    }
+    props.storeInstance
+      .updateAnnotation(
+        collectionUid,
+        imageUid,
+        annotationsData,
+        auditData,
+        isComplete,
+        props.task,
+        props.setTask,
+        auth.user.username
+      )
+      .then(() => {
+        props.setTask({ isLoading: false, description: "" });
+      })
+      .catch((e) => console.error(e));
   };
 
   useEffect(() => {
@@ -220,6 +200,29 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .catch((e) => console.error(e));
     };
 
+    const createAnnotationsObject = (): Annotations | undefined => {
+      if (!auth?.user?.username) return undefined;
+
+      const newAnnotationsObject = new Annotations();
+      newAnnotationsObject.addAnnotation("paintbrush");
+
+      const annotationsData = newAnnotationsObject.getAllAnnotations();
+      const auditData = newAnnotationsObject.getAuditObject();
+
+      props.storeInstance
+        .createAnnotation(
+          collectionUid,
+          imageUid,
+          annotationsData,
+          auditData,
+          isComplete,
+          auth.user.username
+        )
+        .catch((e) => console.error(e));
+
+      return newAnnotationsObject;
+    };
+
     const getAnnotationsObject = (): void => {
       if (!auth?.user?.username) return;
 
@@ -229,7 +232,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .then(
           (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
             setStateIfMounted(
-              data?.annotations || undefined,
+              data?.annotations || createAnnotationsObject(),
               setAnnotationsObject,
               isMounted.current
             );
