@@ -25,7 +25,7 @@ import {
   stringifySlices,
   getImageMetaFromImageFileInfo,
 } from "@/imageConversions";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth, UserAccess } from "@/hooks/use-auth";
 import { useMountEffect } from "@/hooks/use-mountEffect";
 import { useStore } from "@/hooks/use-store";
 import { apiRequest } from "@/api";
@@ -49,8 +49,6 @@ interface Team {
     is_collaborator: boolean;
   }>;
 }
-
-type Collaborator = { name: string; email: string };
 
 interface Props {
   storeInstance: DominateStore;
@@ -81,8 +79,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [showNoImageMessage, setShowNoImageMessage] = useState<boolean>(false);
 
   const [pluginUrls, setPluginUrls] = useState<string[] | null>(null);
-  const [collaborators, setCollaborators] =
-    useState<Collaborator[] | null>(null);
+  const [profiles, setProfiles] = useState<Profile[] | null>(null);
   const isMounted = useRef(false);
 
   const fetchImageItems = useStore(
@@ -94,6 +91,11 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
           setStateIfMounted(items, setCollectionContent, isMounted.current);
+          // owners and members can view the images in a project
+          const canViewAllImages =
+            auth.userAccess === UserAccess.Owner ||
+            auth.userAccess === UserAccess.Member;
+
           // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
           const wrangled = items
             .map(
@@ -113,8 +115,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             )
             .filter(
               ({ assignees }) =>
-                // If user is a collaborator, include only images assigned to them
-                !auth?.userProfile?.is_collaborator ||
+                canViewAllImages ||
                 assignees.includes(auth?.user?.username as string)
             );
 
@@ -349,19 +350,13 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.setIsLoading(true);
   });
 
-  const getCollaborators = (): void => {
-    if (!auth?.isOwner) return;
+  const getProfiles = (): void => {
+    if (!auth || auth.userAccess === UserAccess.Collaborator) return;
+
     void apiRequest("/team/", "GET")
       .then((team: Team) => {
-        const newCollaborators = team.profiles
-          .filter(({ is_collaborator }) => is_collaborator)
-          .map(({ name, email }) => ({ name, email }));
-        if (newCollaborators.length !== 0) {
-          setStateIfMounted(
-            newCollaborators,
-            setCollaborators,
-            isMounted.current
-          );
+        if (team.profiles.length !== 0) {
+          setStateIfMounted(team.profiles, setProfiles, isMounted.current);
         }
       })
       .catch((e) => logger.error(e));
@@ -377,9 +372,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   }, []);
 
   useEffect(() => {
-    if (!auth?.ready || collaborators) return;
-    getCollaborators();
-  }, [auth, collaborators, isMounted]);
+    if (!auth || !auth?.ready || profiles) return;
+    getProfiles();
+  }, [auth, profiles, isMounted]);
 
   useEffect(() => {
     if (!collectionUid) return;
@@ -399,6 +394,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   }, [plugins, pluginUrls, isMounted]);
 
   if (!props.storeInstance || !auth?.user || !collectionUid) return null;
+
   return (
     <>
       <Curate
@@ -426,8 +422,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             <Plugins plugins={pluginUrls} metadata={curateInput} />
           ) : null
         }
-        collaborators={collaborators}
-        userIsOwner={auth.isOwner}
+        profiles={profiles}
+        userAccess={auth.userAccess}
       />
 
       <ConfirmationDialog
