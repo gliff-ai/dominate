@@ -14,6 +14,7 @@ import {
 } from "@/imageConversions";
 import { useAuth, useStore } from "@/hooks";
 import { setStateIfMounted } from "@/helpers";
+import { UserAccess } from "@/hooks/use-auth";
 
 interface Props {
   storeInstance: DominateStore;
@@ -76,13 +77,17 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     props,
     (storeInstance) => {
       if (!auth?.user?.username) return;
+      const canViewAllImages =
+        auth.userAccess === UserAccess.Owner ||
+        auth.userAccess === UserAccess.Member;
+
       storeInstance
         .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
           const wrangled = items
             .filter(
               (item) =>
-                (auth.isOwner ||
+                (canViewAllImages ||
                   item.assignees.includes(auth?.user?.username as string)) &&
                 item.imageUID
             )
@@ -163,41 +168,21 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     const annotationsData = newAnnotationsObject.getAllAnnotations();
     const auditData = newAnnotationsObject.getAuditObject();
 
-    if (annotationsObject === undefined) {
-      // If an annotation item for the given image does not exist, create one.
-      props.storeInstance
-        .createAnnotation(
-          collectionUid,
-          imageUid,
-          annotationsData,
-          auditData,
-          isComplete,
-          props.task,
-          props.setTask,
-          auth.user.username
-        )
-        .then(() => {
-          props.setTask({ isLoading: false, description: "" });
-        })
-        .catch((e) => console.error(e));
-    } else {
-      // Otherwise update it.
-      props.storeInstance
-        .updateAnnotation(
-          collectionUid,
-          imageUid,
-          annotationsData,
-          auditData,
-          isComplete,
-          props.task,
-          props.setTask,
-          auth.user.username
-        )
-        .then(() => {
-          props.setTask({ isLoading: false, description: "" });
-        })
-        .catch((e) => console.error(e));
-    }
+    props.storeInstance
+      .updateAnnotation(
+        collectionUid,
+        imageUid,
+        annotationsData,
+        auditData,
+        isComplete,
+        props.task,
+        props.setTask,
+        auth.user.username
+      )
+      .then(() => {
+        props.setTask({ isLoading: false, description: "" });
+      })
+      .catch((e) => console.error(e));
   };
 
   useEffect(() => {
@@ -215,6 +200,29 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .catch((e) => console.error(e));
     };
 
+    const createAnnotationsObject = (): Annotations | undefined => {
+      if (!auth?.user?.username) return undefined;
+
+      const newAnnotationsObject = new Annotations();
+      newAnnotationsObject.addAnnotation("paintbrush");
+
+      const annotationsData = newAnnotationsObject.getAllAnnotations();
+      const auditData = newAnnotationsObject.getAuditObject();
+
+      props.storeInstance
+        .createAnnotation(
+          collectionUid,
+          imageUid,
+          annotationsData,
+          auditData,
+          isComplete,
+          auth.user.username
+        )
+        .catch((e) => console.error(e));
+
+      return newAnnotationsObject;
+    };
+
     const getAnnotationsObject = (): void => {
       if (!auth?.user?.username) return;
 
@@ -224,7 +232,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .then(
           (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
             setStateIfMounted(
-              data?.annotations || undefined,
+              data?.annotations || createAnnotationsObject(),
               setAnnotationsObject,
               isMounted.current
             );
@@ -271,7 +279,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     }
   }, [imageItem]);
 
-  if (!props.storeInstance || !collectionUid || !imageUid) return null;
+  if (!props.storeInstance || !collectionUid || !imageUid || !auth) return null;
 
   return (
     <UserInterface
@@ -284,7 +292,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       trustedServiceButtonToolbar={
         <TSButtonToolbar collectionUid={collectionUid} imageUid={imageUid} />
       }
-      isUserOwner={auth?.isOwner}
+      userAccess={auth.userAccess}
     />
   );
 };
