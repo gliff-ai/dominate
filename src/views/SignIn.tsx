@@ -8,7 +8,7 @@ import {
   InputAdornment,
 } from "@material-ui/core";
 import { useNavigate } from "react-router-dom";
-import { theme, MessageSnackbar } from "@gliff-ai/style";
+import { theme, WarningSnackbar } from "@gliff-ai/style";
 import SVG from "react-inlinesvg";
 import { useAuth } from "@/hooks/use-auth";
 import { MessageAlert, SubmitButton } from "@/components";
@@ -183,7 +183,7 @@ export function SignIn(): ReactElement | null {
         </div>
       </form>
 
-      <MessageSnackbar
+      <WarningSnackbar
         open={open}
         onClose={handleClose}
         messageText={

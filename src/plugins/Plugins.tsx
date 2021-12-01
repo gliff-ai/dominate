@@ -4,7 +4,7 @@ import {
   BaseIconButton,
   BasePopover,
   theme,
-  MessageSnackbar,
+  WarningSnackbar,
 } from "@gliff-ai/style";
 import { IPlugin, IPluginConstructor } from "./interfaces";
 import { MetaItem } from "@/store/interfaces";
@@ -135,7 +135,7 @@ class Plugins extends Component<Props, State> {
         >
           {this.state.modalContent}
         </PluginModal>
-        <MessageSnackbar
+        <WarningSnackbar
           open={this.state.snackbarOpen}
           onClose={() => this.setState({ snackbarOpen: false })}
           messageText="Oops, something went wrong."

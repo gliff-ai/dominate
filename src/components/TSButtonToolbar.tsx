@@ -4,7 +4,7 @@ import {
   BaseIconButton,
   BasePopover,
   theme,
-  MessageSnackbar,
+  WarningSnackbar,
 } from "@gliff-ai/style";
 
 import { useTrustedService } from "@/hooks/use-trustedService";
@@ -107,7 +107,7 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
               />
             ))}
           </div>
-          <MessageSnackbar
+          <WarningSnackbar
             open={open}
             onClose={() => setOpen(false)}
             messageText={message}

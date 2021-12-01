@@ -9,7 +9,7 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@material-ui/core";
-import { MessageSnackbar } from "@gliff-ai/style";
+import { WarningSnackbar } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
@@ -223,7 +223,7 @@ export const SignUp = (props: Props): ReactElement | null => {
   };
 
   const err = (
-    <MessageSnackbar
+    <WarningSnackbar
       open={open}
       onClose={handleClose}
       messageText={
