@@ -10,11 +10,17 @@ interface Props {
   storeInstance: DominateStore;
 }
 
+export enum UserAccess {
+  Owner = "owner",
+  Member = "member",
+  Collaborator = "collaborator",
+}
+
 interface Context {
   user: User | null;
   userProfile: UserProfile | null;
   ready: boolean;
-  isOwner: boolean;
+  userAccess: UserAccess;
   getInstance: () => DominateStore;
   changePassword: (newPassword: string) => Promise<boolean>;
   signin: (username: string, password: string) => Promise<User>;
@@ -39,10 +45,19 @@ function useProvideAuth(storeInstance: DominateStore) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [ready, setReady] = useState<boolean>(false);
-  const [isOwner, setIsOwner] = useState<boolean>(false);
+  const [userAccess, setUserAccess] = useState<UserAccess>(
+    UserAccess.Collaborator
+  );
 
-  const getIsOwner = (profile: UserProfile): boolean =>
-    Boolean(profile?.id && profile.id === profile?.team?.owner_id);
+  const getUserAccess = (profile: UserProfile): UserAccess => {
+    let access = UserAccess.Collaborator;
+    if (profile?.id && profile.id === profile?.team?.owner_id) {
+      access = UserAccess.Owner;
+    } else if (!profile?.is_collaborator) {
+      access = UserAccess.Member;
+    }
+    return access;
+  };
 
   // Wrapper to the set hook to add the auth token
   const updateUser = (authedUser: User | null) => {
@@ -71,7 +86,7 @@ function useProvideAuth(storeInstance: DominateStore) {
         (profile) => {
           setUserProfile(profile);
           setReady(true);
-          setIsOwner(getIsOwner(profile));
+          setUserAccess(getUserAccess(profile));
         },
         () => {
           // 401 / 403 error, so clear saved session:
@@ -155,7 +170,7 @@ function useProvideAuth(storeInstance: DominateStore) {
     user,
     userProfile,
     ready,
-    isOwner,
+    userAccess,
     signin,
     signout,
     signup,
