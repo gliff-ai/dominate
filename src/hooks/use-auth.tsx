@@ -1,5 +1,7 @@
 import axios from "axios";
 import { useState, useContext, createContext } from "react";
+import { useNavigate } from "react-router-dom";
+
 import { DominateStore } from "@/store";
 import { User, UserProfile } from "@/services/user/interfaces";
 import { createUserProfile, getUserProfile } from "@/services/user";
@@ -49,6 +51,8 @@ function useProvideAuth(storeInstance: DominateStore) {
     UserAccess.Collaborator
   );
 
+  const navigate = useNavigate();
+
   const getUserAccess = (profile: UserProfile): UserAccess => {
     let access = UserAccess.Collaborator;
     if (profile?.id && profile.id === profile?.team?.owner_id) {
@@ -92,6 +96,7 @@ function useProvideAuth(storeInstance: DominateStore) {
           // 401 / 403 error, so clear saved session:
           localStorage.removeItem("storeInstance");
           setReady(true);
+          navigate("signin");
         }
       );
     } else {
