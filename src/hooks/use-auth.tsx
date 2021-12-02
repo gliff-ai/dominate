@@ -1,5 +1,5 @@
 import axios from "axios";
-import { useState, useContext, createContext } from "react";
+import { useState, useContext, createContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { DominateStore } from "@/store";
@@ -22,7 +22,7 @@ interface Context {
   user: User | null;
   userProfile: UserProfile | null;
   ready: boolean;
-  userAccess: UserAccess;
+  userAccess: UserAccess | null;
   getInstance: () => DominateStore;
   changePassword: (newPassword: string) => Promise<boolean>;
   signin: (username: string, password: string) => Promise<User>;
@@ -47,20 +47,24 @@ function useProvideAuth(storeInstance: DominateStore) {
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [ready, setReady] = useState<boolean>(false);
-  const [userAccess, setUserAccess] = useState<UserAccess>(
-    UserAccess.Collaborator
-  );
+  const [userAccess, setUserAccess] = useState<UserAccess | null>(null);
 
   const navigate = useNavigate();
 
-  const getUserAccess = (profile: UserProfile): UserAccess => {
-    let access = UserAccess.Collaborator;
-    if (profile?.id && profile.id === profile?.team?.owner_id) {
-      access = UserAccess.Owner;
-    } else if (!profile?.is_collaborator) {
-      access = UserAccess.Member;
+  useEffect(() => setReady(true), [userProfile]);
+
+  const getUserAccess = (profile: UserProfile): UserAccess | null => {
+    if (!profile?.id) return null;
+
+    if (profile.id === profile?.team?.owner_id) {
+      return UserAccess.Owner;
     }
-    return access;
+
+    if (!profile?.is_collaborator) {
+      return UserAccess.Member;
+    }
+
+    return UserAccess.Collaborator;
   };
 
   // Wrapper to the set hook to add the auth token
@@ -89,7 +93,6 @@ function useProvideAuth(storeInstance: DominateStore) {
       void getUserProfile().then(
         (profile) => {
           setUserProfile(profile);
-          setReady(true);
           setUserAccess(getUserAccess(profile));
         },
         () => {
