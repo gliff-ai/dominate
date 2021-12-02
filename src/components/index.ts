@@ -1,6 +1,5 @@
 export { NavBar } from "./NavBar";
 export { MessageAlert } from "./message/MessageAlert";
-export { MessageSnackbar } from "./message/MessageSnackbar";
 export { ProgressSnackbar } from "./ProgressSnackbar";
 export type { Task } from "./ProgressSnackbar";
 export { SubmitButton } from "./SubmitButton";

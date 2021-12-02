@@ -9,10 +9,11 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@material-ui/core";
+import { WarningSnackbar } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
-import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
+import { MessageAlert, SubmitButton } from "@/components";
 import { VerificationSent } from "@/views/VerificationSent";
 import { useMountEffect } from "@/hooks/use-mountEffect";
 
@@ -222,9 +223,9 @@ export const SignUp = (props: Props): ReactElement | null => {
   };
 
   const err = (
-    <MessageSnackbar
+    <WarningSnackbar
       open={open}
-      handleClose={handleClose}
+      onClose={handleClose}
       messageText={
         String(storeError).includes("duplicate key")
           ? "Looks like that account already exists, try another email!"
