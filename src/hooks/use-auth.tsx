@@ -94,13 +94,14 @@ function useProvideAuth(storeInstance: DominateStore) {
         },
         () => {
           // 401 / 403 error, so clear saved session:
-          localStorage.removeItem("storeInstance");
+          localStorage.removeItem("etebaseInstance");
           setReady(true);
           navigate("signin");
         }
       );
     } else {
       setUserProfile(null);
+      localStorage.removeItem("etebaseInstance");
     }
   };
 
