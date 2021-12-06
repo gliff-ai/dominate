@@ -23,6 +23,7 @@ function useProviderPlugins() {
 
   useEffect(() => {
     if (!auth?.ready || !auth?.user || plugins) return;
+
     // fetch list of registered plugins from STORE
     void getPlugins()
       .then(setPlugins)
