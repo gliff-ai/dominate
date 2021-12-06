@@ -355,8 +355,14 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
     void apiRequest("/team/", "GET")
       .then((team: Team) => {
-        if (team.profiles.length !== 0) {
-          setStateIfMounted(team.profiles, setProfiles, isMounted.current);
+        const newProfiles = team.profiles
+          .filter(({ is_trusted_service }) => !is_trusted_service)
+          .map(({ email, name }) => ({
+            email,
+            name,
+          }));
+        if (newProfiles.length !== 0) {
+          setStateIfMounted(newProfiles, setProfiles, isMounted.current);
         }
       })
       .catch((e) => logger.error(e));

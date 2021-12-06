@@ -3,8 +3,11 @@ import {
   Typography,
   Box,
   makeStyles,
+  Snackbar,
+  SnackbarContent,
 } from "@material-ui/core";
-import { BaseSnackbar } from "@gliff-ai/style";
+import { theme } from "@gliff-ai/style";
+
 import { ReactElement } from "react";
 
 const useStyle = makeStyles({
@@ -16,6 +19,7 @@ const useStyle = makeStyles({
     fontWright: 500,
   },
   progress: { marginLeft: "5px", color: "#ffffff" },
+  snackbarContent: { backgroundColor: theme.palette.info.light },
 });
 
 type Task = { isLoading: boolean; description: string; progress?: number };
@@ -33,41 +37,42 @@ function ProgressSnackbar({ task, setTask }: Props): ReactElement {
   };
 
   return (
-    <BaseSnackbar
-      open={task.isLoading}
-      handleClose={handleClose}
-      message={
-        <div className={classes.messageContainer}>
-          {`${task.description} in progress, please wait...`}
-          <Box style={{ position: "relative", display: "inline-flex" }}>
-            <CircularProgress
-              variant={
-                task.progress !== undefined ? "determinate" : "indeterminate"
-              }
-              value={task.progress}
-              size={task.progress === undefined ? "2rem" : "3rem"}
-              className={classes.progress}
-            />
-            {task.progress !== undefined && (
-              <Box
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  left: 0,
-                  bottom: 0,
-                  right: 0,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <Typography component="div">{`${task.progress}%`}</Typography>
-              </Box>
-            )}
-          </Box>
-        </div>
-      }
-    />
+    <Snackbar open={task.isLoading} onClose={handleClose}>
+      <SnackbarContent
+        className={classes.snackbarContent}
+        message={
+          <div className={classes.messageContainer}>
+            {`${task.description} in progress, please wait...`}
+            <Box style={{ position: "relative", display: "inline-flex" }}>
+              <CircularProgress
+                variant={
+                  task.progress !== undefined ? "determinate" : "indeterminate"
+                }
+                value={task.progress}
+                size={task.progress === undefined ? "2rem" : "3rem"}
+                className={classes.progress}
+              />
+              {task.progress !== undefined && (
+                <Box
+                  style={{
+                    position: "absolute",
+                    top: 0,
+                    left: 0,
+                    bottom: 0,
+                    right: 0,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <Typography component="div">{`${task.progress}%`}</Typography>
+                </Box>
+              )}
+            </Box>
+          </div>
+        }
+      />
+    </Snackbar>
   );
 }
 

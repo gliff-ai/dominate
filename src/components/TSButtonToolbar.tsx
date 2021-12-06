@@ -1,7 +1,11 @@
 import { ReactElement, useEffect, useState } from "react";
 import { TooltipProps, makeStyles } from "@material-ui/core";
-import { BaseIconButton, BasePopover, theme } from "@gliff-ai/style";
-import { MessageSnackbar } from "@/components";
+import {
+  BaseIconButton,
+  BasePopover,
+  theme,
+  WarningSnackbar,
+} from "@gliff-ai/style";
 
 import { useTrustedService } from "@/hooks/use-trustedService";
 import { TrustedServiceClass } from "@/services/trustedServices";
@@ -103,9 +107,9 @@ export const TSButtonToolbar = (props: Props): ReactElement | null => {
               />
             ))}
           </div>
-          <MessageSnackbar
+          <WarningSnackbar
             open={open}
-            handleClose={() => setOpen(false)}
+            onClose={() => setOpen(false)}
             messageText={message}
           />
         </>

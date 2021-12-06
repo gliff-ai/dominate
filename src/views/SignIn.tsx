@@ -8,10 +8,10 @@ import {
   InputAdornment,
 } from "@material-ui/core";
 import { useNavigate } from "react-router-dom";
-import { theme } from "@gliff-ai/style";
+import { theme, WarningSnackbar } from "@gliff-ai/style";
 import SVG from "react-inlinesvg";
 import { useAuth } from "@/hooks/use-auth";
-import { MessageSnackbar, MessageAlert, SubmitButton } from "@/components";
+import { MessageAlert, SubmitButton } from "@/components";
 import { imgSrc } from "@/imgSrc";
 
 const useStyles = makeStyles(() => ({
@@ -183,9 +183,9 @@ export function SignIn(): ReactElement | null {
         </div>
       </form>
 
-      <MessageSnackbar
+      <WarningSnackbar
         open={open}
-        handleClose={handleClose}
+        onClose={handleClose}
         messageText={
           String(storeError).includes("Wrong password for user.")
             ? "Login Failed. Your username and/or password do not match"
