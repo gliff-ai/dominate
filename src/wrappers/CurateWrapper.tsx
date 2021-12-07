@@ -82,11 +82,19 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [profiles, setProfiles] = useState<Profile[] | null>(null);
   const isMounted = useRef(false);
 
+  let loadingImages = false;
+
+  useMountEffect(() => {
+    props.setIsLoading(true);
+  });
+
   const fetchImageItems = useStore(
     props,
     (storeInstance) => {
+      if (loadingImages) return;
       // fetches images via DominateStore, and assigns them to imageItems state
       if (!auth?.user?.username) return;
+      loadingImages = true;
       storeInstance
         .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
@@ -120,12 +128,15 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             );
 
           setCurateInput(wrangled);
+
+          loadingImages = false;
         })
         .catch((err) => {
-          logger.log(err);
+          logger.error(err);
+          loadingImages = false;
         });
     },
-    [collectionUid]
+    [collectionUid, auth]
   );
 
   const addImagesToGallery = async (
@@ -202,7 +213,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         fetchImageItems();
       })
       .catch((error) => {
-        logger.log(error);
+        logger.error(error);
       });
   };
 
@@ -346,10 +357,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     void downloadDataset();
   };
 
-  useMountEffect(() => {
-    props.setIsLoading(true);
-  });
-
   const getProfiles = (): void => {
     if (!auth || auth.userAccess === UserAccess.Collaborator) return;
 
@@ -383,6 +390,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   }, [auth, profiles, isMounted]);
 
   useEffect(() => {
+    if (!auth?.ready) return;
     if (!collectionUid) return;
     fetchImageItems();
   }, [collectionUid, fetchImageItems, isMounted, auth]);

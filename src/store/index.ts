@@ -791,7 +791,9 @@ export class DominateStore {
 
     // fetch the audits and parse as JSON:
     const itemManager = collectionManager.getItemManager(collection);
-    const auditUIDs = tiles.map((tile) => Object.values(tile.auditUID)).flat();
+    const auditUIDs = tiles
+      .map((tile) => Object.values(tile.auditUID || {}))
+      .flat();
     if (auditUIDs.length === 0) return [];
 
     const auditItems = (await itemManager.fetchMulti(auditUIDs)).data;
