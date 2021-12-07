@@ -399,7 +399,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     }
   }, [plugins, pluginUrls, isMounted]);
 
-  if (!props.storeInstance || !auth?.user || !collectionUid) return null;
+  if (!props.storeInstance || !auth?.user || !collectionUid || !auth.userAccess)
+    return null;
 
   return (
     <>
