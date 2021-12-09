@@ -52,7 +52,7 @@ if (IS_MONITORED) {
 
   // setup LogRocket
   setupLogRocketReact(LogRocket);
-  LogRocket.init(`ia4fn6/${LOGROCKET_PROJECT}`, {
+  LogRocket.init(`ia4fn6/${LOGROCKET_PROJECT || ""}`, {
     dom: {
       textSanitizer: true,
       inputSanitizer: true,
