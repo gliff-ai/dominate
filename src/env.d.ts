@@ -10,6 +10,6 @@ interface ImportMeta {
       | "production";
     VITE_IS_SENTRY_DEBUG?: string;
     VITE_VERSION?: string;
-    LOGROCKET_PROJECT?: string;
+    VITE_LOGROCKET_PROJECT?: string;
   };
 }
