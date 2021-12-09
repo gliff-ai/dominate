@@ -21,6 +21,7 @@ if (IS_MONITORED) {
   const VERSION = import.meta.env.VITE_VERSION;
   const SENTRY_ENVIRONMENT = import.meta.env.VITE_SENTRY_ENVIRONMENT;
   const IS_SENTRY_DEBUG = import.meta.env.VITE_IS_SENTRY_DEBUG;
+  const LOGROCKET_PROJECT = import.meta.env.VITE_LOGROCKET_PROJECT;
 
   // setup Sentry
   Sentry.init({
@@ -51,7 +52,7 @@ if (IS_MONITORED) {
 
   // setup LogRocket
   setupLogRocketReact(LogRocket);
-  LogRocket.init("ia4fn6/dominate", {
+  LogRocket.init(`ia4fn6/${LOGROCKET_PROJECT}`, {
     dom: {
       textSanitizer: true,
       inputSanitizer: true,
