@@ -468,6 +468,7 @@ export class DominateStore {
           metadata: imageMetas[i],
           imageUID: newItems[i].uid,
           annotationUID: {},
+          annotationComplete: {},
           auditUID: {},
         });
       }
@@ -718,8 +719,23 @@ export class DominateStore {
     });
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
-    const tile = galleryTiles.find((item) => item.imageUID === imageUid);
+    let galleryHasChanged = false;
+    const tile = galleryTiles.find((item) => {
+      const isSelected = item.imageUID === imageUid;
+      if (isSelected && item.annotationComplete[username] !== isComplete) {
+        item.annotationComplete[username] = isComplete;
+        galleryHasChanged = true;
+      }
+      return isSelected;
+    });
+
     if (tile === undefined) return;
+
+    if (galleryHasChanged) {
+      await collection.setContent(JSON.stringify(galleryTiles));
+      await collectionManager.transaction(collection);
+    }
+
     const annotationUid = tile.annotationUID[username];
     const auditUid = tile.auditUID[username];
     if (!annotationUid || !auditUid) return;
@@ -851,6 +867,13 @@ export class DominateStore {
     imageUids.forEach((imageUid, i) => {
       newContent = newContent.map((item) => {
         if (item.imageUID === imageUid) {
+          // add default for annotationComplete
+          newAssignees[i].forEach((username) => {
+            if (item.annotationComplete[username] === undefined) {
+              item.annotationComplete[username] = false;
+            }
+          });
+
           return { ...item, assignees: newAssignees[i] };
         }
         return item;
