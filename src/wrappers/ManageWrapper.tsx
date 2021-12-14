@@ -137,15 +137,17 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
       content.forEach(({ assignees = [], annotationComplete = {} }) => {
         if (assignees.length === 0) return;
 
+        // NOTE: '|| 0' was added to handle the case of images assigned before
+        // the 'annotationComplete' field was added to the GalleryTile interface.
         if (isOwnerOrMember) {
           progress[uid].total += assignees.length;
           progress[uid].complete += assignees
-            .map((assignee) => Number(annotationComplete[assignee]))
-            .concat([0]) // useful in case there are no assignees
+            .map((assignee) => Number(annotationComplete[assignee]) || 0)
+            .concat([0]) // added to handle case of unassigned images
             .reduce((a, b) => a + b);
         } else {
           progress[uid].total += 1;
-          progress[uid].complete += Number(annotationComplete[username]);
+          progress[uid].complete += Number(annotationComplete[username]) || 0;
         }
       });
     });

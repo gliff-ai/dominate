@@ -766,19 +766,26 @@ export class DominateStore {
     });
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
-    let galleryHasChanged = false;
+
+    let contentHasChanged = false;
     const tile = galleryTiles.find((item) => {
       const isSelected = item.imageUID === imageUid;
-      if (isSelected && item.annotationComplete[username] !== isComplete) {
-        item.annotationComplete[username] = isComplete;
-        galleryHasChanged = true;
+      if (isSelected) {
+        if (item.annotationComplete === undefined) {
+          item.annotationComplete = {};
+          contentHasChanged = true;
+        }
+        if (item.annotationComplete[username] !== isComplete) {
+          item.annotationComplete[username] = isComplete;
+          contentHasChanged = true;
+        }
       }
       return isSelected;
     });
 
     if (tile === undefined) return;
 
-    if (galleryHasChanged) {
+    if (contentHasChanged) {
       await collection.setContent(JSON.stringify(galleryTiles));
       await collectionManager.transaction(collection);
     }
@@ -914,14 +921,18 @@ export class DominateStore {
     imageUids.forEach((imageUid, i) => {
       newContent = newContent.map((item) => {
         if (item.imageUID === imageUid) {
-          // add default for annotationComplete
-          newAssignees[i].forEach((username) => {
-            if (item.annotationComplete[username] === undefined) {
-              item.annotationComplete[username] = false;
-            }
+          if (item.annotationComplete === undefined) {
+            item.annotationComplete = {};
+          }
+          const annotationComplete = {};
+          newAssignees[i].forEach((assignee) => {
+            annotationComplete[assignee] =
+              item.annotationComplete[assignee] !== undefined
+                ? item.annotationComplete[assignee]
+                : false;
           });
 
-          return { ...item, assignees: newAssignees[i] };
+          return { ...item, assignees: newAssignees[i], annotationComplete };
         }
         return item;
       });
