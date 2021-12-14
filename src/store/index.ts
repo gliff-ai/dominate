@@ -226,6 +226,53 @@ export class DominateStore {
     }
   };
 
+  getCollectionsContent = async (
+    collectionUids: string[],
+    type = "gliff.gallery"
+  ): Promise<
+    {
+      uid: string;
+      content: GalleryTile[];
+    }[]
+  > => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const { data } = await collectionManager.list(type);
+
+    const settledPromises = await Promise.allSettled(
+      data.map((collection) =>
+        this.wrangleCollectionsContent(collection, collectionUids)
+      )
+    );
+
+    const resolved: {
+      uid: string;
+      content: GalleryTile[];
+    }[] = [];
+    settledPromises.forEach((result) => {
+      if (result && result.status === "fulfilled" && result.value !== null) {
+        const res = result.value;
+        resolved.push(res);
+      }
+    });
+    return resolved;
+  };
+
+  wrangleCollectionsContent = async (
+    col: Collection,
+    collectionUids: string[]
+  ): Promise<{ uid: string; content: GalleryTile[] } | null> => {
+    if (collectionUids.includes(col.uid)) {
+      const content = await col.getContent(OutputFormat.String);
+      return {
+        uid: col.uid,
+        content: JSON.parse(content) as GalleryTile[],
+      };
+    }
+    return null;
+  };
+
   wrangleGallery = (col: Collection): GalleryMeta => {
     const meta = col.getMeta();
     const modifiedTime = meta.mtime;
