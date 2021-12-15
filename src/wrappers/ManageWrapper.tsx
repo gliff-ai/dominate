@@ -119,17 +119,13 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return result;
   };
 
-  const getAnnotationProgress = async (
-    collectionUids: string[],
-    username: string
-  ): Promise<Progress> => {
+  const getAnnotationProgress = async (username: string): Promise<Progress> => {
     const isOwnerOrMember =
       auth.userAccess === UserAccess.Owner ||
       auth.userAccess === UserAccess.Member;
 
-    const collectionsContent = await props.storeInstance.getCollectionsContent(
-      collectionUids
-    );
+    const collectionsContent =
+      await props.storeInstance.getCollectionsContent();
 
     const progress: Progress = {};
     collectionsContent.forEach(({ uid, content }) => {
