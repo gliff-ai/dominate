@@ -1,0 +1,36 @@
+version: v1
+
+labels:
+  - label: "enhancement"
+    sync: true
+    matcher:
+      title: "^feat: .*"
+      commits: "^feat: .*"
+
+  - label: "bug"
+    matcher:
+      title: "^fix: .*"
+      commits: "^fix: .*"
+
+  - label: "dependencies"
+    matcher:
+      title: "^(build\(deps\): .*|build\(deps-dev\): .*)"
+      commits: "^(build\(deps\): .*|build\(deps-dev\): .*)"
+
+  - label: "test"
+    matcher:
+      title: "^test: .*"
+      commits: "^test: .*"
+
+checks:
+  - context: "Semantic Pull Request"
+    url: "https://github.com/fuxingloh/multi-labeler/blob/main/.github/labeler.yml"
+    description:
+      success: Ready for review & merge.
+      failure: Missing semantic label for merge.
+    labels:
+      any:
+        - enhancement
+        - bug
+        - dependences
+        - test
