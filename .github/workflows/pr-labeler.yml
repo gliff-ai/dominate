@@ -1,7 +1,7 @@
 name: PR Labeler
 on:
   pull_request:
-    types: [opened, edited, synchronize, reopened]
+    types: [opened, edited, auto_merge_enabled, reopened]
     branches:
       - staging
 
