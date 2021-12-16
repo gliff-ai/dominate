@@ -62,3 +62,7 @@ jobs:
           token: ${{ secrets.DEPENDENCY_ROBOT_PAT }}
           pull-request-number: ${{ steps.pull.outputs.PULL_REQUEST_NUMBER }}
           merge-method: merge
+      - name: delete branch if failed
+        if: ${{ failure() }}
+        run: |
+          git branch -D dependencies
