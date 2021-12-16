@@ -24,15 +24,3 @@ labels:
     matcher:
       title: "^test: .*"
       commits: "^test: .*"
-
-checks:
-  - context: "Semantic Pull Request"
-    description:
-      success: Ready for review & merge.
-      failure: Missing semantic label for merge.
-    labels:
-      any:
-        - enhancement
-        - bug
-        - dependences
-        - test
