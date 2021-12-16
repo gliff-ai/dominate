@@ -1,7 +1,7 @@
 name: Scheduled Batch of Minor/Patch Updates
 on:
   schedule:
-    - cron:  '0 06 * * *'
+    - cron: "0 06 * * 5"
 
 jobs:
   Update:
@@ -22,7 +22,7 @@ jobs:
         with:
           node-version: 16
       - name: Update node dependencies
-        run: | 
+        run: |
           npm update --dev
       - name: Commit updates
         uses: stefanzweifel/git-auto-commit-action@v4
@@ -59,6 +59,13 @@ jobs:
         if: steps.pull.outputs.PULL_REQUEST_NUMBER > 1
         uses: peter-evans/enable-pull-request-automerge@v1
         with:
-          token: ${{ secrets.AUTOMERGE_PAT }}
+          token: ${{ secrets.DEPENDENCY_ROBOT_PAT }}
           pull-request-number: ${{ steps.pull.outputs.PULL_REQUEST_NUMBER }}
           merge-method: merge
+      - name: Add to project board
+        uses: docker://takanabe/github-actions-automate-projects:v0.0.1
+        if: steps.pull.outputs.PULL_REQUEST_NUMBER > 1
+        env:
+          GITHUB_TOKEN: ${{ secrets.DEPENDENCY_ROBOT_PAT }}
+          GITHUB_PROJECT_URL: https://github.com/orgs/gliff-ai/projects/10
+          GITHUB_PROJECT_COLUMN_NAME: Review in progress
