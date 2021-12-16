@@ -54,7 +54,7 @@ jobs:
           TO_BRANCH: "staging"
           PULL_REQUEST_TITLE: "build(deps): apply minor and patch dependency updates"
           CONTENT_COMPARISON: true
-          TEAM_REVIEWERS: '["gliff-ai/techteam"]'
+          TEAM_REVIEWERS: '["frontend"]'
       - name: delete branch if failed
         if: ${{ failure() }}
         run: |
