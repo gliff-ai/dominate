@@ -16,5 +16,5 @@ jobs:
       - name: Add PR Label
       - uses: fuxingloh/multi-labeler@v1
         with:
-          github-token: ${{secrets.DEPENDENCY_ROBOT_PAT}}token }}'
+          github-token: ${{ secrets.DEPENDENCY_ROBOT_PAT }}'
           config-path: .github/labeler.yml
