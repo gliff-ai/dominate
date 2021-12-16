@@ -14,8 +14,8 @@ labels:
 
   - label: "dependencies"
     matcher:
-      title: "^(build\x28deps\x29: .*|build\x28deps-dev\x29: .*)"
-      commits: "^(build\x28deps\x29: .*|build\x28deps-dev\x29: .*)"
+      title: "^build\x28(deps|deps-dev)\x29: .*"
+      commits: "^build\x28(deps|deps-dev)\x29: .*"
 
   - label: "test"
     matcher:
