@@ -8,16 +8,19 @@ labels:
       commits: "^feat: .*"
 
   - label: "bug"
+    sync: true
     matcher:
       title: "^fix: .*"
       commits: "^fix: .*"
 
   - label: "dependencies"
+    sync: true
     matcher:
       title: "^build\x28(deps|deps-dev)\x29: .*"
       commits: "^build\x28(deps|deps-dev)\x29: .*"
 
   - label: "test"
+    sync: true
     matcher:
       title: "^test: .*"
       commits: "^test: .*"
