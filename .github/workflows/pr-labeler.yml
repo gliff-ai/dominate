@@ -2,20 +2,19 @@ name: PR Labeler
 on:
   pull_request:
     types: [opened, edited]
+    branches:
+      - staging
 
 jobs:
   check_PR_labels:
-    if: (github.event_name == 'pull_request' && github.event.action != 'closed')
     runs-on: ubuntu-latest
-    name: Check PR Title
     steps:
       - name: Check PR Title
         uses: amannn/action-semantic-pull-request@v3.4.2
+        if: (github.event_name == 'pull_request' && github.event.action != 'closed')
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Add PR Label
         uses: TimonVS/pr-labeler-action@v3
-        with:
-          configuration-path: .github/pr-labeler.yml # optional, .github/pr-labeler.yml is the default value
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
