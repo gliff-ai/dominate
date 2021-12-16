@@ -16,8 +16,8 @@ labels:
   - label: "dependencies"
     sync: true
     matcher:
-      title: "^build\x28(deps|deps-dev)\x29: .*"
-      commits: "^build\x28(deps|deps-dev)\x29: .*"
+      title: "^build\x28deps\x29: .*"
+      commits: "^build\x28deps\x29: .*"
 
   - label: "test"
     sync: true
