@@ -16,6 +16,7 @@ interface GalleryTile {
   id: string; // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
   imageUID: string;
   annotationUID: Record<string, string>;
+  annotationComplete: { [username: string]: boolean };
   auditUID: Record<string, string>;
 }
 
