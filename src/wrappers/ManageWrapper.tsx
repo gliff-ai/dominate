@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ReactElement, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -25,104 +25,120 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   const auth = useAuth();
   const navigate = useNavigate();
 
-  if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
-    return null;
-
-  const getProjects = async () => {
+  const getProjects = useCallback(async () => {
     const projects = await props.storeInstance.getCollectionsMeta();
 
     return projects;
-  };
+  }, [props.storeInstance]);
 
-  const getCollaboratorProject = async ({ name }) => {
-    const projects = await props.storeInstance.getCollectionsMeta();
+  const getCollaboratorProject = useCallback(
+    async ({ name }) => {
+      const projects = await props.storeInstance.getCollectionsMeta();
 
-    // get all members of all team projects
-    const membersPromises: Promise<string[] | null>[] = [];
-    for (let p = 0; p < projects.length; p += 1) {
-      const { uid } = projects[p];
-      membersPromises.push(props.storeInstance.getCollectionMembers(uid));
-    }
-    const allMembers: (string[] | null)[] = await Promise.all<string[] | null>(
-      membersPromises
-    );
+      // get all members of all team projects
+      const membersPromises: Promise<string[] | null>[] = [];
+      for (let p = 0; p < projects.length; p += 1) {
+        const { uid } = projects[p];
+        membersPromises.push(props.storeInstance.getCollectionMembers(uid));
+      }
+      const allMembers: (string[] | null)[] = await Promise.all<
+        string[] | null
+      >(membersPromises);
 
-    // for each project, go through members and return the first that matches
-    for (let p = 0; p < projects.length; p += 1) {
-      const members = allMembers[p];
-      if (members) {
-        for (let m = 0; p < members.length; m += 1) {
-          if (members[m] === name) {
-            return projects[p].uid;
+      // for each project, go through members and return the first that matches
+      for (let p = 0; p < projects.length; p += 1) {
+        const members = allMembers[p];
+        if (members) {
+          for (let m = 0; p < members.length; m += 1) {
+            if (members[m] === name) {
+              return projects[p].uid;
+            }
           }
         }
       }
-    }
 
-    return null;
-  };
+      return null;
+    },
+    [props.storeInstance]
+  );
 
-  const createProject = async ({ name }) => {
-    const result = await props.storeInstance.createCollection(name);
+  const createProject = useCallback(
+    async ({ name }) => {
+      const result = await props.storeInstance.createCollection(name);
 
-    return true; // Maybe not always true...
-  };
+      return true; // Maybe not always true...
+    },
+    [props.storeInstance]
+  );
 
-  const inviteUser = async ({ email }) => {
-    // Invite them to create a gliff account
-    try {
-      const result = await inviteNewUser(email);
-    } catch (e) {
-      console.log("bad invite");
-      console.log(e);
-    }
-
-    return true;
-    // Share collections with them?
-  };
-
-  const inviteCollaborator = async ({ email }) => {
-    try {
+  const inviteUser = useCallback(
+    async ({ email }) => {
       // Invite them to create a gliff account
-      const result = await inviteNewCollaborator(email);
-    } catch (e) {
-      console.log("bad invite");
-      console.log(e);
-    }
+      try {
+        const result = await inviteNewUser(email);
+      } catch (e) {
+        console.log("bad invite");
+        console.log(e);
+      }
 
-    return true;
-    // Share collections with them?
-  };
+      return true;
+      // Share collections with them?
+    },
+    [inviteNewUser]
+  );
 
-  const inviteToProject = async ({ email, projectId }) => {
-    const result = await props.storeInstance.inviteUserToCollection(
-      projectId,
-      email
-    );
+  const inviteCollaborator = useCallback(
+    async ({ email }) => {
+      try {
+        // Invite them to create a gliff account
+        const result = await inviteNewCollaborator(email);
+      } catch (e) {
+        console.log("bad invite");
+        console.log(e);
+      }
 
-    return true;
-  };
+      return true;
+      // Share collections with them?
+    },
+    [inviteNewCollaborator]
+  );
 
-  const addTrustedService = async ({ url, name }) => {
-    // First create a trusted service base user
-    const { key, email } = await props.storeInstance.createTrustedServiceUser();
+  const inviteToProject = useCallback(
+    async ({ email, projectId }) => {
+      const result = await props.storeInstance.inviteUserToCollection(
+        projectId,
+        email
+      );
 
-    // Set the user profile
-    const res = await createTrustedService(email, name, url);
+      return true;
+    },
+    [props.storeInstance]
+  );
 
-    return key;
-  };
+  const addTrustedService = useCallback(
+    async ({ url, name }) => {
+      // First create a trusted service base user
+      const { key, email } =
+        await props.storeInstance.createTrustedServiceUser();
 
-  const getTrustedServices = async () => {
+      // Set the user profile
+      const res = await createTrustedService(email, name, url);
+
+      return key;
+    },
+    [props.storeInstance, createTrustedService]
+  );
+
+  const getTrustedServices = useCallback(async () => {
     const result = await getTrustedService();
 
     return result;
-  };
+  }, [getTrustedService]);
 
   const getAnnotationProgress = async (username: string): Promise<Progress> => {
     const isOwnerOrMember =
-      auth.userAccess === UserAccess.Owner ||
-      auth.userAccess === UserAccess.Member;
+      auth?.userAccess === UserAccess.Owner ||
+      auth?.userAccess === UserAccess.Member;
 
     const collectionsContent =
       await props.storeInstance.getCollectionsContent();
@@ -172,6 +188,9 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     createTrustedService: addTrustedService,
     getTrustedServices,
   };
+
+  if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
+    return null;
 
   const user = {
     email: auth.user.username,
