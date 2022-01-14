@@ -166,6 +166,15 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return progress;
   };
 
+  const getCollectionsMembers = useCallback(async () => {
+    const result = await props.storeInstance.getCollectionsMembers();
+    const members = {};
+    result.forEach(({ uid, usernames }) => {
+      members[uid] = usernames;
+    });
+    return members;
+  }, [props.storeInstance]);
+
   const launchCurate = (projectUid: string): void =>
     // Open the selected project in curate
     navigate(`/curate/${projectUid}`);
@@ -187,6 +196,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     inviteToProject,
     createTrustedService: addTrustedService,
     getTrustedServices,
+    getCollectionsMembers,
   };
 
   if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)

@@ -346,6 +346,40 @@ export class DominateStore {
     return members.data.map((m) => m.username);
   };
 
+  getCollectionsMembers = async (
+    type = "gliff.gallery"
+  ): Promise<
+    {
+      uid: string;
+      usernames: string[];
+    }[]
+  > => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const { data } = await collectionManager.list(type);
+
+    const resolved: { uid: string; usernames: string[] }[] = [];
+    await Promise.allSettled(
+      data.map(async (collection) => {
+        const memberManager = collectionManager.getMemberManager(collection);
+        const members = await memberManager.list();
+        return {
+          uid: collection.uid,
+          usernames: members.data.map((m) => m.username),
+        };
+      })
+    ).then((results) =>
+      results.forEach((result) => {
+        if (result.status === "fulfilled") {
+          resolved.push(result.value);
+        }
+      })
+    );
+
+    return resolved;
+  };
+
   createCollection = async (name: string): Promise<void> => {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
