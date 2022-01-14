@@ -455,6 +455,18 @@ export class DominateStore {
     }
   };
 
+  revokeAccessToCollection = async (
+    collectionUid: string,
+    username: string
+  ) => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const memberManager = collectionManager.getMemberManager(collection);
+    await memberManager.remove(username);
+  };
+
   getItemManager = async (collectionUid: string): Promise<ItemManager> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
     const collectionManager = this.etebaseInstance.getCollectionManager();

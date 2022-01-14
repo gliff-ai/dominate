@@ -175,6 +175,16 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return members;
   }, [props.storeInstance]);
 
+  const removeFromProject = useCallback(
+    async ({ uid, username }): Promise<void> => {
+      const result = await props.storeInstance.revokeAccessToCollection(
+        uid,
+        username
+      );
+    },
+    [props.storeInstance]
+  );
+
   const launchCurate = (projectUid: string): void =>
     // Open the selected project in curate
     navigate(`/curate/${projectUid}`);
@@ -194,6 +204,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     inviteUser,
     inviteCollaborator,
     inviteToProject,
+    removeFromProject,
     createTrustedService: addTrustedService,
     getTrustedServices,
     getCollectionsMembers,
