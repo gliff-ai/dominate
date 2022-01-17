@@ -168,10 +168,12 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
 
   const getCollectionsMembers = useCallback(async () => {
     const result = await props.storeInstance.getCollectionsMembers();
+
     const members = {};
     result.forEach(({ uid, usernames, pendingUsernames }) => {
       members[uid] = { usernames, pendingUsernames };
     });
+
     return members;
   }, [props.storeInstance]);
 
