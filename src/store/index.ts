@@ -352,21 +352,32 @@ export class DominateStore {
     {
       uid: string;
       usernames: string[];
+      pendingUsernames: string[];
     }[]
   > => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
+    const invitationManager = this.etebaseInstance.getInvitationManager();
     const { data } = await collectionManager.list(type);
 
-    const resolved: { uid: string; usernames: string[] }[] = [];
+    const resolved: {
+      uid: string;
+      usernames: string[];
+      pendingUsernames: string[];
+    }[] = [];
     await Promise.allSettled(
       data.map(async (collection) => {
         const memberManager = collectionManager.getMemberManager(collection);
         const members = await memberManager.list();
+        const invitations = await invitationManager.listOutgoing();
+
         return {
           uid: collection.uid,
           usernames: members.data.map((m) => m.username),
+          pendingUsernames: invitations.data
+            .map((m) => m.username)
+            .filter((item, i, array) => array.indexOf(item) === i), // filter out duplicates
         };
       })
     ).then((results) =>
