@@ -31,42 +31,21 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return projects;
   }, [props.storeInstance]);
 
-  const getCollaboratorProject = useCallback(
-    async ({ name }) => {
-      const projects = await props.storeInstance.getCollectionsMeta();
-
-      // get all members of all team projects
-      const membersPromises: Promise<string[] | null>[] = [];
-      for (let p = 0; p < projects.length; p += 1) {
-        const { uid } = projects[p];
-        membersPromises.push(props.storeInstance.getCollectionMembers(uid));
-      }
-      const allMembers: (string[] | null)[] = await Promise.all<
-        string[] | null
-      >(membersPromises);
-
-      // for each project, go through members and return the first that matches
-      for (let p = 0; p < projects.length; p += 1) {
-        const members = allMembers[p];
-        if (members) {
-          for (let m = 0; p < members.length; m += 1) {
-            if (members[m] === name) {
-              return projects[p].uid;
-            }
-          }
-        }
-      }
-
-      return null;
+  const getCollectionMembers = useCallback(
+    async ({ collectionUid }) => {
+      const members = await props.storeInstance.getCollectionMembers(
+        collectionUid
+      );
+      return members;
     },
     [props.storeInstance]
   );
 
   const createProject = useCallback(
     async ({ name }) => {
-      const result = await props.storeInstance.createCollection(name);
+      const uid = await props.storeInstance.createCollection(name);
 
-      return true; // Maybe not always true...
+      return uid;
     },
     [props.storeInstance]
   );
@@ -201,7 +180,8 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     loginUser: "POST /user/login", // Not used, we pass an authd user down
     getProjects,
     getProject: "GET /project/", // TODO
-    getCollaboratorProject,
+    getCollectionMembers,
+    getCollectionsMembers,
     createProject,
     inviteUser,
     inviteCollaborator,
@@ -209,7 +189,6 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     removeFromProject,
     createTrustedService: addTrustedService,
     getTrustedServices,
-    getCollectionsMembers,
   };
 
   if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)

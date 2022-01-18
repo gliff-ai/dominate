@@ -334,16 +334,24 @@ export class DominateStore {
 
   getCollectionMembers = async (
     collectionUid: string
-  ): Promise<string[] | null> => {
-    if (this.collections.length > 0) return null;
+  ): Promise<{ usernames: string[]; pendingUsernames: string[] } | null> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
+    const invitationManager = this.etebaseInstance.getInvitationManager();
+
     const collection = await collectionManager.fetch(collectionUid);
     const memberManager = collectionManager.getMemberManager(collection);
     const members = await memberManager.list();
+    const invitations = await invitationManager.listOutgoing();
 
-    return members.data.map((m) => m.username);
+    return {
+      usernames: members.data.map(({ username }) => username),
+      pendingUsernames: invitations.data
+        .filter((item) => item.collection === collectionUid)
+        .map(({ username }) => username)
+        .filter((item, i, array) => array.indexOf(item) === i), // filter out duplicates
+    };
   };
 
   getCollectionsMembers = async (
@@ -374,9 +382,10 @@ export class DominateStore {
 
         return {
           uid: collection.uid,
-          usernames: members.data.map((m) => m.username),
+          usernames: members.data.map(({ username }) => username),
           pendingUsernames: invitations.data
-            .map((m) => m.username)
+            .filter((item) => item.collection === collection.uid)
+            .map(({ username }) => username)
             .filter((item, i, array) => array.indexOf(item) === i), // filter out duplicates
         };
       })
@@ -391,7 +400,7 @@ export class DominateStore {
     return resolved;
   };
 
-  createCollection = async (name: string): Promise<void> => {
+  createCollection = async (name: string): Promise<string> => {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     // Create, encrypt and upload a new collection
@@ -406,6 +415,7 @@ export class DominateStore {
       "[]" // content
     );
     await collectionManager.upload(collection);
+    return collection.uid;
   };
 
   // TODO change this to return errors and display them when we do styling etc
@@ -695,13 +705,10 @@ export class DominateStore {
       await collection.getContent(OutputFormat.String)
     ) as GalleryTile[];
 
-    const newContent = content.map((tile) => {
-      return {
-        ...tile,
-        // unassign all item from a user
-        assignees: tile.assignees.filter((a) => a !== username),
-      };
-    });
+    const newContent = content.map((tile) => ({
+      ...tile,
+      assignees: tile.assignees.filter((a) => a !== username), // unassign all items from a user
+    }));
 
     await collection.setContent(JSON.stringify(newContent));
     await collectionManager.transaction(collection);
