@@ -469,13 +469,15 @@ export class DominateStore {
   revokeAccessToCollection = async (
     collectionUid: string,
     username: string
-  ) => {
+  ): Promise<void> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
     const memberManager = collectionManager.getMemberManager(collection);
     await memberManager.remove(username);
+
+    await this.removeAssignee(collectionUid, username);
   };
 
   getItemManager = async (collectionUid: string): Promise<ItemManager> => {
@@ -681,6 +683,28 @@ export class DominateStore {
     await itemManager.batch(allItems.data);
 
     setTask({ isLoading: false, description: "Image deletion", progress: 100 });
+  };
+
+  removeAssignee = async (
+    collectionUid: string,
+    username: string
+  ): Promise<void> => {
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const content = JSON.parse(
+      await collection.getContent(OutputFormat.String)
+    ) as GalleryTile[];
+
+    const newContent = content.map((tile) => {
+      return {
+        ...tile,
+        // unassign all item from a user
+        assignees: tile.assignees.filter((a) => a !== username),
+      };
+    });
+
+    await collection.setContent(JSON.stringify(newContent));
+    await collectionManager.transaction(collection);
   };
 
   getAnnotationsObject = async (
