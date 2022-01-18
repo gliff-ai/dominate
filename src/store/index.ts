@@ -226,6 +226,25 @@ export class DominateStore {
     }
   };
 
+  getCollectionContent = async (
+    collectionUid: string
+  ): Promise<{
+    uid: string;
+    content: GalleryTile[];
+  }> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+
+    return {
+      uid: collectionUid,
+      content: JSON.parse(
+        await collection.getContent(OutputFormat.String)
+      ) as GalleryTile[],
+    };
+  };
+
   getCollectionsContent = async (
     type = "gliff.gallery"
   ): Promise<

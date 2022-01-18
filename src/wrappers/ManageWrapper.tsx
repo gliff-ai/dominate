@@ -12,6 +12,7 @@ import {
   createTrustedService,
   getTrustedService,
 } from "@/services/trustedServices";
+import { GalleryTile } from "@/store/interfaces";
 
 type Progress = {
   [uid: string]: { complete: number; total: number };
@@ -114,13 +115,25 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return result;
   }, [getTrustedService]);
 
-  const getAnnotationProgress = async (username: string): Promise<Progress> => {
+  const getAnnotationProgress = async (
+    username: string,
+    collectionUid?: string
+  ): Promise<Progress> => {
     const isOwnerOrMember =
       auth?.userAccess === UserAccess.Owner ||
       auth?.userAccess === UserAccess.Member;
 
-    const collectionsContent =
-      await props.storeInstance.getCollectionsContent();
+    let collectionsContent: {
+      uid: string;
+      content: GalleryTile[];
+    }[];
+    if (collectionUid !== undefined) {
+      collectionsContent = [
+        await props.storeInstance.getCollectionContent(collectionUid),
+      ];
+    } else {
+      collectionsContent = await props.storeInstance.getCollectionsContent();
+    }
 
     const progress: Progress = {};
     collectionsContent.forEach(({ uid, content }) => {
