@@ -51,37 +51,31 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     [props.storeInstance]
   );
 
-  const inviteUser = useCallback(
-    async ({ email }) => {
+  const inviteUser = useCallback(async ({ email }) => {
+    // Invite them to create a gliff account
+    try {
+      const result = await inviteNewUser(email);
+    } catch (e) {
+      console.log("bad invite");
+      console.log(e);
+    }
+
+    return true;
+    // Share collections with them?
+  }, []);
+
+  const inviteCollaborator = useCallback(async ({ email }) => {
+    try {
       // Invite them to create a gliff account
-      try {
-        const result = await inviteNewUser(email);
-      } catch (e) {
-        console.log("bad invite");
-        console.log(e);
-      }
+      const result = await inviteNewCollaborator(email);
+    } catch (e) {
+      console.log("bad invite");
+      console.log(e);
+    }
 
-      return true;
-      // Share collections with them?
-    },
-    [inviteNewUser]
-  );
-
-  const inviteCollaborator = useCallback(
-    async ({ email }) => {
-      try {
-        // Invite them to create a gliff account
-        const result = await inviteNewCollaborator(email);
-      } catch (e) {
-        console.log("bad invite");
-        console.log(e);
-      }
-
-      return true;
-      // Share collections with them?
-    },
-    [inviteNewCollaborator]
-  );
+    return true;
+    // Share collections with them?
+  }, []);
 
   const inviteToProject = useCallback(
     async ({ email, projectId }) => {
@@ -106,14 +100,14 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
 
       return key;
     },
-    [props.storeInstance, createTrustedService]
+    [props.storeInstance]
   );
 
   const getTrustedServices = useCallback(async () => {
     const result = await getTrustedService();
 
     return result;
-  }, [getTrustedService]);
+  }, []);
 
   const getAnnotationProgress = async (
     username: string,
