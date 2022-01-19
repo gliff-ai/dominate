@@ -63,32 +63,10 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
 
     return true; // Maybe not always true...
   };
-
-  const inviteUser = async ({ email }) => {
-    // Invite them to create a gliff account
-    try {
-      const result = await inviteNewUser(email);
-    } catch (e) {
-      console.log("bad invite");
-      console.log(e);
-    }
-
-    return true;
-    // Share collections with them?
-  };
-
-  const inviteCollaborator = async ({ email }) => {
-    try {
-      // Invite them to create a gliff account
-      const result = await inviteNewCollaborator(email);
-    } catch (e) {
-      console.log("bad invite");
-      console.log(e);
-    }
-
-    return true;
-    // Share collections with them?
-  };
+  // Invite them to create a gliff account
+  // Errors are caught in MANAGE
+  const inviteUser = async ({ email }) => inviteNewUser(email);
+  const inviteCollaborator = async ({ email }) => inviteNewCollaborator(email);
 
   const inviteToProject = async ({ email, projectId }) => {
     const result = await props.storeInstance.inviteUserToCollection(
@@ -104,7 +82,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     const { key, email } = await props.storeInstance.createTrustedServiceUser();
 
     // Set the user profile
-    const res = await createTrustedService(email, name, url);
+    await createTrustedService(email, name, url);
 
     return key;
   };
