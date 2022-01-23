@@ -1,48 +1,48 @@
-name: Lint, Build, Test
+name: lint, build, and test
 on: push
 
 jobs:
-  Lint:
+  lint:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v2
-      - name: Setup node
+      - name: setup node
         uses: actions/setup-node@v1
         with:
           node-version: 16
-      - name: Setup dependencies
+      - name: setup dependencies
         run: npm i -g eslint prettier && npm i
-      - name: Lint
+      - name: lint
         run: npm run lint:ts
-      - name: Prettier
+      - name: check formatting
         run: npm run prettier
-  Build:
+  build:
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v2
-      - name: Setup node
+      - name: setup node
         uses: actions/setup-node@v1
         with:
           node-version: 16
-      - name: Setup dependencies
+      - name: setup dependencies
         run: npm i
-      - name: Build
+      - name: build
         run: npm run build
-  Test:
+  test:
     runs-on: ubuntu-latest
     timeout-minutes: 2
     steps:
-      - name: Checkout
+      - name: checkout
         uses: actions/checkout@v2
-      - name: Setup node
+      - name: setup node
         uses: actions/setup-node@v1
         with:
           node-version: 16
-      - name: Setup dependencies
+      - name: setup dependencies
         run: npm i
-      - name: Test
+      - name: run tests
         run: npm run test

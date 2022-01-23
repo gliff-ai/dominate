@@ -1,5 +1,5 @@
 import { ReactElement, useState, useEffect } from "react";
-import { Route, Navigate, RouteProps } from "react-router-dom";
+import { Navigate, RouteProps } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 
 export const PrivateRoute = (props: RouteProps): ReactElement | null => {
@@ -35,7 +35,7 @@ export const PrivateRoute = (props: RouteProps): ReactElement | null => {
   // default to just following the route
   /* eslint-disable react/jsx-props-no-spreading */
   return (
-    (auth?.user && auth?.userProfile?.email_verified && <Route {...props} />) ||
+    (auth?.user && auth?.userProfile?.email_verified && <>{props.element}</>) ||
     element
   );
 };

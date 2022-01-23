@@ -1,5 +1,5 @@
 import { ReactElement, useEffect, useState } from "react";
-import { Route, Routes, Navigate, useLocation, Prompt } from "react-router-dom";
+import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import { CssBaseline, ThemeProvider, makeStyles } from "@material-ui/core";
 import { theme } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
@@ -25,6 +25,7 @@ import {
 } from "@/components";
 import { BasicPage } from "@/views/BasicPage";
 import { PrivateRoute } from "./wrappers/PrivateRouter";
+import { usePrompt } from "./hooks/use-blocker";
 
 interface Props {
   storeInstance: DominateStore;
@@ -75,6 +76,7 @@ const UserInterface = (props: Props): ReactElement | null => {
     height: window.innerHeight,
     width: window.innerWidth,
   });
+
   useEffect(() => {
     function handleResize() {
       setDimensions({
@@ -88,6 +90,12 @@ const UserInterface = (props: Props): ReactElement | null => {
   });
 
   const classes = useStyles(isOverflow);
+
+  usePrompt(
+    "Operations are still pending, are you sure you want to leave the page?",
+    task.isLoading
+  );
+
   return (
     <ThemeProvider theme={theme}>
       {dimensions.width < 700 || dimensions.height < 300 ? (
@@ -102,62 +110,58 @@ const UserInterface = (props: Props): ReactElement | null => {
           <NavBar productSection={productSection} />
           <div className={isOverflow ? classes.overflow : classes.noOverflow}>
             <PageSpinner isLoading={isLoading} />
+
             <Routes>
-              <Routes>
-                <Route
-                  path="signin"
-                  element={<BasicPage view={<SignIn />} title={<>Login</>} />}
-                />
-                <Route
-                  path="signup"
-                  element={
-                    <BasicPage
-                      view={<SignUp />}
-                      title={<>Create an Account</>}
-                    />
-                  }
-                />
-                <Route
-                  path="signup/success"
-                  element={
-                    <BasicPage
-                      view={<SignUp state="4-VerificationSent" />}
-                      title={<>Verify Email</>}
-                    />
-                  }
-                />
+              <Route
+                path="signin"
+                element={<BasicPage view={<SignIn />} title={<>Login</>} />}
+              />
+              <Route
+                path="signup"
+                element={
+                  <BasicPage view={<SignUp />} title={<>Create an Account</>} />
+                }
+              />
+              <Route
+                path="signup/success"
+                element={
+                  <BasicPage
+                    view={<SignUp state="4-VerificationSent" />}
+                    title={<>Verify Email</>}
+                  />
+                }
+              />
 
-                <Route
-                  path="signup/failure"
-                  element={
-                    <BasicPage
-                      view={<SignUp state="3-BillingFailed" />}
-                      title={<>Payment Failed</>}
-                    />
-                  }
-                />
+              <Route
+                path="signup/failure"
+                element={
+                  <BasicPage
+                    view={<SignUp state="3-BillingFailed" />}
+                    title={<>Payment Failed</>}
+                  />
+                }
+              />
 
-                <PrivateRoute
-                  path="curate/:collectionUid"
-                  element={
-                    <>
+              <Route
+                path="curate/:collectionUid"
+                element={
+                  <PrivateRoute
+                    element={
                       <Curate
                         storeInstance={storeInstance}
                         setIsLoading={setIsLoading}
                         task={task}
                         setTask={setTask}
                       />
-                      <Prompt
-                        when={task.isLoading}
-                        message="Operations are still pending, are you sure you want to leave the page?"
-                      />
-                    </>
-                  }
-                />
-                <PrivateRoute
-                  path="annotate/:collectionUid/:imageUid"
-                  element={
-                    <>
+                    }
+                  />
+                }
+              />
+              <Route
+                path="annotate/:collectionUid/:imageUid"
+                element={
+                  <PrivateRoute
+                    element={
                       <Annotate
                         storeInstance={storeInstance}
                         setIsLoading={setIsLoading}
@@ -165,84 +169,100 @@ const UserInterface = (props: Props): ReactElement | null => {
                         setTask={setTask}
                         setProductSection={setProductSection}
                       />
-                      <Prompt
-                        when={task.isLoading}
-                        message="Operations are still pending, are you sure you want to leave the page?"
+                    }
+                  />
+                }
+              />
+              <Route
+                path="manage/*"
+                element={
+                  <PrivateRoute
+                    element={<Manage storeInstance={storeInstance} />}
+                  />
+                }
+              />
+              <Route
+                path="audit/:collectionUid"
+                element={
+                  <PrivateRoute
+                    element={
+                      <Audit
+                        storeInstance={storeInstance}
+                        // setIsLoading={setIsLoading}
                       />
-                    </>
-                  }
-                />
-                <PrivateRoute
-                  path="manage/*"
-                  element={<Manage storeInstance={storeInstance} />}
-                />
-                <PrivateRoute
-                  path="audit/:collectionUid"
-                  element={
-                    <Audit
-                      storeInstance={storeInstance}
-                      // setIsLoading={setIsLoading}
-                    />
-                  }
-                />
-                <Route
-                  path="recover/*"
-                  element={
-                    <BasicPage
-                      view={<RecoverAccount storeInstance={storeInstance} />}
-                      title={<>Recover my Account</>}
-                    />
-                  }
-                />
-                <Route
-                  path="request-recover/*"
-                  element={
-                    <BasicPage
-                      view={<RequestRecoverAccount />}
-                      title={<>Request Recovery</>}
-                      showBackButton
-                    />
-                  }
-                />
-                <Route
-                  path="verify_email/:uid"
-                  element={
-                    <BasicPage
-                      view={<VerifyEmail />}
-                      title={<>Verify Email Address</>}
-                    />
-                  }
-                />
+                    }
+                  />
+                }
+              />
+              <Route
+                path="recover/*"
+                element={
+                  <BasicPage
+                    view={<RecoverAccount storeInstance={storeInstance} />}
+                    title={<>Recover my Account</>}
+                  />
+                }
+              />
+              <Route
+                path="request-recover/*"
+                element={
+                  <BasicPage
+                    view={<RequestRecoverAccount />}
+                    title={<>Request Recovery</>}
+                    showBackButton
+                  />
+                }
+              />
+              <Route
+                path="verify_email/:uid"
+                element={
+                  <BasicPage
+                    view={<VerifyEmail />}
+                    title={<>Verify Email Address</>}
+                  />
+                }
+              />
 
-                <Route
-                  path="request-verify-email"
-                  element={
-                    <BasicPage
-                      view={<RequestEmailVerification />}
-                      title={<>Request Email Verification</>}
-                    />
-                  }
-                />
+              <Route
+                path="request-verify-email"
+                element={
+                  <BasicPage
+                    view={<RequestEmailVerification />}
+                    title={<>Request Email Verification</>}
+                  />
+                }
+              />
 
-                <PrivateRoute
-                  path="/"
-                  element={<Navigate to="manage/projects" />}
-                />
+              <Route
+                path="/"
+                element={
+                  <PrivateRoute element={<Navigate to="manage/projects" />} />
+                }
+              />
 
-                <PrivateRoute
-                  path="reset-password"
-                  element={
-                    <BasicPage
-                      view={<ResetPassword storeInstance={storeInstance} />}
-                      title={<>Change Password</>}
-                      showBackButton
-                    />
-                  }
-                />
-                <PrivateRoute path="account" element={<Account />} />
+              <Route
+                path="reset-password"
+                element={
+                  <PrivateRoute
+                    element={
+                      <BasicPage
+                        view={<ResetPassword storeInstance={storeInstance} />}
+                        title={<>Change Password</>}
+                        showBackButton
+                      />
+                    }
+                  />
+                }
+              />
+              <Route
+                path="account"
+                element={<PrivateRoute element={<Account />} />}
+              />
 
-                <PrivateRoute path="billing" element={<Billing />} />
-              </Routes>
+              <Route
+                path="billing"
+                element={<PrivateRoute element={<Billing />} />}
+              />
             </Routes>
           </div>
           <CookieConsent />

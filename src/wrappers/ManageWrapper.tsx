@@ -6,12 +6,16 @@ import {
   ProvideAuth /* TODO export Services */,
 } from "@gliff-ai/manage";
 import { DominateStore, API_URL } from "@/store";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth, UserAccess } from "@/hooks/use-auth";
 import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
 import {
   createTrustedService,
   getTrustedService,
 } from "@/services/trustedServices";
+
+type Progress = {
+  [uid: string]: { complete: number; total: number };
+};
 
 interface Props {
   storeInstance: DominateStore;
@@ -93,6 +97,37 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return result;
   };
 
+  const getAnnotationProgress = async (username: string): Promise<Progress> => {
+    const isOwnerOrMember =
+      auth.userAccess === UserAccess.Owner ||
+      auth.userAccess === UserAccess.Member;
+
+    const collectionsContent =
+      await props.storeInstance.getCollectionsContent();
+
+    const progress: Progress = {};
+    collectionsContent.forEach(({ uid, content }) => {
+      progress[uid] = { complete: 0, total: 0 };
+      content.forEach(({ assignees = [], annotationComplete = {} }) => {
+        if (assignees.length === 0) return;
+
+        // NOTE: '|| 0' was added to handle the case of images assigned before
+        // the 'annotationComplete' field was added to the GalleryTile interface.
+        if (isOwnerOrMember) {
+          progress[uid].total += assignees.length;
+          progress[uid].complete += assignees
+            .map((assignee) => Number(annotationComplete[assignee]) || 0)
+            .concat([0]) // added to handle case of unassigned images
+            .reduce((a, b) => a + b);
+        } else {
+          progress[uid].total += 1;
+          progress[uid].complete += Number(annotationComplete[username]) || 0;
+        }
+      });
+    });
+    return progress;
+  };
+
   const launchCurate = (projectUid: string): void =>
     // Open the selected project in curate
     navigate(`/curate/${projectUid}`);
@@ -133,6 +168,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
         launchAuditCallback={
           auth?.userProfile.team.tier.id > 1 ? launchAudit : null
         }
+        getAnnotationProgress={getAnnotationProgress}
       />
     </ProvideAuth>
   );
