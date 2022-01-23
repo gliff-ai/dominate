@@ -1,6 +1,8 @@
 import { ReactElement, useState, useEffect, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, makeStyles } from "@material-ui/core";
+import { Card } from "@mui/material";
+
+import makeStyles from '@mui/styles/makeStyles';
 
 import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
 import { ImageFileInfo } from "@gliff-ai/upload";
@@ -111,7 +113,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             onClick={() => cycleImage(false)}
             tooltipPlacement="bottom"
             disabled={!canCycle()}
-          />
+            size="large" />
         </Card>
         <Card className={classes.cardSize}>
           <IconButton
@@ -120,7 +122,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             onClick={() => setIsComplete((prevIsComplete) => !prevIsComplete)}
             fill={isComplete}
             tooltipPlacement="bottom"
-          />
+            size="large" />
         </Card>
         <Card className={`${classes.cardSize} ${classes.cardRight}`}>
           <IconButton
@@ -130,7 +132,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             onClick={() => cycleImage()}
             tooltipPlacement="bottom"
             disabled={!canCycle()}
-          />
+            size="large" />
         </Card>
       </div>
     );

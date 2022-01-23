@@ -1,13 +1,6 @@
-import {
-  Dialog,
-  Card,
-  Paper,
-  Typography,
-  DialogActions,
-  Button,
-  makeStyles,
-  Theme,
-} from "@material-ui/core";
+import { Dialog, Card, Paper, Typography, DialogActions, Button, Theme } from "@mui/material";
+
+import makeStyles from '@mui/styles/makeStyles';
 
 const useStyles = () =>
   makeStyles((theme: Theme) => ({

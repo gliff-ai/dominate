@@ -1,5 +1,6 @@
 import { Component, ReactElement } from "react";
-import { WithStyles, withStyles } from "@material-ui/core";
+import { WithStyles } from '@mui/styles';
+import withStyles from '@mui/styles/withStyles';
 import {
   BaseIconButton,
   BasePopover,

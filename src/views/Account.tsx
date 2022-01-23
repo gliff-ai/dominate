@@ -1,15 +1,7 @@
 import { ReactElement } from "react";
 import SVG from "react-inlinesvg";
-import {
-  Avatar,
-  Card,
-  Grid,
-  IconButton,
-  makeStyles,
-  Paper,
-  Typography,
-  Box,
-} from "@material-ui/core";
+import { Avatar, Card, Grid, IconButton, Paper, Typography, Box } from "@mui/material";
+import makeStyles from '@mui/styles/makeStyles';
 import { theme, HtmlTooltip } from "@gliff-ai/style";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
@@ -119,7 +111,7 @@ export function Account(): ReactElement | null {
               >
                 <Avatar className={classes.editAvatar}>
                   <Link to="/reset-password">
-                    <IconButton>
+                    <IconButton size="large">
                       <SVG
                         src={imgSrc("edit-details")}
                         className={classes.svgSmall}

@@ -1,5 +1,6 @@
 import { CSSProperties } from "react";
-import { Card, makeStyles, Paper, Typography } from "@material-ui/core";
+import { Card, Paper, Typography } from "@mui/material";
+import makeStyles from '@mui/styles/makeStyles';
 import { theme, BaseIconButton } from "@gliff-ai/style";
 
 interface Props {

@@ -14,9 +14,9 @@ export default defineConfig(({ command, mode }) => ({
       "react",
       "react-dom",
       "react-router-dom",
-      "@material-ui/core",
-      "@material-ui/lab",
-      "@material-ui/icons",
+      "@mui/material",
+      "@mui/lab",
+      "@mui/icons-material",
     ],
   },
   
