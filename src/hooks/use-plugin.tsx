@@ -22,8 +22,8 @@ function useProviderPlugins() {
   const [plugins, setPlugins] = useState<Plugin[] | null>(null);
 
   useEffect(() => {
-    if (!auth || !auth.ready || plugins) return;
-    // fetch list of registered plugins from STORE
+    if (!auth?.ready || !auth?.userProfile || plugins) return;
+
     void getPlugins()
       .then(setPlugins)
       .catch((e) => console.error(e));

@@ -226,6 +226,45 @@ export class DominateStore {
     }
   };
 
+  getCollectionsContent = async (
+    type = "gliff.gallery"
+  ): Promise<
+    {
+      uid: string;
+      content: GalleryTile[];
+    }[]
+  > => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const { data } = await collectionManager.list(type);
+
+    const settledPromises = await Promise.allSettled(
+      data.map(this.wrangleCollectionsContent)
+    );
+
+    const resolved: {
+      uid: string;
+      content: GalleryTile[];
+    }[] = [];
+    settledPromises.forEach((result) => {
+      if (result.status === "fulfilled") {
+        resolved.push(result.value);
+      }
+    });
+    return resolved;
+  };
+
+  wrangleCollectionsContent = async (
+    collection: Collection
+  ): Promise<{ uid: string; content: GalleryTile[] }> => {
+    const content = await collection.getContent(OutputFormat.String);
+    return {
+      uid: collection.uid,
+      content: JSON.parse(content) as GalleryTile[],
+    };
+  };
+
   wrangleGallery = (col: Collection): GalleryMeta => {
     const meta = col.getMeta();
     const modifiedTime = meta.mtime;
@@ -468,6 +507,7 @@ export class DominateStore {
           metadata: imageMetas[i],
           imageUID: newItems[i].uid,
           annotationUID: {},
+          annotationComplete: {},
           auditUID: {},
         });
       }
@@ -718,8 +758,30 @@ export class DominateStore {
     });
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
-    const tile = galleryTiles.find((item) => item.imageUID === imageUid);
+
+    let contentHasChanged = false;
+    const tile = galleryTiles.find((item) => {
+      const isSelected = item.imageUID === imageUid;
+      if (isSelected) {
+        if (item.annotationComplete === undefined) {
+          item.annotationComplete = {};
+          contentHasChanged = true;
+        }
+        if (item.annotationComplete[username] !== isComplete) {
+          item.annotationComplete[username] = isComplete;
+          contentHasChanged = true;
+        }
+      }
+      return isSelected;
+    });
+
     if (tile === undefined) return;
+
+    if (contentHasChanged) {
+      await collection.setContent(JSON.stringify(galleryTiles));
+      await collectionManager.transaction(collection);
+    }
+
     const annotationUid = tile.annotationUID[username];
     const auditUid = tile.auditUID[username];
     if (!annotationUid || !auditUid) return;
@@ -851,7 +913,18 @@ export class DominateStore {
     imageUids.forEach((imageUid, i) => {
       newContent = newContent.map((item) => {
         if (item.imageUID === imageUid) {
-          return { ...item, assignees: newAssignees[i] };
+          if (item.annotationComplete === undefined) {
+            item.annotationComplete = {};
+          }
+          const annotationComplete = {};
+          newAssignees[i].forEach((assignee) => {
+            annotationComplete[assignee] =
+              item.annotationComplete[assignee] !== undefined
+                ? item.annotationComplete[assignee]
+                : false;
+          });
+
+          return { ...item, assignees: newAssignees[i], annotationComplete };
         }
         return item;
       });

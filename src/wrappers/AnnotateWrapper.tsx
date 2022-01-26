@@ -279,7 +279,14 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     }
   }, [imageItem]);
 
-  if (!props.storeInstance || !collectionUid || !imageUid || !auth) return null;
+  if (
+    !props.storeInstance ||
+    !collectionUid ||
+    !imageUid ||
+    !auth ||
+    !auth.userAccess
+  )
+    return null;
 
   return (
     <UserInterface
