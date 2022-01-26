@@ -1,8 +1,15 @@
 export interface TrustedService {
-  team_id: number;
+  id: string;
+  type: ServiceType;
   name: string;
-  base_url: string;
+  url: string;
+  enabled: boolean;
+  products: Product;
 }
+
+export type ServiceType = "Python" | "AI";
+
+export type Product = "CURATE" | "ANNOTATE" | "ALL";
 
 export interface UiElement {
   placement: string[];
