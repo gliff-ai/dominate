@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ReactElement, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -11,7 +11,9 @@ import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
 import {
   createTrustedService,
   getTrustedService,
+  TrustedService,
 } from "@/services/trustedServices";
+import { getPlugins, createPlugin } from "@/services/plugins";
 
 type Progress = {
   [uid: string]: { complete: number; total: number };
@@ -24,9 +26,6 @@ interface Props {
 export const ManageWrapper = (props: Props): ReactElement | null => {
   const auth = useAuth();
   const navigate = useNavigate();
-
-  if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
-    return null;
 
   const getProjects = async () => {
     const projects = await props.storeInstance.getCollectionsMeta();
@@ -103,21 +102,38 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return true;
   };
 
-  const addTrustedService = async ({ url, name }) => {
+  const addTrustedService = async (
+    trustedService: Omit<TrustedService, "id">
+  ) => {
     // First create a trusted service base user
     const { key, email } = await props.storeInstance.createTrustedServiceUser();
 
     // Set the user profile
-    const res = await createTrustedService(email, name, url);
+    const res = await createTrustedService({ id: email, ...trustedService });
 
     return key;
   };
 
-  const getTrustedServices = async () => {
+  const getTrustedServices = useCallback(async () => {
     const result = await getTrustedService();
 
     return result;
-  };
+  }, []);
+
+  const getJsPlugins = useCallback(async () => {
+    const result = await getPlugins();
+
+    return result;
+  }, []);
+
+  const createJsPlugin = useCallback(async (newPlugin): Promise<number> => {
+    const result = await createPlugin(newPlugin);
+
+    return result;
+  }, []);
+
+  if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
+    return null;
 
   const getAnnotationProgress = async (username: string): Promise<Progress> => {
     const isOwnerOrMember =
@@ -171,6 +187,8 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     inviteToProject,
     createTrustedService: addTrustedService,
     getTrustedServices,
+    createJsPlugin,
+    getJsPlugins,
   };
 
   const user = {
