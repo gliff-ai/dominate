@@ -1,6 +1,8 @@
 export interface Plugin {
+  name: string;
   url: string;
-  product: Product;
+  enabled: boolean;
+  products: Product;
 }
 
-export type Product = "CURATE" | "ANNOTATE";
+export type Product = "CURATE" | "ANNOTATE" | "ALL";

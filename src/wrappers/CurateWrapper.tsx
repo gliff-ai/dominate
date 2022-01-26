@@ -391,7 +391,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     if (plugins === null || !plugins?.plugins || pluginUrls) return;
 
     const urls = plugins.plugins
-      .filter(({ product }) => product === "CURATE")
+      .filter(({ products }) => products === "CURATE" || products === "ALL")
       .map(({ url }) => url);
 
     if (urls.length !== 0) {
