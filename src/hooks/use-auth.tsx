@@ -51,7 +51,7 @@ function useProvideAuth(storeInstance: DominateStore) {
 
   const navigate = useNavigate();
 
-  useEffect(() => setReady(true), [userProfile]);
+  useEffect(() => setReady(!!userProfile), [userProfile]);
 
   const getUserAccess = (profile: UserProfile): UserAccess | null => {
     if (!profile?.id) return null;
