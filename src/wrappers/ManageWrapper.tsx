@@ -109,6 +109,12 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return result;
   }, []);
 
+  const updateProjectName = useCallback(async ({ projectUid, projectName }) => {
+    await props.storeInstance.updateCollectionName(projectUid, projectName);
+
+    return true;
+  }, []);
+
   const getAnnotationProgress = async (
     username: string,
     collectionUid?: string
@@ -196,6 +202,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     removeFromProject,
     createTrustedService: addTrustedService,
     getTrustedServices,
+    updateProjectName,
   };
 
   if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
