@@ -370,6 +370,15 @@ export class DominateStore {
     return this.collectionsMeta;
   };
 
+  getCollectionMeta = async (collectionUid: string): Promise<GalleryMeta> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+
+    return { ...collection.getMeta(), uid: collection.uid };
+  };
+
   getCollectionMembers = async (
     collectionUid: string
   ): Promise<{ usernames: string[]; pendingUsernames: string[] } | null> => {
