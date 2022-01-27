@@ -32,6 +32,15 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return projects;
   }, [props.storeInstance]);
 
+  const getProject = useCallback(
+    async ({ projectUid }) => {
+      const project = await props.storeInstance.getCollectionMeta(projectUid);
+
+      return project;
+    },
+    [props.storeInstance]
+  );
+
   const getCollectionMembers = useCallback(
     async ({ collectionUid }) => {
       const members = await props.storeInstance.getCollectionMembers(
@@ -192,7 +201,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     queryTeam: "GET /team/",
     loginUser: "POST /user/login", // Not used, we pass an authd user down
     getProjects,
-    getProject: "GET /project/", // TODO
+    getProject,
     getCollectionMembers,
     getCollectionsMembers,
     createProject,
