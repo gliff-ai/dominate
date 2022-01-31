@@ -1,4 +1,4 @@
-import { ReactElement } from "react";
+import { ReactElement, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
@@ -12,6 +12,7 @@ import {
   createTrustedService,
   getTrustedService,
 } from "@/services/trustedServices";
+import { GalleryTile } from "@/store/interfaces";
 
 type Progress = {
   [uid: string]: { complete: number; total: number };
@@ -25,85 +26,115 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   const auth = useAuth();
   const navigate = useNavigate();
 
-  if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
-    return null;
-
-  const getProjects = async () => {
+  const getProjects = useCallback(async () => {
     const projects = await props.storeInstance.getCollectionsMeta();
 
     return projects;
-  };
+  }, [props.storeInstance]);
 
-  const getCollaboratorProject = async ({ name }) => {
-    const projects = await props.storeInstance.getCollectionsMeta();
+  const getProject = useCallback(
+    async ({ projectUid }) => {
+      const project = await props.storeInstance.getCollectionMeta(projectUid);
 
-    // get all members of all team projects
-    const membersPromises: Promise<string[] | null>[] = [];
-    for (let p = 0; p < projects.length; p += 1) {
-      const { uid } = projects[p];
-      membersPromises.push(props.storeInstance.getCollectionMembers(uid));
-    }
-    const allMembers: (string[] | null)[] = await Promise.all<string[] | null>(
-      membersPromises
-    );
+      return project;
+    },
+    [props.storeInstance]
+  );
 
-    // for each project, go through members and return the first that matches
-    for (let p = 0; p < projects.length; p += 1) {
-      const members = allMembers[p];
-      if (members) {
-        for (let m = 0; p < members.length; m += 1) {
-          if (members[m] === name) {
-            return projects[p].uid;
-          }
-        }
-      }
-    }
+  const getCollectionMembers = useCallback(
+    async ({ collectionUid }) => {
+      const members = await props.storeInstance.getCollectionMembers(
+        collectionUid
+      );
+      return members;
+    },
+    [props.storeInstance]
+  );
 
-    return null;
-  };
+  const createProject = useCallback(
+    async ({ name }) => {
+      const uid = await props.storeInstance.createCollection(name);
 
-  const createProject = async ({ name }) => {
-    const result = await props.storeInstance.createCollection(name);
+      return uid;
+    },
+    [props.storeInstance]
+  );
 
-    return true; // Maybe not always true...
-  };
-  // Invite them to create a gliff account
-  // Errors are caught in MANAGE
-  const inviteUser = async ({ email }) => inviteNewUser(email);
-  const inviteCollaborator = async ({ email }) => inviteNewCollaborator(email);
+  const inviteUser = useCallback(async ({ email }) => {
+    // Invite them to create a gliff account
 
-  const inviteToProject = async ({ email, projectId }) => {
-    const result = await props.storeInstance.inviteUserToCollection(
-      projectId,
-      email
-    );
+    const result = await inviteNewUser(email);
 
     return true;
-  };
+    // Share collections with them?
+  }, []);
 
-  const addTrustedService = async ({ url, name }) => {
-    // First create a trusted service base user
-    const { key, email } = await props.storeInstance.createTrustedServiceUser();
+  const inviteCollaborator = useCallback(async ({ email }) => {
+    // Invite them to create a gliff account
 
-    // Set the user profile
-    await createTrustedService(email, name, url);
+    const result = await inviteNewCollaborator(email);
 
-    return key;
-  };
+    return true;
+    // Share collections with them?
+  }, []);
 
-  const getTrustedServices = async () => {
+  const inviteToProject = useCallback(
+    async ({ email, projectId }) => {
+      const result = await props.storeInstance.inviteUserToCollection(
+        projectId,
+        email
+      );
+
+      return true;
+    },
+    [props.storeInstance]
+  );
+
+  const addTrustedService = useCallback(
+    async ({ url, name }) => {
+      // First create a trusted service base user
+      const { key, email } =
+        await props.storeInstance.createTrustedServiceUser();
+
+      // Set the user profile
+      const res = await createTrustedService(email, name, url);
+
+      return key;
+    },
+    [props.storeInstance]
+  );
+
+  const getTrustedServices = useCallback(async () => {
     const result = await getTrustedService();
 
     return result;
-  };
+  }, []);
 
-  const getAnnotationProgress = async (username: string): Promise<Progress> => {
+  const updateProjectName = useCallback(async ({ projectUid, projectName }) => {
+    await props.storeInstance.updateCollectionName(projectUid, projectName);
+
+    return true;
+  }, []);
+
+  const getAnnotationProgress = async (
+    username: string,
+    collectionUid?: string
+  ): Promise<Progress> => {
     const isOwnerOrMember =
-      auth.userAccess === UserAccess.Owner ||
-      auth.userAccess === UserAccess.Member;
+      auth?.userAccess === UserAccess.Owner ||
+      auth?.userAccess === UserAccess.Member;
 
-    const collectionsContent =
-      await props.storeInstance.getCollectionsContent();
+    let collectionsContent: {
+      uid: string;
+      content: GalleryTile[];
+    }[];
+    if (collectionUid !== undefined) {
+      collectionsContent = [
+        await props.storeInstance.getCollectionContent(collectionUid),
+      ];
+    } else {
+      collectionsContent = await props.storeInstance.getCollectionsContent();
+    }
 
     const progress: Progress = {};
     collectionsContent.forEach(({ uid, content }) => {
@@ -128,6 +159,27 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return progress;
   };
 
+  const getCollectionsMembers = useCallback(async () => {
+    const result = await props.storeInstance.getCollectionsMembers();
+
+    const members = {};
+    result.forEach(({ uid, usernames, pendingUsernames }) => {
+      members[uid] = { usernames, pendingUsernames };
+    });
+
+    return members;
+  }, [props.storeInstance]);
+
+  const removeFromProject = useCallback(
+    async ({ uid, username }): Promise<void> => {
+      const result = await props.storeInstance.revokeAccessToCollection(
+        uid,
+        username
+      );
+    },
+    [props.storeInstance]
+  );
+
   const launchCurate = (projectUid: string): void =>
     // Open the selected project in curate
     navigate(`/curate/${projectUid}`);
@@ -141,15 +193,21 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     queryTeam: "GET /team/",
     loginUser: "POST /user/login", // Not used, we pass an authd user down
     getProjects,
-    getProject: "GET /project/", // TODO
-    getCollaboratorProject,
+    getProject,
+    getCollectionMembers,
+    getCollectionsMembers,
     createProject,
     inviteUser,
     inviteCollaborator,
     inviteToProject,
+    removeFromProject,
     createTrustedService: addTrustedService,
     getTrustedServices,
+    updateProjectName,
   };
+
+  if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
+    return null;
 
   const user = {
     email: auth.user.username,

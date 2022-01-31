@@ -226,6 +226,44 @@ export class DominateStore {
     }
   };
 
+  getCollectionContent = async (
+    collectionUid: string
+  ): Promise<{
+    uid: string;
+    content: GalleryTile[];
+  }> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+
+    return {
+      uid: collectionUid,
+      content: JSON.parse(
+        await collection.getContent(OutputFormat.String)
+      ) as GalleryTile[],
+    };
+  };
+
+  updateCollectionName = async (
+    collectionUid: string,
+    collectionName: string
+  ): Promise<void> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+
+    const meta = collection.getMeta();
+    collection.setMeta({
+      ...meta,
+      modifiedTime: Date.now(),
+      name: collectionName,
+    });
+
+    await collectionManager.transaction(collection);
+  };
+
   getCollectionsContent = async (
     type = "gliff.gallery"
   ): Promise<
@@ -332,21 +370,84 @@ export class DominateStore {
     return this.collectionsMeta;
   };
 
-  getCollectionMembers = async (
-    collectionUid: string
-  ): Promise<string[] | null> => {
-    if (this.collections.length > 0) return null;
+  getCollectionMeta = async (collectionUid: string): Promise<GalleryMeta> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
-    const memberManager = collectionManager.getMemberManager(collection);
-    const members = await memberManager.list();
 
-    return members.data.map((m) => m.username);
+    return { ...collection.getMeta(), uid: collection.uid };
   };
 
-  createCollection = async (name: string): Promise<void> => {
+  getCollectionMembers = async (
+    collectionUid: string
+  ): Promise<{ usernames: string[]; pendingUsernames: string[] } | null> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const invitationManager = this.etebaseInstance.getInvitationManager();
+
+    const collection = await collectionManager.fetch(collectionUid);
+    const memberManager = collectionManager.getMemberManager(collection);
+    const members = await memberManager.list();
+    const invitations = await invitationManager.listOutgoing();
+
+    return {
+      usernames: members.data.map(({ username }) => username),
+      pendingUsernames: invitations.data
+        .filter((item) => item.collection === collectionUid)
+        .map(({ username }) => username)
+        .filter((item, i, array) => array.indexOf(item) === i), // filter out duplicates
+    };
+  };
+
+  getCollectionsMembers = async (
+    type = "gliff.gallery"
+  ): Promise<
+    {
+      uid: string;
+      usernames: string[];
+      pendingUsernames: string[];
+    }[]
+  > => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const invitationManager = this.etebaseInstance.getInvitationManager();
+    const { data } = await collectionManager.list(type);
+
+    const resolved: {
+      uid: string;
+      usernames: string[];
+      pendingUsernames: string[];
+    }[] = [];
+    await Promise.allSettled(
+      data.map(async (collection) => {
+        const memberManager = collectionManager.getMemberManager(collection);
+        const members = await memberManager.list();
+        const invitations = await invitationManager.listOutgoing();
+
+        return {
+          uid: collection.uid,
+          usernames: members.data.map(({ username }) => username),
+          pendingUsernames: invitations.data
+            .filter((item) => item.collection === collection.uid)
+            .map(({ username }) => username)
+            .filter((item, i, array) => array.indexOf(item) === i), // filter out duplicates
+        };
+      })
+    ).then((results) =>
+      results.forEach((result) => {
+        if (result.status === "fulfilled") {
+          resolved.push(result.value);
+        }
+      })
+    );
+
+    return resolved;
+  };
+
+  createCollection = async (name: string): Promise<string> => {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     // Create, encrypt and upload a new collection
@@ -361,6 +462,7 @@ export class DominateStore {
       "[]" // content
     );
     await collectionManager.upload(collection);
+    return collection.uid;
   };
 
   // TODO change this to return errors and display them when we do styling etc
@@ -419,6 +521,20 @@ export class DominateStore {
       logger.error("Unknown Invite Error");
       return false;
     }
+  };
+
+  revokeAccessToCollection = async (
+    collectionUid: string,
+    username: string
+  ): Promise<void> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const memberManager = collectionManager.getMemberManager(collection);
+    await memberManager.remove(username);
+
+    await this.removeAssignee(collectionUid, username);
   };
 
   getItemManager = async (collectionUid: string): Promise<ItemManager> => {
@@ -624,6 +740,25 @@ export class DominateStore {
     await itemManager.batch(allItems.data);
 
     setTask({ isLoading: false, description: "Image deletion", progress: 100 });
+  };
+
+  removeAssignee = async (
+    collectionUid: string,
+    username: string
+  ): Promise<void> => {
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const content = JSON.parse(
+      await collection.getContent(OutputFormat.String)
+    ) as GalleryTile[];
+
+    const newContent = content.map((tile) => ({
+      ...tile,
+      assignees: tile.assignees.filter((a) => a !== username), // unassign all items from a user
+    }));
+
+    await collection.setContent(JSON.stringify(newContent));
+    await collectionManager.transaction(collection);
   };
 
   getAnnotationsObject = async (
