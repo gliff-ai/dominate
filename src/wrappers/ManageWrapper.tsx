@@ -62,25 +62,17 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
 
   const inviteUser = useCallback(async ({ email }) => {
     // Invite them to create a gliff account
-    try {
-      const result = await inviteNewUser(email);
-    } catch (e) {
-      console.log("bad invite");
-      console.log(e);
-    }
+
+    const result = await inviteNewUser(email);
 
     return true;
     // Share collections with them?
   }, []);
 
   const inviteCollaborator = useCallback(async ({ email }) => {
-    try {
-      // Invite them to create a gliff account
-      const result = await inviteNewCollaborator(email);
-    } catch (e) {
-      console.log("bad invite");
-      console.log(e);
-    }
+    // Invite them to create a gliff account
+
+    const result = await inviteNewCollaborator(email);
 
     return true;
     // Share collections with them?
