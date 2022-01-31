@@ -21,7 +21,7 @@
   "license": "UNLICENSED",
   "devDependencies": {
     "@gliff-ai/eslint-config": "^0.2.0",
-    "@types/jest": "^26.0.21",
+    "@types/jest": "^27.4.0",
     "@types/libsodium-wrappers": "^0.7.9",
     "@types/logrocket-react": "^3.0.0",
     "@types/react": "^17.0.31",
