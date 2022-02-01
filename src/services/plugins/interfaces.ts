@@ -1,8 +1,6 @@
-export interface Plugin {
+export interface JsPlugin {
   name: string;
   url: string;
   enabled: boolean;
-  products: Product;
+  products: "CURATE" | "ANNOTATE" | "ALL";
 }
-
-export type Product = "CURATE" | "ANNOTATE" | "ALL";
