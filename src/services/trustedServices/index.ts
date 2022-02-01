@@ -5,15 +5,9 @@ export const getTrustedService = (): Promise<TrustedService[]> =>
   apiRequest<TrustedService[]>(`/trusted_service/`, "GET");
 
 export const createTrustedService = (
-  id: string,
-  name: string,
-  base_url: string
+  trustedService: TrustedService
 ): Promise<number> =>
-  apiRequest<number>("/trusted_service/", "POST", {
-    id,
-    name,
-    base_url,
-  });
+  apiRequest<number>("/trusted_service/", "POST", { ...trustedService });
 
 export const getUiTemplate = (apiUrl: string): Promise<UiTemplate> =>
   apiRequest<UiTemplate>("/ui-template/", "POST", {}, apiUrl);

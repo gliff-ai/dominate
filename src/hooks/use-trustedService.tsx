@@ -76,13 +76,13 @@ function useProviderTrustedService() {
     // When the list of trusted services has been fetched,
     // fetch the temaplates for all UI elements and store them in objects
     const elements: TrustedServiceClass[] = [];
-    trustedServices.forEach(({ base_url, name }) => {
-      if (!base_url || base_url === "") return;
-      void getUiTemplate(base_url)
+    trustedServices.forEach(({ url, name }) => {
+      if (!url || url === "") return;
+      void getUiTemplate(url)
         .then((template) => {
           if (template && validate(template)) {
             setUiElements((prevElements) => {
-              const newElements = unpackUiElements(base_url, template);
+              const newElements = unpackUiElements(url, template);
               if (!prevElements) {
                 return newElements;
               }

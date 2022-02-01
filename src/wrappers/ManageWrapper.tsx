@@ -11,7 +11,9 @@ import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
 import {
   createTrustedService,
   getTrustedService,
+  TrustedService,
 } from "@/services/trustedServices";
+import { getPlugins, createPlugin } from "@/services/plugins";
 import { GalleryTile } from "@/store/interfaces";
 
 type Progress = {
@@ -91,13 +93,13 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   );
 
   const addTrustedService = useCallback(
-    async ({ url, name }) => {
+    async (trustedService: Omit<TrustedService, "id">) => {
       // First create a trusted service base user
       const { key, email } =
         await props.storeInstance.createTrustedServiceUser();
 
       // Set the user profile
-      const res = await createTrustedService(email, name, url);
+      const res = await createTrustedService({ id: email, ...trustedService });
 
       return key;
     },
@@ -110,11 +112,26 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return result;
   }, []);
 
-  const updateProjectName = useCallback(async ({ projectUid, projectName }) => {
-    await props.storeInstance.updateCollectionName(projectUid, projectName);
+  const getJsPlugins = useCallback(async () => {
+    const result = await getPlugins();
 
-    return true;
+    return result;
   }, []);
+
+  const createJsPlugin = useCallback(async (newPlugin): Promise<number> => {
+    const result = await createPlugin(newPlugin);
+
+    return result;
+  }, []);
+
+  const updateProjectName = useCallback(
+    async ({ projectUid, projectName }) => {
+      await props.storeInstance.updateCollectionName(projectUid, projectName);
+
+      return true;
+    },
+    [props.storeInstance]
+  );
 
   const getAnnotationProgress = async (
     username: string,
@@ -203,6 +220,8 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     removeFromProject,
     createTrustedService: addTrustedService,
     getTrustedServices,
+    createJsPlugin,
+    getJsPlugins,
     updateProjectName,
   };
 

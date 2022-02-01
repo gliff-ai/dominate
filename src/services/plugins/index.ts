@@ -1,11 +1,8 @@
 import { apiRequest } from "@/api";
-import type { Plugin, Product } from "./interfaces";
+import type { Plugin } from "./interfaces";
 
 export const getPlugins = (): Promise<Plugin[]> =>
   apiRequest<Plugin[]>(`/plugin/`, "GET");
 
-export const createPlugin = (url: string, product: Product): Promise<number> =>
-  apiRequest<number>("/plugin/", "POST", {
-    url,
-    product,
-  });
+export const createPlugin = (plugin: Plugin): Promise<number> =>
+  apiRequest<number>("/plugin/", "POST", { ...plugin });
