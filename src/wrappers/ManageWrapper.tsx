@@ -8,13 +8,11 @@ import {
 import { DominateStore, API_URL } from "@/store";
 import { useAuth, UserAccess } from "@/hooks/use-auth";
 import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
-import {
-  createTrustedService,
-  getTrustedService,
-  TrustedService,
-} from "@/services/trustedServices";
-import { getPlugins, createPlugin } from "@/services/plugins";
+import { trustedServicesAPI, TrustedService } from "@/services/trustedServices";
+import { jsPluginsAPI } from "@/services/plugins";
 import { GalleryTile } from "@/store/interfaces";
+import { PluginType, Plugin } from "./interfaces";
+import { JsPlugin } from "@/services/plugins/interfaces";
 
 type Progress = {
   [uid: string]: { complete: number; total: number };
@@ -92,36 +90,67 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     [props.storeInstance]
   );
 
-  const addTrustedService = useCallback(
-    async (trustedService: Omit<TrustedService, "id">) => {
-      // First create a trusted service base user
-      const { key, email } =
-        await props.storeInstance.createTrustedServiceUser();
+  const getPlugins = useCallback(async (): Promise<Plugin[]> => {
+    const trustedServices =
+      (await trustedServicesAPI.getTrustedService()) as Plugin[];
 
-      // Set the user profile
-      const res = await createTrustedService({ id: email, ...trustedService });
+    const plugins = await jsPluginsAPI.getPlugins();
 
-      return key;
-    },
-    [props.storeInstance]
-  );
-
-  const getTrustedServices = useCallback(async () => {
-    const result = await getTrustedService();
-
-    return result;
+    return trustedServices.concat(
+      plugins.map((p) => ({ ...p, type: "Javascript" })) as Plugin[]
+    );
   }, []);
 
-  const getJsPlugins = useCallback(async () => {
-    const result = await getPlugins();
+  const getDataAndApiFunc = (
+    { type, products, ...rest }: Plugin,
+    method: "create" | "update" | "delete"
+  ) =>
+    type === PluginType.Javascript
+      ? {
+          data: {
+            products: String(products),
+            ...rest,
+          } as JsPlugin,
+          apiFunc: jsPluginsAPI[`${method}Plugin`],
+        }
+      : {
+          data: {
+            type: String(type),
+            products: String(products),
+            ...rest,
+          } as Omit<TrustedService, "id">,
+          apiFunc: trustedServicesAPI[`${method}TrustedService`],
+        };
 
-    return result;
+  const createPlugin = useCallback(async (plugin: Plugin): Promise<
+    string | null
+  > => {
+    const { data, apiFunc } = getDataAndApiFunc(plugin, "create");
+
+    if (plugin.type === PluginType.Javascript) {
+      await apiFunc(data);
+      return null;
+    }
+    // First create a trusted service base user
+    const { key, email } = await props.storeInstance.createTrustedServiceUser();
+
+    // Set the user profile
+    const res = await apiFunc({
+      id: email,
+      ...data,
+    } as TrustedService);
+
+    return key;
   }, []);
 
-  const createJsPlugin = useCallback(async (newPlugin): Promise<number> => {
-    const result = await createPlugin(newPlugin);
+  const updatePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
+    const { data, apiFunc } = getDataAndApiFunc(plugin, "update");
+    return apiFunc(data);
+  }, []);
 
-    return result;
+  const deletePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
+    const { data, apiFunc } = getDataAndApiFunc(plugin, "delete");
+    return apiFunc(data);
   }, []);
 
   const updateProjectName = useCallback(
@@ -214,15 +243,15 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     getCollectionMembers,
     getCollectionsMembers,
     createProject,
+    updateProjectName,
     inviteUser,
     inviteCollaborator,
     inviteToProject,
     removeFromProject,
-    createTrustedService: addTrustedService,
-    getTrustedServices,
-    createJsPlugin,
-    getJsPlugins,
-    updateProjectName,
+    createPlugin,
+    getPlugins,
+    updatePlugin,
+    deletePlugin,
   };
 
   if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
