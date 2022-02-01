@@ -1,16 +1,11 @@
 export interface TrustedService {
   id: string;
-  type: ServiceType;
+  type: "Python" | "AI";
   name: string;
   url: string;
   enabled: boolean;
-  products: Product;
+  products: "CURATE" | "ANNOTATE" | "ALL";
 }
-
-export type ServiceType = "Python" | "AI";
-
-export type Product = "CURATE" | "ANNOTATE" | "ALL";
-
 export interface UiElement {
   placement: string[];
   apiEndpoint: string;
@@ -21,7 +16,6 @@ export interface UiElement {
     tooltip: string;
   };
 }
-
 export interface UiTemplate {
   trustedService: string;
   uiElements: UiElement[];

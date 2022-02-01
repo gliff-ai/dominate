@@ -5,8 +5,7 @@ import {
   UiTemplate,
 } from "@/services/trustedServices/interfaces";
 import {
-  getTrustedService,
-  getUiTemplate,
+  trustedServicesAPI,
   TrustedServiceClass,
 } from "@/services/trustedServices";
 import { useAuth } from "@/hooks/use-auth";
@@ -40,7 +39,7 @@ function useProviderTrustedService() {
   useEffect(() => {
     // Retrive the list of trusted services for the user's team
     if (auth === null || !auth.userProfile || trustedServices) return;
-    void getTrustedService().then(setTrustedServices);
+    void trustedServicesAPI.getTrustedService().then(setTrustedServices);
   }, [auth, trustedServices]);
 
   const unpackUiElements = (
@@ -78,7 +77,8 @@ function useProviderTrustedService() {
     const elements: TrustedServiceClass[] = [];
     trustedServices.forEach(({ url, name }) => {
       if (!url || url === "") return;
-      void getUiTemplate(url)
+      void trustedServicesAPI
+        .getUiTemplate(url)
         .then((template) => {
           if (template && validate(template)) {
             setUiElements((prevElements) => {
