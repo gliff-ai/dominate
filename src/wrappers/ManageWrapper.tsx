@@ -79,9 +79,9 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   }, []);
 
   const inviteToProject = useCallback(
-    async ({ email, projectId }) => {
+    async ({ projectUid, email }) => {
       const result = await props.storeInstance.inviteUserToCollection(
-        projectId,
+        projectUid,
         email
       );
 
@@ -195,10 +195,10 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   }, [props.storeInstance]);
 
   const removeFromProject = useCallback(
-    async ({ uid, username }): Promise<void> => {
+    async ({ projectUid, email }): Promise<void> => {
       const result = await props.storeInstance.revokeAccessToCollection(
-        uid,
-        username
+        projectUid,
+        email
       );
     },
     [props.storeInstance]
