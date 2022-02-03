@@ -319,7 +319,7 @@ export class DominateStore {
   getImagesMeta = async (
     collectionUid: string,
     username: string
-  ): Promise<GalleryTile[]> => {
+  ): Promise<{tiles: GalleryTile[], galleryMeta: GalleryMeta}> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -332,8 +332,9 @@ export class DominateStore {
       auditUID: string;
     };
     const json = JSON.parse(jsonString) as GalleryTile[] | OldGalleryTile[];
-
-    // migrate GalleryTiles to new format if necessary:
+    
+    // migrate GalleryTiles to have multiple annotations/audits per image if necessary:
+    let migrate = false;
     if (
       json.length > 0 &&
       (typeof json[0].annotationUID === "string" ||
@@ -352,9 +353,27 @@ export class DominateStore {
 
       // update in store:
       await collection.setContent(JSON.stringify(json));
+      migrate = true;
+    }
+
+    // get collection metadata:
+    const meta = this.wrangleGallery(collection.getMeta());
+
+    // migrate GalleryMeta to include defaultLabels and restrictLabels if necessary:
+    if (!("defaultLabels" in meta)){
+      meta.defaultLabels = [];
+      migrate = true;
+    }
+    if (!("restrictLabels" in meta)) {
+      meta.restrictLabels = false;
+      migrate = true;
+    }
+
+    if (migrate) {
       await collectionManager.upload(collection);
     }
-    return json as GalleryTile[];
+
+    return {tiles: json as GalleryTile[], galleryMeta: meta};
   };
 
   getCollectionsMeta = async (
