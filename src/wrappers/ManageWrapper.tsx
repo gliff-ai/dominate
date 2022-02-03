@@ -91,66 +91,44 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   );
 
   const getPlugins = useCallback(async (): Promise<Plugin[]> => {
-    const trustedServices =
-      (await trustedServicesAPI.getTrustedService()) as Plugin[];
+    const trustedServices = await trustedServicesAPI.getTrustedService();
 
     const plugins = await jsPluginsAPI.getPlugins();
 
-    return trustedServices.concat(
-      plugins.map((p) => ({ ...p, type: "Javascript" })) as Plugin[]
-    );
+    return (trustedServices as Plugin[]).concat(plugins as Plugin[]);
   }, []);
-
-  const getDataAndApiFunc = (
-    { type, products, ...rest }: Plugin,
-    method: "create" | "update" | "delete"
-  ) =>
-    type === PluginType.Javascript
-      ? {
-          data: {
-            products: String(products),
-            ...rest,
-          } as JsPlugin,
-          apiFunc: jsPluginsAPI[`${method}Plugin`],
-        }
-      : {
-          data: {
-            type: String(type),
-            products: String(products),
-            ...rest,
-          } as Omit<TrustedService, "id">,
-          apiFunc: trustedServicesAPI[`${method}TrustedService`],
-        };
 
   const createPlugin = useCallback(async (plugin: Plugin): Promise<
     string | null
   > => {
-    const { data, apiFunc } = getDataAndApiFunc(plugin, "create");
-
     if (plugin.type === PluginType.Javascript) {
-      await apiFunc(data);
+      await jsPluginsAPI.createPlugin(plugin as JsPlugin);
       return null;
     }
     // First create a trusted service base user
     const { key, email } = await props.storeInstance.createTrustedServiceUser();
 
     // Set the user profile
-    const res = await apiFunc({
-      id: email,
-      ...data,
+    const res = await trustedServicesAPI.createTrustedService({
+      username: email,
+      ...plugin,
     } as TrustedService);
 
     return key;
   }, []);
 
   const updatePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
-    const { data, apiFunc } = getDataAndApiFunc(plugin, "update");
-    return apiFunc(data);
+    if (plugin.type === PluginType.Javascript) {
+      return jsPluginsAPI.updatePlugin(plugin as JsPlugin);
+    }
+    return trustedServicesAPI.updateTrustedService(plugin as TrustedService);
   }, []);
 
   const deletePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
-    const { data, apiFunc } = getDataAndApiFunc(plugin, "delete");
-    return apiFunc(data);
+    if (plugin.type === PluginType.Javascript) {
+      return jsPluginsAPI.deletePlugin(plugin as JsPlugin);
+    }
+    return trustedServicesAPI.deleteTrustedService(plugin as TrustedService);
   }, []);
 
   const updateProjectName = useCallback(
