@@ -10,12 +10,12 @@ const createTrustedService = (
   apiRequest<number>("/trusted_service/", "POST", { ...trustedService });
 
 const updateTrustedService = (
-  trustedService: Omit<TrustedService, "id">
+  trustedService: TrustedService
 ): Promise<number> =>
   apiRequest<number>("/trusted_service/", "PUT", { ...trustedService });
 
 const deleteTrustedService = (
-  trustedService: Omit<TrustedService, "id">
+  trustedService: TrustedService
 ): Promise<number> =>
   apiRequest<number>("/trusted_service/", "DELETE", { ...trustedService });
 

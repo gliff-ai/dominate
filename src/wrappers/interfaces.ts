@@ -13,11 +13,13 @@ enum PluginType {
 }
 
 interface Plugin {
+  username?: string;
   type: PluginType;
   name: string;
   url: string;
   products: Product;
   enabled: boolean;
+  collection_uids: string[];
 }
 
 export { Product, PluginType };

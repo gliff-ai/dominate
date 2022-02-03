@@ -1,11 +1,9 @@
-export interface TrustedService {
-  id: string;
-  type: "Python" | "AI";
-  name: string;
-  url: string;
-  enabled: boolean;
-  products: "CURATE" | "ANNOTATE" | "ALL";
+import { JsPlugin } from "../plugins/interfaces";
+
+export interface TrustedService extends JsPlugin {
+  username: string;
 }
+
 export interface UiElement {
   placement: string[];
   apiEndpoint: string;
