@@ -279,6 +279,8 @@ export class DominateStore {
       ...newMeta, // should overwrite any fields that are already in oldMeta
       modifiedTime: Date.now(),
     });
+
+    await collectionManager.upload(collection);
   };
 
   getCollectionsContent = async (
