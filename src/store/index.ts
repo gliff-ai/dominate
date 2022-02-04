@@ -264,7 +264,10 @@ export class DominateStore {
     await collectionManager.transaction(collection);
   };
 
-  updateCollectionMeta = async (collectionUid: string, newMeta: Partial<{defaultLabels: string[], restrictLabels: boolean}>) => {
+  updateCollectionMeta = async (
+    collectionUid: string,
+    newMeta: Partial<{ defaultLabels: string[]; restrictLabels: boolean }>
+  ) => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -276,7 +279,7 @@ export class DominateStore {
       ...newMeta, // should overwrite any fields that are already in oldMeta
       modifiedTime: Date.now(),
     });
-  }
+  };
 
   getCollectionsContent = async (
     type = "gliff.gallery"
@@ -333,7 +336,7 @@ export class DominateStore {
   getImagesMeta = async (
     collectionUid: string,
     username: string
-  ): Promise<{tiles: GalleryTile[], galleryMeta: GalleryMeta}> => {
+  ): Promise<{ tiles: GalleryTile[]; galleryMeta: GalleryMeta }> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -346,7 +349,7 @@ export class DominateStore {
       auditUID: string;
     };
     const json = JSON.parse(jsonString) as GalleryTile[] | OldGalleryTile[];
-    
+
     // migrate GalleryTiles to have multiple annotations/audits per image if necessary:
     let migrate = false;
     if (
@@ -371,10 +374,10 @@ export class DominateStore {
     }
 
     // get collection metadata:
-    const meta = this.wrangleGallery(collection.getMeta());
+    const meta = this.wrangleGallery(collection);
 
     // migrate GalleryMeta to include defaultLabels and restrictLabels if necessary:
-    if (!("defaultLabels" in meta)){
+    if (!("defaultLabels" in meta)) {
       meta.defaultLabels = [];
       migrate = true;
     }
@@ -387,7 +390,7 @@ export class DominateStore {
       await collectionManager.upload(collection);
     }
 
-    return {tiles: json as GalleryTile[], galleryMeta: meta};
+    return { tiles: json as GalleryTile[], galleryMeta: meta };
   };
 
   getCollectionsMeta = async (
