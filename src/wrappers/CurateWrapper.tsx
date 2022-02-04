@@ -85,7 +85,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [profiles, setProfiles] = useState<Profile[] | null>(null);
   const isMounted = useRef(false);
 
-  const fetchImageItems = useStore( // doesn't actually fetch image items, fetches gallery collection content
+  const fetchImageItems = useStore(
+    // doesn't actually fetch image items, fetches gallery collection content
     props,
     (storeInstance) => {
       // fetches images via DominateStore, and assigns them to imageItems state
@@ -93,7 +94,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       storeInstance
         .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
-          const {tiles, galleryMeta} = items;
+          const { tiles, galleryMeta } = items;
           setStateIfMounted(tiles, setCollectionContent, isMounted.current);
           // owners and members can view the images in a project
           const canViewAllImages =
@@ -178,6 +179,21 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
     props.storeInstance
       .setImageLabels(collectionUid, imageUid, newLabels)
+      .then(fetchImageItems)
+      .catch((error) => {
+        logger.log(error);
+      });
+  };
+
+  const saveDefaultLabelsCallback = async (
+    newLabels: string[],
+    restrictLabels: boolean
+  ) => {
+    props.storeInstance
+      .updateCollectionMeta(collectionUid, {
+        defaultLabels: newLabels,
+        restrictLabels,
+      })
       .then(fetchImageItems)
       .catch((error) => {
         logger.log(error);
@@ -416,6 +432,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         restrictLabels={restrictLabels}
         saveImageCallback={addImagesToGallery}
         saveLabelsCallback={saveLabelsCallback}
+        saveDefaultLabelsCallback={saveDefaultLabelsCallback}
         saveAssigneesCallback={saveAssigneesCallback}
         deleteImagesCallback={deleteImagesCallback}
         annotateCallback={annotateCallback}

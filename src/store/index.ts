@@ -264,6 +264,20 @@ export class DominateStore {
     await collectionManager.transaction(collection);
   };
 
+  updateCollectionMeta = async (collectionUid: string, newMeta: Partial<{defaultLabels: string[], restrictLabels: boolean}>) => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+
+    const oldMeta = collection.getMeta();
+    collection.setMeta({
+      ...oldMeta,
+      ...newMeta, // should overwrite any fields that are already in oldMeta
+      modifiedTime: Date.now(),
+    });
+  }
+
   getCollectionsContent = async (
     type = "gliff.gallery"
   ): Promise<
