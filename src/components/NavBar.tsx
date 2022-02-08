@@ -10,7 +10,7 @@ import {
   Toolbar,
   Typography,
 } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 import { Link, useNavigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
 import { HtmlTooltip } from "@gliff-ai/style";
@@ -127,7 +127,8 @@ export const NavBar = (props: Props): ReactElement | null => {
         onClick={handleClick}
         aria-controls="menu"
         style={{ paddingTop: 0 }}
-        size="large">
+        size="large"
+      >
         <HtmlTooltip
           title={<Typography>Account</Typography>}
           placement="bottom"

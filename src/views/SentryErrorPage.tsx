@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { Typography } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 import { BaseTextButton } from "@gliff-ai/style";
 
 const useStyles = makeStyles(() => ({

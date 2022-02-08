@@ -1,7 +1,12 @@
 import { ReactElement, useEffect, useState } from "react";
 import { Route, Routes, Navigate, useLocation } from "react-router-dom";
-import { CssBaseline, ThemeProvider, Theme, StyledEngineProvider } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+import {
+  CssBaseline,
+  ThemeProvider,
+  Theme,
+  StyledEngineProvider,
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { theme } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
 import { Annotate, Audit, Curate, Manage } from "@/wrappers";
@@ -28,12 +33,10 @@ import { BasicPage } from "@/views/BasicPage";
 import { PrivateRoute } from "./wrappers/PrivateRouter";
 import { usePrompt } from "./hooks/use-blocker";
 
-
-declare module '@mui/styles/defaultTheme' {
+declare module "@mui/styles/defaultTheme" {
   // eslint-disable-next-line @typescript-eslint/no-empty-interface
   interface DefaultTheme extends Theme {}
 }
-
 
 interface Props {
   storeInstance: DominateStore;
@@ -128,7 +131,10 @@ const UserInterface = (props: Props): ReactElement | null => {
                 <Route
                   path="signup"
                   element={
-                    <BasicPage view={<SignUp />} title={<>Create an Account</>} />
+                    <BasicPage
+                      view={<SignUp />}
+                      title={<>Create an Account</>}
+                    />
                   }
                 />
                 <Route

@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { Paper } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 import { BaseIconButton, theme } from "@gliff-ai/style";
 import { imgSrc } from "@/imgSrc";
 

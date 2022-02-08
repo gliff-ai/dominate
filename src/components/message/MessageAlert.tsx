@@ -1,5 +1,5 @@
 import { ReactElement } from "react";
-import { Alert } from '@mui/material';
+import { Alert } from "@mui/material";
 
 interface MessageProps {
   message: string;

@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { Avatar, Theme, Button } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 import { useNavigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
 import { imgSrc } from "@/imgSrc";

@@ -1,6 +1,6 @@
 import { ReactElement, useState, useEffect } from "react";
 import { useLocation } from "react-router-dom";
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 import { theme } from "@gliff-ai/style";
 import { BaseProductIcon } from "./BaseProductIcon";
 import { useAuth } from "@/hooks/use-auth";

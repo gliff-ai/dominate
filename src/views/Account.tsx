@@ -1,7 +1,15 @@
 import { ReactElement } from "react";
 import SVG from "react-inlinesvg";
-import { Avatar, Card, Grid, IconButton, Paper, Typography, Box } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+import {
+  Avatar,
+  Card,
+  Grid,
+  IconButton,
+  Paper,
+  Typography,
+  Box,
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { theme, HtmlTooltip } from "@gliff-ai/style";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";

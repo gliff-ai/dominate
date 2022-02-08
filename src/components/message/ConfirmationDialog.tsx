@@ -1,6 +1,14 @@
-import { Dialog, Card, Paper, Typography, DialogActions, Button, Theme } from "@mui/material";
+import {
+  Dialog,
+  Card,
+  Paper,
+  Typography,
+  DialogActions,
+  Button,
+  Theme,
+} from "@mui/material";
 
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 
 const useStyles = () =>
   makeStyles((theme: Theme) => ({

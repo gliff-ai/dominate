@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import { theme } from "@gliff-ai/style";
 import { TextField, Link, Typography } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 import { getRecoverySession } from "@/services/user";
 import { DominateStore } from "@/store";
 import { MessageAlert, SubmitButton } from "@/components";

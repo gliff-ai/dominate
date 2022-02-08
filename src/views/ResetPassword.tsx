@@ -2,7 +2,7 @@ import { ReactElement, useState } from "react";
 import { useNavigate, Navigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
 import { TextField, IconButton, InputAdornment } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+import makeStyles from "@mui/styles/makeStyles";
 import { theme } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 import { DominateStore } from "@/store";
@@ -136,7 +136,8 @@ export const ResetPassword = (props: Props): ReactElement | null => {
                   onClick={handleClickShowPassword}
                   edge="end"
                   id="newPasswordButton"
-                  size="large">
+                  size="large"
+                >
                   <SVG
                     src={imgSrc("show-or-hide-password")}
                     className={classes.svgSmall}
@@ -172,7 +173,8 @@ export const ResetPassword = (props: Props): ReactElement | null => {
                   aria-label="toggle password visibility"
                   onClick={handleClickShowPassword}
                   edge="end"
-                  size="large">
+                  size="large"
+                >
                   <SVG
                     src={imgSrc("show-or-hide-password")}
                     className={classes.svgSmall}

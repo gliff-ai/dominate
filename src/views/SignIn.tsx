@@ -1,6 +1,12 @@
 import { useState, ReactElement } from "react";
-import { TextField, Link, Typography, IconButton, InputAdornment } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+import {
+  TextField,
+  Link,
+  Typography,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { useNavigate } from "react-router-dom";
 import { theme, WarningSnackbar } from "@gliff-ai/style";
 import SVG from "react-inlinesvg";
@@ -107,83 +113,86 @@ export function SignIn(): ReactElement | null {
     }
   };
 
-  return <>
-    <form onSubmit={onFormSubmit}>
-      <TextField
-        variant="outlined"
-        margin="normal"
-        required
-        fullWidth
-        id="email"
-        name="email"
-        autoComplete="email"
-        type="text"
-        onChange={handleChange}
-        value={login.email}
-        placeholder="E-mail"
-      />
-      <MessageAlert severity="error" message={nameError} />
+  return (
+    <>
+      <form onSubmit={onFormSubmit}>
+        <TextField
+          variant="outlined"
+          margin="normal"
+          required
+          fullWidth
+          id="email"
+          name="email"
+          autoComplete="email"
+          type="text"
+          onChange={handleChange}
+          value={login.email}
+          placeholder="E-mail"
+        />
+        <MessageAlert severity="error" message={nameError} />
 
-      <TextField
-        variant="outlined"
-        margin="normal"
-        required
-        fullWidth
-        name="password"
-        type={login.showPassword ? "text" : "password"}
-        id="password"
-        autoComplete="current-password"
-        value={login.password}
-        onChange={handleChange}
-        placeholder="Password"
-        InputProps={{
-          endAdornment: (
-            <InputAdornment position="end">
-              <IconButton
-                aria-label="toggle password visibility"
-                onClick={handleClickShowPassword}
-                edge="end"
-                size="large">
-                <SVG
-                  src={imgSrc("show-or-hide-password")}
-                  className={classes.svgSmall}
-                  fill={
-                    login.showPassword
-                      ? theme.palette.primary.main
-                      : undefined
-                  }
-                />
-              </IconButton>
-            </InputAdornment>
-          ),
-        }}
-      />
-      <Typography className={classes.forgotPasswordText}>
-        <Link color="secondary" href="/request-recover">
-          Recover My Account
-        </Link>
-      </Typography>
-
-      <SubmitButton loading={loading} value="Continue" />
-
-      <div className={classes.noAccount}>
-        <Typography className={classes.noAccountText}>
-          Don&apos;t have an account yet or been invited to a team?
+        <TextField
+          variant="outlined"
+          margin="normal"
+          required
+          fullWidth
+          name="password"
+          type={login.showPassword ? "text" : "password"}
+          id="password"
+          autoComplete="current-password"
+          value={login.password}
+          onChange={handleChange}
+          placeholder="Password"
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  edge="end"
+                  size="large"
+                >
+                  <SVG
+                    src={imgSrc("show-or-hide-password")}
+                    className={classes.svgSmall}
+                    fill={
+                      login.showPassword
+                        ? theme.palette.primary.main
+                        : undefined
+                    }
+                  />
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
+        />
+        <Typography className={classes.forgotPasswordText}>
+          <Link color="secondary" href="/request-recover">
+            Recover My Account
+          </Link>
         </Typography>
-        <Link color="secondary" href="/signup" variant="body2">
-          Sign Up
-        </Link>
-      </div>
-    </form>
 
-    <WarningSnackbar
-      open={open}
-      onClose={handleClose}
-      messageText={
-        String(storeError).includes("Wrong password for user.")
-          ? "Login Failed. Your username and/or password do not match"
-          : "There was an error logging you in. Please try again"
-      }
-    />
-  </>;
+        <SubmitButton loading={loading} value="Continue" />
+
+        <div className={classes.noAccount}>
+          <Typography className={classes.noAccountText}>
+            Don&apos;t have an account yet or been invited to a team?
+          </Typography>
+          <Link color="secondary" href="/signup" variant="body2">
+            Sign Up
+          </Link>
+        </div>
+      </form>
+
+      <WarningSnackbar
+        open={open}
+        onClose={handleClose}
+        messageText={
+          String(storeError).includes("Wrong password for user.")
+            ? "Login Failed. Your username and/or password do not match"
+            : "There was an error logging you in. Please try again"
+        }
+      />
+    </>
+  );
 }

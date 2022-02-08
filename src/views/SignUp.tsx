@@ -1,8 +1,14 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { ChangeEvent, FormEvent, useState, ReactElement } from "react";
 import { loadStripe } from "@stripe/stripe-js";
-import { TextField, Link, Typography, Checkbox, FormControlLabel } from "@mui/material";
-import makeStyles from '@mui/styles/makeStyles';
+import {
+  TextField,
+  Link,
+  Typography,
+  Checkbox,
+  FormControlLabel,
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { WarningSnackbar } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";
