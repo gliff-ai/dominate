@@ -1,12 +1,7 @@
 import { useEffect, useState, Dispatch, SetStateAction } from "react";
 import SVG from "react-inlinesvg";
-import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  makeStyles,
-} from "@material-ui/core";
+import { Dialog, DialogContent, DialogTitle, Grid } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { theme, BaseIconButton, LoadingSpinner } from "@gliff-ai/style";
 
 import {

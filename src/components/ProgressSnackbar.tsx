@@ -2,10 +2,10 @@ import {
   CircularProgress,
   Typography,
   Box,
-  makeStyles,
   Snackbar,
   SnackbarContent,
-} from "@material-ui/core";
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { theme } from "@gliff-ai/style";
 
 import { ReactElement } from "react";

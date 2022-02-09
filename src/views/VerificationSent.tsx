@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
-import { Typography, makeStyles } from "@material-ui/core";
+import { Typography } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { theme } from "@gliff-ai/style";
 import { useNavigate } from "react-router-dom";
 import { SubmitButton } from "@/components";
