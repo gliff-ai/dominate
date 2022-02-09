@@ -47,7 +47,6 @@
     "@gliff-ai/upload": "^1.0.0",
     "@material-ui/types": "^5.1.0",
     "@mui/icons-material": "^5.3.0",
-    "@mui/lab": "^5.0.0-alpha.65",
     "@mui/material": "^5.3.0",
     "@mui/styles": "^5.3.0",
     "@sentry/integrations": "^6.6.0",
