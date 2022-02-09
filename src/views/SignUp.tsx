@@ -5,10 +5,10 @@ import {
   TextField,
   Link,
   Typography,
-  makeStyles,
   Checkbox,
   FormControlLabel,
-} from "@material-ui/core";
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { WarningSnackbar } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 import { createCheckoutSession, getInvite } from "@/services/user";

@@ -1,4 +1,5 @@
-import { Container, makeStyles, Typography, Button } from "@material-ui/core";
+import { Container, Typography, Button } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { useNavigate } from "react-router-dom";
 import { theme, lightGrey } from "@gliff-ai/style";
 import { imgSrc } from "@/imgSrc";
