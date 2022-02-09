@@ -1,6 +1,6 @@
 import { ChangeEvent, FormEvent, useState } from "react";
 
-import { TextField, Typography, Container } from "@material-ui/core";
+import { TextField, Typography, Container } from "@mui/material";
 import { useNavigate } from "react-router-dom";
 import { apiRequest } from "@/api";
 import { MessageAlert, SubmitButton } from "@/components";

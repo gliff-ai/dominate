@@ -7,19 +7,18 @@ import reactJsx from "vite-react-jsx";
 export default defineConfig(({ command, mode }) => ({
   build: {
     minify: mode !== "development",
-    sourcemap: true
+    sourcemap: true,
   },
   resolve: {
     dedupe: [
       "react",
       "react-dom",
       "react-router-dom",
-      "@material-ui/core",
-      "@material-ui/lab",
-      "@material-ui/icons",
+      "@mui/material",
+      "@mui/icons-material",
     ],
   },
-  
+
   server: {
     port: parseInt(process.env.PORT) || 3000,
     hmr: {

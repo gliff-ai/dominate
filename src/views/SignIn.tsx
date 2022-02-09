@@ -3,10 +3,10 @@ import {
   TextField,
   Link,
   Typography,
-  makeStyles,
   IconButton,
   InputAdornment,
-} from "@material-ui/core";
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { useNavigate } from "react-router-dom";
 import { theme, WarningSnackbar } from "@gliff-ai/style";
 import SVG from "react-inlinesvg";
@@ -150,6 +150,7 @@ export function SignIn(): ReactElement | null {
                   aria-label="toggle password visibility"
                   onClick={handleClickShowPassword}
                   edge="end"
+                  size="large"
                 >
                   <SVG
                     src={imgSrc("show-or-hide-password")}

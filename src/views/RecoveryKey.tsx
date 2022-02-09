@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
-import { Typography, makeStyles, Card } from "@material-ui/core";
+import { Typography, Card } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { theme } from "@gliff-ai/style";
 import { SubmitButton } from "@/components";
 
