@@ -1,5 +1,6 @@
 import { ReactElement, useEffect, useState } from "react";
-import { TooltipProps, makeStyles } from "@material-ui/core";
+import { TooltipProps } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import {
   BaseIconButton,
   BasePopover,

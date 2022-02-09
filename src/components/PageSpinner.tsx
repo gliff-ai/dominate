@@ -1,5 +1,6 @@
 import { ReactElement } from "react";
-import { makeStyles, Theme, CircularProgress } from "@material-ui/core";
+import { Theme, CircularProgress } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { useAuth } from "@/hooks/use-auth";
 
 const useStyle = makeStyles((theme: Theme) => ({
