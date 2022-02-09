@@ -766,7 +766,7 @@ export class DominateStore {
     imageUid: string,
     username: string
   ): Promise<{ meta: AnnotationMeta; annotations: Annotations } | null> => {
-    // retrieves the Annotations object for the specified image
+    // retrieves the Annotations object by the specified user for the specified image
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
@@ -794,6 +794,63 @@ export class DominateStore {
     return {
       meta: annotationMeta,
       annotations: new Annotations(JSON.parse(annotationContent)),
+    };
+  };
+
+  getAllAnnotationsObjects = async (
+    collectionUid: string
+  ): Promise<{ meta: AnnotationMeta[][]; annotations: Annotation[][] }> => {
+    // retrieves the Annotations objects for all images by all users
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const tiles = JSON.parse(
+      await collection.getContent(OutputFormat.String)
+    ) as GalleryTile[];
+
+    const itemManager = collectionManager.getItemManager(collection);
+    const annotationItems = await itemManager.fetchMulti(
+      ([] as string[]).concat(
+        ...tiles.map((tile) => Object.values(tile.annotationUID))
+      )
+    );
+
+    const annotationContents = await Promise.all(
+      annotationItems.data.map((annotation) =>
+        annotation.getContent(OutputFormat.String)
+      )
+    );
+
+    const annotationsMeta = await Promise.all(
+      annotationItems.data.map(
+        (annotation) => annotation.getMeta() as AnnotationMeta
+      )
+    );
+
+    // reshape arrays into [[im0_ann0, im0_ann1, im0_ann2], [im1_ann0, im1_ann1], ...]:
+    let uid: string = "";
+    const annotationContentsReshaped: string[][] = [];
+    const annotationsMetaReshaped: AnnotationMeta[][] = [];
+    for (let i = 0; i < annotationsMeta.length; i += 1) {
+      // this will work so long as fetchMulti returns items in the same order they're specified...
+      if (annotationsMeta[i].uid !== uid) {
+        annotationsMetaReshaped.push([]);
+        annotationContentsReshaped.push([]);
+        uid = annotationsMeta[i].uid;
+      }
+      annotationsMetaReshaped[annotationsMetaReshaped.length - 1].push(
+        annotationsMeta[i]
+      );
+      annotationContentsReshaped[annotationContentsReshaped.length - 1].push(
+        annotationContents[i]
+      );
+    }
+
+    return {
+      meta: annotationsMetaReshaped,
+      annotations: annotationContentsReshaped.map((contentArray) =>
+        contentArray.map((content) => JSON.parse(content) as Annotation)
+      ),
     };
   };
 
@@ -969,11 +1026,39 @@ export class DominateStore {
     const item = await this.getItem(collectionUid, itemUid);
     const content = await item.getContent(OutputFormat.String);
     return {
-      meta: item.getMeta(),
       type: "gliff.image",
       uid: item.uid,
       content,
     } as Image;
+  };
+
+  getAllImages = async (collectionUid: string): Promise<Image[]> => {
+    // Retrive all image items from a collection
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const collectionContent = await collection.getContent(OutputFormat.String);
+    const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
+
+    const itemManager = collectionManager.getItemManager(collection);
+
+    const imageItems = (
+      await itemManager.fetchMulti(galleryTiles.map((tile) => tile.imageUID))
+    ).data;
+    const imageContents = await Promise.all(
+      imageItems.map((item) => item.getContent(OutputFormat.String))
+    );
+    return imageItems.map(
+      (item, i) =>
+        ({
+          name: item.getMeta().name,
+          createdTime: item.getMeta().mtime,
+          modifiedTime: item.getMeta().mtime,
+          type: "gliff.image",
+          uid: item.uid,
+          content: imageContents[i],
+        } as Image)
+    );
   };
 
   getAudits = async (collectionUid: string): Promise<AnnotationSession[]> => {

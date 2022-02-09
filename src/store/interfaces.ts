@@ -36,7 +36,6 @@ interface Image {
   createdTime: number; // time item was created in milliseconds since epoch
   modifiedTime: number; // time item was last modified in milliseconds since epoch
   description?: string; // long description for collection, i.e. project details
-  meta: ImageMeta;
   content: string;
 }
 
@@ -57,6 +56,7 @@ interface ImageMeta {
 }
 
 interface AnnotationMeta {
+  uid: string;
   isComplete: boolean;
   type?: string;
   name?: string;

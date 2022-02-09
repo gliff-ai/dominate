@@ -12,6 +12,7 @@ import {
   GalleryTile,
   Image,
   ImageMeta,
+  AnnotationMeta,
 } from "@/store/interfaces";
 import { Task, TSButtonToolbar } from "@/components";
 import {
@@ -30,6 +31,8 @@ import { useMountEffect } from "@/hooks/use-mountEffect";
 import { useStore } from "@/hooks/use-store";
 import { apiRequest } from "@/api";
 import { setStateIfMounted } from "@/helpers";
+
+import { Annotations } from "@gliff-ai/annotate";
 
 const logger = console;
 
@@ -215,20 +218,36 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
     // retrieve Image items and their names from store:
     // TODO: store image names in Image items!
-    const imagePromises: Promise<Image>[] = [];
-    const imageNames: string[] = [];
-    for (const tile of collectionContent) {
-      const imageUid = tile.imageUID;
-      imagePromises.push(props.storeInstance.getImage(collectionUid, imageUid));
-      imageNames.push(tile.metadata.imageName);
-    }
-    const images: Image[] = await Promise.all(imagePromises);
+    // const imagePromises: Promise<Image>[] = [];
+    // const annotationsPromises: Promise<{
+    //   meta: AnnotationMeta[];
+    //   annotations: Annotations[];
+    // }>[] = [];
+    // const imageNames: string[] = [];
+    // for (const tile of collectionContent) {
+    //   const imageUid = tile.imageUID;
+    //   imagePromises.push(props.storeInstance.getImage(collectionUid, imageUid));
+    //   annotationsPromises.push(
+    //     props.storeInstance.getAllAnnotationsObjects(collectionUid)
+    //   );
+    //   imageNames.push(tile.metadata.imageName);
+    // }
 
-    // append " (n)" to image names when multiple images have the same name,
-    // or else JSZip will treat them as a single image:
+    const images = await props.storeInstance.getAllImages(collectionUid);
+    const { meta: annotationsMeta, annotations } =
+      await props.storeInstance.getAllAnnotationsObjects(collectionUid);
+
+    // const images: Image[] = await Promise.all(imagePromises);
+    // const annotations: {
+    //   meta: AnnotationMeta[];
+    //   annotations: Annotations[];
+    // }[] = await Promise.all(annotationsPromises);
+
     const allnames: string[] = collectionContent.map(
       (tile) => tile.metadata.imageName
     );
+    // append " (n)" to image names when multiple images have the same name,
+    // or else JSZip will treat them as a single image:
     const counts = {};
     for (let i = 0; i < allnames.length; i += 1) {
       if (counts[allnames[i]] > 0) {
@@ -241,18 +260,43 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }
     }
 
+    // make annotations JSON file:
+    type XYPoint = { x: number; y: number };
+    type BoundingBox = {
+      topLeft: XYPoint;
+      bottomRight: XYPoint;
+      spaceTime?: { z: number; t: number };
+    };
+    type Annotation = {
+      labels: string[];
+      segmaskName: string; // name of segmentation mask image (for brushstroke annotations)
+      colour: string; // colour of brushstroke in seg_mask image
+      spline: XYPoint[];
+      boundingBox?: BoundingBox;
+    };
+    type JSONImage = {
+      imageName: string;
+      labels: string[];
+      annotations: Annotation[][];
+    };
+    const annotations_json: JSONImage[] = allnames.map((name, i) => ({
+      imageName: name,
+      labels: collectionContent[i].imageLabels,
+      annotations: annotations[i].map((annotation) => ({
+        labels: annotation.labels,
+        segmaskName: "",
+        colour: "", // colour of this annotation in the segmask image
+        spline: annotation.spline,
+        boundingBox: annotation.boundingBox,
+      })),
+    }));
+
+    // add JSON to zip:
+    const jsonString = JSON.stringify(annotations_json);
+    zip.file("labels.json", jsonString);
+
     if (multi) {
-      // put them all in the root of the zip along with a JSON file describing labels:
-      type JSONImage = { name: string; labels: string[] };
-      const json: JSONImage[] = allnames.map((name, i) => ({
-        name,
-        labels: collectionContent[i].imageLabels,
-      }));
-
-      const jsonString = JSON.stringify(json);
-
-      // add JSON and all images to zip:
-      zip.file("labels.json", jsonString);
+      // put all images in the root of the zip:
       for (let i = 0; i < images.length; i += 1) {
         zip.file(allnames[i], images[i].content, { base64: true });
       }
