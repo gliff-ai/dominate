@@ -799,7 +799,7 @@ export class DominateStore {
 
   getAllAnnotationsObjects = async (
     collectionUid: string
-  ): Promise<{ meta: AnnotationMeta[][]; annotations: Annotation[][] }> => {
+  ): Promise<{ meta: AnnotationMeta[][]; annotations: Annotation[][][] }> => {
     // retrieves the Annotations objects for all images by all users
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -815,7 +815,7 @@ export class DominateStore {
       )
     );
 
-    const annotationContents = await Promise.all(
+    const annotationItemContents = await Promise.all(
       annotationItems.data.map((annotation) =>
         annotation.getContent(OutputFormat.String)
       )
@@ -842,14 +842,14 @@ export class DominateStore {
         annotationsMeta[i]
       );
       annotationContentsReshaped[annotationContentsReshaped.length - 1].push(
-        annotationContents[i]
+        annotationItemContents[i]
       );
     }
 
     return {
       meta: annotationsMetaReshaped,
       annotations: annotationContentsReshaped.map((contentArray) =>
-        contentArray.map((content) => JSON.parse(content) as Annotation)
+        contentArray.map((content) => JSON.parse(content) as Annotation[])
       ),
     };
   };

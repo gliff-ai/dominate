@@ -32,7 +32,7 @@ import { useStore } from "@/hooks/use-store";
 import { apiRequest } from "@/api";
 import { setStateIfMounted } from "@/helpers";
 
-import { Annotations } from "@gliff-ai/annotate";
+import { Annotations, Annotation, getTiffData } from "@gliff-ai/annotate";
 
 const logger = console;
 
@@ -262,33 +262,43 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
     // make annotations JSON file:
     type XYPoint = { x: number; y: number };
+    type ZTPoint = { z: number; t: number };
     type BoundingBox = {
-      topLeft: XYPoint;
-      bottomRight: XYPoint;
-      spaceTime?: { z: number; t: number };
+      coordinates: {
+        topLeft: XYPoint;
+        bottomRight: XYPoint;
+      };
+      spaceTimeInfo: { z: number; t: number };
     };
-    type Annotation = {
+    type JSONAnnotation = {
+      // an individual object (or "layer") within a user's annotation of an image
       labels: string[];
       segmaskName: string; // name of segmentation mask image (for brushstroke annotations)
       colour: string; // colour of brushstroke in seg_mask image
-      spline: XYPoint[];
+      spline: {
+        coordinates: XYPoint[];
+        spaceTimeInfo: ZTPoint;
+        isClosed: boolean;
+      };
       boundingBox?: BoundingBox;
     };
     type JSONImage = {
       imageName: string;
       labels: string[];
-      annotations: Annotation[][];
+      annotations: JSONAnnotation[][]; // array of array because multiple users can each create multiple annotation in the image, e.g. for different cells
     };
     const annotations_json: JSONImage[] = allnames.map((name, i) => ({
       imageName: name,
       labels: collectionContent[i].imageLabels,
-      annotations: annotations[i].map((annotation) => ({
-        labels: annotation.labels,
-        segmaskName: "",
-        colour: "", // colour of this annotation in the segmask image
-        spline: annotation.spline,
-        boundingBox: annotation.boundingBox,
-      })),
+      annotations: annotations[i].map((annotationsObject: Annotation[]) =>
+        annotationsObject.map((annotation) => ({
+          labels: annotation.labels,
+          segmaskName: `${name}.tiff`,
+          colour: annotation.brushStrokes[0].brush.color, // colour of this annotation in the segmask image
+          spline: annotation.spline,
+          boundingBox: annotation.boundingBox,
+        }))
+      ),
     }));
 
     // add JSON to zip:
@@ -299,6 +309,12 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       // put all images in the root of the zip:
       for (let i = 0; i < images.length; i += 1) {
         zip.file(allnames[i], images[i].content, { base64: true });
+        for (const annotationsObject of annotations[i]) {
+          zip.file(
+            `${allnames[i]}.tiff`,
+            getTiffData(new Annotations(annotationsObject))
+          );
+        }
       }
     } else {
       // get set of all labels:
