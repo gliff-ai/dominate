@@ -113,7 +113,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             onClick={() => cycleImage(false)}
             tooltipPlacement="bottom"
             disabled={!canCycle()}
-            size="large"
+            size="small"
           />
         </Card>
         <Card className={classes.cardSize}>
@@ -123,7 +123,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             onClick={() => setIsComplete((prevIsComplete) => !prevIsComplete)}
             fill={isComplete}
             tooltipPlacement="bottom"
-            size="large"
+            size="small"
           />
         </Card>
         <Card className={`${classes.cardSize} ${classes.cardRight}`}>
@@ -134,7 +134,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             onClick={() => cycleImage()}
             tooltipPlacement="bottom"
             disabled={!canCycle()}
-            size="large"
+            size="small"
           />
         </Card>
       </div>
