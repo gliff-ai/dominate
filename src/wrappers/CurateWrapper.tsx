@@ -10,8 +10,7 @@ import {
   Slices,
   MetaItem,
   GalleryTile,
-  Image,
-  ImageMeta,
+  ImageItemMeta,
   AnnotationMeta,
 } from "@/store/interfaces";
 import { Task, TSButtonToolbar } from "@/components";
@@ -22,10 +21,7 @@ import {
 import { Plugins } from "@/plugins/Plugins";
 import { usePlugins } from "@/hooks";
 
-import {
-  stringifySlices,
-  getImageMetaFromImageFileInfo,
-} from "@/imageConversions";
+import { stringifySlices } from "@/imageConversions";
 import { useAuth, UserAccess } from "@/hooks/use-auth";
 import { useMountEffect } from "@/hooks/use-mountEffect";
 import { useStore } from "@/hooks/use-store";
@@ -99,7 +95,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             auth.userAccess === UserAccess.Owner ||
             auth.userAccess === UserAccess.Member;
 
-          // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
+          // discard imageUID, annotationUID and auditUID, and unpack item.fileInfo:
           const wrangled = items
             .map(
               ({
@@ -107,13 +103,14 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
                 imageLabels = [],
                 assignees = [],
                 id,
-                metadata,
+                fileInfo,
               }) => ({
                 thumbnail,
                 imageLabels,
-                id,
-                ...metadata,
                 assignees,
+                id,
+                ...fileInfo,
+                imageName: fileInfo.fileName, // curate expects imageName rather than fileName
               })
             )
             .filter(
@@ -135,7 +132,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     imageFileInfo: ImageFileInfo[],
     slicesData: Slices[]
   ): Promise<void> => {
-    const imageMetas: ImageMeta[] = [];
+    // const imageMetas: ImageItemMeta[] = [];
     const thumbnails: string[] = [];
     const stringifiedSlices: string[] = [];
 
@@ -144,7 +141,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     for (let i = 0; i < imageFileInfo.length; i += 1) {
       // Stringify slices data and get image metadata
       stringifiedSlices.push(stringifySlices(slicesData[i]));
-      imageMetas.push(getImageMetaFromImageFileInfo(imageFileInfo[i]));
+      // imageMetas.push(getImageMetaFromImageFileInfo(imageFileInfo[i]));
 
       // make thumbnail:
       const canvas = document.createElement("canvas");
@@ -162,7 +159,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
     await props.storeInstance.createImage(
       collectionUid,
-      imageMetas,
+      imageFileInfo,
       thumbnails,
       stringifiedSlices,
       props.task,
@@ -244,7 +241,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     // }[] = await Promise.all(annotationsPromises);
 
     const allnames: string[] = collectionContent.map(
-      (tile) => tile.metadata.imageName
+      (tile) => tile.fileInfo.fileName
     );
     // append " (n)" to image names when multiple images have the same name,
     // or else JSZip will treat them as a single image:
@@ -312,7 +309,10 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         for (const annotationsObject of annotations[i]) {
           zip.file(
             `${allnames[i]}.tiff`,
-            getTiffData(new Annotations(annotationsObject))
+            getTiffData(
+              new Annotations(annotationsObject),
+              new ImageFileInfo({ fileName: allnames[i] })
+            )
           );
         }
       }
@@ -345,7 +345,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           for (let i = 0; i < images.length; i += 1) {
             if (collectionContent[i].imageLabels.length === 0) {
               unlabelledFolder.file(
-                collectionContent[i].metadata.imageName,
+                collectionContent[i].fileInfo.fileName,
                 images[i].content,
                 {
                   base64: true,

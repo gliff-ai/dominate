@@ -16,11 +16,11 @@ import { wordlist } from "@/wordlist";
 import type {
   GalleryMeta,
   GalleryTile,
-  Image,
-  ImageMeta,
+  ImageItemMeta,
   AnnotationMeta,
 } from "./interfaces";
 import { Task } from "@/components";
+import { ImageFileInfo } from "@gliff-ai/upload";
 
 const logger = console;
 
@@ -572,7 +572,7 @@ export class DominateStore {
 
   createImage = async (
     collectionUid: string,
-    imageMetas: ImageMeta[],
+    imageFileInfos: ImageFileInfo[],
     thumbnails: string[],
     imageContents: string[] | Uint8Array[],
     task: Task,
@@ -586,20 +586,19 @@ export class DominateStore {
 
       const itemPromises: Promise<Item>[] = [];
 
-      for (let i = 0; i < imageMetas.length; i += 1) {
-        const imageMeta = imageMetas[i];
+      for (let i = 0; i < imageFileInfos.length; i += 1) {
+        const imageFileInfo = imageFileInfos[i];
         const imageContent = imageContents[i];
 
         // Create new image item and add it to the collection
         itemPromises.push(
-          itemManager.create(
+          itemManager.create<Partial<ImageItemMeta>>( // partial because we can't know the uid yet, etebase assigns it here
             {
               type: "gliff.image",
-              name: imageMeta.imageName,
+              name: imageFileInfo.fileName,
               createdTime,
               modifiedTime: createdTime,
-              width: imageMeta.width,
-              height: imageMeta.height,
+              fileInfo: imageFileInfo,
             },
             imageContent
           )
@@ -613,14 +612,14 @@ export class DominateStore {
       await itemManager.batch(newItems);
 
       const newTiles: GalleryTile[] = [];
-      for (let i = 0; i < imageMetas.length; i += 1) {
+      for (let i = 0; i < imageFileInfos.length; i += 1) {
         // Add the image's metadata/thumbnail and a pointer to the image item to the gallery's content:
         newTiles.push({
           id: newItems[i].uid, // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
           thumbnail: thumbnails[i],
           imageLabels: [],
           assignees: [],
-          metadata: imageMetas[i],
+          fileInfo: imageFileInfos[i],
           imageUID: newItems[i].uid,
           annotationUID: {},
           annotationComplete: {},
@@ -1021,18 +1020,19 @@ export class DominateStore {
     return item;
   };
 
-  getImage = async (collectionUid: string, itemUid: string): Promise<Image> => {
+  getImage = async (
+    collectionUid: string,
+    itemUid: string
+  ): Promise<string> => {
     // Retrieve image item from a collection.
     const item = await this.getItem(collectionUid, itemUid);
     const content = await item.getContent(OutputFormat.String);
-    return {
-      type: "gliff.image",
-      uid: item.uid,
-      content,
-    } as Image;
+    return content;
   };
 
-  getAllImages = async (collectionUid: string): Promise<Image[]> => {
+  getAllImages = async (
+    collectionUid: string
+  ): Promise<{ meta: ImageItemMeta; content: string }[]> => {
     // Retrive all image items from a collection
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -1048,17 +1048,10 @@ export class DominateStore {
     const imageContents = await Promise.all(
       imageItems.map((item) => item.getContent(OutputFormat.String))
     );
-    return imageItems.map(
-      (item, i) =>
-        ({
-          name: item.getMeta().name,
-          createdTime: item.getMeta().mtime,
-          modifiedTime: item.getMeta().mtime,
-          type: "gliff.image",
-          uid: item.uid,
-          content: imageContents[i],
-        } as Image)
-    );
+    return imageItems.map((item, i) => ({
+      meta: item.getMeta(),
+      content: imageContents[i],
+    }));
   };
 
   getAudits = async (collectionUid: string): Promise<AnnotationSession[]> => {
@@ -1093,7 +1086,7 @@ export class DominateStore {
       .map((tile) =>
         Object.keys(tile.auditUID).map((username) => ({
           username,
-          imagename: tile.metadata.imageName,
+          imagename: tile.fileInfo.fileName,
         }))
       )
       .flat();
@@ -1155,4 +1148,4 @@ export class DominateStore {
   };
 }
 
-export { Collection, Item, GalleryMeta, Image };
+export { Collection, Item, GalleryMeta };

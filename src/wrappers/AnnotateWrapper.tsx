@@ -8,12 +8,9 @@ import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annota
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { icons, IconButton } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
-import { AnnotationMeta, Image } from "@/store/interfaces";
+import { AnnotationMeta } from "@/store/interfaces";
 import { Task, TSButtonToolbar } from "@/components";
-import {
-  parseStringifiedSlices,
-  getImageFileInfoFromImageMeta,
-} from "@/imageConversions";
+import { parseStringifiedSlices } from "@/imageConversions";
 import { useAuth, useStore } from "@/hooks";
 import { setStateIfMounted } from "@/helpers";
 import { UserAccess } from "@/hooks/use-auth";
@@ -52,7 +49,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const navigate = useNavigate();
   const auth = useAuth();
   const { collectionUid = "", imageUid = "" } = useParams();
-  const [imageItem, setImageItem] = useState<Image | null>(null);
+  const [imageContent, setImageContent] = useState<string | null>(null);
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
   const [imageFileInfo, setImageFileInfo] = useState<ImageFileInfo>();
   const [annotationsObject, setAnnotationsObject] = useState<Annotations>();
@@ -70,7 +67,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     if (!imageUids || currImageIdx === null) return;
     const inc = forward ? 1 : -1;
     const newIndex = (currImageIdx + inc + imageUids.length) % imageUids.length;
-    setImageItem(null);
+    setImageContent(null);
     setSlicesData(null);
     navigate(`/annotate/${collectionUid}/${imageUids[newIndex]}`);
   }
@@ -86,7 +83,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       storeInstance
         .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
-          const wrangled = items
+          const imageUIDs = items
             .filter(
               (item) =>
                 (canViewAllImages ||
@@ -94,7 +91,17 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
                 item.imageUID
             )
             .map((item) => item.imageUID);
-          setStateIfMounted(wrangled, setImageUids, isMounted.current);
+          setStateIfMounted(imageUIDs, setImageUids, isMounted.current);
+          const fileInfo = items.find(
+            (item) => item.imageUID === imageUid
+          )?.fileInfo;
+          if (fileInfo) {
+            setStateIfMounted(
+              new ImageFileInfo(fileInfo),
+              setImageFileInfo,
+              isMounted.current
+            );
+          }
         })
         .catch((e) => {
           console.error(e);
@@ -200,7 +207,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       props.storeInstance
         .getImage(collectionUid, imageUid)
         .then((image) => {
-          setStateIfMounted(image, setImageItem, isMounted.current);
+          setStateIfMounted(image, setImageContent, isMounted.current);
         })
         .catch((e) => console.error(e));
     };
@@ -264,25 +271,25 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   ]);
 
   useEffect(() => {
-    if (imageItem) {
+    if (imageContent) {
       // Set slicesData
       parseStringifiedSlices(
-        imageItem.content,
-        imageItem.meta.width,
-        imageItem.meta.height
+        imageContent
+        // imageContent.meta.width,
+        // imageContent.meta.height
       )
         .then((newSlicesData) => {
           setSlicesData(newSlicesData);
         })
         .catch((e) => console.error(e));
-      // Set imageFileInfo
-      const fileInfo = getImageFileInfoFromImageMeta(
-        imageItem.uid,
-        imageItem.meta
-      );
-      setImageFileInfo(fileInfo);
+      // // Set imageFileInfo
+      // const fileInfo = getImageFileInfoFromImageMeta(
+      //   imageContent.uid,
+      //   imageContent.meta
+      // );
+      // setImageFileInfo(fileInfo);
     }
-  }, [imageItem]);
+  }, [imageContent]);
 
   if (
     !props.storeInstance ||
