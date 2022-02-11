@@ -77,13 +77,18 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     navigate(`/annotate/${collectionUid}/${imageUids[newIndex]}`);
   }
 
+  const isOwnerOrMember = useCallback(
+    () =>
+      auth?.userAccess === UserAccess.Owner ||
+      auth?.userAccess === UserAccess.Member,
+    [auth]
+  );
+
   const fetchImageItems = useStore(
     props,
     (storeInstance) => {
       if (!auth?.user?.username) return;
-      const canViewAllImages =
-        auth.userAccess === UserAccess.Owner ||
-        auth.userAccess === UserAccess.Member;
+      const canViewAllImages = isOwnerOrMember();
 
       storeInstance
         .getImagesMeta(collectionUid, auth?.user.username)
@@ -324,6 +329,11 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       setIsLoading={props.setIsLoading}
       userAccess={auth.userAccess}
       plugins={plugins}
+      launchPluginSettingsCallback={
+        Number(auth?.userProfile?.team?.tier?.id) > 1 && isOwnerOrMember()
+          ? () => navigate(`/manage/plugins`)
+          : null
+      }
     />
   );
 };

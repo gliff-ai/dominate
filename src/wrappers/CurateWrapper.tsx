@@ -80,6 +80,13 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [plugins, setPlugins] = useState<PluginObject | null>(null);
   const isMounted = useRef(false);
 
+  const isOwnerOrMember = useCallback(
+    () =>
+      auth?.userAccess === UserAccess.Owner ||
+      auth?.userAccess === UserAccess.Member,
+    [auth]
+  );
+
   const fetchImageItems = useStore(
     props,
     (storeInstance) => {
@@ -90,9 +97,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         .then((items) => {
           setStateIfMounted(items, setCollectionContent, isMounted.current);
           // owners and members can view the images in a project
-          const canViewAllImages =
-            auth.userAccess === UserAccess.Owner ||
-            auth.userAccess === UserAccess.Member;
+          const canViewAllImages = isOwnerOrMember();
 
           // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
           const wrangled = items
@@ -421,6 +426,11 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         profiles={profiles}
         userAccess={auth.userAccess}
         plugins={plugins}
+        launchPluginSettingsCallback={
+          Number(auth?.userProfile?.team?.tier?.id) > 1 && isOwnerOrMember()
+            ? () => navigate(`/manage/plugins`)
+            : null
+        }
       />
 
       <ConfirmationDialog
