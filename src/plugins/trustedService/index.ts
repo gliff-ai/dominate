@@ -1,6 +1,6 @@
 import Ajv from "ajv";
-import { Plugin, PluginType } from "@/plugins/interfaces";
-import { TrustedServiceClass, ITrustedService } from "./TrustedServiceClass";
+import { Plugin, PluginType, PluginElement } from "@/plugins/interfaces";
+import { TrustedServiceClass } from "./TrustedServiceClass";
 import { UiTemplateSchema } from "./schemas";
 import { trustedServicesAPI } from "@/services/trustedServices";
 import { UiTemplate } from "@/services/trustedServices/interfaces";
@@ -8,7 +8,7 @@ import { UiTemplate } from "@/services/trustedServices/interfaces";
 function unpackUiElements(
   { name, url: baseUrl }: Plugin,
   template: UiTemplate
-): ITrustedService[] {
+): PluginElement[] {
   return template.uiElements.map(
     ({ apiEndpoint, uiParams }) =>
       new TrustedServiceClass(name, baseUrl, apiEndpoint, uiParams.tooltip)
@@ -17,7 +17,7 @@ function unpackUiElements(
 
 async function initTrustedServiceObjects(
   plugins: Plugin[]
-): Promise<{ [name: string]: ITrustedService[] }> {
+): Promise<{ [name: string]: PluginElement[] }> {
   // prepare for validating JSON file
   const ajv = new Ajv();
   const validate = ajv.compile(UiTemplateSchema);

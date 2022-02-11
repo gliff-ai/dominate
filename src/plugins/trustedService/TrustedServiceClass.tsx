@@ -1,18 +1,10 @@
 import { apiRequest } from "@/api";
-import { PluginDataIn, PluginDataOut } from "../interfaces";
+import { PluginElement, PluginDataIn, PluginDataOut } from "../interfaces";
 
-interface ITrustedService {
+class TrustedServiceClass implements PluginElement {
   name: string;
-  baseUrl: string;
-  apiEndpoint: string;
-  tooltip: string;
-  onClick: (data: PluginDataIn) => Promise<PluginDataOut>;
-}
-
-class TrustedServiceClass implements ITrustedService {
-  name: string;
-  baseUrl: string;
-  apiEndpoint: string;
+  private baseUrl: string;
+  private apiEndpoint: string;
   tooltip: string;
 
   constructor(
@@ -38,4 +30,4 @@ class TrustedServiceClass implements ITrustedService {
   };
 }
 
-export { TrustedServiceClass, ITrustedService };
+export { TrustedServiceClass };

@@ -1,17 +1,11 @@
-import { PluginDataIn, PluginDataOut } from "../interfaces";
-
-interface IPlugin {
-  name?: string;
-  tooltip: string;
-  onClick: (data: PluginDataIn) => Promise<PluginDataOut>;
-}
+import { PluginElement } from "../interfaces";
 
 interface IPluginConstructor {
-  new (): IPlugin;
+  new (): PluginElement;
 }
 
 interface IObjectKeys {
   [key: string]: IPluginConstructor;
 }
 
-export { IPlugin, IPluginConstructor, IObjectKeys };
+export { IPluginConstructor, IObjectKeys };

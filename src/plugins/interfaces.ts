@@ -1,5 +1,3 @@
-import { IPlugin } from "./jsPlugin/interfaces";
-import { ITrustedService } from "./trustedService/TrustedServiceClass";
 import { MetaItem } from "@/store/interfaces";
 
 // NOTE: Product, PluginType and Plugin are also defined in MANAGE
@@ -26,7 +24,13 @@ interface Plugin {
   collection_uids: string[]; // collection uids for the projects the plugin has been added to
 }
 
-type PluginObject = { [name: string]: IPlugin[] | ITrustedService[] };
+interface PluginElement {
+  name: string;
+  tooltip: string;
+  onClick: (data: PluginDataIn) => Promise<PluginDataOut>;
+}
+
+type PluginObject = { [name: string]: PluginElement[] };
 
 interface PluginDataIn {
   collectionUid?: string;
@@ -41,4 +45,10 @@ interface PluginDataOut {
 }
 
 export { Product, PluginType };
-export type { Plugin, PluginObject, PluginDataIn, PluginDataOut };
+export type {
+  Plugin,
+  PluginObject,
+  PluginDataIn,
+  PluginDataOut,
+  PluginElement,
+};

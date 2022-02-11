@@ -1,6 +1,6 @@
-import { IPlugin } from "../interfaces";
+import { PluginElement } from "@/plugins/interfaces";
 
-export class SamplePlugin implements IPlugin {
+export class SamplePlugin implements PluginElement {
   name: string;
 
   tooltip: string;

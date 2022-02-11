@@ -1,6 +1,6 @@
-import { IPluginConstructor, IObjectKeys, IPlugin } from "./interfaces";
+import { IPluginConstructor, IObjectKeys } from "./interfaces";
 import { SamplePlugin } from "./example/SamplePlugin";
-import { Plugin, PluginType } from "@/plugins/interfaces";
+import { Plugin, PluginType, PluginElement } from "@/plugins/interfaces";
 
 const builtinPlugins: IObjectKeys = { SamplePlugin };
 
@@ -29,7 +29,7 @@ async function loadJsPlugin(
 
 async function initJsPluginObjects(
   plugins: Plugin[]
-): Promise<{ [name: string]: IPlugin[] }> {
+): Promise<{ [name: string]: PluginElement[] }> {
   const loadedPlugins: {
     name: string;
     PluginConstructor: IPluginConstructor | null;
