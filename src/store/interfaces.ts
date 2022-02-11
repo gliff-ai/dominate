@@ -49,7 +49,7 @@ interface ImageMeta {
   imageName: string;
   num_slices: number; // number of z-slices
   num_channels: number; // numbers colour channels
-  width: number; // width of each slicewrangled
+  width: number; // width of each slice
   height: number; // height of each slice
   size: number; // size of the image in bytes
   resolution_x: number;
