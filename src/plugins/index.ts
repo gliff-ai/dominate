@@ -1,27 +1,50 @@
-import { IPluginConstructor, IObjectKeys } from "./interfaces";
-import { SamplePlugin } from "./example/SamplePlugin";
+import { jsPluginsAPI } from "@/services/plugins";
+import { trustedServicesAPI } from "@/services/trustedServices";
+import { Plugin, Product, PluginType, PluginObject } from "./interfaces";
 
-const builtinPlugins: IObjectKeys = { SamplePlugin };
+import { initJsPluginObjects } from "./jsPlugin";
 
-export async function loadPlugin(
-  pluginName: string
-): Promise<IPluginConstructor | null> {
+import { initTrustedServiceObjects } from "./trustedService";
+
+async function getPlugins(currentProduct: Product, collectionUid: string) {
+  // Get plugins data from STORE
   try {
-    // Try to find it locally
-    if (builtinPlugins[pluginName]) {
-      return builtinPlugins[pluginName];
-    }
+    const newPlugins = (
+      (await trustedServicesAPI.getTrustedService()) as Plugin[]
+    ).concat((await jsPluginsAPI.getPlugins()) as Plugin[]);
 
-    // Try to load the plugin
-    const module = (await import(
-      /* @vite-ignore */
-      `${pluginName}`
-    )) as {
-      default: IPluginConstructor;
-    };
-    return module.default;
+    return newPlugins.filter(
+      ({ collection_uids, products, enabled }) =>
+        collection_uids.includes(collectionUid) &&
+        (products === currentProduct || products === Product.ALL) &&
+        enabled
+    );
   } catch (e) {
     console.error(e);
   }
   return null;
 }
+
+async function initPluginObjects(
+  currentProduct: Product,
+  collectionUid: string
+): Promise<PluginObject | null> {
+  // Initialise plugin objects
+
+  try {
+    const plugins = await getPlugins(currentProduct, collectionUid);
+
+    if (plugins) {
+      const jsPlugins = await initJsPluginObjects(plugins);
+      const trustedServices = await initTrustedServiceObjects(plugins);
+
+      return { ...jsPlugins, ...trustedServices };
+    }
+  } catch (e) {
+    console.error(e);
+  }
+  return null;
+}
+
+export { getPlugins, initPluginObjects, Product, PluginType };
+export type { Plugin, PluginObject };

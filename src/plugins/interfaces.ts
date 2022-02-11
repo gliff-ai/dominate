@@ -1,19 +1,44 @@
+import { IPlugin } from "./jsPlugin/interfaces";
+import { ITrustedService } from "./trustedService/TrustedServiceClass";
 import { MetaItem } from "@/store/interfaces";
 
-interface IPlugin {
-  icon: string;
-  name: string;
-  tooltip: string;
-  usesModal: boolean;
-  onClick: (metadata?: MetaItem[] | null) => JSX.Element | null | void;
+// NOTE: Product, PluginType and Plugin are also defined in MANAGE
+
+enum Product {
+  "CURATE" = "CURATE",
+  "ANNOTATE" = "ANNOTATE",
+  "ALL" = "ALL",
 }
 
-interface IPluginConstructor {
-  new (): IPlugin;
+enum PluginType {
+  "Javascript" = "Javascript",
+  "Python" = "Python",
+  "AI" = "AI",
 }
 
-interface IObjectKeys {
-  [key: string]: IPluginConstructor;
+interface Plugin {
+  username?: string; // trusted-service username (i.e., email address)
+  name: string; // plugin name
+  type: PluginType;
+  url: string; // base_url for trusted-services and url for plugins
+  products: Product;
+  enabled: boolean;
+  collection_uids: string[]; // collection uids for the projects the plugin has been added to
 }
 
-export { IPlugin, IPluginConstructor, IObjectKeys };
+type PluginObject = { [name: string]: IPlugin[] | ITrustedService[] };
+
+interface PluginDataIn {
+  collectionUid?: string;
+  imageUid?: string;
+  metadata?: MetaItem[] | null;
+}
+
+interface PluginDataOut {
+  status?: string; // processing outcome
+  message?: string; // any message returned by the plugin
+  domElement?: JSX.Element | null;
+}
+
+export { Product, PluginType };
+export type { Plugin, PluginObject, PluginDataIn, PluginDataOut };
