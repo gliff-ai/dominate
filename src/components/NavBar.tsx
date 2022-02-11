@@ -4,13 +4,13 @@ import {
   Avatar,
   Grid,
   IconButton,
-  makeStyles,
   Menu,
   MenuItem,
   Theme,
   Toolbar,
   Typography,
-} from "@material-ui/core";
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { Link, useNavigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
 import { HtmlTooltip } from "@gliff-ai/style";
@@ -127,6 +127,7 @@ export const NavBar = (props: Props): ReactElement | null => {
         onClick={handleClick}
         aria-controls="menu"
         style={{ paddingTop: 0 }}
+        size="large"
       >
         <HtmlTooltip
           title={<Typography>Account</Typography>}
@@ -143,7 +144,7 @@ export const NavBar = (props: Props): ReactElement | null => {
         open={Boolean(anchorElement)}
         onClose={handleClose}
         id="menu"
-        style={{ marginTop: "60px", marginLeft: "80px" }}
+        style={{ marginTop: "60px !important", marginLeft: "80px" }}
         transformOrigin={{
           vertical: "top",
           horizontal: "right",

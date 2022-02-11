@@ -2,7 +2,8 @@ import { ChangeEvent, FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { theme } from "@gliff-ai/style";
-import { TextField, Link, Typography, makeStyles } from "@material-ui/core";
+import { TextField, Link, Typography } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { getRecoverySession } from "@/services/user";
 import { DominateStore } from "@/store";
 import { MessageAlert, SubmitButton } from "@/components";

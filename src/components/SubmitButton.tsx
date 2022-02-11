@@ -1,5 +1,6 @@
 import { theme } from "@gliff-ai/style";
-import { Button, CircularProgress, makeStyles } from "@material-ui/core";
+import { Button, CircularProgress } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { ReactElement } from "react";
 
 const useStyles = makeStyles(() => ({

@@ -2,10 +2,10 @@ import {
   CircularProgress,
   Typography,
   Box,
-  makeStyles,
   Snackbar,
   SnackbarContent,
-} from "@material-ui/core";
+} from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 import { theme } from "@gliff-ai/style";
 
 import { ReactElement } from "react";
@@ -37,7 +37,14 @@ function ProgressSnackbar({ task, setTask }: Props): ReactElement {
   };
 
   return (
-    <Snackbar open={task.isLoading} onClose={handleClose}>
+    <Snackbar
+      open={task.isLoading}
+      onClose={handleClose}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "center",
+      }}
+    >
       <SnackbarContent
         className={classes.snackbarContent}
         message={
