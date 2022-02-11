@@ -1,7 +1,6 @@
-import { ReactElement, useState, useEffect, useRef } from "react";
+import { ReactElement, useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@mui/material";
-
 import makeStyles from "@mui/styles/makeStyles";
 
 import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
@@ -9,7 +8,7 @@ import { ImageFileInfo } from "@gliff-ai/upload";
 import { icons, IconButton } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
 import { AnnotationMeta, Image } from "@/store/interfaces";
-import { Task, TSButtonToolbar } from "@/components";
+import { Task } from "@/components";
 import {
   parseStringifiedSlices,
   getImageFileInfoFromImageMeta,
@@ -17,6 +16,7 @@ import {
 import { useAuth, useStore } from "@/hooks";
 import { setStateIfMounted } from "@/helpers";
 import { UserAccess } from "@/hooks/use-auth";
+import { initPluginObjects, PluginObject, Product } from "@/plugins";
 
 interface Props {
   storeInstance: DominateStore;
@@ -60,6 +60,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [isComplete, setIsComplete] = useState<boolean>(false);
   const [imageUids, setImageUids] = useState<string[] | null>(null);
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
+  const [plugins, setPlugins] = useState<PluginObject | null>(null);
+
   const isMounted = useRef(false);
   const classes = useStyle();
 
@@ -263,6 +265,25 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     isMounted,
   ]);
 
+  const fetchPlugins = useCallback(async () => {
+    if (!auth?.user || collectionUid === "") return;
+    try {
+      const newPlugins = await initPluginObjects(
+        Product.ANNOTATE,
+        collectionUid
+      );
+      if (newPlugins) {
+        setStateIfMounted(newPlugins, setPlugins, isMounted.current);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [auth, collectionUid, isMounted]);
+
+  useEffect(() => {
+    fetchPlugins();
+  }, [auth, collectionUid, isMounted]);
+
   useEffect(() => {
     if (imageItem) {
       // Set slicesData
@@ -301,10 +322,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       annotationsObject={slicesData ? annotationsObject : undefined}
       saveAnnotationsCallback={saveAnnotation}
       setIsLoading={props.setIsLoading}
-      trustedServiceButtonToolbar={
-        <TSButtonToolbar collectionUid={collectionUid} imageUid={imageUid} />
-      }
       userAccess={auth.userAccess}
+      plugins={plugins}
     />
   );
 };
