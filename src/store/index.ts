@@ -267,7 +267,7 @@ export class DominateStore {
   updateCollectionMeta = async (
     collectionUid: string,
     newMeta: Partial<{ defaultLabels: string[]; restrictLabels: boolean }>
-  ) => {
+  ): Promise<void> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();

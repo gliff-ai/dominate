@@ -31,7 +31,8 @@ type ImageBitmapBlob = ImageBitmap;
 type Channels = ImageBitmapBlob[];
 type Slices = Channels[];
 
-interface Image { // a sort of hybrid/union of etebase metadata and content for Image items
+interface Image {
+  // a sort of hybrid/union of etebase metadata and content for Image items
   uid: string;
   type: "gliff.image";
   name: string; // human-readable image name, i.e. file name

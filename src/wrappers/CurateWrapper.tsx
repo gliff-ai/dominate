@@ -30,7 +30,6 @@ import { useMountEffect } from "@/hooks/use-mountEffect";
 import { useStore } from "@/hooks/use-store";
 import { apiRequest } from "@/api";
 import { setStateIfMounted } from "@/helpers";
-import { TitleSharp } from "@material-ui/icons";
 
 const logger = console;
 
@@ -185,14 +184,14 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       });
   };
 
-  const saveDefaultLabelsCallback = async (
-    newLabels: string[],
-    restrictLabels: boolean
+  const saveDefaultLabelsCallback = (
+    newDefaultLabels: string[],
+    newRestrictLabels: boolean
   ) => {
     props.storeInstance
       .updateCollectionMeta(collectionUid, {
-        defaultLabels: newLabels,
-        restrictLabels,
+        defaultLabels: newDefaultLabels,
+        restrictLabels: newRestrictLabels,
       })
       .then(fetchImageItems)
       .catch((error) => {
