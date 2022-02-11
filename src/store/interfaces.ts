@@ -28,6 +28,7 @@ interface MetaItem {
 type ImageBitmapBlob = ImageBitmap;
 type Channels = ImageBitmapBlob[];
 type Slices = Channels[];
+
 interface ImageItemMeta {
   uid: string;
   name: string; // human-readable image name, i.e. file name
