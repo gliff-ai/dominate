@@ -266,7 +266,11 @@ export class DominateStore {
 
   updateCollectionMeta = async (
     collectionUid: string,
-    newMeta: Partial<{ defaultLabels: string[]; restrictLabels: boolean }>
+    newMeta: Partial<{
+      defaultLabels: string[];
+      restrictLabels: boolean;
+      multiLabel: boolean;
+    }>
   ): Promise<void> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 

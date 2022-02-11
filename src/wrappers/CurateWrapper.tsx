@@ -186,12 +186,14 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   const saveDefaultLabelsCallback = (
     newDefaultLabels: string[],
-    newRestrictLabels: boolean
+    newRestrictLabels: boolean,
+    newMultiLabel: boolean
   ) => {
     props.storeInstance
       .updateCollectionMeta(collectionUid, {
         defaultLabels: newDefaultLabels,
         restrictLabels: newRestrictLabels,
+        multiLabel: newMultiLabel,
       })
       .then(fetchImageItems)
       .catch((error) => {
