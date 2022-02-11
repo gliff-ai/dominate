@@ -382,13 +382,17 @@ export class DominateStore {
     // get collection metadata:
     const meta = this.wrangleGallery(collection);
 
-    // migrate GalleryMeta to include defaultLabels and restrictLabels if necessary:
+    // migrate GalleryMeta to include defaultLabels, restrictLabels and multiLabel if necessary:
     if (!("defaultLabels" in meta)) {
       meta.defaultLabels = [];
       migrate = true;
     }
     if (!("restrictLabels" in meta)) {
       meta.restrictLabels = false;
+      migrate = true;
+    }
+    if (!("multiLabel" in meta)) {
+      meta.multiLabel = false;
       migrate = true;
     }
 
