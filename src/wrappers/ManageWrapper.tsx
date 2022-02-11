@@ -11,8 +11,8 @@ import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
 import { trustedServicesAPI, TrustedService } from "@/services/trustedServices";
 import { jsPluginsAPI } from "@/services/plugins";
 import { GalleryTile } from "@/store/interfaces";
-import { PluginType, Plugin } from "./interfaces";
-import { JsPlugin } from "@/services/plugins/interfaces";
+import { PluginType, Plugin } from "@/plugins";
+import { JsPlugin } from "@/services/plugins";
 
 type Progress = {
   [uid: string]: { complete: number; total: number };
