@@ -37,7 +37,14 @@ function ProgressSnackbar({ task, setTask }: Props): ReactElement {
   };
 
   return (
-    <Snackbar open={task.isLoading} onClose={handleClose}>
+    <Snackbar
+      open={task.isLoading}
+      onClose={handleClose}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "center",
+      }}
+    >
       <SnackbarContent
         className={classes.snackbarContent}
         message={
