@@ -111,24 +111,26 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     return allPlugins;
   }, []);
 
-  const createPlugin = useCallback(async (plugin: Plugin): Promise<
-    string | null
-  > => {
-    if (plugin.type === PluginType.Javascript) {
-      await jsPluginsAPI.createPlugin(plugin as JsPlugin);
-      return null;
-    }
-    // First create a trusted service base user
-    const { key, email } = await props.storeInstance.createTrustedServiceUser();
+  const createPlugin = useCallback(
+    async (plugin: Plugin): Promise<string | null> => {
+      if (plugin.type === PluginType.Javascript) {
+        await jsPluginsAPI.createPlugin(plugin as JsPlugin);
+        return null;
+      }
+      // First create a trusted service base user
+      const { key, email } =
+        await props.storeInstance.createTrustedServiceUser();
 
-    // Set the user profile
-    const res = await trustedServicesAPI.createTrustedService({
-      username: email,
-      ...plugin,
-    } as TrustedService);
+      // Set the user profile
+      const res = await trustedServicesAPI.createTrustedService({
+        username: email,
+        ...plugin,
+      } as TrustedService);
 
-    return key;
-  }, []);
+      return key;
+    },
+    [props.storeInstance]
+  );
 
   const updatePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
     if (plugin.type === PluginType.Javascript) {
