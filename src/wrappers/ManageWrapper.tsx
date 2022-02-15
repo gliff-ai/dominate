@@ -91,11 +91,24 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   );
 
   const getPlugins = useCallback(async (): Promise<Plugin[]> => {
-    const trustedServices = await trustedServicesAPI.getTrustedService();
+    let allPlugins: Plugin[] = [];
 
-    const plugins = await jsPluginsAPI.getPlugins();
+    try {
+      const trustedServices =
+        (await trustedServicesAPI.getTrustedService()) as Plugin[];
+      allPlugins = allPlugins.concat(trustedServices);
+    } catch (e) {
+      console.error(e);
+    }
 
-    return (trustedServices as Plugin[]).concat(plugins as Plugin[]);
+    try {
+      const jsplugins = (await jsPluginsAPI.getPlugins()) as Plugin[];
+      allPlugins = allPlugins.concat(jsplugins);
+    } catch (e) {
+      console.error(e);
+    }
+
+    return allPlugins;
   }, []);
 
   const createPlugin = useCallback(async (plugin: Plugin): Promise<
