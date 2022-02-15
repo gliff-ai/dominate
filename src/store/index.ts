@@ -808,11 +808,10 @@ export class DominateStore {
     ) as GalleryTile[];
 
     const itemManager = collectionManager.getItemManager(collection);
-    const annotationItems = await itemManager.fetchMulti(
-      ([] as string[]).concat(
-        ...tiles.map((tile) => Object.values(tile.annotationUID))
-      )
-    );
+    const annotationUIDs = ([] as string[]).concat(
+      ...tiles.map((tile) => Object.values(tile.annotationUID))
+    ); // [im0_ann0, im0_ann1, im0_ann2, im1_ann0, im1_ann1, ...]
+    const annotationItems = await itemManager.fetchMulti(annotationUIDs);
 
     const annotationItemContents = await Promise.all(
       annotationItems.data.map((annotation) =>
@@ -827,23 +826,24 @@ export class DominateStore {
     );
 
     // reshape arrays into [[im0_ann0, im0_ann1, im0_ann2], [im1_ann0, im1_ann1], ...]:
-    let uid: string = "";
     const annotationContentsReshaped: string[][] = [];
     const annotationsMetaReshaped: AnnotationMeta[][] = [];
-    for (let i = 0; i < annotationsMeta.length; i += 1) {
-      // this will work so long as fetchMulti returns items in the same order they're specified...
-      if (annotationsMeta[i].uid !== uid) {
-        annotationsMetaReshaped.push([]);
-        annotationContentsReshaped.push([]);
-        uid = annotationsMeta[i].uid;
-      }
-      annotationsMetaReshaped[annotationsMetaReshaped.length - 1].push(
-        annotationsMeta[i]
-      );
-      annotationContentsReshaped[annotationContentsReshaped.length - 1].push(
-        annotationItemContents[i]
-      );
-    }
+    console.log(annotationsMeta);
+
+    tiles.forEach((tile) => {
+      const imageAnnotations: string[] = [];
+      const imageAnnotationMetas: AnnotationMeta[] = [];
+      annotationUIDs.forEach((uid, i) => {
+        if (Object.values(tile.annotationUID).includes(uid)) {
+          imageAnnotations.push(annotationItemContents[i]);
+          imageAnnotationMetas.push(annotationsMeta[i]);
+        }
+      });
+      annotationContentsReshaped.push(imageAnnotations);
+      annotationsMetaReshaped.push(imageAnnotationMetas);
+    });
+
+    console.log(annotationsMetaReshaped);
 
     return {
       meta: annotationsMetaReshaped,
