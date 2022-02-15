@@ -30,7 +30,6 @@ type Channels = ImageBitmapBlob[];
 type Slices = Channels[];
 
 interface ImageItemMeta {
-  uid: string;
   name: string; // human-readable image name, i.e. file name
   type: "gliff.image";
   fileInfo: FileInfo;
@@ -56,7 +55,6 @@ interface FileInfo {
 }
 
 interface AnnotationMeta {
-  uid: string;
   isComplete: boolean;
   type?: string;
   name?: string;
