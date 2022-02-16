@@ -268,16 +268,22 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     const annotations_json: JSONImage[] = allnames.map((name, i) => ({
       imageName: name,
       labels: collectionContent[i].imageLabels,
-      annotations: annotations[i].map((annotationsObject: Annotation[]) =>
-        annotationsObject.map((annotation) => ({
+      annotations: annotations[i].map((annotationsObject: Annotation[], j) => {
+        let maskName = allnames[i].split(".")[0];
+        if (annotations[i].length > 1) {
+          maskName += `_${j}`;
+        }
+        maskName += ".tiff";
+
+        return annotationsObject.map((annotation) => ({
           labels: annotation.labels,
           segmaskName:
-            annotation.brushStrokes.length > 0 ? `${name}.tiff` : undefined,
+            annotation.brushStrokes.length > 0 ? maskName : undefined,
           colour: annotation.brushStrokes[0]?.brush.color, // colour of this annotation in the segmask image
           spline: annotation.spline,
           boundingBox: annotation.boundingBox,
-        }))
-      ),
+        }));
+      }),
     }));
 
     // add JSON to zip:
@@ -352,12 +358,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
               (annotation) => annotation.brushStrokes.length > 0
             ).length > 0 // are there any brushstrokes in this annotationsObject?
           ) {
-            console.log(
-              annotationsObject,
-              annotationsObject.filter(
-                (annotation) => annotation.brushStrokes.length > 0
-              )
-            );
             let maskName = allnames[i].split(".")[0];
             if (userAnnotations.length > 1) {
               maskName += `_${j}`;
