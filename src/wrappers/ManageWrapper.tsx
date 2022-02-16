@@ -112,7 +112,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   }, []);
 
   const createPlugin = useCallback(
-    async (plugin: Plugin): Promise<string | null> => {
+    async (plugin: Plugin): Promise<{ key: string; email: string } | null> => {
       if (plugin.type === PluginType.Javascript) {
         await jsPluginsAPI.createPlugin(plugin as JsPlugin);
         return null;
@@ -127,7 +127,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
         ...plugin,
       } as TrustedService);
 
-      return key;
+      return { key, email };
     },
     [props.storeInstance]
   );
