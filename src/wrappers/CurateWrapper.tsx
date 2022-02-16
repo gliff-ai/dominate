@@ -243,12 +243,14 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     const allnames: string[] = collectionContent.map(
       (tile) => tile.fileInfo.fileName
     );
-    // append " (n)" to image names when multiple images have the same name,
+
+    // append " (n)" to file names when multiple files have the same name
     // or else JSZip will treat them as a single image:
     const counts = {};
     for (let i = 0; i < allnames.length; i += 1) {
       if (counts[allnames[i]] > 0) {
-        allnames[i] += ` (${counts[allnames[i]] as number})`;
+        const [name, extension] = allnames[i].split(".");
+        allnames[i] = `${name} (${counts[allnames[i]] as number}).${extension}`;
       }
       if (counts[allnames[i]] === undefined) {
         counts[allnames[i]] = 1;
@@ -256,6 +258,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         counts[allnames[i]] += 1;
       }
     }
+
+    console.log(annotations);
 
     // make annotations JSON file:
     type XYPoint = { x: number; y: number };
@@ -270,8 +274,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     type JSONAnnotation = {
       // an individual object (or "layer") within a user's annotation of an image
       labels: string[];
-      segmaskName: string; // name of segmentation mask image (for brushstroke annotations)
-      colour: string; // colour of brushstroke in seg_mask image
+      segmaskName?: string; // name of segmentation mask image (for brushstroke annotations)
+      colour?: string; // colour of brushstroke in seg_mask image
       spline: {
         coordinates: XYPoint[];
         spaceTimeInfo: ZTPoint;
@@ -290,8 +294,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       annotations: annotations[i].map((annotationsObject: Annotation[]) =>
         annotationsObject.map((annotation) => ({
           labels: annotation.labels,
-          segmaskName: `${name}.tiff`,
-          colour: annotation.brushStrokes[0].brush.color, // colour of this annotation in the segmask image
+          segmaskName:
+            annotation.brushStrokes.length > 0 ? `${name}.tiff` : undefined,
+          colour: annotation.brushStrokes[0]?.brush.color, // colour of this annotation in the segmask image
           spline: annotation.spline,
           boundingBox: annotation.boundingBox,
         }))
@@ -300,21 +305,15 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
     // add JSON to zip:
     const jsonString = JSON.stringify(annotations_json);
-    zip.file("labels.json", jsonString);
+    zip.file("annotations.json", jsonString);
+
+    // make images directory:
+    const imagesFolder = zip.folder("images") as JSZip;
 
     if (multi) {
-      // put all images in the root of the zip:
+      // put all images in the root of images directory:
       for (let i = 0; i < images.length; i += 1) {
-        zip.file(allnames[i], images[i].content, { base64: true });
-        for (const annotationsObject of annotations[i]) {
-          zip.file(
-            `${allnames[i]}.tiff`,
-            getTiffData(
-              new Annotations(annotationsObject),
-              new ImageFileInfo({ fileName: allnames[i] })
-            )
-          );
-        }
+        imagesFolder.file(allnames[i], images[i].content, { base64: true });
       }
     } else {
       // get set of all labels:
@@ -324,7 +323,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
       // add label folders to zip:
       for (const label of allLabels) {
-        const labelFolder = zip.folder(label);
+        const labelFolder = imagesFolder.folder(label);
         if (labelFolder) {
           // add images to label folder in zip:
           for (let i = 0; i < images.length; i += 1) {
@@ -338,8 +337,11 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }
 
       // put unlabelled images in their own folder:
-      if (collectionContent.filter((tile) => tile.imageLabels.length === 0)) {
-        const unlabelledFolder = zip.folder("unlabelled");
+      if (
+        collectionContent.filter((tile) => tile.imageLabels.length === 0)
+          .length > 0
+      ) {
+        const unlabelledFolder = imagesFolder.folder("unlabelled");
 
         if (unlabelledFolder) {
           for (let i = 0; i < images.length; i += 1) {
@@ -355,6 +357,53 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           }
         }
       }
+    }
+
+    if (
+      annotations
+        .flat(2)
+        .filter((annotation) => annotation.brushStrokes.length > 0).length > 0
+    ) {
+      // create tiff label images (one for each annotator for this image):
+
+      const maskFolder = zip.folder("masks") as JSZip;
+
+      annotations.forEach((userAnnotations, i) => {
+        userAnnotations.forEach((annotationsObject, j) => {
+          if (
+            annotationsObject.filter(
+              (annotation) => annotation.brushStrokes.length > 0
+            ).length > 0 // are there any brushstrokes in this annotationsObject?
+          ) {
+            console.log(
+              annotationsObject,
+              annotationsObject.filter(
+                (annotation) => annotation.brushStrokes.length > 0
+              )
+            );
+            let maskName = allnames[i].split(".")[0];
+            if (userAnnotations.length > 1) {
+              maskName += `_${j}`;
+            }
+            maskName += ".tiff";
+
+            maskFolder.file(
+              maskName,
+              getTiffData(
+                new Annotations(annotationsObject),
+                new ImageFileInfo({
+                  fileName: maskName,
+                  width: images[i].meta.fileInfo.width,
+                  height: images[i].meta.fileInfo.height,
+                  size: images[i].meta.fileInfo.size,
+                  num_channels: images[i].meta.fileInfo.num_channels,
+                  num_slices: images[i].meta.fileInfo.num_slices,
+                })
+              )
+            );
+          }
+        });
+      });
     }
 
     // compress data and save to disk:
