@@ -213,32 +213,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const downloadDataset = async (): Promise<void> => {
     const zip = new JSZip();
 
-    // retrieve Image items and their names from store:
-    // TODO: store image names in Image items!
-    // const imagePromises: Promise<Image>[] = [];
-    // const annotationsPromises: Promise<{
-    //   meta: AnnotationMeta[];
-    //   annotations: Annotations[];
-    // }>[] = [];
-    // const imageNames: string[] = [];
-    // for (const tile of collectionContent) {
-    //   const imageUid = tile.imageUID;
-    //   imagePromises.push(props.storeInstance.getImage(collectionUid, imageUid));
-    //   annotationsPromises.push(
-    //     props.storeInstance.getAllAnnotationsObjects(collectionUid)
-    //   );
-    //   imageNames.push(tile.metadata.imageName);
-    // }
-
     const images = await props.storeInstance.getAllImages(collectionUid);
     const { meta: annotationsMeta, annotations } =
       await props.storeInstance.getAllAnnotationsObjects(collectionUid);
-
-    // const images: Image[] = await Promise.all(imagePromises);
-    // const annotations: {
-    //   meta: AnnotationMeta[];
-    //   annotations: Annotations[];
-    // }[] = await Promise.all(annotationsPromises);
 
     const allnames: string[] = collectionContent.map(
       (tile) => tile.fileInfo.fileName
