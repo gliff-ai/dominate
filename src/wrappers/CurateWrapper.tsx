@@ -236,8 +236,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }
     }
 
-    console.log(annotations);
-
     // make annotations JSON file:
     type XYPoint = { x: number; y: number };
     type ZTPoint = { z: number; t: number };
