@@ -185,7 +185,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         auth.user.username
       )
       .then(() => {
-        props.setTask({ isLoading: false, description: "" });
+        props.setTask({ isLoading: true, description: "" });
       })
       .catch((e) => console.error(e));
   };
