@@ -9,6 +9,8 @@ import {
   OutputFormat,
   CollectionAccessLevel,
 } from "etebase";
+
+import { Task } from "@gliff-ai/style";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
 import { User } from "@/services/user/interfaces";
@@ -20,7 +22,6 @@ import type {
   ImageMeta,
   AnnotationMeta,
 } from "./interfaces";
-import { Task } from "@/components";
 
 const logger = console;
 
