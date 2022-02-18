@@ -13,3 +13,5 @@ export {
 export { GliffCard } from "./GliffCard";
 export { TSButtonToolbar } from "./TSButtonToolbar";
 export { CookieConsent } from "./CookieConsent";
+export { ProductsNavbar } from "./ProductsNavbar";
+export type { ProductNavbarData } from "./ProductsNavbar";

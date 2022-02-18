@@ -13,7 +13,7 @@ import {
   Image,
   ImageMeta,
 } from "@/store/interfaces";
-import { Task, TSButtonToolbar } from "@/components";
+import { ProductNavbarData, Task, TSButtonToolbar } from "@/components";
 import {
   ConfirmationDialog,
   MessageDialog,
@@ -55,6 +55,7 @@ interface Props {
   setIsLoading: (isLoading: boolean) => void;
   task: Task;
   setTask: (task: Task) => void;
+  setProductNavbarData: (data: ProductNavbarData) => void;
 }
 
 export const CurateWrapper = (props: Props): ReactElement | null => {

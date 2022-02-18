@@ -23,7 +23,7 @@ interface Props {
   setIsLoading: (isLoading: boolean) => void;
   task: Task;
   setTask: (task: Task) => void;
-  setProductSection: (productSection: JSX.Element | null) => void;
+  // setProductSection: (productSection: JSX.Element | null) => void;
 }
 
 const useStyle = makeStyles({
@@ -104,41 +104,41 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   );
 
   function updateProductSection(): void {
-    props.setProductSection(
-      <div className={classes.sectionContainer}>
-        <Card className={`${classes.cardSize} ${classes.cardLeft}`}>
-          <IconButton
-            icon={icons.previousNext}
-            tooltip={{ name: "Previous Image" }}
-            onClick={() => cycleImage(false)}
-            tooltipPlacement="bottom"
-            disabled={!canCycle()}
-            size="small"
-          />
-        </Card>
-        <Card className={classes.cardSize}>
-          <IconButton
-            icon={icons.tick}
-            tooltip={{ name: "Mark Annotation As Complete" }}
-            onClick={() => setIsComplete((prevIsComplete) => !prevIsComplete)}
-            fill={isComplete}
-            tooltipPlacement="bottom"
-            size="small"
-          />
-        </Card>
-        <Card className={`${classes.cardSize} ${classes.cardRight}`}>
-          <IconButton
-            className={classes.rotateIcon}
-            icon={icons.previousNext}
-            tooltip={{ name: "Next Image" }}
-            onClick={() => cycleImage()}
-            tooltipPlacement="bottom"
-            disabled={!canCycle()}
-            size="small"
-          />
-        </Card>
-      </div>
-    );
+    // props.setProductSection(
+    //   <div className={classes.sectionContainer}>
+    //     <Card className={`${classes.cardSize} ${classes.cardLeft}`}>
+    //       <IconButton
+    //         icon={icons.previousNext}
+    //         tooltip={{ name: "Previous Image" }}
+    //         onClick={() => cycleImage(false)}
+    //         tooltipPlacement="bottom"
+    //         disabled={!canCycle()}
+    //         size="small"
+    //       />
+    //     </Card>
+    //     <Card className={classes.cardSize}>
+    //       <IconButton
+    //         icon={icons.tick}
+    //         tooltip={{ name: "Mark Annotation As Complete" }}
+    //         onClick={() => setIsComplete((prevIsComplete) => !prevIsComplete)}
+    //         fill={isComplete}
+    //         tooltipPlacement="bottom"
+    //         size="small"
+    //       />
+    //     </Card>
+    //     <Card className={`${classes.cardSize} ${classes.cardRight}`}>
+    //       <IconButton
+    //         className={classes.rotateIcon}
+    //         icon={icons.previousNext}
+    //         tooltip={{ name: "Next Image" }}
+    //         onClick={() => cycleImage()}
+    //         tooltipPlacement="bottom"
+    //         disabled={!canCycle()}
+    //         size="small"
+    //       />
+    //     </Card>
+    //   </div>
+    // );
   }
 
   useEffect(() => {

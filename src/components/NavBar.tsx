@@ -17,7 +17,7 @@ import { HtmlTooltip } from "@gliff-ai/style";
 import { imgSrc } from "@/imgSrc";
 
 import { useAuth } from "@/hooks/use-auth";
-import { ProductIcons, BaseProductIcon } from "@/components";
+import { ProductsNavbar, ProductNavbarData } from "@/components";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -77,7 +77,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
 }));
 interface Props {
-  productSection: JSX.Element | null;
+  productNavbarData: ProductNavbarData;
 }
 export const NavBar = (props: Props): ReactElement | null => {
   // Get auth state and re-render anytime it changes
@@ -204,22 +204,11 @@ export const NavBar = (props: Props): ReactElement | null => {
               alt="gliff logo"
             />
           </Grid>
-          <Grid className={classes.productSectionGrid}>
-            {props.productSection}
-          </Grid>
           <Grid className={classes.navGrid}>
             <nav className={classes.navLinks}>
               {auth.user ? (
                 <>
-                  <ProductIcons />
-                  <BaseProductIcon
-                    key="document"
-                    tool="document"
-                    target="_blank"
-                    customUrlPath="https://docs.gliff.app/"
-                    extraStyleSvg={classes.accessibleSvg}
-                    extraStyleName={classes.accessibleName}
-                  />
+                  <ProductsNavbar productNavbarData={props.productNavbarData} />
                   {accountMenu}
                 </>
               ) : (

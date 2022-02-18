@@ -28,6 +28,7 @@ import {
   ProgressSnackbar,
   Task,
   CookieConsent,
+  ProductNavbarData,
 } from "@/components";
 import { BasicPage } from "@/views/BasicPage";
 import { PrivateRoute } from "./wrappers/PrivateRouter";
@@ -62,8 +63,15 @@ const UserInterface = (props: Props): ReactElement | null => {
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const [isOverflow, setIsOverflow] = useState(true);
-  const [productSection, setProductSection] =
-    useState<JSX.Element | null>(null);
+  const [productNavbarData, setProductNavbarData] = useState<ProductNavbarData>(
+    {
+      teamName: "",
+      projectName: "",
+      imageName: "",
+      buttonBack: null,
+      buttonForward: null,
+    }
+  );
 
   useEffect(() => {
     // Paths we never scroll on because it messes with canvases etc
@@ -78,10 +86,10 @@ const UserInterface = (props: Props): ReactElement | null => {
     setIsOverflow(shouldOverflow(location.pathname));
   }, [location]);
 
-  useEffect(() => {
-    if (!productSection) return;
-    setProductSection(null); // clear product section
-  }, [window.location.pathname]);
+  // useEffect(() => {
+  //   if (!productSection) return;
+  //   setProductSection(null); // clear product section
+  // }, [window.location.pathname]);
 
   const [dimensions, setDimensions] = useState({
     height: window.innerHeight,
@@ -119,7 +127,7 @@ const UserInterface = (props: Props): ReactElement | null => {
           <>
             <ProgressSnackbar task={task} setTask={setTask} />
             <CssBaseline />
-            <NavBar productSection={productSection} />
+            <NavBar productNavbarData={productNavbarData} />
             <div className={isOverflow ? classes.overflow : classes.noOverflow}>
               <PageSpinner isLoading={isLoading} />
 
@@ -167,6 +175,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                           setIsLoading={setIsLoading}
                           task={task}
                           setTask={setTask}
+                          setProductNavbarData={setProductNavbarData}
                         />
                       }
                     />
@@ -182,7 +191,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                           setIsLoading={setIsLoading}
                           task={task}
                           setTask={setTask}
-                          setProductSection={setProductSection}
+                          // setProductSection={setProductSection}
                         />
                       }
                     />
