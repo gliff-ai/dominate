@@ -210,32 +210,29 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     navigate(`/annotate/${collectionUid}/${imageUid}`);
   };
 
-  const downloadDataset = async (): Promise<void> => {
-    const zip = new JSZip();
-
-    const images = await props.storeInstance.getAllImages(collectionUid);
-    const { meta: annotationsMeta, annotations } =
-      await props.storeInstance.getAllAnnotationsObjects(collectionUid);
-
-    const allnames: string[] = collectionContent.map(
-      (tile) => tile.fileInfo.fileName
-    );
-
-    // append " (n)" to file names when multiple files have the same name
-    // or else JSZip will treat them as a single image:
+  const uniquifyFilenames = (filenames: string[]): string[] => {
     const counts = {};
-    for (let i = 0; i < allnames.length; i += 1) {
-      if (counts[allnames[i]] > 0) {
-        const [name, extension] = allnames[i].split(".");
-        allnames[i] = `${name} (${counts[allnames[i]] as number}).${extension}`;
+    for (let i = 0; i < filenames.length; i += 1) {
+      if (counts[filenames[i]] > 0) {
+        const [name, extension] = filenames[i].split(".");
+        filenames[i] = `${name} (${
+          counts[filenames[i]] as number
+        }).${extension}`;
       }
-      if (counts[allnames[i]] === undefined) {
-        counts[allnames[i]] = 1;
+      if (counts[filenames[i]] === undefined) {
+        counts[filenames[i]] = 1;
       } else {
-        counts[allnames[i]] += 1;
+        counts[filenames[i]] += 1;
       }
     }
+    return filenames;
+  };
 
+  const makeAnnotationsJson = (
+    allnames: string[],
+    tiles: GalleryTile[],
+    annotations: Annotation[][][]
+  ): string => {
     // make annotations JSON file:
     type XYPoint = { x: number; y: number };
     type ZTPoint = { z: number; t: number };
@@ -265,7 +262,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     };
     const annotations_json: JSONImage[] = allnames.map((name, i) => ({
       imageName: name,
-      labels: collectionContent[i].imageLabels,
+      labels: tiles[i].imageLabels,
       annotations: annotations[i].map((annotationsObject: Annotation[], j) => {
         let maskName = allnames[i].split(".")[0];
         if (annotations[i].length > 1) {
@@ -284,8 +281,30 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }),
     }));
 
+    return JSON.stringify(annotations_json);
+  };
+
+  const downloadDataset = async (): Promise<void> => {
+    const zip = new JSZip();
+
+    const images = await props.storeInstance.getAllImages(collectionUid);
+    const { meta: annotationsMeta, annotations } =
+      await props.storeInstance.getAllAnnotationsObjects(collectionUid);
+
+    let allnames: string[] = collectionContent.map(
+      (tile) => tile.fileInfo.fileName
+    );
+
+    // append " (n)" to file names when multiple files have the same name
+    // or else JSZip will treat them as a single image:
+    allnames = uniquifyFilenames(allnames);
+
+    const jsonString = makeAnnotationsJson(
+      allnames,
+      collectionContent,
+      annotations
+    );
     // add JSON to zip:
-    const jsonString = JSON.stringify(annotations_json);
     zip.file("annotations.json", jsonString);
 
     // make images directory:
