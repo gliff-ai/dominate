@@ -1,8 +1,8 @@
-export interface Plugin {
+export interface JsPlugin {
+  type: "Javascript" | "Python" | "AI";
   name: string;
   url: string;
   enabled: boolean;
-  products: Product;
+  products: "CURATE" | "ANNOTATE" | "ALL";
+  collection_uids: string[];
 }
-
-export type Product = "CURATE" | "ANNOTATE" | "ALL";

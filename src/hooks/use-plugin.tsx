@@ -1,7 +1,7 @@
 import { useState, useEffect, useContext, createContext } from "react";
 import { useAuth } from "@/hooks/use-auth";
-import { Plugin } from "@/services/plugins/interfaces";
-import { getPlugins } from "@/services/plugins";
+import { JsPlugin } from "@/services/plugins/interfaces";
+import { jsPluginsAPI } from "@/services/plugins";
 
 interface Props {
   children: React.ReactElement;
@@ -9,7 +9,7 @@ interface Props {
 
 interface Context {
   ready: boolean;
-  plugins: Plugin[] | null;
+  plugins: JsPlugin[] | null;
 }
 
 const pluginContext = createContext<Context | null>(null);
@@ -19,12 +19,13 @@ export const usePlugins = (): Context | null => useContext(pluginContext);
 function useProviderPlugins() {
   const auth = useAuth();
   const [ready, setReady] = useState<boolean>(false);
-  const [plugins, setPlugins] = useState<Plugin[] | null>(null);
+  const [plugins, setPlugins] = useState<JsPlugin[] | null>(null);
 
   useEffect(() => {
     if (!auth?.ready || !auth?.userProfile || plugins) return;
 
-    void getPlugins()
+    void jsPluginsAPI
+      .getPlugins()
       .then(setPlugins)
       .catch((e) => console.error(e));
   }, [auth, plugins]);
