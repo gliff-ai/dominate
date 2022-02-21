@@ -38,9 +38,10 @@ async function initJsPluginObjects(
   await Promise.allSettled(
     plugins
       .filter(({ type }) => type === PluginType.Javascript)
-      .map(async ({ name, url }) => {
-        return { name, PluginConstructor: await loadJsPlugin(url) };
-      })
+      .map(async ({ name, url }) => ({
+        name,
+        PluginConstructor: await loadJsPlugin(url),
+      }))
   ).then((results) =>
     results.forEach((result) => {
       if (result?.status === "fulfilled" && result?.value) {
@@ -54,7 +55,7 @@ async function initJsPluginObjects(
     if (PluginConstructor !== null) {
       try {
         const init = new PluginConstructor();
-        init["name"] = name;
+        init.name = name;
         pluginTools[name] = [init];
       } catch (e) {
         console.error(`Error load plug-in: ${(e as Error).message}`);

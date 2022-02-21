@@ -930,35 +930,30 @@ export class DominateStore {
       progress: 70,
     });
 
-    let annotationItem: Item | null = null;
-    let auditItem: Item | null = null;
+    let annotationItem: Item;
+    let auditItem: Item;
+    if (items.data[0].getMeta().type === "gliff.annotation") {
+      [annotationItem, auditItem] = items.data;
+    } else {
+      [auditItem, annotationItem] = items.data;
+    }
+
     const modifiedTime = new Date().getTime();
 
-    for (const itemData of items.data) {
-      const meta = itemData.getMeta();
-      if (meta.type === "gliff.annotation") {
-        // Update annotation item
-        annotationItem = itemData;
-        annotationItem.setMeta({
-          ...meta,
-          modifiedTime,
-          isComplete,
-        });
-        await annotationItem.setContent(JSON.stringify(annotationData));
-      }
+    // Update annotation item
+    annotationItem.setMeta({
+      ...annotationItem.getMeta(),
+      modifiedTime,
+      isComplete,
+    });
+    await annotationItem.setContent(JSON.stringify(annotationData));
 
-      if (meta.type === "gliff.audit") {
-        // Update audit item:
-        auditItem = itemData;
-        auditItem.setMeta({ ...meta, modifiedTime });
-        await auditItem.setContent(JSON.stringify(auditData));
-      }
-    }
+    // Update audit item
+    auditItem.setMeta({ ...auditItem.getMeta(), modifiedTime });
+    await auditItem.setContent(JSON.stringify(auditData));
 
     // Save changes
-    if (annotationItem && auditItem) {
-      await itemManager.batch([annotationItem, auditItem]);
-    }
+    await itemManager.batch([annotationItem, auditItem]);
 
     setTask({
       isLoading: true,

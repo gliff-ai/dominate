@@ -3,8 +3,11 @@ import { PluginElement, PluginDataIn, PluginDataOut } from "../interfaces";
 
 class TrustedServiceClass implements PluginElement {
   name: string;
+
   private baseUrl: string;
+
   private apiEndpoint: string;
+
   tooltip: string;
 
   constructor(

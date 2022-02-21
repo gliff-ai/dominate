@@ -403,7 +403,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   }, [collectionUid, fetchImageItems, isMounted, auth]);
 
   useEffect(() => {
-    fetchPlugins();
+    void fetchPlugins();
   }, [auth, collectionUid, isMounted]);
 
   if (!props.storeInstance || !auth?.user || !collectionUid || !auth.userAccess)

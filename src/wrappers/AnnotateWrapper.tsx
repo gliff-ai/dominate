@@ -178,6 +178,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       progress: 0,
     });
     const annotationsData = newAnnotationsObject.getAllAnnotations();
+
     const auditData = newAnnotationsObject.getAuditObject();
 
     props.storeInstance
@@ -286,7 +287,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   }, [auth, collectionUid, isMounted]);
 
   useEffect(() => {
-    fetchPlugins();
+    void fetchPlugins();
   }, [auth, collectionUid, isMounted]);
 
   useEffect(() => {
