@@ -167,7 +167,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     // Save annotations data
     props.setTask({
       isLoading: true,
-      description: "Saving annotation...",
+      description: "Saving annotation in progress, please wait...",
       progress: 0,
     });
     const annotationsData = newAnnotationsObject.getAllAnnotations();
@@ -185,7 +185,14 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         auth.user.username
       )
       .then(() => {
-        props.setTask({ isLoading: true, description: "" });
+        props.setTask({
+          isLoading: true,
+          description: "Saving annotation complete!",
+          progress: 100,
+        });
+        setTimeout(() => {
+          props.setTask({ isLoading: false, description: "" });
+        }, 5000);
       })
       .catch((e) => console.error(e));
   };
