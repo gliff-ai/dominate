@@ -297,13 +297,21 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
     // append " (n)" to file names when multiple files have the same name
     // or else JSZip will treat them as a single image:
+    console.log(`input: ${allnames}`);
     allnames = uniquifyFilenames(allnames);
+    console.log(`output: ${allnames}`);
 
+    console.log(
+      `allnames: ${allnames}\ncollectionContent: ${JSON.stringify(
+        collectionContent
+      )}\nannotations: ${JSON.stringify(annotations)}`
+    );
     const jsonString = makeAnnotationsJson(
       allnames,
       collectionContent,
       annotations
     );
+    console.log(jsonString);
     // add JSON to zip:
     zip.file("annotations.json", jsonString);
 
