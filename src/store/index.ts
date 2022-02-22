@@ -352,7 +352,6 @@ export class DominateStore {
         if (auditUID !== null) json[i].auditUID[username] = auditUID;
       }
 
-      await collection.setContent(JSON.stringify(json));
       migrate = true;
     }
 
@@ -362,6 +361,7 @@ export class DominateStore {
         json[i].fileInfo = json[i]["metadata"];
         migrate = true;
       }
+
       if (
         !("fileName" in json[i].fileInfo) &&
         "imageName" in json[i].fileInfo
@@ -376,6 +376,7 @@ export class DominateStore {
 
     if (migrate) {
       // update in store:
+      await collection.setContent(JSON.stringify(json));
       await collectionManager.upload(collection);
     }
 
