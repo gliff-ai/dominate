@@ -8,25 +8,29 @@ class TrustedServiceClass implements PluginElement {
 
   private apiEndpoint: string;
 
+  private username: { plugin: string; user: string };
+
   tooltip: string;
 
   constructor(
     name: string,
     baseUrl: string,
     apiEndpoint: string,
-    tooltip: string
+    tooltip: string,
+    username: { plugin: string; user: string }
   ) {
     this.name = name;
     this.baseUrl = baseUrl;
     this.apiEndpoint = apiEndpoint;
     this.tooltip = tooltip;
+    this.username = username;
   }
 
   onClick = async (data: PluginDataIn): Promise<PluginDataOut> => {
     const response = await apiRequest<PluginDataOut>(
       this.apiEndpoint,
       "POST",
-      { ...data },
+      { ...data, username: this.username },
       this.baseUrl
     );
     return response;

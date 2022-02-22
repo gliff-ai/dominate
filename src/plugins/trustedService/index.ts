@@ -6,17 +6,22 @@ import { trustedServicesAPI } from "@/services/trustedServices";
 import { UiTemplate } from "@/services/trustedServices/interfaces";
 
 function unpackUiElements(
-  { name, url: baseUrl }: Plugin,
-  template: UiTemplate
+  { username, name, url: baseUrl }: Plugin,
+  template: UiTemplate,
+  user_username: string
 ): PluginElement[] {
   return template.uiElements.map(
     ({ apiEndpoint, uiParams }) =>
-      new TrustedServiceClass(name, baseUrl, apiEndpoint, uiParams.tooltip)
+      new TrustedServiceClass(name, baseUrl, apiEndpoint, uiParams.tooltip, {
+        plugin: username as string,
+        user: user_username,
+      })
   );
 }
 
 async function initTrustedServiceObjects(
-  plugins: Plugin[]
+  plugins: Plugin[],
+  user_username: string
 ): Promise<{ [name: string]: PluginElement[] }> {
   // prepare for validating JSON file
   const ajv = new Ajv();
@@ -43,7 +48,11 @@ async function initTrustedServiceObjects(
 
       try {
         if (template && validate(template)) {
-          trustedServices[plugin.name] = unpackUiElements(plugin, template);
+          trustedServices[plugin.name] = unpackUiElements(
+            plugin,
+            template,
+            user_username
+          );
         } else {
           console.error(
             `UI template for plug-in ${plugin.name} doesn't match the schema.`

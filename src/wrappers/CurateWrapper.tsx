@@ -98,7 +98,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           setStateIfMounted(items, setCollectionContent, isMounted.current);
           // owners and members can view the images in a project
           const canViewAllImages = isOwnerOrMember();
-
           // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
           const wrangled = items
             .map(
@@ -121,7 +120,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
                 canViewAllImages ||
                 assignees.includes(auth?.user?.username as string)
             );
-
           setCurateInput(wrangled);
         })
         .catch((err) => {
@@ -374,7 +372,11 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const fetchPlugins = useCallback(async () => {
     if (!auth?.user || collectionUid === "") return;
     try {
-      const newPlugins = await initPluginObjects(Product.CURATE, collectionUid);
+      const newPlugins = await initPluginObjects(
+        Product.CURATE,
+        collectionUid,
+        auth?.user.username as string
+      );
       if (newPlugins) {
         setStateIfMounted(newPlugins, setPlugins, isMounted.current);
       }

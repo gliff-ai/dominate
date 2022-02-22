@@ -33,6 +33,7 @@ interface PluginElement {
 type PluginObject = { [name: string]: PluginElement[] };
 
 interface PluginDataIn {
+  usernames?: { plugin: string; user: string };
   collectionUid?: string;
   imageUid?: string;
   metadata?: MetaItem[] | null;

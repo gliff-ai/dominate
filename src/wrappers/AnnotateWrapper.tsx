@@ -276,7 +276,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     try {
       const newPlugins = await initPluginObjects(
         Product.ANNOTATE,
-        collectionUid
+        collectionUid,
+        auth?.user?.username as string
       );
       if (newPlugins) {
         setStateIfMounted(newPlugins, setPlugins, isMounted.current);

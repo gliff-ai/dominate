@@ -27,7 +27,8 @@ async function getPlugins(currentProduct: Product, collectionUid: string) {
 
 async function initPluginObjects(
   currentProduct: Product,
-  collectionUid: string
+  collectionUid: string,
+  user_username: string
 ): Promise<PluginObject | null> {
   // Initialise plugin objects
 
@@ -36,7 +37,10 @@ async function initPluginObjects(
 
     if (plugins) {
       const jsPlugins = await initJsPluginObjects(plugins);
-      const trustedServices = await initTrustedServiceObjects(plugins);
+      const trustedServices = await initTrustedServiceObjects(
+        plugins,
+        user_username
+      );
 
       return { ...jsPlugins, ...trustedServices };
     }
