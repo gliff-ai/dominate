@@ -18,6 +18,7 @@ import type {
   GalleryTile,
   ImageItemMeta,
   AnnotationMeta,
+  FileInfo,
 } from "./interfaces";
 import { Task } from "@/components";
 import { ImageFileInfo } from "@gliff-ai/upload";
@@ -359,6 +360,16 @@ export class DominateStore {
     for (let i = 0; i < json.length; i += 1) {
       if (!("fileInfo" in json[i]) && "metadata" in json[i]) {
         json[i].fileInfo = json[i]["metadata"];
+        migrate = true;
+      }
+      if (
+        !("fileName" in json[i].fileInfo) &&
+        "imageName" in json[i].fileInfo
+      ) {
+        // rename fileInfo.imageName -> fileInfo.fileName:
+        json[i].fileInfo.fileName = (
+          json[i].fileInfo as FileInfo & { imageName: string }
+        ).imageName;
         migrate = true;
       }
     }
