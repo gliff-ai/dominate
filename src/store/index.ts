@@ -333,6 +333,7 @@ export class DominateStore {
     };
     const json = JSON.parse(jsonString) as GalleryTile[] | OldGalleryTile[];
 
+    let migrate = false;
     // migrate GalleryTiles to new format if necessary:
     if (
       json.length > 0 &&
@@ -350,10 +351,23 @@ export class DominateStore {
         if (auditUID !== null) json[i].auditUID[username] = auditUID;
       }
 
-      // update in store:
       await collection.setContent(JSON.stringify(json));
+      migrate = true;
+    }
+
+    // migrate tile.metadata -> tile.fileInfo:
+    for (let i = 0; i < json.length; i += 1) {
+      if (!("fileInfo" in json[i]) && "metadata" in json[i]) {
+        json[i].fileInfo = json[i]["metadata"];
+        migrate = true;
+      }
+    }
+
+    if (migrate) {
+      // update in store:
       await collectionManager.upload(collection);
     }
+
     return json as GalleryTile[];
   };
 
