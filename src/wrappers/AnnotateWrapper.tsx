@@ -161,7 +161,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   useEffect(() => {
     if (!collectionUid) return;
     fetchImageItems();
-  }, [collectionUid]);
+  }, [collectionUid, fetchImageItems]);
 
   useEffect(() => {
     if (!imageUids) return;
@@ -269,6 +269,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     props.storeInstance.ready,
     auth,
     isMounted,
+    isComplete,
   ]);
 
   const fetchPlugins = useCallback(async () => {
@@ -289,7 +290,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
 
   useEffect(() => {
     void fetchPlugins();
-  }, [auth, collectionUid, isMounted]);
+  }, [fetchPlugins]);
 
   useEffect(() => {
     if (imageItem) {

@@ -351,8 +351,13 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.setIsLoading(true);
   });
 
-  const getProfiles = (): void => {
-    if (!auth || auth.userAccess === UserAccess.Collaborator) return;
+  const getProfiles = useCallback((): void => {
+    if (
+      !auth?.ready ||
+      auth?.userAccess === UserAccess.Collaborator ||
+      profiles
+    )
+      return;
 
     void apiRequest("/team/", "GET")
       .then((team: Team) => {
@@ -367,7 +372,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         }
       })
       .catch((e) => logger.error(e));
-  };
+  }, [auth, profiles]);
 
   const fetchPlugins = useCallback(async () => {
     if (!auth?.user || collectionUid === "") return;
@@ -395,9 +400,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   }, []);
 
   useEffect(() => {
-    if (!auth || !auth?.ready || profiles) return;
     getProfiles();
-  }, [auth, profiles, isMounted]);
+  }, [getProfiles]);
 
   useEffect(() => {
     if (!collectionUid) return;
@@ -406,7 +410,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   useEffect(() => {
     void fetchPlugins();
-  }, [auth, collectionUid, isMounted]);
+  }, [fetchPlugins]);
 
   if (!props.storeInstance || !auth?.user || !collectionUid || !auth.userAccess)
     return null;
