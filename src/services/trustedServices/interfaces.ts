@@ -1,15 +1,8 @@
-export interface TrustedService {
-  id: string;
-  type: ServiceType;
-  name: string;
-  url: string;
-  enabled: boolean;
-  products: Product;
+import { JsPlugin } from "../plugins/interfaces";
+
+export interface TrustedService extends JsPlugin {
+  username: string;
 }
-
-export type ServiceType = "Python" | "AI";
-
-export type Product = "CURATE" | "ANNOTATE" | "ALL";
 
 export interface UiElement {
   placement: string[];
@@ -21,7 +14,6 @@ export interface UiElement {
     tooltip: string;
   };
 }
-
 export interface UiTemplate {
   trustedService: string;
   uiElements: UiElement[];
