@@ -755,7 +755,7 @@ export class DominateStore {
 
     const newContent = content.map((tile) => ({
       ...tile,
-      assignees: tile.assignees.filter((a) => a !== username), // unassign all items from a user
+      assignees: tile?.assignees?.filter((a) => a !== username) || [], // unassign all items from a user
     }));
 
     await collection.setContent(JSON.stringify(newContent));
