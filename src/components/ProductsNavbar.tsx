@@ -40,23 +40,28 @@ export function ProductsNavbar({
   const { buttonBack, teamName, projectName, imageName, buttonForward } =
     productNavbarData;
   return (
-    <ButtonGroup variant="contained" orientation="horizontal">
-      <Button>One</Button>
-      <Button>Two</Button>
-      <Button>Three</Button>
+    // FIXME move CSS to STYLE
+    <ButtonGroup
+      orientation="horizontal"
+      variant="text"
+      aria-label="outlined  button group"
+      style={{
+        backgroundColor: "white",
+        color: "white",
+        padding: "1px",
+      }}
+    >
+      <Button style={{ backgroundColor: "white", borderColor: "#dadde9" }}>
+        {buttonBack}
+      </Button>
+      <Button style={{ backgroundColor: "white", borderColor: "#dadde9" }}>
+        {teamName} ^-^ {projectName !== "" && `—${projectName}`}
+        {imageName !== "" && `—${imageName}`}
+      </Button>
+      <Button style={{ backgroundColor: "white", borderColor: "#dadde9" }}>
+        {buttonForward}
+      </Button>
     </ButtonGroup>
-    // <ButtonGroup orientation="horizontal" className="classes.buttonGroup">
-    //   {buttonBack}
-    //   <Button>
-    //     {teamName} ^-^
-    //     {projectName !== "" && `—${projectName}`}
-    //     {imageName !== "" && `—${imageName}`}
-    //   </Button>
-    //   <Button>
-    //     <p>o_o</p>
-    //   </Button>
-    //   {buttonForward}
-    // </ButtonGroup>
   );
 }
 
