@@ -23,6 +23,7 @@ interface Props {
   setIsLoading: (isLoading: boolean) => void;
   task: Task;
   setTask: (task: Task) => void;
+  setProductNavbarData: any;
   // setProductSection: (productSection: JSX.Element | null) => void;
 }
 

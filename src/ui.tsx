@@ -191,7 +191,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                           setIsLoading={setIsLoading}
                           task={task}
                           setTask={setTask}
-                          // setProductSection={setProductSection}
+                          setProductNavbarData={setProductNavbarData}
                         />
                       }
                     />
@@ -201,7 +201,12 @@ const UserInterface = (props: Props): ReactElement | null => {
                   path="manage/*"
                   element={
                     <PrivateRoute
-                      element={<Manage storeInstance={storeInstance} />}
+                      element={
+                        <Manage
+                          storeInstance={storeInstance}
+                          setProductNavbarData={setProductNavbarData}
+                        />
+                      }
                     />
                   }
                 />

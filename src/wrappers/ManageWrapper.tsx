@@ -1,10 +1,11 @@
-import { ReactElement, useCallback } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
   UserInterface as Manage,
   ProvideAuth /* TODO export Services */,
 } from "@gliff-ai/manage";
+import { IconButton, icons } from "@gliff-ai/style";
 import { DominateStore, API_URL } from "@/store";
 import { useAuth, UserAccess } from "@/hooks/use-auth";
 import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
@@ -13,6 +14,7 @@ import { jsPluginsAPI } from "@/services/plugins";
 import { GalleryTile } from "@/store/interfaces";
 import { PluginType, Plugin } from "./interfaces";
 import { JsPlugin } from "@/services/plugins/interfaces";
+import { ProductsNavbar, ProductNavbarData } from "@/components";
 
 type Progress = {
   [uid: string]: { complete: number; total: number };
@@ -20,6 +22,7 @@ type Progress = {
 
 interface Props {
   storeInstance: DominateStore;
+  setProductNavbarData: (data: ProductNavbarData) => void;
 }
 
 export const ManageWrapper = (props: Props): ReactElement | null => {
@@ -226,6 +229,23 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   const launchAudit = (projectUid: string): void =>
     // Open the selected project in audit
     navigate(`/audit/${projectUid}`);
+
+  useEffect(() => {
+    props.setProductNavbarData({
+      teamName: auth?.userProfile?.team.name || "",
+      projectName: "",
+      imageName: "",
+      buttonBack: (
+        <IconButton
+          tooltip={{
+            name: "Navigate to Manage",
+          }}
+          icon={icons.navigationMANAGE}
+        />
+      ),
+      buttonForward: null,
+    });
+  }, []);
 
   // These require trailing slashes otherwise Safari won't send the Auth Token (as django will 301)
   const services = {

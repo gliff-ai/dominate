@@ -13,7 +13,7 @@ import {
   Image,
   ImageMeta,
 } from "@/store/interfaces";
-import { ProductNavbarData, Task, TSButtonToolbar } from "@/components";
+import { ProductsNavbar, ProductNavbarData, Task, TSButtonToolbar } from "@/components";
 import {
   ConfirmationDialog,
   MessageDialog,
