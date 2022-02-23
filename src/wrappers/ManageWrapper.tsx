@@ -90,31 +90,46 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   );
 
   const getPlugins = useCallback(async (): Promise<Plugin[]> => {
-    const trustedServices = await trustedServicesAPI.getTrustedService();
+    let allPlugins: Plugin[] = [];
 
-    const plugins = await jsPluginsAPI.getPlugins();
-
-    return (trustedServices as Plugin[]).concat(plugins as Plugin[]);
-  }, []);
-
-  const createPlugin = useCallback(async (plugin: Plugin): Promise<
-    string | null
-  > => {
-    if (plugin.type === PluginType.Javascript) {
-      await jsPluginsAPI.createPlugin(plugin as JsPlugin);
-      return null;
+    try {
+      const trustedServices =
+        (await trustedServicesAPI.getTrustedService()) as Plugin[];
+      allPlugins = allPlugins.concat(trustedServices);
+    } catch (e) {
+      console.error(e);
     }
-    // First create a trusted service base user
-    const { key, email } = await props.storeInstance.createTrustedServiceUser();
 
-    // Set the user profile
-    const res = await trustedServicesAPI.createTrustedService({
-      username: email,
-      ...plugin,
-    } as TrustedService);
+    try {
+      const jsplugins = (await jsPluginsAPI.getPlugins()) as Plugin[];
+      allPlugins = allPlugins.concat(jsplugins);
+    } catch (e) {
+      console.error(e);
+    }
 
-    return key;
+    return allPlugins;
   }, []);
+
+  const createPlugin = useCallback(
+    async (plugin: Plugin): Promise<{ key: string; email: string } | null> => {
+      if (plugin.type === PluginType.Javascript) {
+        await jsPluginsAPI.createPlugin(plugin as JsPlugin);
+        return null;
+      }
+      // First create a trusted service base user
+      const { key, email } =
+        await props.storeInstance.createTrustedServiceUser();
+
+      // Set the user profile
+      const res = await trustedServicesAPI.createTrustedService({
+        username: email,
+        ...plugin,
+      } as TrustedService);
+
+      return { key, email };
+    },
+    [props.storeInstance]
+  );
 
   const updatePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
     if (plugin.type === PluginType.Javascript) {

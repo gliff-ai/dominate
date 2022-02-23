@@ -144,7 +144,7 @@ export const NavBar = (props: Props): ReactElement | null => {
         open={Boolean(anchorElement)}
         onClose={handleClose}
         id="menu"
-        style={{ marginTop: "60px", marginLeft: "80px" }}
+        style={{ marginTop: "60px !important", marginLeft: "80px" }}
         transformOrigin={{
           vertical: "top",
           horizontal: "right",
