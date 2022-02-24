@@ -5,6 +5,9 @@ interface GalleryMeta {
   createdTime: number; // "time item was created in milliseconds since epoch"
   modifiedTime: number; // "time item was last modified in milliseconds since epoch"
   description?: string; // "long description for collection, i.e. project details"
+  defaultLabels: string[];
+  restrictLabels: boolean;
+  multiLabel: boolean;
 }
 
 // Gallery collection content is an array of these objects
@@ -30,6 +33,7 @@ type Channels = ImageBitmapBlob[];
 type Slices = Channels[];
 
 interface Image {
+  // a sort of hybrid/union of etebase metadata and content for Image items
   uid: string;
   type: "gliff.image";
   name: string; // human-readable image name, i.e. file name

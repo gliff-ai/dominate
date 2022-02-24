@@ -93,7 +93,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       storeInstance
         .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
-          const wrangled = items
+          const wrangled = items.tiles
             .filter(
               (item) =>
                 (canViewAllImages ||

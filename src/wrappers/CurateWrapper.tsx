@@ -61,6 +61,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const auth = useAuth();
 
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
+  const [defaultLabels, setDefaultLabels] = useState<string[]>([]); // more input for curate
+  const [restrictLabels, setRestrictLabels] = useState<boolean>(false); // more input for curate
   const { collectionUid = "" } = useParams<string>(); // uid of selected gallery, from URL
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
 
@@ -88,6 +90,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   );
 
   const fetchImageItems = useStore(
+    // doesn't actually fetch image items, fetches gallery collection content
     props,
     (storeInstance) => {
       // fetches images via DominateStore, and assigns them to imageItems state
@@ -95,11 +98,12 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       storeInstance
         .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
-          setStateIfMounted(items, setCollectionContent, isMounted.current);
+          const { tiles, galleryMeta } = items;
+          setStateIfMounted(tiles, setCollectionContent, isMounted.current);
           // owners and members can view the images in a project
           const canViewAllImages = isOwnerOrMember();
           // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
-          const wrangled = items
+          const wrangled = tiles
             .map(
               ({
                 thumbnail,
@@ -121,6 +125,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
                 assignees.includes(auth?.user?.username as string)
             );
           setCurateInput(wrangled);
+          setDefaultLabels(galleryMeta.defaultLabels);
+          setRestrictLabels(galleryMeta.restrictLabels);
         })
         .catch((err) => {
           logger.log(err);
@@ -173,6 +179,23 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
     props.storeInstance
       .setImageLabels(collectionUid, imageUid, newLabels)
+      .then(fetchImageItems)
+      .catch((error) => {
+        logger.log(error);
+      });
+  };
+
+  const saveDefaultLabelsCallback = (
+    newDefaultLabels: string[],
+    newRestrictLabels: boolean,
+    newMultiLabel: boolean
+  ) => {
+    props.storeInstance
+      .updateCollectionMeta(collectionUid, {
+        defaultLabels: newDefaultLabels,
+        restrictLabels: newRestrictLabels,
+        multiLabel: newMultiLabel,
+      })
       .then(fetchImageItems)
       .catch((error) => {
         logger.log(error);
@@ -419,8 +442,11 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     <>
       <Curate
         metadata={curateInput}
+        defaultLabels={defaultLabels}
+        restrictLabels={restrictLabels}
         saveImageCallback={addImagesToGallery}
         saveLabelsCallback={saveLabelsCallback}
+        saveDefaultLabelsCallback={saveDefaultLabelsCallback}
         saveAssigneesCallback={saveAssigneesCallback}
         deleteImagesCallback={deleteImagesCallback}
         annotateCallback={annotateCallback}
