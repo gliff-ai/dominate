@@ -748,21 +748,18 @@ export class DominateStore {
 
     // delete image, annotation and audit items:
     const itemManager = collectionManager.getItemManager(collection);
-    const allItems: {
-      data: Item[];
-      stoken: string;
-      done: boolean;
-    } = await itemManager.fetchMulti(
+    const allItems: Item[] = await this.fetchMulti(
+      itemManager,
       imageUIDs.concat(annotationUIDs).concat(auditUIDs)
     );
 
     setTask({ isLoading: true, description: "Image deletion", progress: 75 });
 
-    allItems.data.forEach((item) => {
+    allItems.forEach((item) => {
       item.delete();
     });
 
-    await itemManager.batch(allItems.data);
+    await itemManager.batch(allItems);
 
     setTask({ isLoading: false, description: "Image deletion", progress: 100 });
   };
@@ -1012,14 +1009,14 @@ export class DominateStore {
 
     // Retrieve items
     const itemManager = await this.getItemManager(collectionUid);
-    const items = await itemManager.fetchMulti([annotationUid, auditUid]);
+    const items = await this.fetchMulti(itemManager, [annotationUid, auditUid]);
     setTask({
       isLoading: true,
       description: "Saving annotation...",
       progress: 70,
     });
-    const annotationItem = items.data[0];
-    const auditItem = items.data[1];
+    const annotationItem = items[0];
+    const auditItem = items[1];
 
     // Update annotationItem:
     let meta = annotationItem.getMeta();
@@ -1075,9 +1072,10 @@ export class DominateStore {
 
     const itemManager = collectionManager.getItemManager(collection);
 
-    const imageItems = (
-      await itemManager.fetchMulti(galleryTiles.map((tile) => tile.imageUID))
-    ).data;
+    const imageItems = await this.fetchMulti(
+      itemManager,
+      galleryTiles.map((tile) => tile.imageUID)
+    );
     const imageContents = await Promise.all(
       imageItems.map((item) => item.getContent(OutputFormat.String))
     );
@@ -1103,7 +1101,7 @@ export class DominateStore {
     const auditUIDs = tiles.map((tile) => Object.values(tile.auditUID)).flat();
     if (auditUIDs.length === 0) return [];
 
-    const auditItems = (await itemManager.fetchMulti(auditUIDs)).data;
+    const auditItems = await this.fetchMulti(itemManager, auditUIDs);
 
     const auditStrings: string[] = await Promise.all(
       auditItems.map((audit) => audit.getContent(OutputFormat.String))
