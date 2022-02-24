@@ -1080,6 +1080,59 @@ export class DominateStore {
       imageItems.map((item) => item.getContent(OutputFormat.String))
     );
 
+    let migrate = false;
+    for (let i = 0; i < imageItems.length; i += 1) {
+      if (!("fileInfo" in imageItems[i].getMeta())) {
+        interface OldImageMeta {
+          imageName: string;
+          num_slices: number; // number of z-slices
+          num_channels: number; // numbers colour channels
+          width: number; // width of each slice
+          height: number; // height of each slice
+          size: number; // size of the image in bytes
+          resolution_x: number;
+          resolution_y: number;
+          resolution_z: number;
+          format?: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
+          content_hash?: string; // we use this for making sure we don't have duplicate images in a dataset
+          customMeta?: string; // JSON of custom metadata
+        }
+
+        const oldMeta = imageItems[i].getMeta() as OldImageMeta;
+        const fileInfo = {
+          fileName: oldMeta.imageName,
+          num_slices: oldMeta.num_slices,
+          num_channels: oldMeta.num_channels,
+          width: oldMeta.width,
+          height: oldMeta.height,
+          size: oldMeta.size,
+          resolution_x: oldMeta.resolution_x,
+          resolution_y: oldMeta.resolution_y,
+          resolution_z: oldMeta.resolution_z,
+          content_hash: oldMeta.content_hash,
+        };
+        imageItems[i].setMeta({ ...oldMeta, fileInfo });
+        migrate = true;
+      }
+
+      if (
+        !("fileName" in imageItems[i].getMeta<ImageItemMeta>().fileInfo) &&
+        "imageName" in imageItems[i].getMeta<ImageItemMeta>().fileInfo
+      ) {
+        // migrate fileInfo.imageName -> fileInfo.fileName
+        const meta = imageItems[i].getMeta<ImageItemMeta>();
+        meta.fileInfo.fileName = (
+          meta.fileInfo as FileInfo & { imageName: string }
+        ).imageName;
+        imageItems[i].setMeta({ meta });
+        migrate = true;
+      }
+    }
+
+    if (migrate) {
+      await itemManager.batch(imageItems);
+    }
+
     return imageItems.map((item, i) => ({
       meta: item.getMeta(),
       content: imageContents[i],
