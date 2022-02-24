@@ -7,7 +7,7 @@ import {
   StyledEngineProvider,
 } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
-import { theme } from "@gliff-ai/style";
+import { theme, ProgressSnackbar, Task } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
 import { Annotate, Audit, Curate, Manage } from "@/wrappers";
 import {
@@ -22,13 +22,7 @@ import {
   Billing,
   UnsupportedScreenSizeErrorPage,
 } from "@/views";
-import {
-  NavBar,
-  PageSpinner,
-  ProgressSnackbar,
-  Task,
-  CookieConsent,
-} from "@/components";
+import { NavBar, PageSpinner, CookieConsent } from "@/components";
 import { BasicPage } from "@/views/BasicPage";
 import { PrivateRoute } from "./wrappers/PrivateRouter";
 import { usePrompt } from "./hooks/use-blocker";

@@ -5,10 +5,9 @@ import makeStyles from "@mui/styles/makeStyles";
 
 import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
 import { ImageFileInfo } from "@gliff-ai/upload";
-import { icons, IconButton } from "@gliff-ai/style";
+import { icons, IconButton, Task } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
 import { AnnotationMeta, Image } from "@/store/interfaces";
-import { Task } from "@/components";
 import {
   parseStringifiedSlices,
   getImageFileInfoFromImageMeta,
@@ -174,7 +173,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     // Save annotations data
     props.setTask({
       isLoading: true,
-      description: "Saving annotation...",
+      description: "Saving annotation in progress, please wait...",
       progress: 0,
     });
     const annotationsData = newAnnotationsObject.getAllAnnotations();
@@ -193,7 +192,14 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         auth.user.username
       )
       .then(() => {
-        props.setTask({ isLoading: false, description: "" });
+        props.setTask({
+          isLoading: true,
+          description: "Saving annotation complete!",
+          progress: 100,
+        });
+        setTimeout(() => {
+          props.setTask({ isLoading: false, description: "" });
+        }, 5000);
       })
       .catch((e) => console.error(e));
   };

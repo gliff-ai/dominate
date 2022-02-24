@@ -2,6 +2,8 @@ import { ReactElement, useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import Curate from "@gliff-ai/curate";
+import { Task } from "@gliff-ai/style";
+
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
@@ -13,7 +15,6 @@ import {
   Image,
   ImageMeta,
 } from "@/store/interfaces";
-import { Task } from "@/components";
 import {
   ConfirmationDialog,
   MessageDialog,

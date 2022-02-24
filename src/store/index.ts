@@ -9,6 +9,8 @@ import {
   OutputFormat,
   CollectionAccessLevel,
 } from "etebase";
+
+import { Task } from "@gliff-ai/style";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
 import { User } from "@/services/user/interfaces";
@@ -20,7 +22,6 @@ import type {
   ImageMeta,
   AnnotationMeta,
 } from "./interfaces";
-import { Task } from "@/components";
 
 const logger = console;
 
@@ -934,7 +935,7 @@ export class DominateStore {
     const collection = await collectionManager.fetch(collectionUid);
     setTask({
       isLoading: true,
-      description: "Saving annotation...",
+      description: "Saving annotation in progress, please wait...",
       progress: 35,
     });
     const collectionContent = await collection.getContent(OutputFormat.String);
@@ -972,7 +973,7 @@ export class DominateStore {
     const items = await itemManager.fetchMulti([annotationUid, auditUid]);
     setTask({
       isLoading: true,
-      description: "Saving annotation...",
+      description: "Saving annotation in progress, please wait...",
       progress: 70,
     });
 
@@ -1000,12 +1001,6 @@ export class DominateStore {
 
     // Save changes
     await itemManager.batch([annotationItem, auditItem]);
-
-    setTask({
-      isLoading: true,
-      description: "Saving annotation...",
-      progress: 100,
-    });
   };
 
   getItem = async (collectionUid: string, itemUid: string): Promise<Item> => {
