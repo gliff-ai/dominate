@@ -837,16 +837,16 @@ export class DominateStore {
     const annotationUIDs = ([] as string[]).concat(
       ...tiles.map((tile) => Object.values(tile.annotationUID))
     ); // [im0_ann0, im0_ann1, im0_ann2, im1_ann0, im1_ann1, ...]
-    const annotationItems = await itemManager.fetchMulti(annotationUIDs);
+    const annotationItems = await this.fetchMulti(itemManager, annotationUIDs);
 
     const annotationItemContents = await Promise.all(
-      annotationItems.data.map((annotation) =>
+      annotationItems.map((annotation) =>
         annotation.getContent(OutputFormat.String)
       )
     );
 
     const annotationsMeta = await Promise.all(
-      annotationItems.data.map(
+      annotationItems.map(
         (annotation) => annotation.getMeta() as AnnotationMeta
       )
     );
@@ -854,7 +854,6 @@ export class DominateStore {
     // reshape arrays into [[im0_ann0, im0_ann1, im0_ann2], [im1_ann0, im1_ann1], ...]:
     const annotationContentsReshaped: string[][] = [];
     const annotationsMetaReshaped: AnnotationMeta[][] = [];
-    console.log(annotationsMeta);
 
     tiles.forEach((tile) => {
       const imageAnnotations: string[] = [];
@@ -869,14 +868,22 @@ export class DominateStore {
       annotationsMetaReshaped.push(imageAnnotationMetas);
     });
 
-    console.log(annotationsMetaReshaped);
-
     return {
       meta: annotationsMetaReshaped,
       annotations: annotationContentsReshaped.map((contentArray) =>
         contentArray.map((content) => JSON.parse(content) as Annotation[])
       ),
     };
+  };
+
+  fetchMulti = async (
+    itemManager: ItemManager,
+    UIDs: string[]
+  ): Promise<Item[]> => {
+    // calls itemManager.fetchMulti(UIDs), but returns the items in the same order they're specified in UIDs
+
+    const items = (await itemManager.fetchMulti(UIDs)).data;
+    return UIDs.map((uid) => items.find((item) => item.uid === uid)) as Item[];
   };
 
   createAnnotation = async (
@@ -1074,6 +1081,7 @@ export class DominateStore {
     const imageContents = await Promise.all(
       imageItems.map((item) => item.getContent(OutputFormat.String))
     );
+
     return imageItems.map((item, i) => ({
       meta: item.getMeta(),
       content: imageContents[i],

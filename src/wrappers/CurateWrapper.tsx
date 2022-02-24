@@ -266,6 +266,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       annotations: annotations[i].map((annotationsObject: Annotation[], j) => {
         let maskName = allnames[i].split(".")[0];
         if (annotations[i].length > 1) {
+          // numbering the segmasks by different annotators for the same image
           maskName += `_${j}`;
         }
         maskName += ".tiff";
