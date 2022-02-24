@@ -930,22 +930,27 @@ export class DominateStore {
       description: "Saving annotation in progress, please wait...",
       progress: 70,
     });
-    const annotationItem = items.data[0];
-    const auditItem = items.data[1];
 
-    // Update annotationItem:
-    let meta = annotationItem.getMeta();
-    const mtime = new Date().getTime();
+    let annotationItem: Item;
+    let auditItem: Item;
+    if (items.data[0].getMeta().type === "gliff.annotation") {
+      [annotationItem, auditItem] = items.data;
+    } else {
+      [auditItem, annotationItem] = items.data;
+    }
+
+    const modifiedTime = new Date().getTime();
+
+    // Update annotation item
     annotationItem.setMeta({
-      ...meta,
-      mtime,
+      ...annotationItem.getMeta(),
+      modifiedTime,
       isComplete,
     });
     await annotationItem.setContent(JSON.stringify(annotationData));
 
-    // Update auditItem:
-    meta = auditItem.getMeta();
-    auditItem.setMeta({ ...meta, mtime });
+    // Update audit item
+    auditItem.setMeta({ ...auditItem.getMeta(), modifiedTime });
     await auditItem.setContent(JSON.stringify(auditData));
 
     // Save changes

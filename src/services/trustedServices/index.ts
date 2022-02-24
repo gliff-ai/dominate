@@ -30,6 +30,5 @@ const trustedServicesAPI = {
   getUiTemplate,
 };
 
-export { TrustedService };
-export { TrustedServiceClass } from "./TrustedServiceClass";
+export type { TrustedService };
 export { trustedServicesAPI };

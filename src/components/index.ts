@@ -9,5 +9,4 @@ export {
 } from "./productIcons/ProductIcons";
 
 export { GliffCard } from "./GliffCard";
-export { TSButtonToolbar } from "./TSButtonToolbar";
 export { CookieConsent } from "./CookieConsent";
