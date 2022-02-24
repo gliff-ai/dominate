@@ -265,6 +265,29 @@ export class DominateStore {
     await collectionManager.transaction(collection);
   };
 
+  updateCollectionMeta = async (
+    collectionUid: string,
+    newMeta: Partial<{
+      defaultLabels: string[];
+      restrictLabels: boolean;
+      multiLabel: boolean;
+    }>
+  ): Promise<void> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+
+    const oldMeta = collection.getMeta();
+    collection.setMeta({
+      ...oldMeta,
+      ...newMeta, // should overwrite any fields that are already in oldMeta
+      modifiedTime: Date.now(),
+    });
+
+    await collectionManager.upload(collection);
+  };
+
   getCollectionsContent = async (
     type = "gliff.gallery"
   ): Promise<
@@ -320,7 +343,7 @@ export class DominateStore {
   getImagesMeta = async (
     collectionUid: string,
     username: string
-  ): Promise<GalleryTile[]> => {
+  ): Promise<{ tiles: GalleryTile[]; galleryMeta: GalleryMeta }> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -334,7 +357,8 @@ export class DominateStore {
     };
     const json = JSON.parse(jsonString) as GalleryTile[] | OldGalleryTile[];
 
-    // migrate GalleryTiles to new format if necessary:
+    // migrate GalleryTiles to have multiple annotations/audits per image if necessary:
+    let migrate = false;
     if (
       json.length > 0 &&
       (typeof json[0].annotationUID === "string" ||
@@ -353,9 +377,31 @@ export class DominateStore {
 
       // update in store:
       await collection.setContent(JSON.stringify(json));
+      migrate = true;
+    }
+
+    // get collection metadata:
+    const meta = this.wrangleGallery(collection);
+
+    // migrate GalleryMeta to include defaultLabels, restrictLabels and multiLabel if necessary:
+    if (!("defaultLabels" in meta)) {
+      meta.defaultLabels = [];
+      migrate = true;
+    }
+    if (!("restrictLabels" in meta)) {
+      meta.restrictLabels = false;
+      migrate = true;
+    }
+    if (!("multiLabel" in meta)) {
+      meta.multiLabel = false;
+      migrate = true;
+    }
+
+    if (migrate) {
       await collectionManager.upload(collection);
     }
-    return json as GalleryTile[];
+
+    return { tiles: json as GalleryTile[], galleryMeta: meta };
   };
 
   getCollectionsMeta = async (
