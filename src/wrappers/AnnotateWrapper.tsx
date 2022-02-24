@@ -1,7 +1,6 @@
-import { ReactElement, useState, useEffect, useRef } from "react";
+import { ReactElement, useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@mui/material";
-
 import makeStyles from "@mui/styles/makeStyles";
 
 import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
@@ -9,7 +8,7 @@ import { ImageFileInfo } from "@gliff-ai/upload";
 import { icons, IconButton } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
 import { AnnotationMeta, Image } from "@/store/interfaces";
-import { Task, TSButtonToolbar } from "@/components";
+import { Task } from "@/components";
 import {
   parseStringifiedSlices,
   getImageFileInfoFromImageMeta,
@@ -17,6 +16,7 @@ import {
 import { useAuth, useStore } from "@/hooks";
 import { setStateIfMounted } from "@/helpers";
 import { UserAccess } from "@/hooks/use-auth";
+import { initPluginObjects, PluginObject, Product } from "@/plugins";
 
 interface Props {
   storeInstance: DominateStore;
@@ -60,6 +60,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [isComplete, setIsComplete] = useState<boolean>(false);
   const [imageUids, setImageUids] = useState<string[] | null>(null);
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
+  const [plugins, setPlugins] = useState<PluginObject | null>(null);
+
   const isMounted = useRef(false);
   const classes = useStyle();
 
@@ -75,13 +77,18 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     navigate(`/annotate/${collectionUid}/${imageUids[newIndex]}`);
   }
 
+  const isOwnerOrMember = useCallback(
+    () =>
+      auth?.userAccess === UserAccess.Owner ||
+      auth?.userAccess === UserAccess.Member,
+    [auth]
+  );
+
   const fetchImageItems = useStore(
     props,
     (storeInstance) => {
       if (!auth?.user?.username) return;
-      const canViewAllImages =
-        auth.userAccess === UserAccess.Owner ||
-        auth.userAccess === UserAccess.Member;
+      const canViewAllImages = isOwnerOrMember();
 
       storeInstance
         .getImagesMeta(collectionUid, auth?.user.username)
@@ -154,7 +161,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   useEffect(() => {
     if (!collectionUid) return;
     fetchImageItems();
-  }, [collectionUid]);
+  }, [collectionUid, fetchImageItems]);
 
   useEffect(() => {
     if (!imageUids) return;
@@ -171,6 +178,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       progress: 0,
     });
     const annotationsData = newAnnotationsObject.getAllAnnotations();
+
     const auditData = newAnnotationsObject.getAuditObject();
 
     props.storeInstance
@@ -261,7 +269,28 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     props.storeInstance.ready,
     auth,
     isMounted,
+    isComplete,
   ]);
+
+  const fetchPlugins = useCallback(async () => {
+    if (!auth?.user || collectionUid === "") return;
+    try {
+      const newPlugins = await initPluginObjects(
+        Product.ANNOTATE,
+        collectionUid,
+        auth?.user?.username as string
+      );
+      if (newPlugins) {
+        setStateIfMounted(newPlugins, setPlugins, isMounted.current);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [auth, collectionUid, isMounted]);
+
+  useEffect(() => {
+    void fetchPlugins();
+  }, [fetchPlugins]);
 
   useEffect(() => {
     if (imageItem) {
@@ -301,10 +330,13 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       annotationsObject={slicesData ? annotationsObject : undefined}
       saveAnnotationsCallback={saveAnnotation}
       setIsLoading={props.setIsLoading}
-      trustedServiceButtonToolbar={
-        <TSButtonToolbar collectionUid={collectionUid} imageUid={imageUid} />
-      }
       userAccess={auth.userAccess}
+      plugins={plugins}
+      launchPluginSettingsCallback={
+        Number(auth?.userProfile?.team?.tier?.id) > 1 && isOwnerOrMember()
+          ? () => navigate(`/manage/plugins`)
+          : null
+      }
     />
   );
 };

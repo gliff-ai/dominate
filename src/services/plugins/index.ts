@@ -16,3 +16,4 @@ const deletePlugin = (plugin: JsPlugin): Promise<number> =>
 const jsPluginsAPI = { getPlugins, createPlugin, updatePlugin, deletePlugin };
 
 export { jsPluginsAPI };
+export type { JsPlugin };
