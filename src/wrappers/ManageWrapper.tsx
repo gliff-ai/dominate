@@ -17,6 +17,10 @@ type Progress = {
   [uid: string]: { complete: number; total: number };
 };
 
+type Progress = {
+  [uid: string]: { complete: number; total: number };
+};
+
 interface Props {
   storeInstance: DominateStore;
 }
