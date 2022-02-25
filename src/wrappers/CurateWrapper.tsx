@@ -26,9 +26,13 @@ import { useAuth, UserAccess } from "@/hooks/use-auth";
 import { useMountEffect } from "@/hooks/use-mountEffect";
 import { useStore } from "@/hooks/use-store";
 import { apiRequest } from "@/api";
-import { setStateIfMounted } from "@/helpers";
+import {
+  setStateIfMounted,
+  uniquifyFilenames,
+  makeAnnotationsJson,
+} from "@/helpers";
 
-import { Annotations, Annotation, getTiffData } from "@gliff-ai/annotate";
+import { Annotations, getTiffData } from "@gliff-ai/annotate";
 
 const logger = console;
 
@@ -210,81 +214,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     navigate(`/annotate/${collectionUid}/${imageUid}`);
   };
 
-  const uniquifyFilenames = (filenames: string[]): string[] => {
-    const counts = {};
-    for (let i = 0; i < filenames.length; i += 1) {
-      if (counts[filenames[i]] > 0) {
-        const [name, extension] = filenames[i].split(".");
-        filenames[i] = `${name} (${
-          counts[filenames[i]] as number
-        }).${extension}`;
-      }
-      if (counts[filenames[i]] === undefined) {
-        counts[filenames[i]] = 1;
-      } else {
-        counts[filenames[i]] += 1;
-      }
-    }
-    return filenames;
-  };
-
-  const makeAnnotationsJson = (
-    allnames: string[],
-    tiles: GalleryTile[],
-    annotations: Annotation[][][]
-  ): string => {
-    // make annotations JSON file:
-    type XYPoint = { x: number; y: number };
-    type ZTPoint = { z: number; t: number };
-    type BoundingBox = {
-      coordinates: {
-        topLeft: XYPoint;
-        bottomRight: XYPoint;
-      };
-      spaceTimeInfo: { z: number; t: number };
-    };
-    type JSONAnnotation = {
-      // an individual object (or "layer") within a user's annotation of an image
-      labels: string[];
-      segmaskName?: string; // name of segmentation mask image (for brushstroke annotations)
-      colour?: string; // colour of brushstroke in seg_mask image
-      spline: {
-        coordinates: XYPoint[];
-        spaceTimeInfo: ZTPoint;
-        isClosed: boolean;
-      };
-      boundingBox?: BoundingBox;
-    };
-    type JSONImage = {
-      imageName: string;
-      labels: string[];
-      annotations: JSONAnnotation[][]; // array of array because multiple users can each create multiple annotation in the image, e.g. for different cells
-    };
-    const annotations_json: JSONImage[] = allnames.map((name, i) => ({
-      imageName: name,
-      labels: tiles[i].imageLabels,
-      annotations: annotations[i].map((annotationsObject: Annotation[], j) => {
-        let maskName = allnames[i].split(".")[0];
-        if (annotations[i].length > 1) {
-          // numbering the segmasks by different annotators for the same image
-          maskName += `_${j}`;
-        }
-        maskName += ".tiff";
-
-        return annotationsObject.map((annotation) => ({
-          labels: annotation.labels,
-          segmaskName:
-            annotation.brushStrokes.length > 0 ? maskName : undefined,
-          colour: annotation.brushStrokes[0]?.brush.color, // colour of this annotation in the segmask image
-          spline: annotation.spline,
-          boundingBox: annotation.boundingBox,
-        }));
-      }),
-    }));
-
-    return JSON.stringify(annotations_json);
-  };
-
   const downloadDataset = async (): Promise<void> => {
     const zip = new JSZip();
 
@@ -302,11 +231,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     allnames = uniquifyFilenames(allnames);
     console.log(`output: ${allnames}`);
 
-    console.log(
-      `allnames: ${allnames}\ncollectionContent: ${JSON.stringify(
-        collectionContent
-      )}\nannotations: ${JSON.stringify(annotations)}`
-    );
+    console.log(`allnames: ${allnames}`);
+    console.log(`collectionContent: ${JSON.stringify(collectionContent)}`);
+    console.log(`annotations: ${JSON.stringify(annotations)}`);
     const jsonString = makeAnnotationsJson(
       allnames,
       collectionContent,
