@@ -7,6 +7,7 @@ import { Task } from "@gliff-ai/style";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
+import { Annotations, getTiffData } from "@gliff-ai/annotate";
 import { DominateStore } from "@/store";
 import { Slices, MetaItem, GalleryTile } from "@/store/interfaces";
 import {
@@ -25,7 +26,6 @@ import {
   makeAnnotationsJson,
 } from "@/helpers";
 
-import { Annotations, getTiffData } from "@gliff-ai/annotate";
 import { initPluginObjects, PluginObject, Product } from "@/plugins";
 
 const logger = console;
@@ -246,19 +246,12 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
     // append " (n)" to file names when multiple files have the same name
     // or else JSZip will treat them as a single image:
-    console.log(`input: ${allnames}`);
     allnames = uniquifyFilenames(allnames);
-    console.log(`output: ${allnames}`);
-
-    console.log(`allnames: ${allnames}`);
-    console.log(`collectionContent: ${JSON.stringify(collectionContent)}`);
-    console.log(`annotations: ${JSON.stringify(annotations)}`);
     const jsonString = makeAnnotationsJson(
       allnames,
       collectionContent,
       annotations
     );
-    console.log(jsonString);
     // add JSON to zip:
     zip.file("annotations.json", jsonString);
 

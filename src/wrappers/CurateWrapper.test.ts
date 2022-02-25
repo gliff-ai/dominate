@@ -5,7 +5,6 @@ import {
   annotations,
   expectedOutput,
 } from "./makeAnnotationsJsonTestData";
-import { Annotation } from "@gliff-ai/annotate";
 
 describe("Download dataset annotations", () => {
   beforeEach(() => {});

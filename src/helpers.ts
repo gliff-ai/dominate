@@ -1,6 +1,5 @@
 import { GalleryTile } from "@/store/interfaces";
-import { Annotation } from "@gliff-ai/annotate";
-import { Spline, BoundingBox } from "@gliff-ai/annotate";
+import { Annotation, Spline, BoundingBox } from "@gliff-ai/annotate";
 
 export function setStateIfMounted(
   newState: any,
@@ -48,7 +47,7 @@ export const makeAnnotationsJson = (
     labels: string[];
     annotations: JSONAnnotation[][]; // array of array because multiple users can each create multiple annotation in the image, e.g. for different cells
   }
-  const annotations_json: JSONImage[] = allnames.map((name, i) => ({
+  const annotationsJson: JSONImage[] = allnames.map((name, i) => ({
     imageName: name,
     labels: tiles[i].imageLabels,
     annotations: annotations[i].map((annotationsObject: Annotation[], j) => {
@@ -69,5 +68,5 @@ export const makeAnnotationsJson = (
     }),
   }));
 
-  return JSON.stringify(annotations_json);
+  return JSON.stringify(annotationsJson);
 };

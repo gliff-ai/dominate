@@ -13,6 +13,7 @@ import {
 import { Task } from "@gliff-ai/style";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
+import { ImageFileInfo } from "@gliff-ai/upload";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
 import type {
@@ -22,7 +23,6 @@ import type {
   AnnotationMeta,
   FileInfo,
 } from "./interfaces";
-import { ImageFileInfo } from "@gliff-ai/upload";
 
 const logger = console;
 
@@ -382,7 +382,9 @@ export class DominateStore {
     // migrate tile.metadata -> tile.fileInfo:
     for (let i = 0; i < json.length; i += 1) {
       if (!("fileInfo" in json[i]) && "metadata" in json[i]) {
-        json[i].fileInfo = json[i]["metadata"];
+        json[i].fileInfo = (
+          json[i] as GalleryTile & { metadata: FileInfo }
+        ).metadata;
         migrate = true;
       }
 
