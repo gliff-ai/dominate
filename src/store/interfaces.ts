@@ -5,6 +5,9 @@ interface GalleryMeta {
   createdTime: number; // "time item was created in milliseconds since epoch"
   modifiedTime: number; // "time item was last modified in milliseconds since epoch"
   description?: string; // "long description for collection, i.e. project details"
+  defaultLabels: string[];
+  restrictLabels: boolean;
+  multiLabel: boolean;
 }
 
 // Gallery collection content is an array of these objects

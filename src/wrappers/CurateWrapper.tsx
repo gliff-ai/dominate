@@ -1,25 +1,18 @@
-import { ReactElement, useEffect, useState, useRef } from "react";
+import { ReactElement, useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import Curate from "@gliff-ai/curate";
+import { Task } from "@gliff-ai/style";
+
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import { DominateStore } from "@/store";
-import {
-  Slices,
-  MetaItem,
-  GalleryTile,
-  ImageItemMeta,
-  AnnotationMeta,
-} from "@/store/interfaces";
-import { Task, TSButtonToolbar } from "@/components";
+import { Slices, MetaItem, GalleryTile } from "@/store/interfaces";
 import {
   ConfirmationDialog,
   MessageDialog,
 } from "@/components/message/ConfirmationDialog";
-import { Plugins } from "@/plugins/Plugins";
-import { usePlugins } from "@/hooks";
 
 import { stringifySlices } from "@/imageConversions";
 import { useAuth, UserAccess } from "@/hooks/use-auth";
@@ -33,6 +26,7 @@ import {
 } from "@/helpers";
 
 import { Annotations, getTiffData } from "@gliff-ai/annotate";
+import { initPluginObjects, PluginObject, Product } from "@/plugins";
 
 const logger = console;
 
@@ -63,9 +57,10 @@ interface Props {
 export const CurateWrapper = (props: Props): ReactElement | null => {
   const navigate = useNavigate();
   const auth = useAuth();
-  const plugins = usePlugins();
 
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
+  const [defaultLabels, setDefaultLabels] = useState<string[]>([]); // more input for curate
+  const [restrictLabels, setRestrictLabels] = useState<boolean>(false); // more input for curate
   const { collectionUid = "" } = useParams<string>(); // uid of selected gallery, from URL
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
 
@@ -80,12 +75,20 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   // no images to download message state:
   const [showNoImageMessage, setShowNoImageMessage] = useState<boolean>(false);
-
-  const [pluginUrls, setPluginUrls] = useState<string[] | null>(null);
   const [profiles, setProfiles] = useState<Profile[] | null>(null);
+
+  const [plugins, setPlugins] = useState<PluginObject | null>(null);
   const isMounted = useRef(false);
 
+  const isOwnerOrMember = useCallback(
+    () =>
+      auth?.userAccess === UserAccess.Owner ||
+      auth?.userAccess === UserAccess.Member,
+    [auth]
+  );
+
   const fetchImageItems = useStore(
+    // doesn't actually fetch image items, fetches gallery collection content
     props,
     (storeInstance) => {
       // fetches images via DominateStore, and assigns them to imageItems state
@@ -93,14 +96,12 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       storeInstance
         .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
-          setStateIfMounted(items, setCollectionContent, isMounted.current);
+          const { tiles, galleryMeta } = items;
+          setStateIfMounted(tiles, setCollectionContent, isMounted.current);
           // owners and members can view the images in a project
-          const canViewAllImages =
-            auth.userAccess === UserAccess.Owner ||
-            auth.userAccess === UserAccess.Member;
-
-          // discard imageUID, annotationUID and auditUID, and unpack item.fileInfo:
-          const wrangled = items
+          const canViewAllImages = isOwnerOrMember();
+          // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
+          const wrangled = tiles
             .map(
               ({
                 thumbnail,
@@ -122,8 +123,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
                 canViewAllImages ||
                 assignees.includes(auth?.user?.username as string)
             );
-
           setCurateInput(wrangled);
+          setDefaultLabels(galleryMeta.defaultLabels);
+          setRestrictLabels(galleryMeta.restrictLabels);
         })
         .catch((err) => {
           logger.log(err);
@@ -176,6 +178,23 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
     props.storeInstance
       .setImageLabels(collectionUid, imageUid, newLabels)
+      .then(fetchImageItems)
+      .catch((error) => {
+        logger.log(error);
+      });
+  };
+
+  const saveDefaultLabelsCallback = (
+    newDefaultLabels: string[],
+    newRestrictLabels: boolean,
+    newMultiLabel: boolean
+  ) => {
+    props.storeInstance
+      .updateCollectionMeta(collectionUid, {
+        defaultLabels: newDefaultLabels,
+        restrictLabels: newRestrictLabels,
+        multiLabel: newMultiLabel,
+      })
       .then(fetchImageItems)
       .catch((error) => {
         logger.log(error);
@@ -389,8 +408,13 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.setIsLoading(true);
   });
 
-  const getProfiles = (): void => {
-    if (!auth || auth.userAccess === UserAccess.Collaborator) return;
+  const getProfiles = useCallback((): void => {
+    if (
+      !auth?.ready ||
+      auth?.userAccess === UserAccess.Collaborator ||
+      profiles
+    )
+      return;
 
     void apiRequest("/team/", "GET")
       .then((team: Team) => {
@@ -405,7 +429,23 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         }
       })
       .catch((e) => logger.error(e));
-  };
+  }, [auth, profiles]);
+
+  const fetchPlugins = useCallback(async () => {
+    if (!auth?.user || collectionUid === "") return;
+    try {
+      const newPlugins = await initPluginObjects(
+        Product.CURATE,
+        collectionUid,
+        auth?.user.username as string
+      );
+      if (newPlugins) {
+        setStateIfMounted(newPlugins, setPlugins, isMounted.current);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [auth, collectionUid, isMounted]);
 
   useEffect(() => {
     // runs at mount
@@ -417,9 +457,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   }, []);
 
   useEffect(() => {
-    if (!auth || !auth?.ready || profiles) return;
     getProfiles();
-  }, [auth, profiles, isMounted]);
+  }, [getProfiles]);
 
   useEffect(() => {
     if (!collectionUid) return;
@@ -427,16 +466,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   }, [collectionUid, fetchImageItems, isMounted, auth]);
 
   useEffect(() => {
-    if (plugins === null || !plugins?.plugins || pluginUrls) return;
-
-    const urls = plugins.plugins
-      .filter(({ products }) => products === "CURATE" || products === "ALL")
-      .map(({ url }) => url);
-
-    if (urls.length !== 0) {
-      setStateIfMounted(urls, setPluginUrls, isMounted.current);
-    }
-  }, [plugins, pluginUrls, isMounted]);
+    void fetchPlugins();
+  }, [fetchPlugins]);
 
   if (!props.storeInstance || !auth?.user || !collectionUid || !auth.userAccess)
     return null;
@@ -445,31 +476,27 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     <>
       <Curate
         metadata={curateInput}
+        defaultLabels={defaultLabels}
+        restrictLabels={restrictLabels}
         saveImageCallback={addImagesToGallery}
         saveLabelsCallback={saveLabelsCallback}
+        saveDefaultLabelsCallback={saveDefaultLabelsCallback}
         saveAssigneesCallback={saveAssigneesCallback}
         deleteImagesCallback={deleteImagesCallback}
         annotateCallback={annotateCallback}
         downloadDatasetCallback={downloadDatasetCallback}
+        updateImagesCallback={fetchImageItems}
         showAppBar={false}
         setIsLoading={props.setIsLoading}
         setTask={props.setTask}
-        trustedServiceButtonToolbar={(imageUid: string, enabled: boolean) => (
-          <TSButtonToolbar
-            collectionUid={collectionUid}
-            imageUid={imageUid}
-            tooltipPlacement="top"
-            enabled={enabled}
-            callback={fetchImageItems}
-          />
-        )}
-        plugins={
-          pluginUrls ? (
-            <Plugins plugins={pluginUrls} metadata={curateInput} />
-          ) : null
-        }
         profiles={profiles}
         userAccess={auth.userAccess}
+        plugins={plugins}
+        launchPluginSettingsCallback={
+          Number(auth?.userProfile?.team?.tier?.id) > 1 && isOwnerOrMember()
+            ? () => navigate(`/manage/plugins`)
+            : null
+        }
       />
 
       <ConfirmationDialog

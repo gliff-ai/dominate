@@ -9,6 +9,8 @@ import {
   OutputFormat,
   CollectionAccessLevel,
 } from "etebase";
+
+import { Task } from "@gliff-ai/style";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
 import { User } from "@/services/user/interfaces";
@@ -20,7 +22,6 @@ import type {
   AnnotationMeta,
   FileInfo,
 } from "./interfaces";
-import { Task } from "@/components";
 import { ImageFileInfo } from "@gliff-ai/upload";
 
 const logger = console;
@@ -265,6 +266,29 @@ export class DominateStore {
     await collectionManager.transaction(collection);
   };
 
+  updateCollectionMeta = async (
+    collectionUid: string,
+    newMeta: Partial<{
+      defaultLabels: string[];
+      restrictLabels: boolean;
+      multiLabel: boolean;
+    }>
+  ): Promise<void> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+
+    const oldMeta = collection.getMeta();
+    collection.setMeta({
+      ...oldMeta,
+      ...newMeta, // should overwrite any fields that are already in oldMeta
+      modifiedTime: Date.now(),
+    });
+
+    await collectionManager.upload(collection);
+  };
+
   getCollectionsContent = async (
     type = "gliff.gallery"
   ): Promise<
@@ -320,7 +344,7 @@ export class DominateStore {
   getImagesMeta = async (
     collectionUid: string,
     username: string
-  ): Promise<GalleryTile[]> => {
+  ): Promise<{ tiles: GalleryTile[]; galleryMeta: GalleryMeta }> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -334,8 +358,8 @@ export class DominateStore {
     };
     const json = JSON.parse(jsonString) as GalleryTile[] | OldGalleryTile[];
 
+    // migrate GalleryTiles to have multiple annotations/audits per image if necessary:
     let migrate = false;
-    // migrate GalleryTiles to new format if necessary:
     if (
       json.length > 0 &&
       (typeof json[0].annotationUID === "string" ||
@@ -377,10 +401,31 @@ export class DominateStore {
     if (migrate) {
       // update in store:
       await collection.setContent(JSON.stringify(json));
+      migrate = true;
+    }
+
+    // get collection metadata:
+    const meta = this.wrangleGallery(collection);
+
+    // migrate GalleryMeta to include defaultLabels, restrictLabels and multiLabel if necessary:
+    if (!("defaultLabels" in meta)) {
+      meta.defaultLabels = [];
+      migrate = true;
+    }
+    if (!("restrictLabels" in meta)) {
+      meta.restrictLabels = false;
+      migrate = true;
+    }
+    if (!("multiLabel" in meta)) {
+      meta.multiLabel = false;
+      migrate = true;
+    }
+
+    if (migrate) {
       await collectionManager.upload(collection);
     }
 
-    return json as GalleryTile[];
+    return { tiles: json as GalleryTile[], galleryMeta: meta };
   };
 
   getCollectionsMeta = async (
@@ -975,7 +1020,7 @@ export class DominateStore {
     const collection = await collectionManager.fetch(collectionUid);
     setTask({
       isLoading: true,
-      description: "Saving annotation...",
+      description: "Saving annotation in progress, please wait...",
       progress: 35,
     });
     const collectionContent = await collection.getContent(OutputFormat.String);
@@ -1013,35 +1058,35 @@ export class DominateStore {
     const items = await this.fetchMulti(itemManager, [annotationUid, auditUid]);
     setTask({
       isLoading: true,
-      description: "Saving annotation...",
+      description: "Saving annotation in progress, please wait...",
       progress: 70,
     });
-    const annotationItem = items[0];
-    const auditItem = items[1];
 
-    // Update annotationItem:
-    let meta = annotationItem.getMeta();
-    const mtime = new Date().getTime();
+    let annotationItem: Item;
+    let auditItem: Item;
+    if (items[0].getMeta().type === "gliff.annotation") {
+      // note: this check should be obsolete since adding this.fetchMulti
+      [annotationItem, auditItem] = items;
+    } else {
+      [auditItem, annotationItem] = items;
+    }
+
+    const modifiedTime = new Date().getTime();
+
+    // Update annotation item
     annotationItem.setMeta({
-      ...meta,
-      mtime,
+      ...annotationItem.getMeta(),
+      modifiedTime,
       isComplete,
     });
     await annotationItem.setContent(JSON.stringify(annotationData));
 
-    // Update auditItem:
-    meta = auditItem.getMeta();
-    auditItem.setMeta({ ...meta, mtime });
+    // Update audit item
+    auditItem.setMeta({ ...auditItem.getMeta(), modifiedTime });
     await auditItem.setContent(JSON.stringify(auditData));
 
     // Save changes
     await itemManager.batch([annotationItem, auditItem]);
-
-    setTask({
-      isLoading: true,
-      description: "Saving annotation...",
-      progress: 100,
-    });
   };
 
   getItem = async (collectionUid: string, itemUid: string): Promise<Item> => {
