@@ -1,37 +1,3 @@
-import { ImageFileInfo } from "@gliff-ai/upload";
-import { ImageItemMeta } from "@/store/interfaces";
-
-// function getImageMetaFromImageFileInfo(
-//   imageFileInfo: ImageFileInfo
-// ): ImageItemMeta {
-//   return {
-//     name: imageFileInfo.fileName,
-
-//     fileInfo: {
-//       fileName: imageFileInfo.fileName,
-//       width: imageFileInfo.width,
-//       height: imageFileInfo.height,
-//       size: imageFileInfo.size,
-//       num_channels: imageFileInfo.num_channels,
-//       num_slices: imageFileInfo.num_slices,
-//       resolution_x: imageFileInfo.resolution_x,
-//       resolution_y: imageFileInfo.resolution_y,
-//       resolution_z: imageFileInfo.resolution_z,
-//       content_hash: imageFileInfo.content_hash,
-//     },
-//   };
-// }
-
-// function getImageFileInfoFromImageMeta(
-//   imageUid: string,
-//   imageMeta: ImageMeta
-// ): ImageFileInfo {
-//   return new ImageFileInfo({
-//     fileName: imageUid,
-//     ...imageMeta,
-//   });
-// }
-
 function stringifySlices(slicesData: ImageBitmap[][]): string {
   // Convert image data from ImageBitmap[][] to string of base64-ecoded images.
   const slicesBase64: string[][] = [];
@@ -56,11 +22,7 @@ function stringifySlices(slicesData: ImageBitmap[][]): string {
   return JSON.stringify(slicesBase64);
 }
 
-function convertBase64ToImageBitmap(
-  base64: string
-  // width: number,
-  // height: number
-): Promise<ImageBitmap> {
+function convertBase64ToImageBitmap(base64: string): Promise<ImageBitmap> {
   return new Promise((resolve) => {
     const image = new Image();
 
@@ -76,8 +38,6 @@ function convertBase64ToImageBitmap(
 
 function parseStringifiedSlices(
   stringifiedSlicesData: string
-  // imageWidth: number,
-  // imageHeight: number
 ): Promise<ImageBitmap[][]> {
   // Convert image data from base64 encoded to ImageBitmap[][].
   const slicesBase64 = JSON.parse(stringifiedSlicesData) as string[][];
@@ -88,8 +48,6 @@ function parseStringifiedSlices(
     for (let j = 0; j < slicesBase64[i].length; j += 1) {
       slicesBitmapPromise[i][j] = convertBase64ToImageBitmap(
         slicesBase64[i][j]
-        // imageWidth,
-        // imageHeight
       );
     }
   }
@@ -178,6 +136,4 @@ export {
   parseStringifiedSlices,
   convertImageBitmapToUint8Array,
   convertUint8ArrayToImageBitmap,
-  // getImageMetaFromImageFileInfo,
-  // getImageFileInfoFromImageMeta,
 };
