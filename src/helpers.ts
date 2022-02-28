@@ -1,5 +1,5 @@
-import { GalleryTile } from "@/store/interfaces";
 import { Annotation, Spline, BoundingBox } from "@gliff-ai/annotate";
+import { GalleryTile } from "@/store/interfaces";
 
 export function setStateIfMounted(
   newState: any,
