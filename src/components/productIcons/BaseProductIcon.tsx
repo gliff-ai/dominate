@@ -93,9 +93,9 @@ function BaseProductIcon({
   );
 
   const handleNavigate = () => {
-    customUrlPath
-      ? window.location.assign(customUrlPath)
-      : navigate(`/${tool}`);
+    if (customUrlPath === "https://docs.gliff.app/") {
+      window.open(customUrlPath, "_blank");
+    } else navigate(`/${tool}`);
   };
 
   return (
@@ -136,7 +136,7 @@ function BaseProductIcon({
 
 BaseProductIcon.defaultProps = {
   linkDisabled: false,
-  target: "_blank",
+  target: "_self",
   extraStyleAvatar: undefined,
   extraStyleSvg: undefined,
   extraStyleName: undefined,
