@@ -138,7 +138,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     imageFileInfo: ImageFileInfo[],
     slicesData: Slices[]
   ): Promise<void> => {
-    // const imageMetas: ImageItemMeta[] = [];
     const thumbnails: string[] = [];
     const stringifiedSlices: string[] = [];
 
@@ -147,7 +146,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     for (let i = 0; i < imageFileInfo.length; i += 1) {
       // Stringify slices data and get image metadata
       stringifiedSlices.push(stringifySlices(slicesData[i]));
-      // imageMetas.push(getImageMetaFromImageFileInfo(imageFileInfo[i]));
 
       // make thumbnail:
       const canvas = document.createElement("canvas");
