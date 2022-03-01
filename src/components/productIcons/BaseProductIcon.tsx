@@ -92,12 +92,18 @@ function BaseProductIcon({
     </Avatar>
   );
 
+  const handleNavigate = () => {
+    customUrlPath
+      ? window.location.assign(customUrlPath)
+      : navigate(`/${tool}`);
+  };
+
   return (
     <div className={classes.outerDiv}>
       <div className={classes.iconDiv}>
         <Button
           className={classes.productButton}
-          onClick={() => navigate(customUrlPath || `/${tool}`)}
+          onClick={handleNavigate}
           disabled={linkDisabled}
         >
           {avatar}
@@ -130,7 +136,7 @@ function BaseProductIcon({
 
 BaseProductIcon.defaultProps = {
   linkDisabled: false,
-  target: "_self",
+  target: "_blank",
   extraStyleAvatar: undefined,
   extraStyleSvg: undefined,
   extraStyleName: undefined,
