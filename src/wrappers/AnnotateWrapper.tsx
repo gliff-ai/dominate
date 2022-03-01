@@ -308,21 +308,11 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   useEffect(() => {
     if (imageContent) {
       // Set slicesData
-      parseStringifiedSlices(
-        imageContent
-        // imageContent.meta.width,
-        // imageContent.meta.height
-      )
+      parseStringifiedSlices(imageContent)
         .then((newSlicesData) => {
           setSlicesData(newSlicesData);
         })
         .catch((e) => console.error(e));
-      // // Set imageFileInfo
-      // const fileInfo = getImageFileInfoFromImageMeta(
-      //   imageContent.uid,
-      //   imageContent.meta
-      // );
-      // setImageFileInfo(fileInfo);
     }
   }, [imageContent]);
 
