@@ -12,7 +12,7 @@ interface GalleryMeta {
 
 // Gallery collection content is an array of these objects
 interface GalleryTile {
-  metadata: ImageMeta;
+  fileInfo: FileInfo;
   imageLabels: string[];
   assignees: string[]; // collaborator(s) to whome the image has been assigned
   thumbnail: string; // base64
@@ -32,32 +32,29 @@ type ImageBitmapBlob = ImageBitmap;
 type Channels = ImageBitmapBlob[];
 type Slices = Channels[];
 
-interface Image {
-  // a sort of hybrid/union of etebase metadata and content for Image items
-  uid: string;
-  type: "gliff.image";
+interface ImageItemMeta {
   name: string; // human-readable image name, i.e. file name
+  type: "gliff.image";
+  fileInfo: FileInfo;
   createdTime: number; // time item was created in milliseconds since epoch
   modifiedTime: number; // time item was last modified in milliseconds since epoch
   description?: string; // long description for collection, i.e. project details
-  meta: ImageMeta;
-  content: string;
+  customMeta?: string; // JSON of custom metadata
+  format?: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
 }
 
-interface ImageMeta {
+interface FileInfo {
   // the stuff in ImageFileInfo
-  imageName: string;
+  fileName: string;
   num_slices: number; // number of z-slices
   num_channels: number; // numbers colour channels
   width: number; // width of each slice
   height: number; // height of each slice
   size: number; // size of the image in bytes
-  resolution_x: number;
-  resolution_y: number;
-  resolution_z: number;
-  format?: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
+  resolution_x?: number;
+  resolution_y?: number;
+  resolution_z?: number;
   content_hash?: string; // we use this for making sure we don't have duplicate images in a dataset
-  customMeta?: string; // JSON of custom metadata
 }
 
 interface AnnotationMeta {
@@ -74,8 +71,8 @@ export type {
   GalleryMeta,
   GalleryTile,
   MetaItem,
-  Image,
   Slices,
-  ImageMeta,
+  ImageItemMeta,
+  FileInfo,
   AnnotationMeta,
 };
