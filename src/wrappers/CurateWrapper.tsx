@@ -7,28 +7,25 @@ import { Task } from "@gliff-ai/style";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
+import { Annotations, getTiffData } from "@gliff-ai/annotate";
 import { DominateStore } from "@/store";
-import {
-  Slices,
-  MetaItem,
-  GalleryTile,
-  Image,
-  ImageMeta,
-} from "@/store/interfaces";
+import { Slices, MetaItem, GalleryTile } from "@/store/interfaces";
 import {
   ConfirmationDialog,
   MessageDialog,
 } from "@/components/message/ConfirmationDialog";
 
-import {
-  stringifySlices,
-  getImageMetaFromImageFileInfo,
-} from "@/imageConversions";
+import { stringifySlices } from "@/imageConversions";
 import { useAuth, UserAccess } from "@/hooks/use-auth";
 import { useMountEffect } from "@/hooks/use-mountEffect";
 import { useStore } from "@/hooks/use-store";
 import { apiRequest } from "@/api";
-import { setStateIfMounted } from "@/helpers";
+import {
+  setStateIfMounted,
+  uniquifyFilenames,
+  makeAnnotationsJson,
+} from "@/helpers";
+
 import { initPluginObjects, PluginObject, Product } from "@/plugins";
 
 const logger = console;
@@ -111,13 +108,14 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
                 imageLabels = [],
                 assignees = [],
                 id,
-                metadata,
+                fileInfo,
               }) => ({
                 thumbnail,
                 imageLabels,
-                id,
-                ...metadata,
                 assignees,
+                id,
+                ...fileInfo,
+                imageName: fileInfo.fileName, // curate expects imageName rather than fileName
               })
             )
             .filter(
@@ -140,7 +138,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     imageFileInfo: ImageFileInfo[],
     slicesData: Slices[]
   ): Promise<void> => {
-    const imageMetas: ImageMeta[] = [];
     const thumbnails: string[] = [];
     const stringifiedSlices: string[] = [];
 
@@ -149,7 +146,6 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     for (let i = 0; i < imageFileInfo.length; i += 1) {
       // Stringify slices data and get image metadata
       stringifiedSlices.push(stringifySlices(slicesData[i]));
-      imageMetas.push(getImageMetaFromImageFileInfo(imageFileInfo[i]));
 
       // make thumbnail:
       const canvas = document.createElement("canvas");
@@ -167,7 +163,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
     await props.storeInstance.createImage(
       collectionUid,
-      imageMetas,
+      imageFileInfo,
       thumbnails,
       stringifiedSlices,
       props.task,
@@ -238,48 +234,32 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const downloadDataset = async (): Promise<void> => {
     const zip = new JSZip();
 
-    // retrieve Image items and their names from store:
-    // TODO: store image names in Image items!
-    const imagePromises: Promise<Image>[] = [];
-    const imageNames: string[] = [];
-    for (const tile of collectionContent) {
-      const imageUid = tile.imageUID;
-      imagePromises.push(props.storeInstance.getImage(collectionUid, imageUid));
-      imageNames.push(tile.metadata.imageName);
-    }
-    const images: Image[] = await Promise.all(imagePromises);
+    const images = await props.storeInstance.getAllImages(collectionUid);
+    const { meta: annotationsMeta, annotations } =
+      await props.storeInstance.getAllAnnotationsObjects(collectionUid);
 
-    // append " (n)" to image names when multiple images have the same name,
-    // or else JSZip will treat them as a single image:
-    const allnames: string[] = collectionContent.map(
-      (tile) => tile.metadata.imageName
+    let allnames: string[] = collectionContent.map(
+      (tile) => tile.fileInfo.fileName
     );
-    const counts = {};
-    for (let i = 0; i < allnames.length; i += 1) {
-      if (counts[allnames[i]] > 0) {
-        allnames[i] += ` (${counts[allnames[i]] as number})`;
-      }
-      if (counts[allnames[i]] === undefined) {
-        counts[allnames[i]] = 1;
-      } else {
-        counts[allnames[i]] += 1;
-      }
-    }
+
+    // append " (n)" to file names when multiple files have the same name
+    // or else JSZip will treat them as a single image:
+    allnames = uniquifyFilenames(allnames);
+    const jsonString = makeAnnotationsJson(
+      allnames,
+      collectionContent,
+      annotations
+    );
+    // add JSON to zip:
+    zip.file("annotations.json", jsonString);
+
+    // make images directory:
+    const imagesFolder = zip.folder("images") as JSZip;
 
     if (multi) {
-      // put them all in the root of the zip along with a JSON file describing labels:
-      type JSONImage = { name: string; labels: string[] };
-      const json: JSONImage[] = allnames.map((name, i) => ({
-        name,
-        labels: collectionContent[i].imageLabels,
-      }));
-
-      const jsonString = JSON.stringify(json);
-
-      // add JSON and all images to zip:
-      zip.file("labels.json", jsonString);
+      // put all images in the root of images directory:
       for (let i = 0; i < images.length; i += 1) {
-        zip.file(allnames[i], images[i].content, { base64: true });
+        imagesFolder.file(allnames[i], images[i].content, { base64: true });
       }
     } else {
       // get set of all labels:
@@ -289,7 +269,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
       // add label folders to zip:
       for (const label of allLabels) {
-        const labelFolder = zip.folder(label);
+        const labelFolder = imagesFolder.folder(label);
         if (labelFolder) {
           // add images to label folder in zip:
           for (let i = 0; i < images.length; i += 1) {
@@ -303,14 +283,17 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }
 
       // put unlabelled images in their own folder:
-      if (collectionContent.filter((tile) => tile.imageLabels.length === 0)) {
-        const unlabelledFolder = zip.folder("unlabelled");
+      if (
+        collectionContent.filter((tile) => tile.imageLabels.length === 0)
+          .length > 0
+      ) {
+        const unlabelledFolder = imagesFolder.folder("unlabelled");
 
         if (unlabelledFolder) {
           for (let i = 0; i < images.length; i += 1) {
             if (collectionContent[i].imageLabels.length === 0) {
               unlabelledFolder.file(
-                collectionContent[i].metadata.imageName,
+                collectionContent[i].fileInfo.fileName,
                 images[i].content,
                 {
                   base64: true,
@@ -320,6 +303,47 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           }
         }
       }
+    }
+
+    if (
+      annotations
+        .flat(2)
+        .filter((annotation) => annotation.brushStrokes.length > 0).length > 0
+    ) {
+      // create tiff label images (one for each annotator for this image):
+
+      const maskFolder = zip.folder("masks") as JSZip;
+
+      annotations.forEach((userAnnotations, i) => {
+        userAnnotations.forEach((annotationsObject, j) => {
+          if (
+            annotationsObject.filter(
+              (annotation) => annotation.brushStrokes.length > 0
+            ).length > 0 // are there any brushstrokes in this annotationsObject?
+          ) {
+            let maskName = allnames[i].split(".")[0];
+            if (userAnnotations.length > 1) {
+              maskName += `_${j}`;
+            }
+            maskName += ".tiff";
+
+            maskFolder.file(
+              maskName,
+              getTiffData(
+                new Annotations(annotationsObject),
+                new ImageFileInfo({
+                  fileName: maskName,
+                  width: images[i].meta.fileInfo.width,
+                  height: images[i].meta.fileInfo.height,
+                  size: images[i].meta.fileInfo.size,
+                  num_channels: images[i].meta.fileInfo.num_channels,
+                  num_slices: images[i].meta.fileInfo.num_slices,
+                })
+              )
+            );
+          }
+        });
+      });
     }
 
     // compress data and save to disk:
