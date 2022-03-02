@@ -49,9 +49,6 @@ interface Props {
   tool: string;
   customUrlPath?: string;
   linkDisabled?: boolean;
-  // TODO: support target?
-  // eslint-disable-next-line react/no-unused-prop-types
-  target?: string;
   extraStyleAvatar?: string;
   extraStyleSvg?: string;
   extraStyleName?: string;
@@ -93,9 +90,13 @@ function BaseProductIcon({
   );
 
   const handleNavigate = () => {
-    if (customUrlPath === "https://docs.gliff.app/") {
+    if (customUrlPath?.startsWith("http")) {
       window.open(customUrlPath, "_blank");
-    } else navigate(`/${tool}`);
+    } else if (customUrlPath) {
+      navigate(customUrlPath);
+    } else {
+      navigate(`/${tool}`);
+    }
   };
 
   return (
@@ -136,7 +137,6 @@ function BaseProductIcon({
 
 BaseProductIcon.defaultProps = {
   linkDisabled: false,
-  target: "_self",
   extraStyleAvatar: undefined,
   extraStyleSvg: undefined,
   extraStyleName: undefined,
