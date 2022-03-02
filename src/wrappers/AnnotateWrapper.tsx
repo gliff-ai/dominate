@@ -177,7 +177,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         setDefaultLabels(meta.defaultLabels);
         setRestrictLabels(meta.restrictLabels);
         setMultiLabel(meta.multiLabel);
-      });
+      })
+      .catch((e) => console.error(e));
   }, [collectionUid, fetchImageItems]);
 
   useEffect(() => {
