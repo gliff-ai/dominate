@@ -7,7 +7,7 @@ import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annota
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { icons, IconButton, Task } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
-import { AnnotationMeta } from "@/store/interfaces";
+import { AnnotationMeta, GalleryMeta } from "@/store/interfaces";
 import { parseStringifiedSlices } from "@/imageConversions";
 import { useAuth, useStore } from "@/hooks";
 import { setStateIfMounted } from "@/helpers";
@@ -57,6 +57,10 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [imageUids, setImageUids] = useState<string[] | null>(null);
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
   const [plugins, setPlugins] = useState<PluginObject | null>(null);
+
+  const [defaultLabels, setDefaultLabels] = useState<string[]>([]);
+  const [restrictLabels, setRestrictLabels] = useState<boolean>(false);
+  const [multiLabel, setMultiLabel] = useState<boolean>(true);
 
   const isMounted = useRef(false);
   const classes = useStyle();
@@ -167,6 +171,13 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   useEffect(() => {
     if (!collectionUid) return;
     fetchImageItems();
+    props.storeInstance
+      .getCollectionMeta(collectionUid)
+      .then((meta: GalleryMeta) => {
+        setDefaultLabels(meta.defaultLabels);
+        setRestrictLabels(meta.restrictLabels);
+        setMultiLabel(meta.multiLabel);
+      });
   }, [collectionUid, fetchImageItems]);
 
   useEffect(() => {
@@ -340,6 +351,9 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
           ? () => navigate(`/manage/plugins`)
           : null
       }
+      defaultLabels={defaultLabels}
+      restrictLabels={restrictLabels}
+      multiLabel={multiLabel}
     />
   );
 };
