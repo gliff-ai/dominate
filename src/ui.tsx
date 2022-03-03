@@ -7,7 +7,7 @@ import {
   StyledEngineProvider,
 } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
-import { theme } from "@gliff-ai/style";
+import { theme, ProgressSnackbar, Task } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
 import { Annotate, Audit, Curate, Manage } from "@/wrappers";
 import {
@@ -25,8 +25,6 @@ import {
 import {
   NavBar,
   PageSpinner,
-  ProgressSnackbar,
-  Task,
   CookieConsent,
   ProductNavbarData,
 } from "@/components";

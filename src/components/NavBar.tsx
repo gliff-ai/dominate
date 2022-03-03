@@ -17,7 +17,11 @@ import { HtmlTooltip } from "@gliff-ai/style";
 import { imgSrc } from "@/imgSrc";
 
 import { useAuth } from "@/hooks/use-auth";
-import { ProductsNavbar, ProductNavbarData } from "@/components";
+import {
+  ProductsNavbar,
+  ProductNavbarData,
+  BaseProductIcon,
+} from "@/components";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
