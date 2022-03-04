@@ -2,12 +2,15 @@ import { ReactElement, useEffect, useState, useRef } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import UserInterface, { AnnotationSession } from "@gliff-ai/audit";
+import { IconButton, icons } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
 import { useAuth } from "@/hooks/use-auth";
 import { setStateIfMounted } from "@/helpers";
+import { ProductNavbarData } from "@/components";
 
 interface Props {
   storeInstance: DominateStore;
+  setProductNavbarData: (data: ProductNavbarData) => void;
 }
 
 export const AuditWrapper = (props: Props): ReactElement | null => {
@@ -45,6 +48,32 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
       navigate("/manage");
     }
   }, [auth, navigate]);
+
+  useEffect(() => {
+    props.setProductNavbarData({
+      teamName: auth?.userProfile?.team.name || "",
+      projectName: "",
+      imageName: "",
+      buttonBack: (
+        <IconButton
+          onClick={() => navigate("/manage")}
+          tooltip={{
+            name: `Return to MANAGE `,
+          }}
+          icon={icons.navigationMANAGE}
+        />
+      ),
+      buttonForward: (
+        <IconButton
+          onClick={() => navigate(`/curate/${collectionUid}`)}
+          tooltip={{
+            name: `Return to Curate`,
+          }}
+          icon={icons.navigationCURATE}
+        />
+      ),
+    });
+  }, []);
 
   if (!auth) return null;
   if (!collectionUid) return null;

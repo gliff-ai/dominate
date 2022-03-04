@@ -125,7 +125,10 @@ const UserInterface = (props: Props): ReactElement | null => {
           <>
             <ProgressSnackbar task={task} setTask={setTask} />
             <CssBaseline />
-            <NavBar productNavbarData={productNavbarData} />
+            <NavBar
+              productNavbarData={productNavbarData}
+              storeInstance={storeInstance}
+            />
             <div className={isOverflow ? classes.overflow : classes.noOverflow}>
               <PageSpinner isLoading={isLoading} />
 
@@ -215,6 +218,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                       element={
                         <Audit
                           storeInstance={storeInstance}
+                          setProductNavbarData={setProductNavbarData}
                           // setIsLoading={setIsLoading}
                         />
                       }

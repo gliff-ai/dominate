@@ -22,6 +22,7 @@ import {
   ProductNavbarData,
   BaseProductIcon,
 } from "@/components";
+import { DominateStore } from "@/store";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -82,6 +83,7 @@ const useStyles = makeStyles((theme: Theme) => ({
 }));
 interface Props {
   productNavbarData: ProductNavbarData;
+  storeInstance: DominateStore;
 }
 export const NavBar = (props: Props): ReactElement | null => {
   // Get auth state and re-render anytime it changes
@@ -208,13 +210,11 @@ export const NavBar = (props: Props): ReactElement | null => {
               alt="gliff logo"
             />
           </Grid>
+          <ProductsNavbar productNavbarData={props.productNavbarData} />
           <Grid className={classes.navGrid}>
             <nav className={classes.navLinks}>
               {auth.user ? (
-                <>
-                  <ProductsNavbar productNavbarData={props.productNavbarData} />
-                  {accountMenu}
-                </>
+                <>{accountMenu}</>
               ) : (
                 <Typography>
                   <Link to="/signin">Sign In</Link>

@@ -2,7 +2,7 @@ import { ReactElement, useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import Curate from "@gliff-ai/curate";
-import { Task } from "@gliff-ai/style";
+import { Task, IconButton, icons } from "@gliff-ai/style";
 
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
@@ -10,7 +10,7 @@ import JSZip from "jszip";
 import { Annotations, getTiffData } from "@gliff-ai/annotate";
 import { DominateStore } from "@/store";
 import { Slices, MetaItem, GalleryTile } from "@/store/interfaces";
-import { ProductsNavbar, ProductNavbarData } from "@/components";
+import { ProductNavbarData } from "@/components";
 import {
   ConfirmationDialog,
   MessageDialog,
@@ -461,6 +461,32 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   useEffect(() => {
     void fetchPlugins();
   }, [fetchPlugins]);
+
+  useEffect(() => {
+    props.setProductNavbarData({
+      teamName: auth?.userProfile?.team.name || "",
+      projectName: "",
+      imageName: "",
+      buttonBack: (
+        <IconButton
+          onClick={() => navigate("/manage")}
+          tooltip={{
+            name: `Return to MANAGE `,
+          }}
+          icon={icons.navigationMANAGE}
+        />
+      ),
+      buttonForward: (
+        <IconButton
+          onClick={() => navigate(`/audit/${collectionUid}`)}
+          tooltip={{
+            name: `Navigate to AUDIT`,
+          }}
+          icon={icons.navigationAUDIT}
+        />
+      ),
+    });
+  }, []);
 
   if (!props.storeInstance || !auth?.user || !collectionUid || !auth.userAccess)
     return null;

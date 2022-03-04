@@ -6,6 +6,7 @@ import makeStyles from "@mui/styles/makeStyles";
 import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { icons, IconButton, Task } from "@gliff-ai/style";
+import { ProductNavbarData } from "@/components";
 import { DominateStore } from "@/store";
 import { AnnotationMeta } from "@/store/interfaces";
 import { parseStringifiedSlices } from "@/imageConversions";
@@ -19,7 +20,7 @@ interface Props {
   setIsLoading: (isLoading: boolean) => void;
   task: Task;
   setTask: (task: Task) => void;
-  setProductNavbarData: any;
+  setProductNavbarData: (data: ProductNavbarData) => void;
   // setProductSection: (productSection: JSX.Element | null) => void;
 }
 
@@ -316,6 +317,24 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         .catch((e) => console.error(e));
     }
   }, [imageContent]);
+
+  useEffect(() => {
+    props.setProductNavbarData({
+      teamName: auth?.userProfile?.team.name || "",
+      projectName: "",
+      imageName: "",
+      buttonBack: (
+        <IconButton
+          onClick={() => navigate(`/curate/${collectionUid}`)}
+          tooltip={{
+            name: `Return to CURATE `,
+          }}
+          icon={icons.navigationCURATE}
+        />
+      ),
+      buttonForward: null,
+    });
+  }, []);
 
   if (
     !props.storeInstance ||

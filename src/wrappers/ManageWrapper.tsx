@@ -234,14 +234,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
       teamName: auth?.userProfile?.team.name || "",
       projectName: "",
       imageName: "",
-      buttonBack: (
-        <IconButton
-          tooltip={{
-            name: "Navigate to Manage",
-          }}
-          icon={icons.navigationMANAGE}
-        />
-      ),
+      buttonBack: null,
       buttonForward: null,
     });
   }, []);
