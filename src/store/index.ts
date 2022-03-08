@@ -668,8 +668,6 @@ export class DominateStore {
           itemManager
             .create<Omit<ImageItemMeta, "uid">>( // partial because we can't know the uid yet, etebase assigns it here
               {
-                metaVersion: 2,
-                imageVersion: 1,
                 type: "gliff.image",
                 name: imageFileInfo.fileName,
                 createdTime,
