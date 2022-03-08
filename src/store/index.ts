@@ -665,16 +665,21 @@ export class DominateStore {
 
         // Create new image item and add it to the collection
         itemPromises.push(
-          itemManager.create<Partial<ImageItemMeta>>( // partial because we can't know the uid yet, etebase assigns it here
-            {
-              type: "gliff.image",
-              name: imageFileInfo.fileName,
-              createdTime,
-              modifiedTime: createdTime,
-              fileInfo: imageFileInfo,
-            },
-            imageContent
-          )
+          itemManager
+            .create<Omit<ImageItemMeta, "uid">>( // partial because we can't know the uid yet, etebase assigns it here
+              {
+                metaVersion: 2,
+                imageVersion: 1,
+                type: "gliff.image",
+                name: imageFileInfo.fileName,
+                createdTime,
+                modifiedTime: createdTime,
+                fileInfo: imageFileInfo,
+              },
+              imageContent
+            )
+            // We use uploadContent, then batch when we want to chunk
+            .then((item: Item) => itemManager.batch([item]).then(() => item))
         );
       }
 
@@ -682,7 +687,6 @@ export class DominateStore {
 
       // save new image items:
       const newItems = await Promise.all(itemPromises);
-      await itemManager.batch(newItems);
 
       const newTiles: GalleryTile[] = [];
       for (let i = 0; i < imageFileInfos.length; i += 1) {

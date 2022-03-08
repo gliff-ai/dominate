@@ -40,6 +40,8 @@ interface ImageItemMeta {
   modifiedTime: number; // time item was last modified in milliseconds since epoch
   description?: string; // long description for collection, i.e. project details
   customMeta?: string; // JSON of custom metadata
+  metaVersion: 2;
+  imageVersion: 1;
   format?: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
 }
 
