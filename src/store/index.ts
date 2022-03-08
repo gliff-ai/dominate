@@ -16,13 +16,20 @@ import { AnnotationSession } from "@gliff-ai/audit";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
-import type {
+import type { ImageItemMeta } from "./interfaces";
+import {
   GalleryMeta,
   GalleryTile,
-  ImageItemMeta,
-  AnnotationMeta,
   FileInfo,
-} from "./interfaces";
+  ImageMeta,
+  AnnotationMeta,
+  migrations,
+} from "@/interfaces";
+
+interface BaseMeta {
+  version: number;
+  type: string;
+}
 
 const logger = console;
 
@@ -918,6 +925,42 @@ export class DominateStore {
         contentArray.map((content) => JSON.parse(content) as Annotation[])
       ),
     };
+  };
+
+  migrate = async (
+    collectionManager: CollectionManager,
+    collection: Collection
+  ): Promise<Collection> => {
+    // migrate if necessary:
+    let meta = collection.getMeta<BaseMeta>();
+    if (meta.version < migrations[meta.type].length) {
+      let content = await collection.getContent(OutputFormat.String);
+      const outstandingMigrations = migrations[meta.type].slice(meta.version);
+      for (const migration of outstandingMigrations) {
+        type CurrentVersion = Parameters<typeof migration>[0];
+        // all migrations migrate metadata, because even if only the content changes, meta needs a version number bump:
+        meta = migration.meta(meta as CurrentVersion);
+        // but not all migrations migrate content:
+        if (migration.content !== null) {
+          content = migration.content(content);
+        }
+      }
+      collection.setMeta(meta);
+      await collection.setContent(content);
+
+      await collectionManager.upload(collection);
+    }
+
+    return collection;
+  };
+
+  fetch = async (
+    collectionManager: CollectionManager,
+    uid: string
+  ): Promise<Collection> => {
+    // fetch collection:
+    let collection = await collectionManager.fetch(uid);
+    return await this.migrate(collectionManager, collection);
   };
 
   fetchMulti = async (
