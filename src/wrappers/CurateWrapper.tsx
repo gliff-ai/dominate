@@ -141,7 +141,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     const thumbnails: string[] = [];
     const stringifiedSlices: string[] = [];
 
-    // props.setTask({ ...props.task, progress: 0 });
+    props.setTask({ ...props.task, progress: 0 });
 
     for (let i = 0; i < imageFileInfo.length; i += 1) {
       // Stringify slices data and get image metadata
@@ -158,7 +158,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       }
     }
 
-    // props.setTask({ ...props.task, progress: 10 });
+    props.setTask({ ...props.task, progress: 10 });
 
     // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
     await props.storeInstance.createImage(
