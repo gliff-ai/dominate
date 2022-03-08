@@ -215,7 +215,6 @@ export const NavBar = (props: Props): ReactElement | null => {
                   <BaseProductIcon
                     key="document"
                     tool="document"
-                    target="_blank"
                     customUrlPath="https://docs.gliff.app/"
                     extraStyleSvg={classes.accessibleSvg}
                     extraStyleName={classes.accessibleName}

@@ -49,9 +49,6 @@ interface Props {
   tool: string;
   customUrlPath?: string;
   linkDisabled?: boolean;
-  // TODO: support target?
-  // eslint-disable-next-line react/no-unused-prop-types
-  target?: string;
   extraStyleAvatar?: string;
   extraStyleSvg?: string;
   extraStyleName?: string;
@@ -92,12 +89,22 @@ function BaseProductIcon({
     </Avatar>
   );
 
+  const handleNavigate = () => {
+    if (customUrlPath?.startsWith("http")) {
+      window.open(customUrlPath, "_blank");
+    } else if (customUrlPath) {
+      navigate(customUrlPath);
+    } else {
+      navigate(`/${tool}`);
+    }
+  };
+
   return (
     <div className={classes.outerDiv}>
       <div className={classes.iconDiv}>
         <Button
           className={classes.productButton}
-          onClick={() => navigate(customUrlPath || `/${tool}`)}
+          onClick={handleNavigate}
           disabled={linkDisabled}
         >
           {avatar}
@@ -130,7 +137,6 @@ function BaseProductIcon({
 
 BaseProductIcon.defaultProps = {
   linkDisabled: false,
-  target: "_self",
   extraStyleAvatar: undefined,
   extraStyleSvg: undefined,
   extraStyleName: undefined,
