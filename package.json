@@ -53,7 +53,7 @@
     "@sentry/react": "^6.6.0",
     "@sentry/tracing": "^6.6.0",
     "@stripe/stripe-js": "^1.14.0",
-    "ajv": "^8.6.2",
+    "ajv": "^8.10.0",
     "axios": "^0.24.0",
     "csstype": "^3.0.10",
     "etebase": "^0.43.1",
