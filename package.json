@@ -62,7 +62,7 @@
     "jszip": "^3.7.0",
     "libsodium-wrappers": "^0.7.6",
     "logrocket": "^2.0.0",
-    "logrocket-react": "^4.0.1",
+    "logrocket-react": "^5.0.1",
     "path-browserify": "^1.0.1",
     "react": "^17.0.0",
     "react-cookie-consent": "^6.2.4",
