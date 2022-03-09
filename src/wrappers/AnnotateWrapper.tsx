@@ -1,20 +1,18 @@
-import { ReactElement, useState, useEffect, useRef } from "react";
+import { ReactElement, useState, useEffect, useRef, useCallback } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Card, makeStyles } from "@material-ui/core";
+import { Card } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
 
 import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
 import { ImageFileInfo } from "@gliff-ai/upload";
-import { icons, IconButton } from "@gliff-ai/style";
+import { icons, IconButton, Task } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
-import { AnnotationMeta, Image } from "@/store/interfaces";
-import { Task, TSButtonToolbar } from "@/components";
-import {
-  parseStringifiedSlices,
-  getImageFileInfoFromImageMeta,
-} from "@/imageConversions";
+import { AnnotationMeta } from "@/store/interfaces";
+import { parseStringifiedSlices } from "@/imageConversions";
 import { useAuth, useStore } from "@/hooks";
 import { setStateIfMounted } from "@/helpers";
 import { UserAccess } from "@/hooks/use-auth";
+import { initPluginObjects, PluginObject, Product } from "@/plugins";
 
 interface Props {
   storeInstance: DominateStore;
@@ -50,7 +48,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const navigate = useNavigate();
   const auth = useAuth();
   const { collectionUid = "", imageUid = "" } = useParams();
-  const [imageItem, setImageItem] = useState<Image | null>(null);
+  const [imageContent, setImageContent] = useState<string | null>(null);
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
   const [imageFileInfo, setImageFileInfo] = useState<ImageFileInfo>();
   const [annotationsObject, setAnnotationsObject] = useState<Annotations>();
@@ -58,6 +56,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [isComplete, setIsComplete] = useState<boolean>(false);
   const [imageUids, setImageUids] = useState<string[] | null>(null);
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
+  const [plugins, setPlugins] = useState<PluginObject | null>(null);
+
   const isMounted = useRef(false);
   const classes = useStyle();
 
@@ -68,23 +68,28 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     if (!imageUids || currImageIdx === null) return;
     const inc = forward ? 1 : -1;
     const newIndex = (currImageIdx + inc + imageUids.length) % imageUids.length;
-    setImageItem(null);
+    setImageContent(null);
     setSlicesData(null);
     navigate(`/annotate/${collectionUid}/${imageUids[newIndex]}`);
   }
+
+  const isOwnerOrMember = useCallback(
+    () =>
+      auth?.userAccess === UserAccess.Owner ||
+      auth?.userAccess === UserAccess.Member,
+    [auth]
+  );
 
   const fetchImageItems = useStore(
     props,
     (storeInstance) => {
       if (!auth?.user?.username) return;
-      const canViewAllImages =
-        auth.userAccess === UserAccess.Owner ||
-        auth.userAccess === UserAccess.Member;
+      const canViewAllImages = isOwnerOrMember();
 
       storeInstance
         .getImagesMeta(collectionUid, auth?.user.username)
         .then((items) => {
-          const wrangled = items
+          const imageUIDs = items.tiles
             .filter(
               (item) =>
                 (canViewAllImages ||
@@ -92,7 +97,17 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
                 item.imageUID
             )
             .map((item) => item.imageUID);
-          setStateIfMounted(wrangled, setImageUids, isMounted.current);
+          setStateIfMounted(imageUIDs, setImageUids, isMounted.current);
+          const fileInfo = items.tiles.find(
+            (item) => item.imageUID === imageUid
+          )?.fileInfo;
+          if (fileInfo) {
+            setStateIfMounted(
+              new ImageFileInfo(fileInfo),
+              setImageFileInfo,
+              isMounted.current
+            );
+          }
         })
         .catch((e) => {
           console.error(e);
@@ -111,6 +126,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             onClick={() => cycleImage(false)}
             tooltipPlacement="bottom"
             disabled={!canCycle()}
+            size="small"
           />
         </Card>
         <Card className={classes.cardSize}>
@@ -120,6 +136,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             onClick={() => setIsComplete((prevIsComplete) => !prevIsComplete)}
             fill={isComplete}
             tooltipPlacement="bottom"
+            size="small"
           />
         </Card>
         <Card className={`${classes.cardSize} ${classes.cardRight}`}>
@@ -130,6 +147,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             onClick={() => cycleImage()}
             tooltipPlacement="bottom"
             disabled={!canCycle()}
+            size="small"
           />
         </Card>
       </div>
@@ -149,7 +167,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   useEffect(() => {
     if (!collectionUid) return;
     fetchImageItems();
-  }, [collectionUid]);
+  }, [collectionUid, fetchImageItems]);
 
   useEffect(() => {
     if (!imageUids) return;
@@ -162,10 +180,11 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     // Save annotations data
     props.setTask({
       isLoading: true,
-      description: "Saving annotation...",
+      description: "Saving annotation in progress, please wait...",
       progress: 0,
     });
     const annotationsData = newAnnotationsObject.getAllAnnotations();
+
     const auditData = newAnnotationsObject.getAuditObject();
 
     props.storeInstance
@@ -180,7 +199,14 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         auth.user.username
       )
       .then(() => {
-        props.setTask({ isLoading: false, description: "" });
+        props.setTask({
+          isLoading: true,
+          description: "Saving annotation complete!",
+          progress: 100,
+        });
+        setTimeout(() => {
+          props.setTask({ isLoading: false, description: "" });
+        }, 5000);
       })
       .catch((e) => console.error(e));
   };
@@ -195,7 +221,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       props.storeInstance
         .getImage(collectionUid, imageUid)
         .then((image) => {
-          setStateIfMounted(image, setImageItem, isMounted.current);
+          setStateIfMounted(image, setImageContent, isMounted.current);
         })
         .catch((e) => console.error(e));
     };
@@ -256,28 +282,39 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     props.storeInstance.ready,
     auth,
     isMounted,
+    isComplete,
   ]);
 
+  const fetchPlugins = useCallback(async () => {
+    if (!auth?.user || collectionUid === "") return;
+    try {
+      const newPlugins = await initPluginObjects(
+        Product.ANNOTATE,
+        collectionUid,
+        auth?.user?.username as string
+      );
+      if (newPlugins) {
+        setStateIfMounted(newPlugins, setPlugins, isMounted.current);
+      }
+    } catch (e) {
+      console.error(e);
+    }
+  }, [auth, collectionUid, isMounted]);
+
   useEffect(() => {
-    if (imageItem) {
+    void fetchPlugins();
+  }, [fetchPlugins]);
+
+  useEffect(() => {
+    if (imageContent) {
       // Set slicesData
-      parseStringifiedSlices(
-        imageItem.content,
-        imageItem.meta.width,
-        imageItem.meta.height
-      )
+      parseStringifiedSlices(imageContent)
         .then((newSlicesData) => {
           setSlicesData(newSlicesData);
         })
         .catch((e) => console.error(e));
-      // Set imageFileInfo
-      const fileInfo = getImageFileInfoFromImageMeta(
-        imageItem.uid,
-        imageItem.meta
-      );
-      setImageFileInfo(fileInfo);
     }
-  }, [imageItem]);
+  }, [imageContent]);
 
   if (
     !props.storeInstance ||
@@ -296,10 +333,13 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       annotationsObject={slicesData ? annotationsObject : undefined}
       saveAnnotationsCallback={saveAnnotation}
       setIsLoading={props.setIsLoading}
-      trustedServiceButtonToolbar={
-        <TSButtonToolbar collectionUid={collectionUid} imageUid={imageUid} />
-      }
       userAccess={auth.userAccess}
+      plugins={plugins}
+      launchPluginSettingsCallback={
+        Number(auth?.userProfile?.team?.tier?.id) > 1 && isOwnerOrMember()
+          ? () => navigate(`/manage/plugins`)
+          : null
+      }
     />
   );
 };

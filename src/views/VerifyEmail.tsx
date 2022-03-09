@@ -1,6 +1,6 @@
 import { FormEvent, useState } from "react";
 import { useNavigate, useParams } from "react-router-dom";
-import { Typography } from "@material-ui/core";
+import { Typography } from "@mui/material";
 import { MessageAlert, SubmitButton } from "@/components";
 import { apiRequest } from "@/api";
 import { useMountEffect } from "@/hooks/use-mountEffect";

@@ -9,18 +9,20 @@ import {
   OutputFormat,
   CollectionAccessLevel,
 } from "etebase";
+
+import { Task } from "@gliff-ai/style";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
+import { ImageFileInfo } from "@gliff-ai/upload";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
 import type {
   GalleryMeta,
   GalleryTile,
-  Image,
-  ImageMeta,
+  ImageItemMeta,
   AnnotationMeta,
+  FileInfo,
 } from "./interfaces";
-import { Task } from "@/components";
 
 const logger = console;
 
@@ -226,6 +228,67 @@ export class DominateStore {
     }
   };
 
+  getCollectionContent = async (
+    collectionUid: string
+  ): Promise<{
+    uid: string;
+    content: GalleryTile[];
+  }> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+
+    return {
+      uid: collectionUid,
+      content: JSON.parse(
+        await collection.getContent(OutputFormat.String)
+      ) as GalleryTile[],
+    };
+  };
+
+  updateCollectionName = async (
+    collectionUid: string,
+    collectionName: string
+  ): Promise<void> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+
+    const meta = collection.getMeta();
+    collection.setMeta({
+      ...meta,
+      modifiedTime: Date.now(),
+      name: collectionName,
+    });
+
+    await collectionManager.transaction(collection);
+  };
+
+  updateCollectionMeta = async (
+    collectionUid: string,
+    newMeta: Partial<{
+      defaultLabels: string[];
+      restrictLabels: boolean;
+      multiLabel: boolean;
+    }>
+  ): Promise<void> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+
+    const oldMeta = collection.getMeta();
+    collection.setMeta({
+      ...oldMeta,
+      ...newMeta, // should overwrite any fields that are already in oldMeta
+      modifiedTime: Date.now(),
+    });
+
+    await collectionManager.upload(collection);
+  };
+
   getCollectionsContent = async (
     type = "gliff.gallery"
   ): Promise<
@@ -281,7 +344,7 @@ export class DominateStore {
   getImagesMeta = async (
     collectionUid: string,
     username: string
-  ): Promise<GalleryTile[]> => {
+  ): Promise<{ tiles: GalleryTile[]; galleryMeta: GalleryMeta }> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -295,7 +358,8 @@ export class DominateStore {
     };
     const json = JSON.parse(jsonString) as GalleryTile[] | OldGalleryTile[];
 
-    // migrate GalleryTiles to new format if necessary:
+    // migrate GalleryTiles to have multiple annotations/audits per image if necessary:
+    let migrate = false;
     if (
       json.length > 0 &&
       (typeof json[0].annotationUID === "string" ||
@@ -312,11 +376,58 @@ export class DominateStore {
         if (auditUID !== null) json[i].auditUID[username] = auditUID;
       }
 
+      migrate = true;
+    }
+
+    // migrate tile.metadata -> tile.fileInfo:
+    for (let i = 0; i < json.length; i += 1) {
+      if (!("fileInfo" in json[i]) && "metadata" in json[i]) {
+        json[i].fileInfo = (
+          json[i] as GalleryTile & { metadata: FileInfo }
+        ).metadata;
+        migrate = true;
+      }
+
+      if (
+        !("fileName" in json[i].fileInfo) &&
+        "imageName" in json[i].fileInfo
+      ) {
+        // rename fileInfo.imageName -> fileInfo.fileName:
+        json[i].fileInfo.fileName = (
+          json[i].fileInfo as FileInfo & { imageName: string }
+        ).imageName;
+        migrate = true;
+      }
+    }
+
+    if (migrate) {
       // update in store:
       await collection.setContent(JSON.stringify(json));
+      migrate = true;
+    }
+
+    // get collection metadata:
+    const meta = this.wrangleGallery(collection);
+
+    // migrate GalleryMeta to include defaultLabels, restrictLabels and multiLabel if necessary:
+    if (!("defaultLabels" in meta)) {
+      meta.defaultLabels = [];
+      migrate = true;
+    }
+    if (!("restrictLabels" in meta)) {
+      meta.restrictLabels = false;
+      migrate = true;
+    }
+    if (!("multiLabel" in meta)) {
+      meta.multiLabel = false;
+      migrate = true;
+    }
+
+    if (migrate) {
       await collectionManager.upload(collection);
     }
-    return json as GalleryTile[];
+
+    return { tiles: json as GalleryTile[], galleryMeta: meta };
   };
 
   getCollectionsMeta = async (
@@ -332,21 +443,84 @@ export class DominateStore {
     return this.collectionsMeta;
   };
 
-  getCollectionMembers = async (
-    collectionUid: string
-  ): Promise<string[] | null> => {
-    if (this.collections.length > 0) return null;
+  getCollectionMeta = async (collectionUid: string): Promise<GalleryMeta> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
-    const memberManager = collectionManager.getMemberManager(collection);
-    const members = await memberManager.list();
 
-    return members.data.map((m) => m.username);
+    return { ...collection.getMeta(), uid: collection.uid };
   };
 
-  createCollection = async (name: string): Promise<void> => {
+  getCollectionMembers = async (
+    collectionUid: string
+  ): Promise<{ usernames: string[]; pendingUsernames: string[] } | null> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const invitationManager = this.etebaseInstance.getInvitationManager();
+
+    const collection = await collectionManager.fetch(collectionUid);
+    const memberManager = collectionManager.getMemberManager(collection);
+    const members = await memberManager.list();
+    const invitations = await invitationManager.listOutgoing();
+
+    return {
+      usernames: members.data.map(({ username }) => username),
+      pendingUsernames: invitations.data
+        .filter((item) => item.collection === collectionUid)
+        .map(({ username }) => username)
+        .filter((item, i, array) => array.indexOf(item) === i), // filter out duplicates
+    };
+  };
+
+  getCollectionsMembers = async (
+    type = "gliff.gallery"
+  ): Promise<
+    {
+      uid: string;
+      usernames: string[];
+      pendingUsernames: string[];
+    }[]
+  > => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const invitationManager = this.etebaseInstance.getInvitationManager();
+    const { data } = await collectionManager.list(type);
+
+    const resolved: {
+      uid: string;
+      usernames: string[];
+      pendingUsernames: string[];
+    }[] = [];
+    await Promise.allSettled(
+      data.map(async (collection) => {
+        const memberManager = collectionManager.getMemberManager(collection);
+        const members = await memberManager.list();
+        const invitations = await invitationManager.listOutgoing();
+
+        return {
+          uid: collection.uid,
+          usernames: members.data.map(({ username }) => username),
+          pendingUsernames: invitations.data
+            .filter((item) => item.collection === collection.uid)
+            .map(({ username }) => username)
+            .filter((item, i, array) => array.indexOf(item) === i), // filter out duplicates
+        };
+      })
+    ).then((results) =>
+      results.forEach((result) => {
+        if (result.status === "fulfilled") {
+          resolved.push(result.value);
+        }
+      })
+    );
+
+    return resolved;
+  };
+
+  createCollection = async (name: string): Promise<string> => {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     // Create, encrypt and upload a new collection
@@ -361,6 +535,7 @@ export class DominateStore {
       "[]" // content
     );
     await collectionManager.upload(collection);
+    return collection.uid;
   };
 
   // TODO change this to return errors and display them when we do styling etc
@@ -421,6 +596,20 @@ export class DominateStore {
     }
   };
 
+  revokeAccessToCollection = async (
+    collectionUid: string,
+    username: string
+  ): Promise<void> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const memberManager = collectionManager.getMemberManager(collection);
+    await memberManager.remove(username);
+
+    await this.removeAssignee(collectionUid, username);
+  };
+
   getItemManager = async (collectionUid: string): Promise<ItemManager> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -456,7 +645,7 @@ export class DominateStore {
 
   createImage = async (
     collectionUid: string,
-    imageMetas: ImageMeta[],
+    imageFileInfos: ImageFileInfo[],
     thumbnails: string[],
     imageContents: string[] | Uint8Array[],
     task: Task,
@@ -470,23 +659,25 @@ export class DominateStore {
 
       const itemPromises: Promise<Item>[] = [];
 
-      for (let i = 0; i < imageMetas.length; i += 1) {
-        const imageMeta = imageMetas[i];
+      for (let i = 0; i < imageFileInfos.length; i += 1) {
+        const imageFileInfo = imageFileInfos[i];
         const imageContent = imageContents[i];
 
         // Create new image item and add it to the collection
         itemPromises.push(
-          itemManager.create(
-            {
-              type: "gliff.image",
-              name: imageMeta.imageName,
-              createdTime,
-              modifiedTime: createdTime,
-              width: imageMeta.width,
-              height: imageMeta.height,
-            },
-            imageContent
-          )
+          itemManager
+            .create<Omit<ImageItemMeta, "uid">>( // partial because we can't know the uid yet, etebase assigns it here
+              {
+                type: "gliff.image",
+                name: imageFileInfo.fileName,
+                createdTime,
+                modifiedTime: createdTime,
+                fileInfo: imageFileInfo,
+              },
+              imageContent
+            )
+            // We use uploadContent, then batch when we want to chunk
+            .then((item: Item) => itemManager.batch([item]).then(() => item))
         );
       }
 
@@ -494,17 +685,16 @@ export class DominateStore {
 
       // save new image items:
       const newItems = await Promise.all(itemPromises);
-      await itemManager.batch(newItems);
 
       const newTiles: GalleryTile[] = [];
-      for (let i = 0; i < imageMetas.length; i += 1) {
+      for (let i = 0; i < imageFileInfos.length; i += 1) {
         // Add the image's metadata/thumbnail and a pointer to the image item to the gallery's content:
         newTiles.push({
           id: newItems[i].uid, // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
           thumbnail: thumbnails[i],
           imageLabels: [],
           assignees: [],
-          metadata: imageMetas[i],
+          fileInfo: imageFileInfos[i],
           imageUID: newItems[i].uid,
           annotationUID: {},
           annotationComplete: {},
@@ -607,23 +797,39 @@ export class DominateStore {
 
     // delete image, annotation and audit items:
     const itemManager = collectionManager.getItemManager(collection);
-    const allItems: {
-      data: Item[];
-      stoken: string;
-      done: boolean;
-    } = await itemManager.fetchMulti(
+    const allItems: Item[] = await this.fetchMulti(
+      itemManager,
       imageUIDs.concat(annotationUIDs).concat(auditUIDs)
     );
 
     setTask({ isLoading: true, description: "Image deletion", progress: 75 });
 
-    allItems.data.forEach((item) => {
+    allItems.forEach((item) => {
       item.delete();
     });
 
-    await itemManager.batch(allItems.data);
+    await itemManager.batch(allItems);
 
     setTask({ isLoading: false, description: "Image deletion", progress: 100 });
+  };
+
+  removeAssignee = async (
+    collectionUid: string,
+    username: string
+  ): Promise<void> => {
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const content = JSON.parse(
+      await collection.getContent(OutputFormat.String)
+    ) as GalleryTile[];
+
+    const newContent = content.map((tile) => ({
+      ...tile,
+      assignees: tile?.assignees?.filter((a) => a !== username) || [], // unassign all items from a user
+    }));
+
+    await collection.setContent(JSON.stringify(newContent));
+    await collectionManager.transaction(collection);
   };
 
   getAnnotationsObject = async (
@@ -631,7 +837,7 @@ export class DominateStore {
     imageUid: string,
     username: string
   ): Promise<{ meta: AnnotationMeta; annotations: Annotations } | null> => {
-    // retrieves the Annotations object for the specified image
+    // retrieves the Annotations object by the specified user for the specified image
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await collectionManager.fetch(collectionUid);
@@ -660,6 +866,70 @@ export class DominateStore {
       meta: annotationMeta,
       annotations: new Annotations(JSON.parse(annotationContent)),
     };
+  };
+
+  getAllAnnotationsObjects = async (
+    collectionUid: string
+  ): Promise<{ meta: AnnotationMeta[][]; annotations: Annotation[][][] }> => {
+    // retrieves the Annotations objects for all images by all users
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const tiles = JSON.parse(
+      await collection.getContent(OutputFormat.String)
+    ) as GalleryTile[];
+
+    const itemManager = collectionManager.getItemManager(collection);
+    const annotationUIDs = ([] as string[]).concat(
+      ...tiles.map((tile) => Object.values(tile.annotationUID))
+    ); // [im0_ann0, im0_ann1, im0_ann2, im1_ann0, im1_ann1, ...]
+    const annotationItems = await this.fetchMulti(itemManager, annotationUIDs);
+
+    const annotationItemContents = await Promise.all(
+      annotationItems.map((annotation) =>
+        annotation.getContent(OutputFormat.String)
+      )
+    );
+
+    const annotationsMeta = await Promise.all(
+      annotationItems.map(
+        (annotation) => annotation.getMeta() as AnnotationMeta
+      )
+    );
+
+    // reshape arrays into [[im0_ann0, im0_ann1, im0_ann2], [im1_ann0, im1_ann1], ...]:
+    const annotationContentsReshaped: string[][] = [];
+    const annotationsMetaReshaped: AnnotationMeta[][] = [];
+
+    tiles.forEach((tile) => {
+      const imageAnnotations: string[] = [];
+      const imageAnnotationMetas: AnnotationMeta[] = [];
+      annotationUIDs.forEach((uid, i) => {
+        if (Object.values(tile.annotationUID).includes(uid)) {
+          imageAnnotations.push(annotationItemContents[i]);
+          imageAnnotationMetas.push(annotationsMeta[i]);
+        }
+      });
+      annotationContentsReshaped.push(imageAnnotations);
+      annotationsMetaReshaped.push(imageAnnotationMetas);
+    });
+
+    return {
+      meta: annotationsMetaReshaped,
+      annotations: annotationContentsReshaped.map((contentArray) =>
+        contentArray.map((content) => JSON.parse(content) as Annotation[])
+      ),
+    };
+  };
+
+  fetchMulti = async (
+    itemManager: ItemManager,
+    UIDs: string[]
+  ): Promise<Item[]> => {
+    // calls itemManager.fetchMulti(UIDs), but returns the items in the same order they're specified in UIDs
+
+    const items = (await itemManager.fetchMulti(UIDs)).data;
+    return UIDs.map((uid) => items.find((item) => item.uid === uid)) as Item[];
   };
 
   createAnnotation = async (
@@ -727,6 +997,7 @@ export class DominateStore {
     );
     galleryTiles[tileIdx].annotationUID[username] = annotationsItem.uid;
     galleryTiles[tileIdx].auditUID[username] = auditItem.uid;
+    galleryTiles[tileIdx].annotationComplete[username] = false;
     await collection.setContent(JSON.stringify(galleryTiles));
     await collectionManager.upload(collection);
 
@@ -753,7 +1024,7 @@ export class DominateStore {
     const collection = await collectionManager.fetch(collectionUid);
     setTask({
       isLoading: true,
-      description: "Saving annotation...",
+      description: "Saving annotation in progress, please wait...",
       progress: 35,
     });
     const collectionContent = await collection.getContent(OutputFormat.String);
@@ -788,38 +1059,38 @@ export class DominateStore {
 
     // Retrieve items
     const itemManager = await this.getItemManager(collectionUid);
-    const items = await itemManager.fetchMulti([annotationUid, auditUid]);
+    const items = await this.fetchMulti(itemManager, [annotationUid, auditUid]);
     setTask({
       isLoading: true,
-      description: "Saving annotation...",
+      description: "Saving annotation in progress, please wait...",
       progress: 70,
     });
-    const annotationItem = items.data[0];
-    const auditItem = items.data[1];
 
-    // Update annotationItem:
-    let meta = annotationItem.getMeta();
-    const mtime = new Date().getTime();
+    let annotationItem: Item;
+    let auditItem: Item;
+    if (items[0].getMeta().type === "gliff.annotation") {
+      // note: this check should be obsolete since adding this.fetchMulti
+      [annotationItem, auditItem] = items;
+    } else {
+      [auditItem, annotationItem] = items;
+    }
+
+    const modifiedTime = new Date().getTime();
+
+    // Update annotation item
     annotationItem.setMeta({
-      ...meta,
-      mtime,
+      ...annotationItem.getMeta(),
+      modifiedTime,
       isComplete,
     });
     await annotationItem.setContent(JSON.stringify(annotationData));
 
-    // Update auditItem:
-    meta = auditItem.getMeta();
-    auditItem.setMeta({ ...meta, mtime });
+    // Update audit item
+    auditItem.setMeta({ ...auditItem.getMeta(), modifiedTime });
     await auditItem.setContent(JSON.stringify(auditData));
 
     // Save changes
     await itemManager.batch([annotationItem, auditItem]);
-
-    setTask({
-      isLoading: true,
-      description: "Saving annotation...",
-      progress: 100,
-    });
   };
 
   getItem = async (collectionUid: string, itemUid: string): Promise<Item> => {
@@ -829,16 +1100,93 @@ export class DominateStore {
     return item;
   };
 
-  getImage = async (collectionUid: string, itemUid: string): Promise<Image> => {
+  getImage = async (
+    collectionUid: string,
+    itemUid: string
+  ): Promise<string> => {
     // Retrieve image item from a collection.
     const item = await this.getItem(collectionUid, itemUid);
     const content = await item.getContent(OutputFormat.String);
-    return {
+    return content;
+  };
+
+  getAllImages = async (
+    collectionUid: string
+  ): Promise<{ meta: ImageItemMeta; content: string }[]> => {
+    // Retrive all image items from a collection
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const collectionContent = await collection.getContent(OutputFormat.String);
+    const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
+
+    const itemManager = collectionManager.getItemManager(collection);
+
+    const imageItems = await this.fetchMulti(
+      itemManager,
+      galleryTiles.map((tile) => tile.imageUID)
+    );
+    const imageContents = await Promise.all(
+      imageItems.map((item) => item.getContent(OutputFormat.String))
+    );
+
+    let migrate = false;
+    for (let i = 0; i < imageItems.length; i += 1) {
+      if (!("fileInfo" in imageItems[i].getMeta())) {
+        interface OldImageMeta {
+          imageName: string;
+          num_slices: number; // number of z-slices
+          num_channels: number; // numbers colour channels
+          width: number; // width of each slice
+          height: number; // height of each slice
+          size: number; // size of the image in bytes
+          resolution_x: number;
+          resolution_y: number;
+          resolution_z: number;
+          format?: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
+          content_hash?: string; // we use this for making sure we don't have duplicate images in a dataset
+          customMeta?: string; // JSON of custom metadata
+        }
+
+        const oldMeta = imageItems[i].getMeta() as OldImageMeta;
+        const fileInfo = {
+          fileName: oldMeta.imageName,
+          num_slices: oldMeta.num_slices,
+          num_channels: oldMeta.num_channels,
+          width: oldMeta.width,
+          height: oldMeta.height,
+          size: oldMeta.size,
+          resolution_x: oldMeta.resolution_x,
+          resolution_y: oldMeta.resolution_y,
+          resolution_z: oldMeta.resolution_z,
+          content_hash: oldMeta.content_hash,
+        };
+        imageItems[i].setMeta({ ...oldMeta, fileInfo });
+        migrate = true;
+      }
+
+      if (
+        !("fileName" in imageItems[i].getMeta<ImageItemMeta>().fileInfo) &&
+        "imageName" in imageItems[i].getMeta<ImageItemMeta>().fileInfo
+      ) {
+        // migrate fileInfo.imageName -> fileInfo.fileName
+        const meta = imageItems[i].getMeta<ImageItemMeta>();
+        meta.fileInfo.fileName = (
+          meta.fileInfo as FileInfo & { imageName: string }
+        ).imageName;
+        imageItems[i].setMeta({ meta });
+        migrate = true;
+      }
+    }
+
+    if (migrate) {
+      await itemManager.batch(imageItems);
+    }
+
+    return imageItems.map((item, i) => ({
       meta: item.getMeta(),
-      type: "gliff.image",
-      uid: item.uid,
-      content,
-    } as Image;
+      content: imageContents[i],
+    }));
   };
 
   getAudits = async (collectionUid: string): Promise<AnnotationSession[]> => {
@@ -856,7 +1204,7 @@ export class DominateStore {
     const auditUIDs = tiles.map((tile) => Object.values(tile.auditUID)).flat();
     if (auditUIDs.length === 0) return [];
 
-    const auditItems = (await itemManager.fetchMulti(auditUIDs)).data;
+    const auditItems = await this.fetchMulti(itemManager, auditUIDs);
 
     const auditStrings: string[] = await Promise.all(
       auditItems.map((audit) => audit.getContent(OutputFormat.String))
@@ -873,7 +1221,7 @@ export class DominateStore {
       .map((tile) =>
         Object.keys(tile.auditUID).map((username) => ({
           username,
-          imagename: tile.metadata.imageName,
+          imagename: tile.fileInfo.fileName,
         }))
       )
       .flat();
@@ -935,4 +1283,4 @@ export class DominateStore {
   };
 }
 
-export { Collection, Item, GalleryMeta, Image };
+export { Collection, Item, GalleryMeta };

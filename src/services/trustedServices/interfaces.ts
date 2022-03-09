@@ -1,21 +1,20 @@
-export interface TrustedService {
-  team_id: number;
-  name: string;
-  base_url: string;
-}
+import { JsPlugin } from "../plugins/interfaces";
 
-export interface UiElement {
-  placement: string[];
-  apiEndpoint: string;
-  uiParams: {
-    tag?: string;
-    value?: string;
-    icon: string;
-    tooltip: string;
-  };
+export interface TrustedService extends JsPlugin {
+  username: string;
 }
-
 export interface UiTemplate {
   trustedService: string;
   uiElements: UiElement[];
+}
+
+export interface UiElement {
+  placement: string[]; // TODO: delete
+  apiEndpoint: string;
+  uiParams: {
+    tag?: string; // NOTE: unused
+    value?: string; // NOTE: unused
+    icon: string; // TODO: delete
+    tooltip: string;
+  };
 }

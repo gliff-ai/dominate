@@ -6,13 +6,13 @@ import { CaptureConsole } from "@sentry/integrations";
 import LogRocket from "logrocket";
 import setupLogRocketReact from "logrocket-react";
 import { BrowserRouter } from "react-router-dom";
-import { StylesProvider } from "@material-ui/core";
+import StylesProvider from "@mui/styles/StylesProvider";
 import { generateClassName } from "@gliff-ai/style";
 import { SentryErrorPage, BasicPage } from "@/views";
 
 import { DominateStore, API_URL } from "@/store";
 import UserInterface from "@/ui";
-import { ProvideAuth, ProvideTrustedService, ProvidePlugins } from "@/hooks";
+import { ProvideAuth } from "@/hooks";
 
 const IS_MONITORED = import.meta.env.VITE_IS_MONITORED === "true";
 
@@ -76,13 +76,9 @@ ReactDOM.render(
       showDialog
     >
       <ProvideAuth storeInstance={storeInstance}>
-        <ProvideTrustedService>
-          <ProvidePlugins>
-            <StylesProvider generateClassName={generateClassName("dominate")}>
-              <UserInterface storeInstance={storeInstance} />
-            </StylesProvider>
-          </ProvidePlugins>
-        </ProvideTrustedService>
+        <StylesProvider generateClassName={generateClassName("dominate")}>
+          <UserInterface storeInstance={storeInstance} />
+        </StylesProvider>
       </ProvideAuth>
     </Sentry.ErrorBoundary>
   </BrowserRouter>,

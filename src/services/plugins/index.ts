@@ -1,11 +1,19 @@
 import { apiRequest } from "@/api";
-import type { Plugin, Product } from "./interfaces";
+import type { JsPlugin } from "./interfaces";
 
-export const getPlugins = (): Promise<Plugin[]> =>
-  apiRequest<Plugin[]>(`/plugin/`, "GET");
+const getPlugins = (): Promise<JsPlugin[]> =>
+  apiRequest<JsPlugin[]>(`/plugin/`, "GET");
 
-export const createPlugin = (url: string, product: Product): Promise<number> =>
-  apiRequest<number>("/plugin/", "POST", {
-    url,
-    product,
-  });
+const createPlugin = (plugin: JsPlugin): Promise<number> =>
+  apiRequest<number>("/plugin/", "POST", { ...plugin });
+
+const updatePlugin = (plugin: JsPlugin): Promise<number> =>
+  apiRequest<number>("/plugin/", "PUT", { ...plugin });
+
+const deletePlugin = (plugin: JsPlugin): Promise<number> =>
+  apiRequest<number>("/plugin/", "DELETE", { ...plugin });
+
+const jsPluginsAPI = { getPlugins, createPlugin, updatePlugin, deletePlugin };
+
+export { jsPluginsAPI };
+export type { JsPlugin };

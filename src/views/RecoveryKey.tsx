@@ -1,6 +1,7 @@
-import { ReactElement } from "react";
-import { Typography, makeStyles, Card } from "@material-ui/core";
-import { theme } from "@gliff-ai/style";
+import { ChangeEvent, ReactElement, useState } from "react";
+import { Typography, Card, FormControlLabel, Checkbox } from "@mui/material";
+import makeStyles from "@mui/styles/makeStyles";
+import { black, theme } from "@gliff-ai/style";
 import { SubmitButton } from "@/components";
 
 const useStyles = makeStyles(() => ({
@@ -16,8 +17,8 @@ const useStyles = makeStyles(() => ({
   recoveryKeyParagraph: {
     marginBottom: "44px",
     marginTop: "13px",
-    color: theme.palette.text.secondary,
-    fontSize: 13,
+    color: black,
+    fontSize: "21px",
     textAlign: "center",
     width: "519px",
     "& em": {
@@ -48,7 +49,13 @@ interface Props {
 }
 
 export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
+  const [checboxTicked, setCheckboxTicked] = useState<boolean>(false);
+
   const classes = useStyles();
+
+  const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
+    setCheckboxTicked(event.target.checked);
+  };
 
   return (
     <>
@@ -72,14 +79,32 @@ export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
         className={classes.submitDiv}
         style={{ display: "flex", flexDirection: "column" }}
       >
-        <div>I have saved my recovery key somewhere safe</div>
+        <FormControlLabel
+          control={
+            <Checkbox
+              id="confirmRecoveryKeyIsSaved"
+              checked={checboxTicked}
+              onChange={handleChange}
+            />
+          }
+          label={
+            <Typography>
+              I confirm I have saved my recovery key and understand I won&apos;t
+              be able to recover my account and data without it.
+            </Typography>
+          }
+        />
         <form
           onSubmit={(e) => {
             e.preventDefault();
             callback();
           }}
         >
-          <SubmitButton value="Continue" loading={false} />
+          <SubmitButton
+            disabled={!checboxTicked}
+            value="Continue"
+            loading={false}
+          />
         </form>
       </div>
     </>
