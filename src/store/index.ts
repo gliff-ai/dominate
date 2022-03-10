@@ -861,8 +861,8 @@ export class DominateStore {
     )
       return null;
 
-    const itemManager = collectionManager.getItemManager(collection);
-    const annotationItem = await itemManager.fetch(
+    const annotationItem = await this.fetch(
+      collectionManager,
       galleryTile.annotationUID[username]
     );
     const annotationContent = await annotationItem.getContent(
@@ -1253,10 +1253,10 @@ export class DominateStore {
     await this.batchUpload(collectionManager, [annotationItem, auditItem]);
   };
 
-  getItem = async (collectionUid: string, itemUid: string): Promise<Item> => {
+  getItem = async (itemUid: string): Promise<Collection> => {
     // Retrieve item from a collection.
-    const itemManager = await this.getItemManager(collectionUid);
-    const item = await itemManager.fetch(itemUid);
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const item = await this.fetch(collectionManager, itemUid);
     return item;
   };
 
@@ -1265,7 +1265,7 @@ export class DominateStore {
     itemUid: string
   ): Promise<string> => {
     // Retrieve image item from a collection.
-    const item = await this.getItem(collectionUid, itemUid);
+    const item = await this.getItem(itemUid);
     const content = await item.getContent(OutputFormat.String);
     return content;
   };
