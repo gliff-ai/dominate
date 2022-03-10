@@ -2,7 +2,7 @@
 
 interface AnnotationMetaV0 {
   isComplete: boolean;
-  type?: string;
+  type: "gliff.annotation";
   name?: string;
   mtime?: number;
   description?: string;
