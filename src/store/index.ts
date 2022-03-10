@@ -971,7 +971,9 @@ export class DominateStore {
     // add version field and pre-migrate to V0 if necessary:
     if (!("version" in meta)) {
       collection = await this.preMigrate(collection);
+      await collectionManager.upload(collection);
       meta = collection.getMeta<BaseMeta>();
+      content = await collection.getContent();
     }
 
     // migrate if necessary:
@@ -996,10 +998,26 @@ export class DominateStore {
 
   fetch = async (
     collectionManager: CollectionManager,
-    uid: string
+    uid: string,
+    itemManager: ItemManager | null = null
   ): Promise<Collection> => {
     // fetch collection:
-    let collection = await collectionManager.fetch(uid);
+    let collection;
+    try {
+      collection = await collectionManager.fetch(uid);
+    } catch (e) {
+      // it's an Item, convert it to a Collection:
+      if (itemManager === null)
+        throw Error(
+          "Attempting to convert an Item to a Collection without an ItemManager!"
+        );
+      const item = await itemManager.fetch(uid);
+      const meta = item.getMeta();
+      const content = await item.getContent();
+      collection = collectionManager.create(meta.type as string, meta, content);
+      await collectionManager.upload(collection); // this should be redundant since this.migrate will upload it after performing pre-migration
+    }
+
     return await this.migrate(collectionManager, collection);
   };
 
