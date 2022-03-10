@@ -559,31 +559,6 @@ export class DominateStore {
     return collectionManager.getItemManager(collection);
   };
 
-  appendGalleryTile = async (
-    collectionManager: CollectionManager,
-    collectionUid: string,
-    tile: GalleryTile
-  ): Promise<void> => {
-    // adds a new GalleryTile object to the gallery collection's content JSON
-    // uses store transactions to prevent race conditions if multiple images are uploaded at once
-    // (if race conditions occur, it re-fetches and tries again until it works)
-
-    const collection = await this.fetch(collectionManager, collectionUid);
-    const oldContent = await collection.getContent(OutputFormat.String);
-
-    const content = JSON.stringify(
-      (JSON.parse(oldContent) as GalleryTile[]).concat(tile)
-    );
-
-    await collection.setContent(content);
-
-    return collectionManager.transaction(collection).catch((e) => {
-      // TODO: if it's not a conflict something bad had happened so maybe don't retry?, else
-      logger.error(e);
-      return this.appendGalleryTile(collectionManager, collectionUid, tile);
-    });
-  };
-
   createImage = async (
     collectionUid: string,
     imageFileInfos: ImageFileInfo[],
