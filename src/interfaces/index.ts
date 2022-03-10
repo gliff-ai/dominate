@@ -13,12 +13,13 @@ migrations["gliff.gallery"] = GalleryMigrations;
 migrations["gliff.image"] = ImageMigrations;
 migrations["gliff.annotation"] = AnnotationMigrations;
 
-export {
+export type {
   GalleryMeta,
   GalleryContent,
   GalleryTile,
   ImageMeta,
   AnnotationMeta,
   FileInfo,
-  migrations,
 };
+
+export { migrations };

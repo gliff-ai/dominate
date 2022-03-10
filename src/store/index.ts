@@ -8,6 +8,7 @@ import {
   toBase64,
   OutputFormat,
   CollectionAccessLevel,
+  ItemMetadata,
 } from "etebase";
 
 import { Task } from "@gliff-ai/style";
@@ -25,11 +26,14 @@ import {
   AnnotationMeta,
   migrations,
 } from "@/interfaces";
+import { useAuth } from "@/hooks";
 
 interface BaseMeta {
   version: number;
   type: string;
 }
+
+const auth = useAuth();
 
 const logger = console;
 
@@ -927,14 +931,121 @@ export class DominateStore {
     };
   };
 
+  preMigrate = async (collection: Collection): Promise<Collection> => {
+    // migrates a versionless etebase object of unknown structure to V0 of whatever type it is
+
+    const meta: any = collection.getMeta();
+    if ((meta as ItemMetadata).type === "gliff.gallery") {
+      const content = JSON.parse(
+        await collection.getContent(OutputFormat.String)
+      ) as any[];
+
+      // migrate GalleryTiles if necessary:
+      for (let i = 0; i < content.length; i += 1) {
+        if (
+          content.length > 0 &&
+          (typeof content[0].annotationUID === "string" ||
+            content[0].annotationUID === null)
+        ) {
+          // migrate GalleryTiles to hold multiple annotation / audit UIDs:
+          const { annotationUID } = content[i];
+          const { auditUID } = content[i];
+          content[i].annotationUID = {};
+          content[i].auditUID = {};
+          if (annotationUID !== null)
+            content[i].annotationUID[auth?.user?.username as string] =
+              annotationUID;
+          if (auditUID !== null)
+            content[i].auditUID[auth?.user?.username as string] = auditUID;
+        }
+
+        if (!("fileInfo" in content[i]) && "metadata" in content[i]) {
+          // migrate tile.metadata -> tile.fileInfo
+          content[i].fileInfo = content[i].metadata;
+        }
+
+        if (
+          !("fileName" in content[i].fileInfo) &&
+          "imageName" in content[i].fileInfo
+        ) {
+          // rename fileInfo.imageName -> fileInfo.fileName:
+          content[i].fileInfo.fileName = (
+            content[i].fileInfo as FileInfo & { imageName: string }
+          ).imageName;
+        }
+
+        if (!("annotationComplete" in content[i])) {
+          // add annotationComplete field:
+          content[i].annotationComplete = {};
+        }
+      }
+
+      // migrate GalleryMeta to include defaultLabels, restrictLabels and multiLabel if necessary:
+      if (!("defaultLabels" in meta)) {
+        (meta as { defaultLabels: string[] }).defaultLabels = [];
+      }
+      if (!("restrictLabels" in meta)) {
+        (meta as { restrictLabels: boolean }).restrictLabels = false;
+      }
+      if (!("multiLabel" in meta)) {
+        (meta as { multiLabel: boolean }).multiLabel = false;
+      }
+
+      await collection.setContent(JSON.stringify(content));
+    } else if ((meta as ItemMetadata).type === "gliff.image") {
+      if (!("fileInfo" in meta)) {
+        // package file metadata fields into FileInfo:
+        const fileInfo = {
+          fileName: (meta as { imageName: string }).imageName,
+          num_slices: (meta as FileInfo).num_slices,
+          num_channels: (meta as FileInfo).num_channels,
+          width: (meta as FileInfo).width,
+          height: (meta as FileInfo).height,
+          size: (meta as FileInfo).size,
+          resolution_x: (meta as FileInfo).resolution_x,
+          resolution_y: (meta as FileInfo).resolution_y,
+          resolution_z: (meta as FileInfo).resolution_z,
+          content_hash: (meta as FileInfo).content_hash,
+        };
+        (meta as { fileInfo: FileInfo }).fileInfo = fileInfo;
+      }
+
+      if (!("fileName" in meta.fileInfo) && "imageName" in meta.fileInfo) {
+        // migrate fileInfo.imageName -> fileInfo.fileName
+        (meta as { fileInfo: FileInfo }).fileInfo.fileName = (
+          (meta as { fileInfo: FileInfo }).fileInfo as FileInfo & {
+            imageName: string;
+          }
+        ).imageName;
+      }
+    } else if (meta.type === "gliff.annotation") {
+      if (!("isComplete" in meta)) {
+        meta.isComplete = false;
+      }
+    }
+
+    (meta as BaseMeta).version = 0;
+
+    await collection.setMeta(meta);
+
+    return collection;
+  };
+
   migrate = async (
     collectionManager: CollectionManager,
     collection: Collection
   ): Promise<Collection> => {
-    // migrate if necessary:
     let meta = collection.getMeta<BaseMeta>();
+    let content = JSON.parse(await collection.getContent(OutputFormat.String));
+
+    // add version field and pre-migrate to V0 if necessary:
+    if (!("version" in meta)) {
+      collection = await this.preMigrate(collection);
+      meta = collection.getMeta<BaseMeta>();
+    }
+
+    // migrate if necessary:
     if (meta.version < migrations[meta.type].length) {
-      let content = await collection.getContent(OutputFormat.String);
       const outstandingMigrations = migrations[meta.type].slice(meta.version);
       for (const migration of outstandingMigrations) {
         type CurrentVersion = Parameters<typeof migration>[0];
@@ -946,8 +1057,7 @@ export class DominateStore {
         }
       }
       collection.setMeta(meta);
-      await collection.setContent(content);
-
+      await collection.setContent(JSON.stringify(content));
       await collectionManager.upload(collection);
     }
 
@@ -1167,6 +1277,7 @@ export class DominateStore {
       itemManager,
       galleryTiles.map((tile) => tile.imageUID)
     );
+
     const imageContents = await Promise.all(
       imageItems.map((item) => item.getContent(OutputFormat.String))
     );
@@ -1323,5 +1434,3 @@ export class DominateStore {
     await collectionManager.upload(collection);
   };
 }
-
-export { Collection, Item, GalleryMeta };
