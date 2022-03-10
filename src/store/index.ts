@@ -738,7 +738,8 @@ export class DominateStore {
     const itemManager = collectionManager.getItemManager(collection);
     const allItems: Collection[] = await this.fetchMulti(
       itemManager,
-      imageUIDs.concat(annotationUIDs).concat(auditUIDs)
+      imageUIDs.concat(annotationUIDs).concat(auditUIDs),
+      collectionUid
     );
 
     setTask({ isLoading: true, description: "Image deletion", progress: 75 });
@@ -793,7 +794,8 @@ export class DominateStore {
 
     const annotationItem = await this.fetch(
       collectionManager,
-      galleryTile.annotationUID[username]
+      galleryTile.annotationUID[username],
+      collectionUid
     );
     const annotationContent = await annotationItem.getContent(
       OutputFormat.String
@@ -999,7 +1001,7 @@ export class DominateStore {
   fetch = async (
     collectionManager: CollectionManager,
     uid: string,
-    itemManager: ItemManager | null = null
+    galleryUid: string | null = null
   ): Promise<Collection> => {
     // fetch collection:
     let collection;
@@ -1007,10 +1009,13 @@ export class DominateStore {
       collection = await collectionManager.fetch(uid);
     } catch (e) {
       // it's an Item, convert it to a Collection:
-      if (itemManager === null)
+      if (galleryUid === null)
         throw Error(
           "Attempting to convert an Item to a Collection without an ItemManager!"
         );
+      const itemManager = collectionManager.getItemManager(
+        await collectionManager.fetch(galleryUid)
+      );
       const item = await itemManager.fetch(uid);
       const meta = item.getMeta();
       const content = await item.getContent();
@@ -1201,10 +1206,13 @@ export class DominateStore {
     await this.batchUpload(collectionManager, [annotationItem, auditItem]);
   };
 
-  getItem = async (itemUid: string): Promise<Collection> => {
+  getItem = async (
+    collectionUid: string,
+    itemUid: string
+  ): Promise<Collection> => {
     // Retrieve item from a collection.
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const item = await this.fetch(collectionManager, itemUid);
+    const item = await this.fetch(collectionManager, itemUid, collectionUid);
     return item;
   };
 
@@ -1213,7 +1221,7 @@ export class DominateStore {
     itemUid: string
   ): Promise<string> => {
     // Retrieve image item from a collection.
-    const item = await this.getItem(itemUid);
+    const item = await this.getItem(itemUid, collectionUid);
     const content = await item.getContent(OutputFormat.String);
     return content;
   };
