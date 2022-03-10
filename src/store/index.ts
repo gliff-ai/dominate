@@ -737,7 +737,7 @@ export class DominateStore {
     // delete image, annotation and audit items:
     const itemManager = collectionManager.getItemManager(collection);
     const allItems: Collection[] = await this.fetchMulti(
-      itemManager,
+      collectionManager,
       imageUIDs.concat(annotationUIDs).concat(auditUIDs),
       collectionUid
     );
@@ -824,7 +824,11 @@ export class DominateStore {
     const annotationUIDs = ([] as string[]).concat(
       ...tiles.map((tile) => Object.values(tile.annotationUID))
     ); // [im0_ann0, im0_ann1, im0_ann2, im1_ann0, im1_ann1, ...]
-    const annotationItems = await this.fetchMulti(itemManager, annotationUIDs);
+    const annotationItems = await this.fetchMulti(
+      collectionManager,
+      annotationUIDs,
+      collectionUid
+    );
 
     const annotationItemContents = await Promise.all(
       annotationItems.map((annotation) =>
@@ -1027,13 +1031,13 @@ export class DominateStore {
   };
 
   fetchMulti = async (
-    itemManager: ItemManager,
-    UIDs: string[]
+    collectionManager: CollectionManager,
+    UIDs: string[],
+    galleryUid: string | null = null
   ): Promise<Collection[]> => {
-    // calls itemManager.fetchMulti(UIDs), but returns the items in the same order they're specified in UIDs
-
-    const collectionManager = this.etebaseInstance.getCollectionManager();
-    const promises = UIDs.map((uid) => this.fetch(collectionManager, uid));
+    const promises = UIDs.map((uid) =>
+      this.fetch(collectionManager, uid, galleryUid)
+    );
     const collections = await Promise.all(promises);
     return collections;
   };
@@ -1172,7 +1176,11 @@ export class DominateStore {
 
     // Retrieve items
     const itemManager = await this.getItemManager(collectionUid);
-    const items = await this.fetchMulti(itemManager, [annotationUid, auditUid]);
+    const items = await this.fetchMulti(
+      collectionManager,
+      [annotationUid, auditUid],
+      collectionUid
+    );
     setTask({
       isLoading: true,
       description: "Saving annotation in progress, please wait...",
@@ -1239,8 +1247,9 @@ export class DominateStore {
     const itemManager = collectionManager.getItemManager(collection);
 
     const imageItems = await this.fetchMulti(
-      itemManager,
-      galleryTiles.map((tile) => tile.imageUID)
+      collectionManager,
+      galleryTiles.map((tile) => tile.imageUID),
+      collectionUid
     );
 
     const imageContents = await Promise.all(
@@ -1268,7 +1277,11 @@ export class DominateStore {
     const auditUIDs = tiles.map((tile) => Object.values(tile.auditUID)).flat();
     if (auditUIDs.length === 0) return [];
 
-    const auditItems = await this.fetchMulti(itemManager, auditUIDs);
+    const auditItems = await this.fetchMulti(
+      collectionManager,
+      auditUIDs,
+      collectionUid
+    );
 
     const auditStrings: string[] = await Promise.all(
       auditItems.map((audit) => audit.getContent(OutputFormat.String))
