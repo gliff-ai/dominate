@@ -363,80 +363,10 @@ export class DominateStore {
     const collection = await this.fetch(collectionManager, collectionUid);
     const jsonString = await collection.getContent(OutputFormat.String);
 
-    type OldGalleryTile = Omit<GalleryTile, "annotationUID" | "auditUID"> & {
-      annotationUID: string;
-      auditUID: string;
-    };
-    const json = JSON.parse(jsonString) as GalleryTile[] | OldGalleryTile[];
-
-    // migrate GalleryTiles to have multiple annotations/audits per image if necessary:
-    let migrate = false;
-    if (
-      json.length > 0 &&
-      (typeof json[0].annotationUID === "string" ||
-        json[0].annotationUID === null)
-    ) {
-      // migrate to new format:
-      for (let i = 0; i < json.length; i += 1) {
-        const { annotationUID } = json[i];
-        const { auditUID } = json[i];
-        json[i].annotationUID = {};
-        json[i].auditUID = {};
-        if (annotationUID !== null)
-          json[i].annotationUID[username] = annotationUID;
-        if (auditUID !== null) json[i].auditUID[username] = auditUID;
-      }
-
-      migrate = true;
-    }
-
-    // migrate tile.metadata -> tile.fileInfo:
-    for (let i = 0; i < json.length; i += 1) {
-      if (!("fileInfo" in json[i]) && "metadata" in json[i]) {
-        json[i].fileInfo = (
-          json[i] as GalleryTile & { metadata: FileInfo }
-        ).metadata;
-        migrate = true;
-      }
-
-      if (
-        !("fileName" in json[i].fileInfo) &&
-        "imageName" in json[i].fileInfo
-      ) {
-        // rename fileInfo.imageName -> fileInfo.fileName:
-        json[i].fileInfo.fileName = (
-          json[i].fileInfo as FileInfo & { imageName: string }
-        ).imageName;
-        migrate = true;
-      }
-    }
-
-    if (migrate) {
-      // update in store:
-      await collection.setContent(JSON.stringify(json));
-      migrate = true;
-    }
+    const json = JSON.parse(jsonString) as GalleryTile[];
 
     // get collection metadata:
     const meta = this.wrangleGallery(collection);
-
-    // migrate GalleryMeta to include defaultLabels, restrictLabels and multiLabel if necessary:
-    if (!("defaultLabels" in meta)) {
-      meta.defaultLabels = [];
-      migrate = true;
-    }
-    if (!("restrictLabels" in meta)) {
-      meta.restrictLabels = false;
-      migrate = true;
-    }
-    if (!("multiLabel" in meta)) {
-      meta.multiLabel = false;
-      migrate = true;
-    }
-
-    if (migrate) {
-      await collectionManager.upload(collection);
-    }
 
     return { tiles: json as GalleryTile[], galleryMeta: meta };
   };
@@ -1290,59 +1220,6 @@ export class DominateStore {
     const imageContents = await Promise.all(
       imageItems.map((item) => item.getContent(OutputFormat.String))
     );
-
-    let migrate = false;
-    for (let i = 0; i < imageItems.length; i += 1) {
-      if (!("fileInfo" in imageItems[i].getMeta())) {
-        interface OldImageMeta {
-          imageName: string;
-          num_slices: number; // number of z-slices
-          num_channels: number; // numbers colour channels
-          width: number; // width of each slice
-          height: number; // height of each slice
-          size: number; // size of the image in bytes
-          resolution_x: number;
-          resolution_y: number;
-          resolution_z: number;
-          format?: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
-          content_hash?: string; // we use this for making sure we don't have duplicate images in a dataset
-          customMeta?: string; // JSON of custom metadata
-        }
-
-        const oldMeta = imageItems[i].getMeta() as OldImageMeta;
-        const fileInfo = {
-          fileName: oldMeta.imageName,
-          num_slices: oldMeta.num_slices,
-          num_channels: oldMeta.num_channels,
-          width: oldMeta.width,
-          height: oldMeta.height,
-          size: oldMeta.size,
-          resolution_x: oldMeta.resolution_x,
-          resolution_y: oldMeta.resolution_y,
-          resolution_z: oldMeta.resolution_z,
-          content_hash: oldMeta.content_hash,
-        };
-        imageItems[i].setMeta({ ...oldMeta, fileInfo });
-        migrate = true;
-      }
-
-      if (
-        !("fileName" in imageItems[i].getMeta<ImageItemMeta>().fileInfo) &&
-        "imageName" in imageItems[i].getMeta<ImageItemMeta>().fileInfo
-      ) {
-        // migrate fileInfo.imageName -> fileInfo.fileName
-        const meta = imageItems[i].getMeta<ImageItemMeta>();
-        meta.fileInfo.fileName = (
-          meta.fileInfo as FileInfo & { imageName: string }
-        ).imageName;
-        imageItems[i].setMeta({ meta });
-        migrate = true;
-      }
-    }
-
-    if (migrate) {
-      await this.batchUpload(collectionManager, imageItems);
-    }
 
     return imageItems.map((item, i) => ({
       meta: item.getMeta(),
