@@ -806,7 +806,7 @@ export class DominateStore {
 
     // delete image, annotation and audit items:
     const itemManager = collectionManager.getItemManager(collection);
-    const allItems: Item[] = await this.fetchMulti(
+    const allItems: Collection[] = await this.fetchMulti(
       itemManager,
       imageUIDs.concat(annotationUIDs).concat(auditUIDs)
     );
@@ -817,7 +817,7 @@ export class DominateStore {
       item.delete();
     });
 
-    await itemManager.batch(allItems);
+    await this.batchUpload(collectionManager, allItems);
 
     setTask({ isLoading: false, description: "Image deletion", progress: 100 });
   };
@@ -1076,11 +1076,20 @@ export class DominateStore {
   fetchMulti = async (
     itemManager: ItemManager,
     UIDs: string[]
-  ): Promise<Item[]> => {
+  ): Promise<Collection[]> => {
     // calls itemManager.fetchMulti(UIDs), but returns the items in the same order they're specified in UIDs
 
-    const items = (await itemManager.fetchMulti(UIDs)).data;
-    return UIDs.map((uid) => items.find((item) => item.uid === uid)) as Item[];
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const promises = UIDs.map((uid) => this.fetch(collectionManager, uid));
+    const collections = await Promise.all(promises);
+    return collections;
+  };
+
+  batchUpload = async (
+    collectionManager: CollectionManager,
+    collections: Collection[]
+  ): Promise<void> => {
+    await Promise.all(collections.map((col) => collectionManager.upload(col)));
   };
 
   createAnnotation = async (
@@ -1217,8 +1226,8 @@ export class DominateStore {
       progress: 70,
     });
 
-    let annotationItem: Item;
-    let auditItem: Item;
+    let annotationItem: Collection;
+    let auditItem: Collection;
     if (items[0].getMeta().type === "gliff.annotation") {
       // note: this check should be obsolete since adding this.fetchMulti
       [annotationItem, auditItem] = items;
@@ -1241,7 +1250,7 @@ export class DominateStore {
     await auditItem.setContent(JSON.stringify(auditData));
 
     // Save changes
-    await itemManager.batch([annotationItem, auditItem]);
+    await this.batchUpload(collectionManager, [annotationItem, auditItem]);
   };
 
   getItem = async (collectionUid: string, itemUid: string): Promise<Item> => {
@@ -1332,7 +1341,7 @@ export class DominateStore {
     }
 
     if (migrate) {
-      await itemManager.batch(imageItems);
+      await this.batchUpload(collectionManager, imageItems);
     }
 
     return imageItems.map((item, i) => ({
