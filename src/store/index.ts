@@ -846,6 +846,14 @@ export class DominateStore {
     // migrates a versionless etebase object of unknown structure to V0 of whatever type it is
 
     const meta: any = collection.getMeta();
+
+    if (!("type" in meta)) {
+      // pre-migration-system Gallery collections don't have a type field in metadata, because we thought we didn't need it
+      // since collections have type as a required argument on creation
+      // but it turns out collection.type isn't a thing, it only works through collectionManager.list
+      // Galleries are the only etebase objects we use that don't have a type field, so we can assume that this collection is a gallery:
+      meta.type = "gliff.gallery";
+    }
     if ((meta as ItemMetadata).type === "gliff.gallery") {
       const content = JSON.parse(
         await collection.getContent(OutputFormat.String)
