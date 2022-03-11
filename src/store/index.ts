@@ -26,14 +26,11 @@ import {
   AnnotationMeta,
   migrations,
 } from "@/interfaces";
-import { useAuth } from "@/hooks";
 
 interface BaseMeta {
   version: number;
   type: string;
 }
-
-const auth = useAuth();
 
 const logger = console;
 
@@ -864,10 +861,12 @@ export class DominateStore {
           content[i].annotationUID = {};
           content[i].auditUID = {};
           if (annotationUID !== null)
-            content[i].annotationUID[auth?.user?.username as string] =
-              annotationUID;
+            content[i].annotationUID[
+              this.etebaseInstance.user.username as string
+            ] = annotationUID;
           if (auditUID !== null)
-            content[i].auditUID[auth?.user?.username as string] = auditUID;
+            content[i].auditUID[this.etebaseInstance.user.username as string] =
+              auditUID;
         }
 
         if (!("fileInfo" in content[i]) && "metadata" in content[i]) {
