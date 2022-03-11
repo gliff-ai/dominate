@@ -349,11 +349,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     // compress data and save to disk:
     const date = new Date();
     const projectName = await props.storeInstance
-      .getCollectionsMeta()
-      .then(
-        (collections) =>
-          collections.filter((c) => c.uid === collectionUid)[0].name
-      )
+      .getCollectionMeta(collectionUid)
+      .then((collection) => collection.name)
       .catch((err) => {
         logger.log(err);
         return "";
