@@ -10,7 +10,11 @@ import { DominateStore } from "@/store";
 import { AnnotationMeta, GalleryMeta } from "@/store/interfaces";
 import { parseStringifiedSlices } from "@/imageConversions";
 import { useAuth, useStore } from "@/hooks";
-import { convertMetadataToGalleryTiles, setStateIfMounted } from "@/helpers";
+import {
+  convertMetadataToGalleryTiles,
+  setStateIfMounted,
+  MetaItemWithId,
+} from "@/helpers";
 import { UserAccess } from "@/hooks/use-auth";
 import { initPluginObjects, PluginObject, Product } from "@/plugins";
 
@@ -314,9 +318,9 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   }, [auth, collectionUid, isMounted]);
 
   const saveMetadataCallback = useCallback(
-    ({ collectionUid, metadata }) => {
-      const newTiles = convertMetadataToGalleryTiles(metadata);
-      props.storeInstance.updateGallery(collectionUid, newTiles);
+    (data: { collectionUid: string; metadata: MetaItemWithId[] }) => {
+      const newTiles = convertMetadataToGalleryTiles(data.metadata);
+      void props.storeInstance.updateGallery(data.collectionUid, newTiles);
     },
     [props.storeInstance]
   );

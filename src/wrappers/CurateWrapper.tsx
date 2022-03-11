@@ -26,6 +26,7 @@ import {
   makeAnnotationsJson,
   convertGalleryToMetadata,
   convertMetadataToGalleryTiles,
+  MetaItemWithId,
 } from "@/helpers";
 
 import { initPluginObjects, PluginObject, Product } from "@/plugins";
@@ -103,17 +104,17 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           const { tiles: gallery, galleryMeta } = items;
           setStateIfMounted(gallery, setCollectionContent, isMounted.current);
 
-          const metadata = convertGalleryToMetadata(gallery);
+          const newMetadata = convertGalleryToMetadata(gallery);
 
           // if user is collaborator, include only images assigned to them.
           const canViewAllImages = isOwnerOrMember();
-          metadata.filter(
+          newMetadata.filter(
             ({ assignees }) =>
               canViewAllImages ||
               (assignees as string[]).includes(auth?.user?.username as string)
           );
 
-          setMetadata(metadata);
+          setMetadata(newMetadata);
           setDefaultLabels(galleryMeta.defaultLabels);
           setRestrictLabels(galleryMeta.restrictLabels);
           setMultiLabel(galleryMeta.multiLabel);
@@ -430,9 +431,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   }, [auth, collectionUid, isMounted]);
 
   const saveMetadataCallback = useCallback(
-    ({ collectionUid, metadata }) => {
-      const newTiles = convertMetadataToGalleryTiles(metadata);
-      props.storeInstance.updateGallery(collectionUid, newTiles);
+    (data: { collectionUid: string; metadata: MetaItemWithId[] }) => {
+      const newTiles = convertMetadataToGalleryTiles(data.metadata);
+      void props.storeInstance.updateGallery(data.collectionUid, newTiles);
     },
     [props.storeInstance]
   );

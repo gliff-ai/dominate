@@ -89,7 +89,7 @@ export function convertGalleryToMetadata(gallery: GalleryTile[]): MetaItem[] {
   );
 }
 
-interface MetaItemWithId extends Partial<MetaItem> {
+export interface MetaItemWithId extends MetaItem {
   id: string;
 }
 
@@ -113,8 +113,8 @@ export function convertMetadataToGalleryTiles(
       ...mitem // all keys included
     }) => {
       // delete excluded key-value pairs
-      const copyOfMitem = Object.assign({}, mitem);
-      for (let key of excludedKeys) delete copyOfMitem[key];
+      const copyOfMitem = { ...mitem };
+      for (const key of excludedKeys) delete copyOfMitem[key];
 
       // convert matadata item to gallery tile
       const { imageLabels, assignees, thumbnail, ...fileInfo } = copyOfMitem;
