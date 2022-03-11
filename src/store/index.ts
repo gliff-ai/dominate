@@ -1089,7 +1089,7 @@ export class DominateStore {
     );
     galleryTiles[tileIdx].annotationUID[username] = annotationsItem.uid;
     galleryTiles[tileIdx].auditUID[username] = auditItem.uid;
-    galleryTiles[tileIdx].annotationComplete[username] = false;
+    galleryTiles[tileIdx].annotationComplete[username] = isComplete;
     await collection.setContent(JSON.stringify(galleryTiles));
     await collectionManager.upload(collection);
 
