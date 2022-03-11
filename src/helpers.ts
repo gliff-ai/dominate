@@ -1,5 +1,5 @@
 import { Annotation, Spline, BoundingBox } from "@gliff-ai/annotate";
-import { GalleryTile } from "@/store/interfaces";
+import { GalleryTile, MetaItem } from "@/store/interfaces";
 
 export function setStateIfMounted(
   newState: any,
@@ -70,3 +70,56 @@ export const makeAnnotationsJson = (
 
   return JSON.stringify(annotationsJson);
 };
+
+export function convertGalleryToMetadata(gallery: GalleryTile[]): MetaItem[] {
+  /*  convert Gallery object into Metadata object.
+      excluded keys: imageUID, AnnotationUID, auditUID, annotationComplete. */
+
+  return gallery.map(
+    ({ id, thumbnail, assignees = [], imageLabels = [], fileInfo }) =>
+      // keys included in the metada object (and displayed in CURATE).
+      ({
+        id,
+        thumbnail,
+        assignees,
+        imageLabels,
+        ...fileInfo,
+        imageName: fileInfo.fileName, // CURATE expects imageName rather than fileName.
+      })
+  );
+}
+
+interface MetaItemWithId extends Partial<MetaItem> {
+  id: string;
+}
+
+export function convertMetadataToGalleryTiles(
+  metadata: MetaItemWithId[],
+  excludedKeys: string[] = []
+): { [id: string]: Partial<GalleryTile> } {
+  /*  convert Matadata object to an object that maps ids to GalleryTile objects.
+      the map can be more easily used to update the Gallery object. 
+      any extra field that should not be overridden can be added to excludedKeys. */
+
+  const newTiles = {};
+  metadata.forEach(
+    ({
+      // keys always excluded by default from the updated tile
+      id,
+      imageUID,
+      annotationUID,
+      auditUID,
+      annotationComplete,
+      ...mitem // all keys included
+    }) => {
+      // delete excluded key-value pairs
+      const copyOfMitem = Object.assign({}, mitem);
+      for (let key of excludedKeys) delete copyOfMitem[key];
+
+      // convert matadata item to gallery tile
+      const { imageLabels, assignees, thumbnail, ...fileInfo } = copyOfMitem;
+      newTiles[id] = { imageLabels, assignees, thumbnail, fileInfo };
+    }
+  );
+  return newTiles;
+}
