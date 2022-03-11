@@ -429,6 +429,14 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     }
   }, [auth, collectionUid, isMounted]);
 
+  const saveMetadataCallback = useCallback(
+    ({ collectionUid, metadata }) => {
+      const newTiles = convertMetadataToGalleryTiles(metadata);
+      props.storeInstance.updateGallery(collectionUid, newTiles);
+    },
+    [props.storeInstance]
+  );
+
   useEffect(() => {
     // runs at mount
     isMounted.current = true;
@@ -480,6 +488,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             ? () => navigate(`/manage/plugins`)
             : null
         }
+        saveMetadataCallback={saveMetadataCallback}
       />
 
       <ConfirmationDialog
