@@ -336,7 +336,7 @@ export class DominateStore {
     };
   };
 
-  wrangleGallery = (col: Collection): GalleryMeta => {
+  wrangleGallery = (col: Collection): GalleryMeta & { uid: string } => {
     const meta = col.getMeta();
     const modifiedTime = meta.mtime;
     delete meta.mtime;
@@ -346,7 +346,7 @@ export class DominateStore {
       modifiedTime,
       type: "gliff.gallery",
       uid: col.uid,
-    } as GalleryMeta;
+    } as GalleryMeta & { uid: string };
   };
 
   getImagesMeta = async (
@@ -381,7 +381,9 @@ export class DominateStore {
     return this.collectionsMeta;
   };
 
-  getCollectionMeta = async (collectionUid: string): Promise<GalleryMeta> => {
+  getCollectionMeta = async (
+    collectionUid: string
+  ): Promise<GalleryMeta & { uid: string }> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -465,6 +467,7 @@ export class DominateStore {
     const collection = await collectionManager.create(
       "gliff.gallery", // type
       {
+        type: "gliff.gallery",
         name,
         createdTime: Date.now(),
         modifiedTime: Date.now(),

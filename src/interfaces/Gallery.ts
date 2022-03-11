@@ -3,7 +3,6 @@ import { FileInfo } from "./shared";
 // ----------------------------- META -----------------------------
 interface GalleryMetaV0 {
   version: 0;
-  uid: string;
   type: "gliff.gallery";
   name: string; // "human-readable gallery name, i.e. folder name"
   createdTime: number; // "time item was created in milliseconds since epoch"
@@ -16,7 +15,6 @@ interface GalleryMetaV0 {
 
 interface GalleryMetaV1 {
   version: 1;
-  uid: string;
   type: "gliff.gallery";
   name: string; // "human-readable gallery name, i.e. folder name"
   createdTime: number; // "time item was created in milliseconds since epoch"
