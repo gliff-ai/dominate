@@ -61,6 +61,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
   const [defaultLabels, setDefaultLabels] = useState<string[]>([]); // more input for curate
   const [restrictLabels, setRestrictLabels] = useState<boolean>(false); // more input for curate
+  const [multiLabel, setMultiLabel] = useState<boolean>(true); // more input for curate
   const { collectionUid = "" } = useParams<string>(); // uid of selected gallery, from URL
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
 
@@ -126,6 +127,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           setCurateInput(wrangled);
           setDefaultLabels(galleryMeta.defaultLabels);
           setRestrictLabels(galleryMeta.restrictLabels);
+          setMultiLabel(galleryMeta.multiLabel);
         })
         .catch((err) => {
           logger.log(err);
@@ -469,6 +471,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         metadata={curateInput}
         defaultLabels={defaultLabels}
         restrictLabels={restrictLabels}
+        multiLabel={multiLabel}
         saveImageCallback={addImagesToGallery}
         saveLabelsCallback={saveLabelsCallback}
         saveDefaultLabelsCallback={saveDefaultLabelsCallback}
