@@ -964,7 +964,7 @@ export class DominateStore {
       collection = await this.preMigrate(collection);
       await collectionManager.upload(collection);
       meta = collection.getMeta<BaseMeta>();
-      content = await collection.getContent();
+      content = JSON.parse(await collection.getContent(OutputFormat.String));
     }
 
     // migrate if necessary:
