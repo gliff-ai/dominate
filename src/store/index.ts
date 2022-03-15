@@ -1007,8 +1007,12 @@ export class DominateStore {
       );
       const item = await itemManager.fetch(uid);
       const meta = item.getMeta();
-      const content = await item.getContent();
-      collection = collectionManager.create(meta.type as string, meta, content);
+      const content = await item.getContent(OutputFormat.String);
+      collection = await collectionManager.create(
+        meta.type as string,
+        meta,
+        content
+      );
       await collectionManager.upload(collection); // this should be redundant since this.migrate will upload it after performing pre-migration
     }
 
