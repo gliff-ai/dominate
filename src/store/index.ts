@@ -308,7 +308,17 @@ export class DominateStore {
           tile.imageLabels = imageLabels;
         }
         if (fileInfo !== undefined) {
-          tile.fileInfo = { ...tile.fileInfo, ...fileInfo };
+          // add new fields to fileInfo
+          const newFileInfo = { ...tile.fileInfo, ...fileInfo };
+
+          // remove all null values
+          for (const key in newFileInfo) {
+            if (newFileInfo[key] === null) {
+              delete newFileInfo[key];
+            }
+          }
+          // apply changes
+          tile.fileInfo = newFileInfo;
         }
       }
     });
