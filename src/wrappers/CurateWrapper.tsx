@@ -321,17 +321,10 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
             maskFolder.file(
               maskName,
-              getTiffData(
-                new Annotations(annotationsObject),
-                new ImageFileInfo({
-                  fileName: maskName,
-                  width: images[i].meta.fileInfo.width,
-                  height: images[i].meta.fileInfo.height,
-                  size: images[i].meta.fileInfo.size,
-                  num_channels: images[i].meta.fileInfo.num_channels,
-                  num_slices: images[i].meta.fileInfo.num_slices,
-                })
-              )
+              getTiffData(new Annotations(annotationsObject), {
+                ...images[i].meta.fileInfo,
+                fileName: maskName,
+              })
             );
           }
         });

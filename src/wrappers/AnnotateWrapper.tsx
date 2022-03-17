@@ -110,11 +110,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             (item) => item.imageUID === imageUid
           )?.fileInfo;
           if (fileInfo) {
-            setStateIfMounted(
-              new ImageFileInfo(fileInfo),
-              setImageFileInfo,
-              isMounted.current
-            );
+            setStateIfMounted(fileInfo, setImageFileInfo, isMounted.current);
           }
         })
         .catch((e) => {
