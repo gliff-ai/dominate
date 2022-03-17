@@ -433,7 +433,10 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const saveMetadataCallback = useCallback(
     (data: { collectionUid: string; metadata: MetaItemWithId[] }) => {
       const newTiles = convertMetadataToGalleryTiles(data.metadata);
-      void props.storeInstance.updateGallery(data.collectionUid, newTiles);
+      void props.storeInstance
+        .updateGallery(data.collectionUid, newTiles)
+        .then(() => fetchImageItems())
+        .catch((error) => console.error(error));
     },
     [props.storeInstance]
   );
