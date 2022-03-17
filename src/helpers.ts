@@ -93,33 +93,38 @@ export interface MetaItemWithId extends MetaItem {
   id: string;
 }
 
+// List of keys that CANNOT be updated by plugins.
+// NOTE: a disallowed list is used because plugins should be able to add any new field.
+const EXCLUDED_KEYS = [
+  "id",
+  "assignees",
+  "thumbnail",
+  "imageUID",
+  "annotationUID",
+  "auditUID",
+  "annotationComplete",
+  "width",
+  "height",
+  "num_slices",
+  "fileName",
+];
+
 export function convertMetadataToGalleryTiles(
   metadata: MetaItemWithId[],
-  excludedKeys: string[] = []
+  excludedKeys: string[] = EXCLUDED_KEYS
 ): { [id: string]: Partial<GalleryTile> } {
-  /*  convert Matadata object to an object that maps ids to GalleryTile objects.
-      the map can be more easily used to update the Gallery object. 
-      any extra field that should not be overridden can be added to excludedKeys. */
+  /*  Convert Matadata object to an object that maps IDs to GalleryTile objects.
+      The returned map can be used to update the Gallery object. 
+      Any extra field that should never be overridden can be added to EXCLUDED_KEYS. */
 
   const newTiles = {};
-  metadata.forEach(
-    ({
-      // keys always excluded by default from the updated tile
-      id,
-      imageUID,
-      annotationUID,
-      auditUID,
-      annotationComplete,
-      ...mitem // all keys included
-    }) => {
-      // delete excluded key-value pairs
-      const copyOfMitem = { ...mitem };
-      for (const key of excludedKeys) delete copyOfMitem[key];
+  metadata.forEach(({ id, ...otherKeys }) => {
+    // delete excluded key-value pairs
+    for (const key of excludedKeys) delete otherKeys[key];
 
-      // convert matadata item to gallery tile
-      const { imageLabels, assignees, thumbnail, ...fileInfo } = copyOfMitem;
-      newTiles[id] = { imageLabels, assignees, thumbnail, fileInfo };
-    }
-  );
+    // convert matadata item to gallery tile
+    const { imageLabels, ...fileInfo } = otherKeys;
+    newTiles[id] = { imageLabels, fileInfo };
+  });
   return newTiles;
 }
