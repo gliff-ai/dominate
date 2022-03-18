@@ -312,7 +312,7 @@ export class DominateStore {
           const newFileInfo = { ...tile.fileInfo, ...fileInfo };
 
           // remove all null values
-          for (const key in newFileInfo) {
+          for (const key of Object.keys(newFileInfo)) {
             if (newFileInfo[key] === null) {
               delete newFileInfo[key];
             }
