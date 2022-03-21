@@ -1,4 +1,4 @@
-import sodium from "libsodium-wrappers";
+import sodium, { output_formats } from "libsodium-wrappers";
 import {
   Account,
   Collection,
@@ -998,14 +998,15 @@ export class DominateStore {
       collection = await collectionManager.fetch(uid);
     } catch (e) {
       // it's an Item, convert it to a Collection:
+      console.log(`Failed to fetch collection ${uid}, fetching as item`);
       if (galleryUid === null)
         throw Error(
           "Attempting to convert an Item to a Collection without an ItemManager!"
         );
-      const itemManager = collectionManager.getItemManager(
-        await collectionManager.fetch(galleryUid)
-      );
+      const gallery = await collectionManager.fetch(galleryUid);
+      const itemManager = collectionManager.getItemManager(gallery);
       const item = await itemManager.fetch(uid);
+      console.log(`Fetched item ${uid}; type: ${item.getMeta().type}`);
       const meta = item.getMeta();
       const content = await item.getContent(OutputFormat.String);
       collection = await collectionManager.create(
@@ -1013,7 +1014,17 @@ export class DominateStore {
         meta,
         content
       );
-      await collectionManager.upload(collection); // this should be redundant since this.migrate will upload it after performing pre-migration
+      await collectionManager.upload(collection);
+      console.log(`Re-uploaded item ${uid} as collection ${collection.uid}`);
+
+      // migrate item UIDs in gallery content to the new collection UID:
+      let galleryTiles: string = await gallery.getContent(OutputFormat.String);
+      console.log(galleryTiles);
+      galleryTiles = galleryTiles.replace(new RegExp(uid, "g"), collection.uid);
+      console.log(galleryTiles);
+      await gallery.setContent(galleryTiles);
+      await collectionManager.upload(gallery);
+      console.log(`Migrated ${uid} -> ${collection.uid} in galleryTiles`);
     }
 
     return await this.migrate(collectionManager, collection);
@@ -1218,7 +1229,7 @@ export class DominateStore {
     itemUid: string
   ): Promise<string> => {
     // Retrieve image item from a collection.
-    const item = await this.getItem(itemUid, collectionUid);
+    const item = await this.getItem(collectionUid, itemUid);
     const content = await item.getContent(OutputFormat.String);
     return content;
   };
