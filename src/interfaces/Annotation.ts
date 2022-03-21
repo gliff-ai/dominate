@@ -1,8 +1,9 @@
 // ----------------------------- META -----------------------------
 
 interface AnnotationMetaV0 {
-  isComplete: boolean;
+  version: 0;
   type: "gliff.annotation";
+  isComplete: boolean;
   name?: string;
   mtime?: number;
   description?: string;
