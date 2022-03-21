@@ -943,6 +943,14 @@ export class DominateStore {
       if (!("isComplete" in meta)) {
         meta.isComplete = false;
       }
+    } else if (meta.type === "gliff.audit") {
+      if (!("modifiedTime" in meta)) {
+        if ("mtime" in meta) {
+          meta.modifiedTime = meta.mtime;
+        } else {
+          meta.modifiedTime = meta.createdTime;
+        }
+      }
     }
 
     (meta as BaseMeta).version = 0;
@@ -1079,7 +1087,7 @@ export class DominateStore {
     const auditItem = await itemManager.create(
       {
         type: "gliff.audit",
-        mtime: createdTime,
+        modifiedTime: createdTime,
         createdTime,
       },
       JSON.stringify(auditData)
