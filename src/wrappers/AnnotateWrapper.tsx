@@ -218,6 +218,9 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   useEffect(() => {
     const getImage = (): void => {
       // Retrieve image item and set it as state
+      // DominateStore needs to be able to redirect to a new URL if/when converting the image from collection to item, because the UID will change,
+      // but it can't useNavigate by itself because it's not a function component, so pass it here:
+      props.storeInstance.giveNavigate(navigate);
       props.storeInstance
         .getImage(collectionUid, imageUid)
         .then((image) => {

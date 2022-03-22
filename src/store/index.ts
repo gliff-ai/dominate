@@ -1,3 +1,4 @@
+import { Component } from "react";
 import sodium, { output_formats } from "libsodium-wrappers";
 import {
   Account,
@@ -26,6 +27,7 @@ import {
   AnnotationMeta,
   migrations,
 } from "@/interfaces";
+import { NavigateFunction } from "react-router-dom";
 
 interface BaseMeta {
   version: number;
@@ -56,6 +58,8 @@ export class DominateStore {
   collectionsMeta: GalleryMeta[];
 
   public isLoggedIn: boolean;
+
+  navigate: NavigateFunction;
 
   constructor() {
     this.collections = [];
@@ -1025,17 +1029,46 @@ export class DominateStore {
       await collectionManager.upload(collection);
       console.log(`Re-uploaded item ${uid} as collection ${collection.uid}`);
 
-      // migrate item UIDs in gallery content to the new collection UID:
-      let galleryTiles: string = await gallery.getContent(OutputFormat.String);
-      console.log(galleryTiles);
-      galleryTiles = galleryTiles.replace(new RegExp(uid, "g"), collection.uid);
-      console.log(galleryTiles);
-      await gallery.setContent(galleryTiles);
-      await collectionManager.upload(gallery);
-      console.log(`Migrated ${uid} -> ${collection.uid} in galleryTiles`);
+      await this.updateUids(gallery, uid, collection.uid);
+
+      const path = window.location.pathname.split("/").slice(1); // path starts with a /, so first element from split is "", so we discard it with slice(1)
+      if (
+        path[0] === "annotate" &&
+        meta.type === "gliff.image" &&
+        path[2] !== collection.uid &&
+        this.navigate
+      ) {
+        console.log(path, this.navigate);
+        // redirect to the new annotate/galleryUid/imageUid path if we're converting an image item to collection in ANNOTATE
+        console.log("redirecting");
+        this.navigate(`/annotate/${galleryUid}/${collection.uid}`);
+      }
     }
 
     return await this.migrate(collectionManager, collection);
+  };
+
+  updateUids = async (
+    gallery: Collection,
+    oldUid: string,
+    newUid: string
+  ): Promise<void> => {
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+
+    // migrate item UIDs in gallery content to the new collection UID:
+    let galleryTiles: string = await gallery.getContent(OutputFormat.String);
+    console.log(galleryTiles);
+    galleryTiles = galleryTiles.replace(new RegExp(oldUid, "g"), newUid);
+    console.log(galleryTiles);
+    await gallery.setContent(galleryTiles);
+    try {
+      await collectionManager.transaction(gallery);
+      console.log(`Migrated ${oldUid} -> ${newUid} in galleryTiles`);
+    } catch (err) {
+      // race condition, try again:
+      const newGallery = await collectionManager.fetch(gallery.uid);
+      this.updateUids(newGallery, oldUid, newUid);
+    }
   };
 
   fetchMulti = async (
@@ -1365,5 +1398,9 @@ export class DominateStore {
 
     await collection.setContent(JSON.stringify(newContent));
     await collectionManager.upload(collection);
+  };
+
+  giveNavigate = (navigate: NavigateFunction): void => {
+    this.navigate = navigate;
   };
 }
