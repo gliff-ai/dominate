@@ -1057,14 +1057,15 @@ export class DominateStore {
 
     // migrate item UIDs in gallery content to the new collection UID:
     let galleryTiles: string = await gallery.getContent(OutputFormat.String);
-    console.log(galleryTiles);
     galleryTiles = galleryTiles.replace(new RegExp(oldUid, "g"), newUid);
-    console.log(galleryTiles);
     await gallery.setContent(galleryTiles);
     try {
       await collectionManager.transaction(gallery);
       console.log(`Migrated ${oldUid} -> ${newUid} in galleryTiles`);
     } catch (err) {
+      console.log(
+        `Failed to upload galleryTiles ${gallery.uid} due to conflict; retrying...`
+      );
       // race condition, try again:
       const newGallery = await collectionManager.fetch(gallery.uid);
       this.updateUids(newGallery, oldUid, newUid);
