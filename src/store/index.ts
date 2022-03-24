@@ -1010,7 +1010,6 @@ export class DominateStore {
       collection = await collectionManager.fetch(uid);
     } catch (e) {
       // it's an Item, convert it to a Collection:
-      console.log(`Failed to fetch collection ${uid}, fetching as item`);
       if (galleryUid === null)
         throw Error(
           "Attempting to convert an Item to a Collection without an ItemManager!"
@@ -1018,7 +1017,6 @@ export class DominateStore {
       const gallery = await collectionManager.fetch(galleryUid);
       const itemManager = collectionManager.getItemManager(gallery);
       const item = await itemManager.fetch(uid);
-      console.log(`Fetched item ${uid}; type: ${item.getMeta().type}`);
       const meta = item.getMeta();
       const content = await item.getContent(OutputFormat.String);
       collection = await collectionManager.create(
@@ -1027,11 +1025,9 @@ export class DominateStore {
         content
       );
       await collectionManager.upload(collection);
-      console.log(`Re-uploaded item ${uid} as collection ${collection.uid}`);
 
       // update UID in galleryTiles, redirecting if it's an image UID:
       const path = window.location.pathname.split("/").slice(1); // path starts with a /, so first element from split is "", so we discard it with slice(1)
-      console.log(path, meta.type, this.navigate);
       if (
         path[0] === "annotate" &&
         meta.type === "gliff.image" &&
@@ -1039,7 +1035,6 @@ export class DominateStore {
         this.navigate
       ) {
         // redirect to the new annotate/galleryUid/imageUid path if we're converting an image item to collection in ANNOTATE
-        console.log("Hello");
         await this.updateUids(
           gallery,
           uid,
@@ -1074,7 +1069,6 @@ export class DominateStore {
     try {
       await collectionManager.transaction(gallery);
       console.log(`Migrated ${oldUid} -> ${newUid} in galleryTiles`);
-      console.log(redirectPath, Boolean(redirectPath));
       if (redirectPath) {
         console.log("redirecting");
         this.navigate(redirectPath);
