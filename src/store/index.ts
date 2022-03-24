@@ -289,6 +289,44 @@ export class DominateStore {
     await collectionManager.upload(collection);
   };
 
+  updateGallery = async (
+    collectionUid: string,
+    newTiles: { [id: string]: Partial<GalleryTile> }
+  ): Promise<void> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await collectionManager.fetch(collectionUid);
+    const content = await collection.getContent(OutputFormat.String);
+    const gallery = JSON.parse(content) as GalleryTile[];
+
+    const newTilesIds = Object.keys(newTiles);
+    gallery.forEach((tile) => {
+      if (newTilesIds.includes(tile.id)) {
+        const { imageLabels, fileInfo } = newTiles[tile.id];
+        if (imageLabels !== undefined) {
+          tile.imageLabels = imageLabels;
+        }
+        if (fileInfo !== undefined) {
+          // add new fields to fileInfo
+          const newFileInfo = { ...tile.fileInfo, ...fileInfo };
+
+          // remove all null values
+          for (const key of Object.keys(newFileInfo)) {
+            if (newFileInfo[key] === null) {
+              delete newFileInfo[key];
+            }
+          }
+          // apply changes
+          tile.fileInfo = newFileInfo;
+        }
+      }
+    });
+
+    await collection.setContent(JSON.stringify(gallery));
+    await collectionManager.transaction(collection);
+  };
+
   getCollectionsContent = async (
     type = "gliff.gallery"
   ): Promise<
