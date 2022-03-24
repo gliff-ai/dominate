@@ -1,4 +1,4 @@
-import { MetaItem } from "@/store/interfaces";
+import { MetaItem } from "@/interfaces";
 
 // NOTE: Product, PluginType and Plugin are also defined in MANAGE
 
