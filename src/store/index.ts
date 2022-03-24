@@ -1029,19 +1029,25 @@ export class DominateStore {
       await collectionManager.upload(collection);
       console.log(`Re-uploaded item ${uid} as collection ${collection.uid}`);
 
-      await this.updateUids(gallery, uid, collection.uid);
-
+      // update UID in galleryTiles, redirecting if it's an image UID:
       const path = window.location.pathname.split("/").slice(1); // path starts with a /, so first element from split is "", so we discard it with slice(1)
+      console.log(path, meta.type, this.navigate);
       if (
         path[0] === "annotate" &&
         meta.type === "gliff.image" &&
         path[2] !== collection.uid &&
         this.navigate
       ) {
-        console.log(path, this.navigate);
         // redirect to the new annotate/galleryUid/imageUid path if we're converting an image item to collection in ANNOTATE
-        console.log("redirecting");
-        this.navigate(`/annotate/${galleryUid}/${collection.uid}`);
+        console.log("Hello");
+        await this.updateUids(
+          gallery,
+          uid,
+          collection.uid,
+          `/annotate/${gallery.uid}/${collection.uid}`
+        );
+      } else {
+        await this.updateUids(gallery, uid, collection.uid);
       }
     }
 
@@ -1051,8 +1057,14 @@ export class DominateStore {
   updateUids = async (
     gallery: Collection,
     oldUid: string,
-    newUid: string
+    newUid: string,
+    redirectPath: string | null = null
   ): Promise<void> => {
+    // changes all occurrences of a UID in gallery by direct string replacement.
+    // will re-fetch the gallery and try again if a transaction conflict occurs
+    // e.g. due to another thread concurrently updating a different UID
+    // can optionally navigate to a new path on success (needed if an imageUID is changed)
+
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     // migrate item UIDs in gallery content to the new collection UID:
@@ -1062,13 +1074,18 @@ export class DominateStore {
     try {
       await collectionManager.transaction(gallery);
       console.log(`Migrated ${oldUid} -> ${newUid} in galleryTiles`);
+      console.log(redirectPath, Boolean(redirectPath));
+      if (redirectPath) {
+        console.log("redirecting");
+        this.navigate(redirectPath);
+      }
     } catch (err) {
       console.log(
-        `Failed to upload galleryTiles ${gallery.uid} due to conflict; retrying...`
+        `Failed to migrate ${oldUid} -> ${newUid} in galleryTiles due to conflict; retrying...`
       );
       // race condition, try again:
       const newGallery = await collectionManager.fetch(gallery.uid);
-      this.updateUids(newGallery, oldUid, newUid);
+      this.updateUids(newGallery, oldUid, newUid, redirectPath);
     }
   };
 
