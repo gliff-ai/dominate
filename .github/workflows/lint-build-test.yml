@@ -32,8 +32,6 @@ jobs:
         run: npm i
       - name: build
         run: npm run build
-        env:
-          NODE_OPTIONS: --max_old_space_size=4096
   test:
     runs-on: ubuntu-latest
     timeout-minutes: 2

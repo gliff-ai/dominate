@@ -8,9 +8,9 @@
     "dist/*"
   ],
   "scripts": {
-    "build": "npx vite build --mode development",
-    "build:staging": "npx vite build --mode staging && cp staticwebapp.config.json dist/",
-    "build:production": "npx vite build --mode production && cp staticwebapp.config.json dist/",
+    "build": "NODE_OPTIONS='--max-old-space-size=8192' npx vite build --mode development",
+    "build:staging": "NODE_OPTIONS='--max-old-space-size=8192' npx vite build --mode staging && cp staticwebapp.config.json dist/",
+    "build:production": "NODE_OPTIONS='--max-old-space-size=8192' npx vite build --mode production && cp staticwebapp.config.json dist/",
     "format": "npx --no-install prettier --write src",
     "prettier": "npx --no-install prettier -c src",
     "lint": "tsc --noEmit && npm run lint:ts && npm run prettier",
