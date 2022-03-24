@@ -9,7 +9,8 @@ import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import { Annotations, getTiffData } from "@gliff-ai/annotate";
 import { DominateStore } from "@/store";
-import { Slices, MetaItem, GalleryTile } from "@/store/interfaces";
+import { Slices, MetaItem } from "@/store/interfaces";
+import { GalleryTile } from "@/interfaces";
 import {
   ConfirmationDialog,
   MessageDialog,

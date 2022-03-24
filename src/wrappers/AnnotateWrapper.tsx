@@ -7,7 +7,7 @@ import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annota
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { icons, IconButton, Task } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
-import { AnnotationMeta } from "@/store/interfaces";
+import { AnnotationMeta } from "@/interfaces";
 import { parseStringifiedSlices } from "@/imageConversions";
 import { useAuth, useStore } from "@/hooks";
 import { setStateIfMounted } from "@/helpers";
