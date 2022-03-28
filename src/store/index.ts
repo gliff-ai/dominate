@@ -13,7 +13,6 @@ import { Task } from "@gliff-ai/style";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
 import { ImageFileInfo } from "@gliff-ai/upload";
-import { NavigateFunction } from "react-router-dom";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
 import {
@@ -55,8 +54,6 @@ export class DominateStore {
   collectionsMeta: GalleryMeta[];
 
   public isLoggedIn: boolean;
-
-  navigate: NavigateFunction;
 
   constructor() {
     this.collections = [];
@@ -1379,9 +1376,5 @@ export class DominateStore {
 
     await collection.setContent(JSON.stringify(newContent));
     await collectionManager.upload(collection);
-  };
-
-  giveNavigate = (navigate: NavigateFunction): void => {
-    this.navigate = navigate;
   };
 }
