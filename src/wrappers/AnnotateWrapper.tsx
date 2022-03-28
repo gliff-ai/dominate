@@ -87,7 +87,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       const canViewAllImages = isOwnerOrMember();
 
       storeInstance
-        .getImagesMeta(collectionUid, auth?.user.username)
+        .getImagesMeta(collectionUid)
         .then((items) => {
           const imageUIDs = items.tiles
             .filter(

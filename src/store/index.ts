@@ -15,6 +15,7 @@ import { Task } from "@gliff-ai/style";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
 import { ImageFileInfo } from "@gliff-ai/upload";
+import { NavigateFunction } from "react-router-dom";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
 import {
@@ -25,7 +26,6 @@ import {
   AnnotationMeta,
   migrations,
 } from "@/interfaces";
-import { NavigateFunction } from "react-router-dom";
 
 interface BaseMeta {
   version: number;
@@ -352,8 +352,7 @@ export class DominateStore {
   };
 
   getImagesMeta = async (
-    collectionUid: string,
-    username: string
+    collectionUid: string
   ): Promise<{ tiles: GalleryTile[]; galleryMeta: GalleryMeta }> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
@@ -367,7 +366,7 @@ export class DominateStore {
     // get collection metadata:
     const meta = this.wrangleGallery(collection);
 
-    return { tiles: json as GalleryTile[], galleryMeta: meta };
+    return { tiles: json, galleryMeta: meta };
   };
 
   getCollectionsMeta = async (
@@ -712,7 +711,6 @@ export class DominateStore {
     setTask({ isLoading: true, description: "Image deletion", progress: 50 });
 
     // delete image, annotation and audit items:
-    const itemManager = collectionManager.getItemManager(collection);
     const allItems: Collection[] = await this.fetchMulti(
       collectionManager,
       imageUIDs.concat(annotationUIDs).concat(auditUIDs),
@@ -797,7 +795,6 @@ export class DominateStore {
       await collection.getContent(OutputFormat.String)
     ) as GalleryTile[];
 
-    const itemManager = collectionManager.getItemManager(collection);
     const annotationUIDs = ([] as string[]).concat(
       ...tiles.map((tile) => Object.values(tile.annotationUID))
     ); // [im0_ann0, im0_ann1, im0_ann2, im1_ann0, im1_ann1, ...]
@@ -846,6 +843,7 @@ export class DominateStore {
 
   preMigrate = async (collection: Collection): Promise<Collection> => {
     // migrates a versionless etebase object of unknown structure to V0 of whatever type it is
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 
     const meta: any = collection.getMeta();
 
@@ -874,12 +872,10 @@ export class DominateStore {
           content[i].annotationUID = {};
           content[i].auditUID = {};
           if (annotationUID !== null)
-            content[i].annotationUID[
-              this.etebaseInstance.user.username as string
-            ] = annotationUID;
+            content[i].annotationUID[this.etebaseInstance.user.username] =
+              annotationUID;
           if (auditUID !== null)
-            content[i].auditUID[this.etebaseInstance.user.username as string] =
-              auditUID;
+            content[i].auditUID[this.etebaseInstance.user.username] = auditUID;
         }
 
         if (!("fileInfo" in content[i]) && "metadata" in content[i]) {
@@ -957,15 +953,19 @@ export class DominateStore {
 
     (meta as BaseMeta).version = 0;
 
-    await collection.setMeta(meta);
+    collection.setMeta(meta);
 
     return collection;
+
+    /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
   };
 
   migrate = async (
     collectionManager: CollectionManager,
-    collection: Collection
+    collection_: Collection
   ): Promise<Collection> => {
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
+    let collection = collection_;
     let meta = collection.getMeta<BaseMeta>();
     let content = JSON.parse(await collection.getContent(OutputFormat.String));
 
@@ -995,6 +995,8 @@ export class DominateStore {
     }
 
     return collection;
+
+    /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
   };
 
   fetch = async (
@@ -1003,7 +1005,7 @@ export class DominateStore {
     galleryUid: string | null = null
   ): Promise<Collection> => {
     // fetch collection:
-    let collection;
+    let collection: Collection;
     try {
       collection = await collectionManager.fetch(uid);
     } catch (e) {
@@ -1044,7 +1046,8 @@ export class DominateStore {
       }
     }
 
-    return await this.migrate(collectionManager, collection);
+    collection = await this.migrate(collectionManager, collection);
+    return collection;
   };
 
   updateUids = async (
@@ -1077,7 +1080,7 @@ export class DominateStore {
       );
       // race condition, try again:
       const newGallery = await collectionManager.fetch(gallery.uid);
-      this.updateUids(newGallery, oldUid, newUid, redirectPath);
+      await this.updateUids(newGallery, oldUid, newUid, redirectPath);
     }
   };
 
