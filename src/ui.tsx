@@ -135,7 +135,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                   path="signup/success"
                   element={
                     <BasicPage
-                      view={<SignUp state="4-VerificationSent" />}
+                      view={<SignUp state="3-VerificationSent" />}
                       title={<>Verify Email</>}
                     />
                   }
@@ -145,8 +145,8 @@ const UserInterface = (props: Props): ReactElement | null => {
                   path="signup/failure"
                   element={
                     <BasicPage
-                      view={<SignUp state="3-BillingFailed" />}
-                      title={<>Payment Failed</>}
+                      view={<SignUp state="1-Signup" />}
+                      title={<>Creating Account Failed</>}
                     />
                   }
                 />

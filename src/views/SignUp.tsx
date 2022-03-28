@@ -46,11 +46,7 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-type State =
-  | "1-Signup"
-  | "2-RecoveryKey"
-  | "3-BillingFailed"
-  | "4-VerificationSent";
+type State = "1-Signup" | "2-RecoveryKey" | "3-VerificationSent";
 
 interface Props {
   // eslint-disable-next-line react/require-default-props
@@ -85,7 +81,7 @@ export const SignUp = (props: Props): ReactElement | null => {
     setOpen(true);
   };
 
-  const tierId = query.get("tier_id") || null;
+  const tierId = query.get("tier_id") || null; // This is only used for custom plans
   const inviteId = query.get("invite_id") || null;
 
   useMountEffect(() => {
@@ -163,6 +159,7 @@ export const SignUp = (props: Props): ReactElement | null => {
         signUp.inviteId as string,
         signUp.acceptedTermsAndConditions
       );
+
       if (profile) {
         setUser(profile.profile);
         setRecoveryKey(profile.recoveryKey);
@@ -181,44 +178,6 @@ export const SignUp = (props: Props): ReactElement | null => {
       if (e instanceof Error) {
         setStoreError(e.message);
       }
-    }
-  };
-
-  const billing = async () => {
-    if (!tierId || inviteId) {
-      setState("4-VerificationSent");
-      return;
-    }
-
-    const stripe = await stripePromise;
-
-    if (!user || !stripe) {
-      return;
-    }
-
-    try {
-      const session = await createCheckoutSession(tierId, user.id, user.email);
-
-      if (!session) {
-        // There's no need to use Stripe for this tier
-        setState("4-VerificationSent");
-        return;
-      }
-
-      const { id: sessionId } = session;
-
-      // When the customer clicks on the button, redirect them to Checkout.
-      const result = await stripe.redirectToCheckout({
-        sessionId,
-      });
-
-      if (result.error) {
-        console.error(result.error);
-      }
-    } catch (error) {
-      console.error(error);
-      setStoreError(error);
-      setOpen(true);
     }
   };
 
@@ -353,30 +312,16 @@ export const SignUp = (props: Props): ReactElement | null => {
   if (state === "2-RecoveryKey" && recoveryKey) {
     return (
       <>
-        <RecoveryKey recoveryKey={recoveryKey} callback={billing} />
+        <RecoveryKey
+          recoveryKey={recoveryKey}
+          callback={() => setState("3-VerificationSent")}
+        />
         {err}
       </>
     );
   }
 
-  if (state === "3-BillingFailed") {
-    // This should be infrequent as Stripe will normally catch errors within Checkout
-    return (
-      <>
-        <p>
-          There was an error processing your payment. Please&nbsp;
-          <Link color="secondary" href="/signin">
-            Sign In
-          </Link>
-          &nbsp; and upgrade your account from the billing page
-        </p>
-
-        <p>Alternatively, contact us at contact@gliff.ai for help</p>
-      </>
-    );
-  }
-
-  if (state === "4-VerificationSent") {
+  if (state === "3-VerificationSent") {
     return (
       <>
         <VerificationSent />
