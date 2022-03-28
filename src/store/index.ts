@@ -1026,24 +1026,8 @@ export class DominateStore {
       );
       await collectionManager.upload(collection);
 
-      // update UID in galleryTiles, redirecting if it's an image UID:
-      const path = window.location.pathname.split("/").slice(1); // path starts with a /, so first element from split is "", so we discard it with slice(1)
-      if (
-        path[0] === "annotate" &&
-        meta.type === "gliff.image" &&
-        path[2] !== collection.uid &&
-        this.navigate
-      ) {
-        // redirect to the new annotate/galleryUid/imageUid path if we're converting an image item to collection in ANNOTATE
-        await this.updateUids(
-          gallery,
-          uid,
-          collection.uid,
-          `/annotate/${gallery.uid}/${collection.uid}`
-        );
-      } else {
-        await this.updateUids(gallery, uid, collection.uid);
-      }
+      // update UID in galleryTiles:
+      await this.updateUids(gallery, uid, collection.uid);
     }
 
     collection = await this.migrate(collectionManager, collection);
@@ -1053,8 +1037,7 @@ export class DominateStore {
   updateUids = async (
     gallery: Collection,
     oldUid: string,
-    newUid: string,
-    redirectPath: string | null = null
+    newUid: string
   ): Promise<void> => {
     // changes all occurrences of a UID in gallery by direct string replacement.
     // will re-fetch the gallery and try again if a transaction conflict occurs
@@ -1070,17 +1053,13 @@ export class DominateStore {
     try {
       await collectionManager.transaction(gallery);
       console.log(`Migrated ${oldUid} -> ${newUid} in galleryTiles`);
-      if (redirectPath) {
-        console.log("redirecting");
-        this.navigate(redirectPath);
-      }
     } catch (err) {
       console.log(
         `Failed to migrate ${oldUid} -> ${newUid} in galleryTiles due to conflict; retrying...`
       );
       // race condition, try again:
       const newGallery = await collectionManager.fetch(gallery.uid);
-      await this.updateUids(newGallery, oldUid, newUid, redirectPath);
+      await this.updateUids(newGallery, oldUid, newUid);
     }
   };
 
@@ -1276,16 +1255,6 @@ export class DominateStore {
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const item = await this.fetch(collectionManager, itemUid, collectionUid);
     return item;
-  };
-
-  getImage = async (
-    collectionUid: string,
-    itemUid: string
-  ): Promise<string> => {
-    // Retrieve image item from a collection.
-    const item = await this.getItem(collectionUid, itemUid);
-    const content = await item.getContent(OutputFormat.String);
-    return content;
   };
 
   getAllImages = async (
