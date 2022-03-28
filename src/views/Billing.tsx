@@ -11,6 +11,9 @@ import {
   getLimits,
   getPlan,
   getPayment,
+} from "@/services/billing";
+
+import type {
   AddonPrices,
   Invoice,
   Limits,
@@ -90,10 +93,23 @@ export function Billing(): JSX.Element {
     if (auth?.user) {
       void getLimits().then(setLimits);
       void getPlan().then((p) => {
+        console.log(p);
         if (p) {
           setPlan(p);
-          void getInvoices().then(setInvoices);
-          void getPayment().then(setPayment);
+          // We don't want to show the invoice for the free trial
+          void getInvoices().then((i: Invoice[]) => {
+            if (
+              p.trial_end &&
+              i.length === 1 &&
+              i[0].amount_paid === 0 &&
+              i[0].paid
+            ) {
+              setInvoices(false);
+            } else {
+              setInvoices(i);
+            }
+          });
+          void getPayment().then((p) => setPayment(p ?? false));
         } else {
           setPlan("CUSTOM");
           setInvoices(false);
@@ -151,6 +167,76 @@ export function Billing(): JSX.Element {
     />
   );
 
+  const planDescription = (p: Plan) => (
+    <>
+      <Grid item xs={p.trial_end ? 12 : 4}>
+        <div
+          style={{
+            width: "100%",
+            padding: p.trial_end ? "25px" : "75px",
+            textAlign: "center",
+          }}
+        >
+          <SVG
+            src={plansMap[p.tier_name].icon}
+            style={{ width: "100px", height: "100px", margin: "auto" }}
+          />
+        </div>
+
+        {p.trial_end ? (
+          <div
+            style={{
+              width: "100%",
+              padding: "10px",
+              textAlign: "center",
+            }}
+          >
+            You are on the free trial for the{" "}
+            <strong>{plansMap[p.tier_name].name}</strong> plan.
+            <br />
+            Your trial ends on:{" "}
+            {new Date(p.trial_end * 1000).toLocaleDateString()}
+            <br />
+            After this date you will be downgraded to the free plan.
+            <br />
+            <br />
+            To continue on the {plansMap[p.tier_name].name} plan, please add
+            payment details.
+          </div>
+        ) : (
+          <>
+            Your current plan is <strong>{plansMap[p.tier_name].name}</strong>{" "}
+            with <strong>{Object.values(p.addons).length}</strong> addons
+            <br />
+            The current period ends on:{" "}
+            {new Date(p.current_period_end * 1000).toLocaleDateString()}
+          </>
+        )}
+      </Grid>
+
+      {!p.trial_end ? (
+        <Grid item xs={5}>
+          <table className={classes.baseTable}>
+            <thead>
+              <tr>
+                <th>Description</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>{plansMap[p.tier_name].name}</td>
+                <td>£{p.base_price / 100}</td>
+              </tr>
+            </tbody>
+          </table>
+        </Grid>
+      ) : (
+        <></>
+      )}
+    </>
+  );
+
   let planElement: JSX.Element;
   if (!plan) {
     planElement = <GliffCard title="Plan" el={<LoadingSpinner />} />;
@@ -161,42 +247,7 @@ export function Billing(): JSX.Element {
         el={
           plan !== "CUSTOM" ? (
             <Grid container spacing={3}>
-              <Grid item xs={3}>
-                <div
-                  style={{
-                    width: "100%",
-                    padding: "75px",
-                    textAlign: "center",
-                  }}
-                >
-                  <SVG
-                    src={plansMap[plan.tier_name].icon}
-                    style={{ width: "100px", height: "100px", margin: "auto" }}
-                  />
-                </div>
-                Your current plan is{" "}
-                <strong>{plansMap[plan.tier_name].name}</strong> with{" "}
-                <strong>{Object.values(plan.addons).length}</strong> addons
-                <br />
-                The current period ends on:{" "}
-                {new Date(plan.current_period_end * 1000).toLocaleDateString()}
-              </Grid>
-              <Grid item xs={6}>
-                <table className={classes.baseTable}>
-                  <thead>
-                    <tr>
-                      <th>Description</th>
-                      <th>Amount</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>{plansMap[plan.tier_name].name}</td>
-                      <td>£{plan.base_price / 100}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </Grid>
+              {planDescription(plan)}
             </Grid>
           ) : (
             <Grid container spacing={3}>
@@ -226,9 +277,9 @@ export function Billing(): JSX.Element {
     <GliffCard
       title="Payment Details"
       el={
-        !payment ? (
+        payment === null ? (
           <LoadingSpinner />
-        ) : (
+        ) : payment ? (
           <>
             Card Number: {payment.number}
             <br />
@@ -239,6 +290,8 @@ export function Billing(): JSX.Element {
             Name: {payment.name}
             <br />
           </>
+        ) : (
+          <>You have no payment method.</>
         )
       }
     />

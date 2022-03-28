@@ -16,8 +16,8 @@ export const getPlan = (): Promise<Plan> =>
 export const getAddonPrices = (): Promise<AddonPrices> =>
   apiRequest<AddonPrices>("/billing/addon-prices", "GET");
 
-export const getPayment = (): Promise<Payment> =>
-  apiRequest<Payment>("/billing/payment-method", "GET");
+export const getPayment = (): Promise<Payment | null> =>
+  apiRequest<Payment | null>("/billing/payment-method", "GET");
 
 export const addAddons = (
   users: number,
