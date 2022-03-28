@@ -1,5 +1,4 @@
-import { Component } from "react";
-import sodium, { output_formats } from "libsodium-wrappers";
+import sodium from "libsodium-wrappers";
 import {
   Account,
   Collection,
