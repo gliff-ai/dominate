@@ -188,7 +188,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     newMultiLabel: boolean
   ) => {
     props.storeInstance
-      .updateCollectionMeta(collectionUid, {
+      .updateGalleryMeta(collectionUid, {
         defaultLabels: newDefaultLabels,
         restrictLabels: newRestrictLabels,
         multiLabel: newMultiLabel,

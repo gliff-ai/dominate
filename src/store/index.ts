@@ -276,7 +276,7 @@ export class DominateStore {
     await collectionManager.transaction(collection);
   };
 
-  updateCollectionMeta = async (
+  updateGalleryMeta = async (
     collectionUid: string,
     newMeta: Partial<{
       defaultLabels: string[];
@@ -465,14 +465,18 @@ export class DominateStore {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     // Create, encrypt and upload a new collection
-    const collection = await collectionManager.create(
+    const collection = await collectionManager.create<GalleryMeta>(
       "gliff.gallery", // type
       {
         type: "gliff.gallery",
+        version: 0,
         name,
         createdTime: Date.now(),
         modifiedTime: Date.now(),
         description: "[]",
+        defaultLabels: [],
+        restrictLabels: false,
+        multiLabel: true,
       }, // metadata
       "[]" // content
     );
