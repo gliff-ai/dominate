@@ -3,7 +3,6 @@ import {
   Account,
   Collection,
   CollectionManager,
-  ItemManager,
   toBase64,
   OutputFormat,
   CollectionAccessLevel,
