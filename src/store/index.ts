@@ -3,7 +3,6 @@ import {
   Account,
   Collection,
   CollectionManager,
-  Item,
   ItemManager,
   toBase64,
   OutputFormat,
@@ -24,6 +23,7 @@ import {
   FileInfo,
   ImageMeta,
   AnnotationMeta,
+  AuditMeta,
   migrations,
 } from "@/interfaces";
 
@@ -552,14 +552,6 @@ export class DominateStore {
     await this.removeAssignee(collectionUid, username);
   };
 
-  getItemManager = async (collectionUid: string): Promise<ItemManager> => {
-    if (!this.etebaseInstance) throw new Error("No store instance");
-    const collectionManager = this.etebaseInstance.getCollectionManager();
-
-    const collection = await this.fetch(collectionManager, collectionUid);
-    return collectionManager.getItemManager(collection);
-  };
-
   createImage = async (
     collectionUid: string,
     imageFileInfos: ImageFileInfo[],
@@ -571,20 +563,22 @@ export class DominateStore {
     try {
       // Create/upload new store item for the image:
       const createdTime = new Date().getTime();
-      // Retrieve itemManager
-      const itemManager = await this.getItemManager(collectionUid);
+      // Retrieve collectionManager
+      const collectionManager = this.etebaseInstance.getCollectionManager();
 
-      const itemPromises: Promise<Item>[] = [];
+      const collectionPromises: Promise<Collection>[] = [];
 
       for (let i = 0; i < imageFileInfos.length; i += 1) {
         const imageFileInfo = imageFileInfos[i];
         const imageContent = imageContents[i];
 
         // Create new image item and add it to the collection
-        itemPromises.push(
-          itemManager.create<Partial<ImageMeta>>( // partial because we can't know the uid yet, etebase assigns it here
+        collectionPromises.push(
+          collectionManager.create<ImageMeta>( // partial because we can't know the uid yet, etebase assigns it here
+            "gliff.image",
             {
               type: "gliff.image",
+              version: 0,
               name: imageFileInfo.fileName,
               createdTime,
               modifiedTime: createdTime,
@@ -598,19 +592,19 @@ export class DominateStore {
       setTask({ ...task, progress: 30 });
 
       // save new image items:
-      const newItems = await Promise.all(itemPromises);
-      await itemManager.batch(newItems);
+      const newCollections = await Promise.all(collectionPromises);
+      await this.batchUpload(collectionManager, newCollections);
 
       const newTiles: GalleryTile[] = [];
       for (let i = 0; i < imageFileInfos.length; i += 1) {
         // Add the image's metadata/thumbnail and a pointer to the image item to the gallery's content:
         newTiles.push({
-          id: newItems[i].uid, // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
+          id: newCollections[i].uid, // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
           thumbnail: thumbnails[i],
           imageLabels: [],
           assignees: [],
           fileInfo: imageFileInfos[i],
-          imageUID: newItems[i].uid,
+          imageUID: newCollections[i].uid,
           annotationUID: {},
           annotationComplete: {},
           auditUID: {},
@@ -620,7 +614,6 @@ export class DominateStore {
       setTask({ ...task, progress: 65 });
 
       // save new gallery tiles:
-      const collectionManager = this.etebaseInstance.getCollectionManager();
       const collection = await this.fetch(collectionManager, collectionUid);
       const oldContent = await collection.getContent(OutputFormat.String);
       const newContent = JSON.stringify(
@@ -1012,7 +1005,7 @@ export class DominateStore {
       // it's an Item, convert it to a Collection:
       if (galleryUid === null)
         throw Error(
-          "Attempting to convert an Item to a Collection without an ItemManager!"
+          "Attempting to convert an Item to a Collection without a galleryUid!"
         );
       const gallery = await collectionManager.fetch(galleryUid);
       const itemManager = collectionManager.getItemManager(gallery);
@@ -1093,14 +1086,16 @@ export class DominateStore {
   ): Promise<void> => {
     // Store annotations object in a new item.
 
-    // Retrieve itemManager
-    const itemManager = await this.getItemManager(collectionUid);
+    // Retrieve collectionManager
+    const collectionManager = this.etebaseInstance.getCollectionManager();
 
     // Create new Annotation item
     const createdTime = new Date().getTime();
-    const annotationsItem = await itemManager.create(
+    const annotationsItem = await collectionManager.create<AnnotationMeta>(
+      "gliff.annotation",
       {
         type: "gliff.annotation",
+        version: 0,
         mtime: createdTime,
         isComplete,
         createdTime,
@@ -1109,9 +1104,11 @@ export class DominateStore {
     );
 
     // Create new Audit item:
-    const auditItem = await itemManager.create(
+    const auditItem = await collectionManager.create<AuditMeta>(
+      "gliff.audit",
       {
         type: "gliff.audit",
+        version: 0,
         modifiedTime: createdTime,
         createdTime,
       },
@@ -1127,7 +1124,7 @@ export class DominateStore {
     }
 
     // Store annotationsItem and auditItem inside the collection:
-    await itemManager.batch([annotationsItem, auditItem]);
+    await this.batchUpload(collectionManager, [annotationsItem, auditItem]);
 
     if (setTask) {
       setTask({
@@ -1138,7 +1135,6 @@ export class DominateStore {
     }
 
     // Update collection content JSON:
-    const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await this.fetch(collectionManager, collectionUid);
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
@@ -1171,7 +1167,11 @@ export class DominateStore {
     username: string
   ): Promise<void> => {
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetch(
+      collectionManager,
+      collectionUid,
+      collectionUid
+    );
     setTask({
       isLoading: true,
       description: "Saving annotation in progress, please wait...",
