@@ -1208,7 +1208,6 @@ export class DominateStore {
     if (!annotationUid || !auditUid) return;
 
     // Retrieve items
-    const itemManager = await this.getItemManager(collectionUid);
     const items = await this.fetchMulti(
       collectionManager,
       [annotationUid, auditUid],
@@ -1267,8 +1266,6 @@ export class DominateStore {
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
 
-    const itemManager = collectionManager.getItemManager(collection);
-
     const imageItems = await this.fetchMulti(
       collectionManager,
       galleryTiles.map((tile) => tile.imageUID),
@@ -1296,7 +1293,6 @@ export class DominateStore {
     const tiles = JSON.parse(collectionContent) as GalleryTile[];
 
     // fetch the audits and parse as JSON:
-    const itemManager = collectionManager.getItemManager(collection);
     const auditUIDs = tiles.map((tile) => Object.values(tile.auditUID)).flat();
     if (auditUIDs.length === 0) return [];
 
