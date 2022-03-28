@@ -18,7 +18,6 @@ import { AnnotationSession } from "@gliff-ai/audit";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
-import type { ImageItemMeta } from "./interfaces";
 import {
   GalleryMeta,
   GalleryTile,
@@ -585,7 +584,7 @@ export class DominateStore {
 
         // Create new image item and add it to the collection
         itemPromises.push(
-          itemManager.create<Partial<ImageItemMeta>>( // partial because we can't know the uid yet, etebase assigns it here
+          itemManager.create<Partial<ImageMeta>>( // partial because we can't know the uid yet, etebase assigns it here
             {
               type: "gliff.image",
               name: imageFileInfo.fileName,
@@ -1289,7 +1288,7 @@ export class DominateStore {
 
   getAllImages = async (
     collectionUid: string
-  ): Promise<{ meta: ImageItemMeta; content: string }[]> => {
+  ): Promise<{ meta: ImageMeta; content: string }[]> => {
     // Retrive all image items from a collection
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
