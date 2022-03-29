@@ -39,6 +39,7 @@ import { useInput } from "@/hooks/use-input";
 import { SubmitButton, GliffCard } from "@/components";
 
 import { useAuth } from "@/hooks/use-auth";
+import { Addon } from "@/services/billing/interfaces";
 
 const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY;
 
@@ -201,6 +202,20 @@ export function Billing(): JSX.Element {
                   />
                 </td>
               </tr>
+
+              <tr>
+                <td colSpan={2}>
+                  <br />
+                  <BaseTextButton
+                    text={"Purchase Addons"}
+                    style={{ margin: "0 auto", display: "block" }}
+                    onClick={() => {
+                      setAddonDialogOpen(true);
+                      void getAddonPrices().then(setAddonPrices);
+                    }}
+                  />
+                </td>
+              </tr>
             </tbody>
           </table>
         )
@@ -301,6 +316,19 @@ export function Billing(): JSX.Element {
                 <td>{plansMap[p.tier_name].name}</td>
                 <td>£{p.base_price / 100}</td>
               </tr>
+
+              {Object.entries(p.addons)
+                .filter(([, a]) => !!a)
+                .map(([key, addon]: [string, Addon]) => (
+                  <tr key={key}>
+                    <td>
+                      {" "}
+                      {addon.quantity} x {addon.name} @ £
+                      {addon.price_per_unit / 100} each
+                    </td>
+                    <td>£{addon.quantity * (addon.price_per_unit / 100)}</td>
+                  </tr>
+                ))}
             </tbody>
           </table>
         </Grid>
@@ -444,11 +472,15 @@ export function Billing(): JSX.Element {
       {addonTypes.map((addon) => {
         if (!addonPrices[addon]) return null;
         return (
-          <label key={addon} htmlFor={addon}>
-            Additional {addon} @ £{(addonPrices[addon] as number) / 100}:
-            {/* eslint-disable-next-line react/jsx-props-no-spreading */}
-            <input name={addon} type="number" min="0" {...form[addon].bind} />
-          </label>
+          <div key={addon}>
+            <label htmlFor={addon}>
+              Additional {addon} @ £{(addonPrices[addon] as number) / 100}:
+              {/* eslint-disable-next-line react/jsx-props-no-spreading */}
+              <input name={addon} type="number" min="0" {...form[addon].bind} />
+            </label>
+            <br />
+            <br />
+          </div>
         );
       })}
       Total: £
@@ -461,14 +493,14 @@ export function Billing(): JSX.Element {
               (addonPrices[addon] as number) * parseInt(form[addon].value, 10),
             0
           ) / 100
-      ).toFixed(2)}
+      ).toFixed(2)}{" "}
       per month
       <SubmitButton loading={addonFormLoading} value="Confirm" />
     </form>
   );
 
   if (!auth?.user) return <></>;
-
+  // Replace Dialog when Style 9 hits
   return (
     <div style={{ margin: "20px" }}>
       <Grid container spacing={3}>
@@ -499,7 +531,7 @@ export function Billing(): JSX.Element {
               onClick={() => setAddonDialogOpen(false)}
             />
           </DialogTitle>
-          <DialogContent>{addonForm}</DialogContent>
+          <DialogContent style={{ padding: "10px" }}>{addonForm}</DialogContent>
         </Dialog>
       </Grid>
     </div>
