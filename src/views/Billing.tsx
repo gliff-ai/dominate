@@ -1,8 +1,20 @@
 import { useEffect, useState, Dispatch, SetStateAction } from "react";
+import { loadStripe } from "@stripe/stripe-js";
 import SVG from "react-inlinesvg";
-import { Dialog, DialogContent, DialogTitle, Grid } from "@mui/material";
+import {
+  Dialog,
+  DialogContent,
+  DialogTitle,
+  Grid,
+  Button,
+} from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
-import { theme, BaseIconButton, LoadingSpinner } from "@gliff-ai/style";
+import {
+  theme,
+  BaseIconButton,
+  LoadingSpinner,
+  BaseTextButton,
+} from "@gliff-ai/style";
 
 import {
   addAddons,
@@ -11,6 +23,7 @@ import {
   getLimits,
   getPlan,
   getPayment,
+  createCheckoutSession,
 } from "@/services/billing";
 
 import type {
@@ -26,6 +39,10 @@ import { useInput } from "@/hooks/use-input";
 import { SubmitButton, GliffCard } from "@/components";
 
 import { useAuth } from "@/hooks/use-auth";
+
+const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY;
+
+const stripePromise = loadStripe(STRIPE_KEY);
 
 type FormState = {
   [key in "user" | "project" | "collaborator"]: {
@@ -89,21 +106,43 @@ export function Billing(): JSX.Element {
 
   const addonTypes = ["user", "project", "collaborator"] as const;
 
+  const addPaymentButton = (): JSX.Element => {
+    const doCheckout = async () => {
+      const stripe = await stripePromise;
+      try {
+        const session = await createCheckoutSession();
+
+        if (!session || !stripe) {
+          return;
+        }
+
+        const { id: sessionId } = session;
+
+        // When the customer clicks on the button, redirect them to Checkout.
+        const result = await stripe.redirectToCheckout({
+          sessionId,
+        });
+
+        if (result.error) {
+          console.error(result.error);
+        }
+      } catch (error) {
+        console.error(error);
+      }
+    };
+
+    return <BaseTextButton onClick={doCheckout} text="Add Payment Method" />;
+  };
+
   useEffect(() => {
     if (auth?.user) {
       void getLimits().then(setLimits);
       void getPlan().then((p) => {
-        console.log(p);
         if (p) {
           setPlan(p);
           // We don't want to show the invoice for the free trial
           void getInvoices().then((i: Invoice[]) => {
-            if (
-              p.trial_end &&
-              i.length === 1 &&
-              i[0].amount_paid === 0 &&
-              i[0].paid
-            ) {
+            if (p.is_trial) {
               setInvoices(false);
             } else {
               setInvoices(i);
@@ -152,6 +191,16 @@ export function Billing(): JSX.Element {
                   GB
                 </td>
               </tr>
+
+              <tr>
+                <td colSpan={2}>
+                  <br />
+                  <BaseTextButton
+                    text={"Change Plan"}
+                    style={{ margin: "0 auto", display: "block" }}
+                  />
+                </td>
+              </tr>
             </tbody>
           </table>
         )
@@ -167,13 +216,35 @@ export function Billing(): JSX.Element {
     />
   );
 
+  const paymentDetails = (p: Plan) => (
+    <>
+      {payment ? (
+        <>
+          <br />
+          You will be charged and moved on to the {
+            plansMap[p.tier_name].name
+          }{" "}
+          plan at the end of your trial.
+        </>
+      ) : (
+        <>
+          After this date you will be downgraded to the free plan.
+          <br />
+          <br />
+          To continue on the {plansMap[p.tier_name].name} plan, please add
+          payment details.
+        </>
+      )}
+    </>
+  );
+
   const planDescription = (p: Plan) => (
     <>
-      <Grid item xs={p.trial_end ? 12 : 4}>
+      <Grid item xs={p.is_trial ? 12 : 4}>
         <div
           style={{
             width: "100%",
-            padding: p.trial_end ? "25px" : "75px",
+            padding: p.is_trial ? "25px" : "75px",
             textAlign: "center",
           }}
         >
@@ -183,38 +254,40 @@ export function Billing(): JSX.Element {
           />
         </div>
 
-        {p.trial_end ? (
-          <div
-            style={{
-              width: "100%",
-              padding: "10px",
-              textAlign: "center",
-            }}
-          >
-            You are on the free trial for the{" "}
-            <strong>{plansMap[p.tier_name].name}</strong> plan.
-            <br />
-            Your trial ends on:{" "}
-            {new Date(p.trial_end * 1000).toLocaleDateString()}
-            <br />
-            After this date you will be downgraded to the free plan.
-            <br />
-            <br />
-            To continue on the {plansMap[p.tier_name].name} plan, please add
-            payment details.
-          </div>
-        ) : (
-          <>
-            Your current plan is <strong>{plansMap[p.tier_name].name}</strong>{" "}
-            with <strong>{Object.values(p.addons).length}</strong> addons
-            <br />
-            The current period ends on:{" "}
-            {new Date(p.current_period_end * 1000).toLocaleDateString()}
-          </>
-        )}
+        <div
+          style={{
+            width: "100%",
+            padding: "10px",
+            textAlign: "center",
+          }}
+        >
+          {p.is_trial ? (
+            <>
+              You are on the free trial for the{" "}
+              <strong>{plansMap[p.tier_name].name}</strong> plan.
+              <br />
+              Your trial ends on:{" "}
+              {new Date(p.trial_end * 1000).toLocaleDateString()}
+              <br />
+              {paymentDetails(p)}
+            </>
+          ) : (
+            <>
+              Your current plan is <strong>{plansMap[p.tier_name].name}</strong>{" "}
+              with{" "}
+              <strong>
+                {Object.values(p.addons).filter((a) => !!a).length}
+              </strong>{" "}
+              addons
+              <br />
+              The current period ends on:{" "}
+              {new Date(p.current_period_end * 1000).toLocaleDateString()}
+            </>
+          )}
+        </div>
       </Grid>
 
-      {!p.trial_end ? (
+      {!p.is_trial ? (
         <Grid item xs={5}>
           <table className={classes.baseTable}>
             <thead>
@@ -273,29 +346,36 @@ export function Billing(): JSX.Element {
     );
   }
 
-  const paymentElement = (
-    <GliffCard
-      title="Payment Details"
-      el={
-        payment === null ? (
-          <LoadingSpinner />
-        ) : payment ? (
-          <>
-            Card Number: {payment.number}
-            <br />
-            Card Expiry: {payment.expiry}
-            <br />
-            Type: {toTitleCase(payment.brand)}
-            <br />
-            Name: {payment.name}
-            <br />
-          </>
-        ) : (
-          <>You have no payment method.</>
-        )
-      }
-    />
+  let paymentElement = (
+    <GliffCard title="Payment Details" el={<LoadingSpinner />} />
   );
+
+  if (payment !== null) {
+    paymentElement = (
+      <GliffCard
+        title="Payment Details"
+        el={
+          payment ? (
+            <>
+              Card Number: {payment.number}
+              <br />
+              Card Expiry: {payment.expiry}
+              <br />
+              Type: {toTitleCase(payment.brand)}
+              <br />
+              Name: {payment.name}
+              <br />
+            </>
+          ) : (
+            <>
+              You have no payment method.
+              {addPaymentButton()}
+            </>
+          )
+        }
+      />
+    );
+  }
 
   const invoicesElement = (
     <GliffCard

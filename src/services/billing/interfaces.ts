@@ -38,6 +38,7 @@ export interface Plan {
   billed_usage: number;
   billed_usage_gb_price: number;
   is_custom: boolean;
+  is_trial: boolean;
 }
 
 export interface Addon {
@@ -57,4 +58,8 @@ export interface Payment {
   expiry: string;
   brand: string;
   name: string;
+}
+
+export interface CheckoutSession {
+  id: string;
 }
