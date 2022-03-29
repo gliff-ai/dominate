@@ -557,8 +557,7 @@ export class DominateStore {
     ).then((results) =>
       results.forEach((result) => {
         if (result.status === "fulfilled") {
-          const { uid, data } = result.value;
-          resolved[uid] = data;
+          resolved[result.value.uid] = result.value.data;
         }
       })
     );
