@@ -14,6 +14,21 @@ interface GalleryMetaV0 extends BaseMeta {
   multiLabel: boolean;
 }
 
+// example new interface:
+// interface GalleryMetaV1 extends BaseMeta {
+//   meta_version: 1;
+//   content_version: 0;
+//   type: "gliff.gallery";
+//   name: string; // "human-readable gallery name, i.e. folder name"
+//   createdTime: number; // "time item was created in milliseconds since epoch"
+//   modifiedTime: number; // "time item was last modified in milliseconds since epoch"
+//   description?: string; // "long description for collection, i.e. project details"
+//   defaultLabels: string[];
+//   restrictLabels: boolean;
+//   multiLabel: boolean;
+//   hello: "world";
+// }
+
 // ----------------------------- CONTENT -----------------------------
 
 type GalleryContentV0 = GalleryTileV0[];
@@ -33,12 +48,13 @@ interface GalleryTileV0 {
 
 const metaMigrations = [
   // example migration:
-  // {
-  //   meta: (oldMeta: GalleryMetaV0): GalleryMetaV1 => {
-  //     const newMeta: GalleryMetaV1 = { ...oldMeta, hello: "world" };
-  //     return newMeta;
-  //   },
-  //   content: null,
+  // (oldMeta: GalleryMetaV0): GalleryMetaV1 => {
+  //   const newMeta: GalleryMetaV1 = {
+  //     ...oldMeta,
+  //     meta_version: 1,
+  //     hello: "world",
+  //   };
+  //   return newMeta;
   // },
 ];
 
