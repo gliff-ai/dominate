@@ -1009,30 +1009,30 @@ export class DominateStore {
 
     // migrate if necessary:
     let migrate = false;
-    if (meta.meta_version < migrations[meta.type + ".meta"].length) {
+    if (meta.meta_version < migrations[`${meta.type}.meta`].length) {
       // migrate meta:
       console.log(`Migrating ${meta.type.split(".")[1]} metadata`);
-      const outstandingMetaMigrations = migrations[meta.type + ".meta"].slice(
+      const outstandingMetaMigrations = migrations[`${meta.type}.meta`].slice(
         meta.meta_version
       );
       for (const migration of outstandingMetaMigrations) {
         meta = migration(meta);
       }
-      meta.meta_version = migrations[meta.type + ".meta"].length;
+      meta.meta_version = migrations[`${meta.type}.meta`].length;
 
       migrate = true;
     }
 
-    if (meta.content_version < migrations[meta.type + ".content"].length) {
+    if (meta.content_version < migrations[`${meta.type}.content`].length) {
       // migrate content:
       console.log(`Migrating ${meta.type.split(".")[1]} content`);
       const outstandingContentMigrations = migrations[
-        meta.type + ".content"
+        `${meta.type}.content`
       ].slice(meta.content_version);
       for (const migration of outstandingContentMigrations) {
         content = migration(content);
       }
-      meta.content_version = migrations[meta.type + ".content"].length;
+      meta.content_version = migrations[`${meta.type}.content`].length;
 
       migrate = true;
     }
