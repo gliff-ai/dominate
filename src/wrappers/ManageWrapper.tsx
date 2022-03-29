@@ -40,16 +40,6 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     [props.storeInstance]
   );
 
-  const getCollectionMembers = useCallback(
-    async ({ collectionUid }) => {
-      const members = await props.storeInstance.getCollectionMembers(
-        collectionUid
-      );
-      return members;
-    },
-    [props.storeInstance]
-  );
-
   const createProject = useCallback(
     async ({ name }) => {
       const uid = await props.storeInstance.createCollection(name);
@@ -206,15 +196,21 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     [auth, props.storeInstance]
   );
 
+  const getCollectionMembers = useCallback(
+    async ({ collectionUid }) => {
+      const result = await props.storeInstance.getCollectionMembers(
+        collectionUid
+      );
+
+      return result;
+    },
+    [props.storeInstance]
+  );
+
   const getCollectionsMembers = useCallback(async () => {
     const result = await props.storeInstance.getCollectionsMembers();
 
-    const members = {};
-    result.forEach(({ uid, usernames, pendingUsernames }) => {
-      members[uid] = { usernames, pendingUsernames };
-    });
-
-    return members;
+    return result;
   }, [props.storeInstance]);
 
   const removeFromProject = useCallback(

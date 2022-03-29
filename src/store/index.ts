@@ -8,8 +8,13 @@ import {
   toBase64,
   OutputFormat,
   CollectionAccessLevel,
+  SignedInvitationRead,
 } from "etebase";
-
+import {
+  CollectionInvitationListResponse,
+  CollectionMember,
+  CollectionMemberListResponse,
+} from "etebase/dist/lib/OnlineManagers";
 import { Task } from "@gliff-ai/style";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
@@ -492,7 +497,7 @@ export class DominateStore {
 
   getCollectionMembers = async (
     collectionUid: string
-  ): Promise<{ usernames: string[]; pendingUsernames: string[] } | null> => {
+  ): Promise<{ username: string; isPending: boolean }[] | null> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -503,24 +508,31 @@ export class DominateStore {
     const members = await memberManager.list();
     const invitations = await invitationManager.listOutgoing();
 
-    return {
-      usernames: members.data.map(({ username }) => username),
-      pendingUsernames: invitations.data
-        .filter((item) => item.collection === collectionUid)
-        .map(({ username }) => username)
-        .filter((item, i, array) => array.indexOf(item) === i), // filter out duplicates
-    };
+    return this.reshapeMembers(collectionUid, members, invitations);
   };
+
+  reshapeMembers = (
+    collectionUid: string,
+    members: CollectionMemberListResponse<CollectionMember>,
+    invitations: CollectionInvitationListResponse<SignedInvitationRead>
+  ): { username: string; isPending: boolean }[] =>
+    members.data
+      .map(({ username }) => ({
+        username,
+        isPending: false,
+      }))
+      .concat(
+        invitations.data
+          .filter((item) => item.collection === collectionUid)
+          .filter((item, i, array) => array.indexOf(item) === i) // filter out duplicats
+          .map(({ username }) => ({ username, isPending: true }))
+      );
 
   getCollectionsMembers = async (
     type = "gliff.gallery"
-  ): Promise<
-    {
-      uid: string;
-      usernames: string[];
-      pendingUsernames: string[];
-    }[]
-  > => {
+  ): Promise<{
+    [uid: string]: { username: string; isPending: boolean }[];
+  }> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -528,10 +540,9 @@ export class DominateStore {
     const { data } = await collectionManager.list(type);
 
     const resolved: {
-      uid: string;
-      usernames: string[];
-      pendingUsernames: string[];
-    }[] = [];
+      [uid: string]: { username: string; isPending: boolean }[];
+    } = {};
+
     await Promise.allSettled(
       data.map(async (collection) => {
         const memberManager = collectionManager.getMemberManager(collection);
@@ -540,17 +551,14 @@ export class DominateStore {
 
         return {
           uid: collection.uid,
-          usernames: members.data.map(({ username }) => username),
-          pendingUsernames: invitations.data
-            .filter((item) => item.collection === collection.uid)
-            .map(({ username }) => username)
-            .filter((item, i, array) => array.indexOf(item) === i), // filter out duplicates
+          data: this.reshapeMembers(collection.uid, members, invitations),
         };
       })
     ).then((results) =>
       results.forEach((result) => {
         if (result.status === "fulfilled") {
-          resolved.push(result.value);
+          const { uid, data } = result.value;
+          resolved[uid] = data;
         }
       })
     );
