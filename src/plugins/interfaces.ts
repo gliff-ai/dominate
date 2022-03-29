@@ -25,6 +25,7 @@ interface Plugin {
 }
 
 interface PluginElement {
+  type?: string; // added by DOMINATE, not by the plugin's creator
   name: string;
   tooltip: string;
   onClick: (data: PluginDataIn) => Promise<PluginDataOut>;

@@ -44,7 +44,6 @@ interface ImageItemMeta {
 }
 
 interface FileInfo {
-  // the stuff in ImageFileInfo
   fileName: string;
   num_slices: number; // number of z-slices
   num_channels: number; // numbers colour channels
