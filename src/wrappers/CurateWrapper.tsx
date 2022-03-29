@@ -24,6 +24,9 @@ import {
   setStateIfMounted,
   uniquifyFilenames,
   makeAnnotationsJson,
+  convertGalleryToMetadata,
+  convertMetadataToGalleryTiles,
+  MetaItemWithId,
 } from "@/helpers";
 
 import { initPluginObjects, PluginObject, Product } from "@/plugins";
@@ -58,9 +61,10 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const navigate = useNavigate();
   const auth = useAuth();
 
-  const [curateInput, setCurateInput] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
+  const [metadata, setMetadata] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
   const [defaultLabels, setDefaultLabels] = useState<string[]>([]); // more input for curate
   const [restrictLabels, setRestrictLabels] = useState<boolean>(false); // more input for curate
+  const [multiLabel, setMultiLabel] = useState<boolean>(true); // more input for curate
   const { collectionUid = "" } = useParams<string>(); // uid of selected gallery, from URL
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
 
@@ -93,39 +97,27 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     (storeInstance) => {
       // fetches images via DominateStore, and assigns them to imageItems state
       if (!auth?.user?.username) return;
+
       storeInstance
         .getImagesMeta(collectionUid)
         .then((items) => {
-          const { tiles, galleryMeta } = items;
-          setStateIfMounted(tiles, setCollectionContent, isMounted.current);
-          // owners and members can view the images in a project
+          const { tiles: gallery, galleryMeta } = items;
+          setStateIfMounted(gallery, setCollectionContent, isMounted.current);
+
+          const newMetadata = convertGalleryToMetadata(gallery);
+
+          // if user is collaborator, include only images assigned to them.
           const canViewAllImages = isOwnerOrMember();
-          // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
-          const wrangled = tiles
-            .map(
-              ({
-                thumbnail,
-                imageLabels = [],
-                assignees = [],
-                id,
-                fileInfo,
-              }) => ({
-                thumbnail,
-                imageLabels,
-                assignees,
-                id,
-                ...fileInfo,
-                imageName: fileInfo.fileName, // curate expects imageName rather than fileName
-              })
-            )
-            .filter(
-              ({ assignees }) =>
-                canViewAllImages ||
-                assignees.includes(auth?.user?.username as string)
-            );
-          setCurateInput(wrangled);
+          newMetadata.filter(
+            ({ assignees }) =>
+              canViewAllImages ||
+              (assignees as string[]).includes(auth?.user?.username as string)
+          );
+
+          setMetadata(newMetadata);
           setDefaultLabels(galleryMeta.defaultLabels);
           setRestrictLabels(galleryMeta.restrictLabels);
+          setMultiLabel(galleryMeta.multiLabel);
         })
         .catch((err) => {
           logger.log(err);
@@ -329,17 +321,10 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
             maskFolder.file(
               maskName,
-              getTiffData(
-                new Annotations(annotationsObject),
-                new ImageFileInfo({
-                  fileName: maskName,
-                  width: images[i].meta.fileInfo.width,
-                  height: images[i].meta.fileInfo.height,
-                  size: images[i].meta.fileInfo.size,
-                  num_channels: images[i].meta.fileInfo.num_channels,
-                  num_slices: images[i].meta.fileInfo.num_slices,
-                })
-              )
+              getTiffData(new Annotations(annotationsObject), {
+                ...images[i].meta.fileInfo,
+                fileName: maskName,
+              })
             );
           }
         });
@@ -435,6 +420,17 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     }
   }, [auth, collectionUid, isMounted]);
 
+  const saveMetadataCallback = useCallback(
+    (data: { collectionUid: string; metadata: MetaItemWithId[] }) => {
+      const newTiles = convertMetadataToGalleryTiles(data.metadata);
+      void props.storeInstance
+        .updateGallery(data.collectionUid, newTiles)
+        .then(() => fetchImageItems())
+        .catch((error) => console.error(error));
+    },
+    [props.storeInstance]
+  );
+
   useEffect(() => {
     // runs at mount
     isMounted.current = true;
@@ -463,9 +459,10 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   return (
     <>
       <Curate
-        metadata={curateInput}
+        metadata={metadata}
         defaultLabels={defaultLabels}
         restrictLabels={restrictLabels}
+        multiLabel={multiLabel}
         saveImageCallback={addImagesToGallery}
         saveLabelsCallback={saveLabelsCallback}
         saveDefaultLabelsCallback={saveDefaultLabelsCallback}
@@ -485,6 +482,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             ? () => navigate(`/manage/plugins`)
             : null
         }
+        saveMetadataCallback={saveMetadataCallback}
       />
 
       <ConfirmationDialog

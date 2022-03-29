@@ -1,5 +1,5 @@
 import { Annotation, Spline, BoundingBox } from "@gliff-ai/annotate";
-import { GalleryTile } from "@/interfaces";
+import { GalleryTile, MetaItem } from "@/interfaces";
 
 export function setStateIfMounted(
   newState: any,
@@ -70,3 +70,61 @@ export const makeAnnotationsJson = (
 
   return JSON.stringify(annotationsJson);
 };
+
+export function convertGalleryToMetadata(gallery: GalleryTile[]): MetaItem[] {
+  /*  convert Gallery object into Metadata object.
+      excluded keys: imageUID, AnnotationUID, auditUID, annotationComplete. */
+
+  return gallery.map(
+    ({ id, thumbnail, assignees = [], imageLabels = [], fileInfo }) =>
+      // keys included in the metada object (and displayed in CURATE).
+      ({
+        id,
+        thumbnail,
+        assignees,
+        imageLabels,
+        ...fileInfo,
+        imageName: fileInfo.fileName, // CURATE expects imageName rather than fileName.
+      })
+  );
+}
+
+export interface MetaItemWithId extends MetaItem {
+  id: string;
+}
+
+// List of keys that CANNOT be updated by plugins.
+// NOTE: a disallowed list is used because plugins should be able to add any new field.
+const EXCLUDED_KEYS = [
+  "id",
+  "assignees",
+  "thumbnail",
+  "imageUID",
+  "annotationUID",
+  "auditUID",
+  "annotationComplete",
+  "width",
+  "height",
+  "num_slices",
+  "fileName",
+];
+
+export function convertMetadataToGalleryTiles(
+  metadata: MetaItemWithId[],
+  excludedKeys: string[] = EXCLUDED_KEYS
+): { [id: string]: Partial<GalleryTile> } {
+  /*  Convert Matadata object to an object that maps IDs to GalleryTile objects.
+      The returned map can be used to update the Gallery object. 
+      Any extra field that should never be overridden can be added to EXCLUDED_KEYS. */
+
+  const newTiles = {};
+  metadata.forEach(({ id, ...otherKeys }) => {
+    // delete excluded key-value pairs
+    for (const key of excludedKeys) delete otherKeys[key];
+
+    // convert matadata item to gallery tile
+    const { imageLabels, ...fileInfo } = otherKeys;
+    newTiles[id] = { imageLabels, fileInfo };
+  });
+  return newTiles;
+}

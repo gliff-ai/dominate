@@ -8,10 +8,14 @@ import { ImageFileInfo } from "@gliff-ai/upload";
 import { icons, IconButton, Task } from "@gliff-ai/style";
 import { OutputFormat } from "etebase";
 import { DominateStore } from "@/store";
-import { AnnotationMeta } from "@/interfaces";
+import { AnnotationMeta, GalleryMeta } from "@/interfaces";
 import { parseStringifiedSlices } from "@/imageConversions";
 import { useAuth, useStore } from "@/hooks";
-import { setStateIfMounted } from "@/helpers";
+import {
+  convertMetadataToGalleryTiles,
+  setStateIfMounted,
+  MetaItemWithId,
+} from "@/helpers";
 import { UserAccess } from "@/hooks/use-auth";
 import { initPluginObjects, PluginObject, Product } from "@/plugins";
 
@@ -59,6 +63,10 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
   const [plugins, setPlugins] = useState<PluginObject | null>(null);
 
+  const [defaultLabels, setDefaultLabels] = useState<string[]>([]);
+  const [restrictLabels, setRestrictLabels] = useState<boolean>(false);
+  const [multiLabel, setMultiLabel] = useState<boolean>(true);
+
   const isMounted = useRef(false);
   const classes = useStyle();
 
@@ -103,11 +111,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             (item) => item.imageUID === imageUid
           )?.fileInfo;
           if (fileInfo) {
-            setStateIfMounted(
-              new ImageFileInfo(fileInfo),
-              setImageFileInfo,
-              isMounted.current
-            );
+            setStateIfMounted(fileInfo, setImageFileInfo, isMounted.current);
           }
         })
         .catch((e) => {
@@ -168,6 +172,14 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   useEffect(() => {
     if (!collectionUid) return;
     fetchImageItems();
+    props.storeInstance
+      .getCollectionMeta(collectionUid)
+      .then((meta: GalleryMeta) => {
+        setDefaultLabels(meta.defaultLabels);
+        setRestrictLabels(meta.restrictLabels);
+        setMultiLabel(meta.multiLabel);
+      })
+      .catch((e) => console.error(e));
   }, [collectionUid, fetchImageItems]);
 
   useEffect(() => {
@@ -319,6 +331,17 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     }
   }, [auth, collectionUid, isMounted]);
 
+  const saveMetadataCallback = useCallback(
+    (data: { collectionUid: string; metadata: MetaItemWithId[] }) => {
+      const newTiles = convertMetadataToGalleryTiles(data.metadata);
+      void props.storeInstance
+        .updateGallery(data.collectionUid, newTiles)
+        .then(() => fetchImageItems())
+        .catch((error) => console.error(error));
+    },
+    [props.storeInstance]
+  );
+
   useEffect(() => {
     void fetchPlugins();
   }, [fetchPlugins]);
@@ -358,6 +381,10 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
           ? () => navigate(`/manage/plugins`)
           : null
       }
+      defaultLabels={defaultLabels}
+      restrictLabels={restrictLabels}
+      multiLabel={multiLabel}
+      saveMetadataCallback={saveMetadataCallback}
     />
   );
 };

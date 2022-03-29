@@ -56,6 +56,7 @@ async function initJsPluginObjects(
       try {
         const init = new PluginConstructor();
         init.name = name;
+        init.type = "Javascript";
         pluginTools[name] = [init];
       } catch (e) {
         console.error(`Error load plug-in: ${(e as Error).message}`);
