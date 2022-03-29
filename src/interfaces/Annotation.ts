@@ -1,7 +1,10 @@
+import { BaseMeta } from "./shared";
+
 // ----------------------------- META -----------------------------
 
-interface AnnotationMetaV0 {
-  version: 0;
+interface AnnotationMetaV0 extends BaseMeta {
+  meta_version: 0;
+  content_version: 0;
   type: "gliff.annotation";
   isComplete: boolean;
   name?: string;
@@ -11,9 +14,11 @@ interface AnnotationMetaV0 {
   createdTime?: number;
 }
 
-const migrations = [];
+const metaMigrations = [];
+const contentMigrations = [];
 
 export {
   AnnotationMetaV0 as AnnotationMeta,
-  migrations as AnnotationMigrations,
+  metaMigrations as AnnotationMetaMigrations,
+  contentMigrations as AnnotationContentMigrations,
 };

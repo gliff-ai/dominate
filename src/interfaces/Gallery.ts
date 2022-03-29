@@ -1,8 +1,9 @@
-import { FileInfo } from "./shared";
+import { FileInfo, BaseMeta } from "./shared";
 
 // ----------------------------- META -----------------------------
-interface GalleryMetaV0 {
-  version: 0;
+interface GalleryMetaV0 extends BaseMeta {
+  meta_version: 0;
+  content_version: 0;
   type: "gliff.gallery";
   name: string; // "human-readable gallery name, i.e. folder name"
   createdTime: number; // "time item was created in milliseconds since epoch"
@@ -30,20 +31,23 @@ interface GalleryTileV0 {
   auditUID: Record<string, string>;
 }
 
-const migrations = [
+const metaMigrations = [
   // example migration:
   // {
   //   meta: (oldMeta: GalleryMetaV0): GalleryMetaV1 => {
-  //     const newMeta: GalleryMetaV1 = { ...oldMeta, version: 1, hello: "world" };
+  //     const newMeta: GalleryMetaV1 = { ...oldMeta, hello: "world" };
   //     return newMeta;
   //   },
   //   content: null,
   // },
 ];
 
+const contentMigrations = [];
+
 export {
   GalleryMetaV0 as GalleryMeta,
   GalleryContentV0 as GalleryContent,
   GalleryTileV0 as GalleryTile,
-  migrations as GalleryMigrations,
+  metaMigrations as GalleryMetaMigrations,
+  contentMigrations as GalleryContentMigrations,
 };

@@ -1,3 +1,9 @@
+interface BaseMeta {
+  meta_version: number;
+  content_version: number;
+  type: string;
+}
+
 interface FileInfo {
   // the stuff in ImageFileInfo
   fileName: string;
@@ -12,4 +18,4 @@ interface FileInfo {
   content_hash?: string; // we use this for making sure we don't have duplicate images in a dataset
 }
 
-export { FileInfo };
+export { FileInfo, BaseMeta };

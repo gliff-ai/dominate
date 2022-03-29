@@ -16,6 +16,7 @@ import { ImageFileInfo } from "@gliff-ai/upload";
 import { User } from "@/services/user/interfaces";
 import { wordlist } from "@/wordlist";
 import {
+  BaseMeta,
   GalleryMeta,
   GalleryTile,
   FileInfo,
@@ -24,11 +25,6 @@ import {
   AuditMeta,
   migrations,
 } from "@/interfaces";
-
-interface BaseMeta {
-  version: number;
-  type: string;
-}
 
 const logger = console;
 
@@ -503,7 +499,8 @@ export class DominateStore {
       "gliff.gallery", // type
       {
         type: "gliff.gallery",
-        version: 0,
+        meta_version: 0,
+        content_version: 0,
         name,
         createdTime: Date.now(),
         modifiedTime: Date.now(),
@@ -616,7 +613,8 @@ export class DominateStore {
             "gliff.image",
             {
               type: "gliff.image",
-              version: 0,
+              meta_version: 0,
+              content_version: 0,
               name: imageFileInfo.fileName,
               createdTime,
               modifiedTime: createdTime,
@@ -982,7 +980,8 @@ export class DominateStore {
       }
     }
 
-    (meta as BaseMeta).version = 0;
+    (meta as BaseMeta).meta_version = 0;
+    (meta as BaseMeta).content_version = 0;
 
     collection.setMeta(meta);
 
@@ -1000,8 +999,8 @@ export class DominateStore {
     let meta = collection.getMeta<BaseMeta>();
     let content = JSON.parse(await collection.getContent(OutputFormat.String));
 
-    // add version field and pre-migrate to V0 if necessary:
-    if (!("version" in meta)) {
+    // pre-migrate to V0 if necessary:
+    if (!("meta_version" in meta)) {
       collection = await this.preMigrate(collection);
       await collectionManager.upload(collection);
       meta = collection.getMeta<BaseMeta>();
@@ -1009,17 +1008,34 @@ export class DominateStore {
     }
 
     // migrate if necessary:
-    if (meta.version < migrations[meta.type].length) {
-      const outstandingMigrations = migrations[meta.type].slice(meta.version);
-      for (const migration of outstandingMigrations) {
-        type CurrentVersion = Parameters<typeof migration>[0];
-        // all migrations migrate metadata, because even if only the content changes, meta needs a version number bump:
-        meta = migration.meta(meta as CurrentVersion);
-        // but not all migrations migrate content:
-        if (migration.content !== null) {
-          content = migration.content(content);
-        }
+    let migrate = false;
+    if (meta.meta_version < migrations[meta.type + ".meta"].length) {
+      // migrate meta:
+      const outstandingMetaMigrations = migrations[meta.type + ".meta"].slice(
+        meta.meta_version
+      );
+      for (const migration of outstandingMetaMigrations) {
+        meta = migration(meta);
       }
+      meta.meta_version = migrations[meta.type + ".meta"].length;
+
+      migrate = true;
+    }
+
+    if (meta.content_version < migrations[meta.type + ".content"].length) {
+      // migrate content:
+      const outstandingContentMigrations = migrations[
+        meta.type + ".content"
+      ].slice(meta.content_version);
+      for (const migration of outstandingContentMigrations) {
+        content = migration(content);
+      }
+      meta.content_version = migrations[meta.type + ".content"].length;
+
+      migrate = true;
+    }
+
+    if (migrate) {
       collection.setMeta(meta);
       await collection.setContent(JSON.stringify(content));
       await collectionManager.upload(collection);
@@ -1027,7 +1043,7 @@ export class DominateStore {
 
     return collection;
 
-    /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
+    /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
   };
 
   fetch = async (
@@ -1133,7 +1149,8 @@ export class DominateStore {
       "gliff.annotation",
       {
         type: "gliff.annotation",
-        version: 0,
+        meta_version: 0,
+        content_version: 0,
         mtime: createdTime,
         isComplete,
         createdTime,
@@ -1146,7 +1163,8 @@ export class DominateStore {
       "gliff.audit",
       {
         type: "gliff.audit",
-        version: 0,
+        meta_version: 0,
+        content_version: 0,
         modifiedTime: createdTime,
         createdTime,
       },

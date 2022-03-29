@@ -1,9 +1,10 @@
-import { FileInfo } from "./shared";
+import { FileInfo, BaseMeta } from "./shared";
 
 // ----------------------------- META -----------------------------
 
-interface ImageMetaV0 {
-  version: 0;
+interface ImageMetaV0 extends BaseMeta {
+  meta_version: 0;
+  content_version: 0;
   type: "gliff.image";
   name: string; // human-readable image name, i.e. file name
   fileInfo: FileInfo;
@@ -14,6 +15,11 @@ interface ImageMetaV0 {
   format?: "WebP"; // Maybe other later, maybe we dont convert PNG etc to this
 }
 
-const migrations = [];
+const metaMigrations = [];
+const contentMigrations = [];
 
-export { ImageMetaV0 as ImageMeta, migrations as ImageMigrations };
+export {
+  ImageMetaV0 as ImageMeta,
+  metaMigrations as ImageMetaMigrations,
+  contentMigrations as ImageContentMigrations,
+};
