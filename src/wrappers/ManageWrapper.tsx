@@ -154,48 +154,57 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     [props.storeInstance]
   );
 
-  const getAnnotationProgress = async (
-    username: string,
-    collectionUid?: string
-  ): Promise<Progress> => {
-    const isOwnerOrMember =
-      auth?.userAccess === UserAccess.Owner ||
-      auth?.userAccess === UserAccess.Member;
+  const getAnnotationProgress = useCallback(
+    async ({
+      username,
+      projectUid,
+    }: {
+      username: string;
+      projectUid?: string;
+    }): Promise<Progress> => {
+      const isOwnerOrMember =
+        auth?.userAccess === UserAccess.Owner ||
+        auth?.userAccess === UserAccess.Member;
 
-    let collectionsContent: {
-      uid: string;
-      content: GalleryTile[];
-    }[];
-    if (collectionUid !== undefined) {
-      collectionsContent = [
-        await props.storeInstance.getCollectionContent(collectionUid),
-      ];
-    } else {
-      collectionsContent = await props.storeInstance.getCollectionsContent();
-    }
+      let collectionsContent: {
+        uid: string;
+        content: GalleryTile[];
+      }[];
 
-    const progress: Progress = {};
-    collectionsContent.forEach(({ uid, content }) => {
-      progress[uid] = { complete: 0, total: 0 };
-      content.forEach(({ assignees = [], annotationComplete = {} }) => {
-        if (assignees.length === 0) return;
+      if (projectUid !== undefined) {
+        collectionsContent = [
+          await props.storeInstance.getCollectionContent(projectUid),
+        ];
+      } else {
+        collectionsContent = await props.storeInstance.getCollectionsContent();
+      }
 
-        // NOTE: '|| 0' was added to handle the case of images assigned before
-        // the 'annotationComplete' field was added to the GalleryTile interface.
-        if (isOwnerOrMember) {
-          progress[uid].total += assignees.length;
-          progress[uid].complete += assignees
-            .map((assignee) => Number(annotationComplete[assignee]) || 0)
-            .concat([0]) // added to handle case of unassigned images
-            .reduce((a, b) => a + b);
-        } else {
-          progress[uid].total += 1;
-          progress[uid].complete += Number(annotationComplete[username]) || 0;
-        }
+      const progress: Progress = {};
+
+      collectionsContent.forEach(({ uid, content }) => {
+        progress[uid] = { complete: 0, total: 0 };
+
+        content.forEach(({ assignees = [], annotationComplete = {} }) => {
+          if (assignees.length === 0) return;
+
+          // NOTE: '|| 0' was added to handle the case of images assigned before
+          // the 'annotationComplete' field was added to the GalleryTile interface.
+          if (isOwnerOrMember) {
+            progress[uid].total += assignees.length;
+            progress[uid].complete += assignees
+              .map((assignee) => Number(annotationComplete[assignee]) || 0)
+              .concat([0]) // added to handle case of unassigned images
+              .reduce((a, b) => a + b);
+          } else {
+            progress[uid].total += 1;
+            progress[uid].complete += Number(annotationComplete[username]) || 0;
+          }
+        });
       });
-    });
-    return progress;
-  };
+      return progress;
+    },
+    [auth, props.storeInstance]
+  );
 
   const getCollectionsMembers = useCallback(async () => {
     const result = await props.storeInstance.getCollectionsMembers();
@@ -244,6 +253,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     getPlugins,
     updatePlugin,
     deletePlugin,
+    getAnnotationProgress,
   };
 
   if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
@@ -266,7 +276,6 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
         launchAuditCallback={
           auth?.userProfile.team.tier.id > 1 ? launchAudit : null
         }
-        getAnnotationProgress={getAnnotationProgress}
       />
     </ProvideAuth>
   );
