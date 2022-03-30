@@ -28,14 +28,14 @@ interface AnnotationMetaV1 extends BaseMeta {
 
 const metaMigrations = [
   (oldMeta: AnnotationMetaV0): AnnotationMetaV1 => {
-    let newMeta;
+    let newMeta: AnnotationMetaV1;
     if ("mtime" in oldMeta) {
       newMeta = {
         ...oldMeta,
         meta_version: 1,
         modifiedTime: oldMeta.mtime,
       } as AnnotationMetaV1;
-      delete newMeta.mtime;
+      delete (newMeta as AnnotationMetaV1 & { mtime?: number }).mtime;
     } else {
       newMeta = {
         ...oldMeta,

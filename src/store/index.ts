@@ -1009,8 +1009,9 @@ export class DominateStore {
 
     // migrate if necessary:
     let migrate = false;
-    const metaCurrentVersion = migrations[`${meta.type}.meta`].length;
-    const contentCurrentVersion = migrations[`${meta.type}.content`].length;
+    const metaCurrentVersion: number = migrations[`${meta.type}.meta`].length;
+    const contentCurrentVersion: number =
+      migrations[`${meta.type}.content`].length;
     if (meta.meta_version < metaCurrentVersion) {
       // migrate meta:
       console.log(
