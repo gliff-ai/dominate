@@ -223,13 +223,19 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     [props.storeInstance]
   );
 
-  const launchCurate = (projectUid: string): void =>
-    // Open the selected project in curate
-    navigate(`/curate/${projectUid}`);
+  const launchCurate = useCallback(
+    (projectUid: string): void =>
+      // Open the selected project in curate
+      navigate(`/curate/${projectUid}`),
+    [navigate]
+  );
 
-  const launchAudit = (projectUid: string): void =>
-    // Open the selected project in audit
-    navigate(`/audit/${projectUid}`);
+  const launchAudit = useCallback(
+    (projectUid: string): void =>
+      // Open the selected project in audit
+      navigate(`/audit/${projectUid}`),
+    [navigate]
+  );
 
   // These require trailing slashes otherwise Safari won't send the Auth Token (as django will 301)
   const services = {
