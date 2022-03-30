@@ -431,7 +431,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         .then(() => fetchImageItems())
         .catch((error) => console.error(error));
     },
-    [props.storeInstance]
+    [props.storeInstance, fetchImageItems]
   );
 
   useEffect(() => {
