@@ -1009,30 +1009,40 @@ export class DominateStore {
 
     // migrate if necessary:
     let migrate = false;
-    if (meta.meta_version < migrations[`${meta.type}.meta`].length) {
+    const metaCurrentVersion = migrations[`${meta.type}.meta`].length;
+    const contentCurrentVersion = migrations[`${meta.type}.content`].length;
+    if (meta.meta_version < metaCurrentVersion) {
       // migrate meta:
-      console.log(`Migrating ${meta.type.split(".")[1]} metadata`);
+      console.log(
+        `Migrating ${
+          meta.type.split(".")[1]
+        } metadata to version ${metaCurrentVersion}`
+      );
       const outstandingMetaMigrations = migrations[`${meta.type}.meta`].slice(
         meta.meta_version
       );
       for (const migration of outstandingMetaMigrations) {
         meta = migration(meta);
       }
-      meta.meta_version = migrations[`${meta.type}.meta`].length;
+      meta.meta_version = metaCurrentVersion;
 
       migrate = true;
     }
 
-    if (meta.content_version < migrations[`${meta.type}.content`].length) {
+    if (meta.content_version < contentCurrentVersion) {
       // migrate content:
-      console.log(`Migrating ${meta.type.split(".")[1]} content`);
+      console.log(
+        `Migrating ${
+          meta.type.split(".")[1]
+        } content to version ${contentCurrentVersion}`
+      );
       const outstandingContentMigrations = migrations[
         `${meta.type}.content`
       ].slice(meta.content_version);
       for (const migration of outstandingContentMigrations) {
         content = migration(content);
       }
-      meta.content_version = migrations[`${meta.type}.content`].length;
+      meta.content_version = contentCurrentVersion;
 
       migrate = true;
     }
@@ -1151,7 +1161,7 @@ export class DominateStore {
       "gliff.annotation",
       {
         type: "gliff.annotation",
-        meta_version: 0,
+        meta_version: 1,
         content_version: 0,
         mtime: createdTime,
         isComplete,

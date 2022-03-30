@@ -14,11 +14,43 @@ interface AnnotationMetaV0 extends BaseMeta {
   createdTime?: number;
 }
 
-const metaMigrations = [];
+interface AnnotationMetaV1 extends BaseMeta {
+  meta_version: 1;
+  content_version: 0;
+  type: "gliff.annotation";
+  isComplete: boolean;
+  name?: string;
+  modifiedTime?: number;
+  description?: string;
+  color?: string;
+  createdTime?: number;
+}
+
+const metaMigrations = [
+  (oldMeta: AnnotationMetaV0): AnnotationMetaV1 => {
+    let newMeta;
+    if ("mtime" in oldMeta) {
+      newMeta = {
+        ...oldMeta,
+        meta_version: 1,
+        modifiedTime: oldMeta.mtime,
+      } as AnnotationMetaV1;
+      delete newMeta.mtime;
+    } else {
+      newMeta = {
+        ...oldMeta,
+        meta_version: 1,
+        modifiedTime: oldMeta.createdTime,
+      } as AnnotationMetaV1;
+    }
+    return newMeta;
+  },
+];
+
 const contentMigrations = [];
 
 export {
-  AnnotationMetaV0 as AnnotationMeta,
+  AnnotationMetaV1 as AnnotationMeta,
   metaMigrations as AnnotationMetaMigrations,
   contentMigrations as AnnotationContentMigrations,
 };
