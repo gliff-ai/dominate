@@ -237,6 +237,11 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     [navigate]
   );
 
+  const launchDocs = useCallback(
+    () => window.open("https://docs.gliff.app/", "_blank"),
+    [window]
+  );
+
   // These require trailing slashes otherwise Safari won't send the Auth Token (as django will 301)
   const services = {
     queryTeam: "GET /team/",
@@ -256,6 +261,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     updatePlugin,
     deletePlugin,
     getAnnotationProgress,
+    launchDocs,
   };
 
   if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
