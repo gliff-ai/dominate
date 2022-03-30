@@ -66,6 +66,12 @@ interface AnnotationMeta {
   createdTime?: number;
 }
 
+type ProjectMember = {
+  name?: string;
+  username: string;
+  isPending: boolean;
+};
+
 export type {
   GalleryMeta,
   GalleryTile,
@@ -74,4 +80,5 @@ export type {
   ImageItemMeta,
   FileInfo,
   AnnotationMeta,
+  ProjectMember,
 };
