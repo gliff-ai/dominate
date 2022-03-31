@@ -147,7 +147,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       if (ctx) {
         ctx.globalCompositeOperation = "lighter";
         slicesData[i][0].forEach((channel) => {
-          ctx.drawImage(slicesData[i][0][0], 0, 0, 128, 128);
+          ctx.drawImage(channel, 0, 0, 128, 128);
         });
         thumbnails.push(canvas.toDataURL());
       }
