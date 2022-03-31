@@ -48,6 +48,11 @@ const useStyle = makeStyles({
   rotateIcon: { transform: "rotate(180deg)" },
 });
 
+let isCompleteButtonClicked = false;
+// Tells a useEffect hook that isComplete changed because the button was clicked, not
+// because isComplete has just loaded from store. This is a common problem with hooks, with no clear solution:
+// https://stackoverflow.com/questions/56247433/how-to-use-setstate-callback-on-react-hooks
+
 export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const navigate = useNavigate();
   const auth = useAuth();
@@ -137,7 +142,10 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
           <IconButton
             icon={icons.tick}
             tooltip={{ name: "Mark Annotation As Complete" }}
-            onClick={() => setIsComplete((prevIsComplete) => !prevIsComplete)}
+            onClick={() => {
+              setIsComplete((prevIsComplete) => !prevIsComplete);
+              isCompleteButtonClicked = true;
+            }}
             fill={isComplete}
             tooltipPlacement="bottom"
             size="small"
@@ -294,8 +302,14 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     props.storeInstance.ready,
     auth,
     isMounted,
-    isComplete,
   ]);
+
+  useEffect(() => {
+    if (annotationsObject !== undefined && isCompleteButtonClicked) {
+      saveAnnotation(annotationsObject as Annotations);
+      isCompleteButtonClicked = false;
+    }
+  }, [isComplete]);
 
   const fetchPlugins = useCallback(async () => {
     if (!auth?.user || collectionUid === "") return;
