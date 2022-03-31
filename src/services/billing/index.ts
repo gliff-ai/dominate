@@ -5,6 +5,7 @@ import type {
   Invoice,
   Limits,
   Plan,
+  Plans,
   Payment,
   CheckoutSession,
 } from "./interfaces";
@@ -19,6 +20,9 @@ export const getInvoices = (): Promise<Invoice[]> =>
 
 export const getPlan = (): Promise<Plan> =>
   apiRequest<Plan>("/billing/plan", "GET");
+
+export const getAllPlans = (): Promise<Plans> =>
+  apiRequest<Plans>("/billing/plans", "GET");
 
 export const getAddonPrices = (): Promise<AddonPrices> =>
   apiRequest<AddonPrices>("/billing/addon-prices", "GET");
@@ -37,6 +41,11 @@ export const addAddons = (
     collaborators,
   });
 
+export const upgradePlan = (tier_id: number): Promise<Plan> =>
+  apiRequest<Plan>("/billing/plan/", "POST", {
+    tier_id,
+  });
+
 export const createCheckoutSession = (): Promise<CheckoutSession | null> =>
   apiRequest<CheckoutSession | null>(
     "/billing/create-checkout-session/",
@@ -46,4 +55,4 @@ export const createCheckoutSession = (): Promise<CheckoutSession | null> =>
 export const cancelPlan = (): Promise<null> =>
   apiRequest<null>("/billing/cancel/", "POST");
 
-export { AddonPrices, Invoice, Limits, Plan, Payment };
+export { AddonPrices, Invoice, Limits, Plan, Payment, Plans };

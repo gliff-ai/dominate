@@ -7,6 +7,9 @@ import {
   DialogTitle,
   Grid,
   Button,
+  Select,
+  MenuItem,
+  SelectChangeEvent,
 } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import {
@@ -25,6 +28,8 @@ import {
   getPayment,
   createCheckoutSession,
   cancelPlan,
+  getAllPlans,
+  upgradePlan,
 } from "@/services/billing";
 
 import type {
@@ -33,6 +38,7 @@ import type {
   Limits,
   Plan,
   Payment,
+  Plans,
 } from "@/services/billing";
 
 import { imgSrc } from "@/imgSrc";
@@ -92,6 +98,10 @@ export function Billing(): JSX.Element {
   const [addonFormLoading, setAddonFormLoading] = useState(false);
   const [addonDialogOpen, setAddonDialogOpen] = useState(false);
 
+  const [upgradeDialogOpen, setUpgradeDialogOpen] = useState(false);
+  const [upgradePrices, setUpgradePrices] = useState<Plans | null>(null);
+  const [upgradeValue, setUpgradeValue] = useState<string | null>("");
+
   const form = {
     user: useInput("0"),
     project: useInput("0"),
@@ -107,6 +117,71 @@ export function Billing(): JSX.Element {
   } as const;
 
   const addonTypes = ["user", "project", "collaborator"] as const;
+
+  const upgradeForm = (
+    <>
+      <Dialog
+        open={upgradeDialogOpen}
+        onClose={() => setUpgradeDialogOpen(false)}
+      >
+        <DialogTitle className={classes.dialogTitle}>
+          Change Plan
+          <BaseIconButton
+            tooltip={{
+              name: "Close",
+              icon: imgSrc("close"),
+            }}
+            onClick={() => setUpgradeDialogOpen(false)}
+          />
+        </DialogTitle>
+        <DialogContent style={{ padding: "10px" }}>
+          <form
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (upgradeValue && upgradeValue !== "") {
+                void upgradePlan(parseInt(upgradeValue, 10)).then((p: Plan) => {
+                  setUpgradeDialogOpen(false);
+                  setPlan(p);
+                });
+              }
+            }}
+          >
+            {upgradePrices ? (
+              <>
+                <Select
+                  id="upgrade-select"
+                  value={upgradeValue}
+                  label="Plan"
+                  onChange={(e: SelectChangeEvent) =>
+                    setUpgradeValue(e.target.value)
+                  }
+                >
+                  {upgradePrices?.tiers.map((p) => {
+                    if (plansMap[p.name]) {
+                      return (
+                        <MenuItem key={p.id} value={p.id}>
+                          {plansMap[p.name].name} - £
+                          {(p.price / 100).toFixed(2)}
+                        </MenuItem>
+                      );
+                    }
+                    return (
+                      <MenuItem key={p.id} value={p.id}>
+                        {p.name} - £{(p.price / 100).toFixed(2)}
+                      </MenuItem>
+                    );
+                  })}
+                </Select>
+                <SubmitButton value="Change Plan" loading={false} />
+              </>
+            ) : (
+              <LoadingSpinner />
+            )}
+          </form>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
 
   const addPaymentButton = (): JSX.Element => {
     const doCheckout = async () => {
@@ -150,7 +225,9 @@ export function Billing(): JSX.Element {
               setInvoices(i);
             }
           });
-          void getPayment().then((p) => setPayment(p ?? false));
+          void getPayment().then((paymentMethod) =>
+            setPayment(paymentMethod ?? false)
+          );
         }
       });
     }
@@ -190,14 +267,21 @@ export function Billing(): JSX.Element {
                 </td>
               </tr>
 
-              {!payment ? null : (
+              {!payment || plan?.cancel_date ? null : (
                 <>
+                  {upgradeForm}
                   <tr>
                     <td colSpan={2}>
                       <br />
                       <BaseTextButton
-                        text={"Change Plan"}
+                        text="Change Plan"
                         style={{ margin: "0 auto", display: "block" }}
+                        onClick={() => {
+                          setUpgradeDialogOpen(true);
+                          void getAllPlans().then((p) => {
+                            setUpgradePrices(p);
+                          });
+                        }}
                       />
                     </td>
                   </tr>
@@ -206,7 +290,7 @@ export function Billing(): JSX.Element {
                     <td colSpan={2}>
                       <br />
                       <BaseTextButton
-                        text={"Purchase Addons"}
+                        text="Purchase Addons"
                         style={{ margin: "0 auto", display: "block" }}
                         onClick={() => {
                           setAddonDialogOpen(true);
@@ -222,7 +306,7 @@ export function Billing(): JSX.Element {
         )
       }
       action={
-        !plan?.is_custom
+        !plan?.is_custom && payment && !plan?.cancel_date
           ? {
               tooltip: "Add Addons",
               icon: imgSrc("add"),
@@ -238,7 +322,7 @@ export function Billing(): JSX.Element {
 
   const cancelPlanButton = (
     <BaseTextButton
-      text={"Cancel Plan"}
+      text="Cancel Plan"
       onClick={async () => {
         await cancelPlan();
         const p = await getPlan();
@@ -250,30 +334,39 @@ export function Billing(): JSX.Element {
     />
   );
 
-  const paymentDetails = (p: Plan) => (
-    <>
-      {payment ? (
+  const paymentDetails = (p: Plan) => {
+    if (payment) {
+      if (!p.cancel_date) {
+        return (
+          <>
+            <br />
+            You will be charged and moved on to the {
+              plansMap[p.tier_name].name
+            }{" "}
+            plan at the end of your trial.
+            <br />
+            <br />
+            {cancelPlanButton}
+          </>
+        );
+      }
+      return (
         <>
           <br />
-          You will be charged and moved on to the {
-            plansMap[p.tier_name].name
-          }{" "}
-          plan at the end of your trial.
-          <br />
-          <br />
-          {cancelPlanButton}
+          Your account will be removed at the end of your trial.
         </>
-      ) : (
-        <>
-          After this date you will be downgraded to the free plan.
-          <br />
-          <br />
-          To continue on the {plansMap[p.tier_name].name} plan, please add
-          payment details.
-        </>
-      )}
-    </>
-  );
+      );
+    }
+    return (
+      <>
+        After this date you will be downgraded to the free plan.
+        <br />
+        <br />
+        To continue on the {plansMap[p.tier_name].name} plan, please add payment
+        details.
+      </>
+    );
+  };
 
   const planDescription = (p: Plan) => (
     <>
@@ -329,7 +422,14 @@ export function Billing(): JSX.Element {
                   {new Date(p.current_period_end * 1000).toLocaleDateString()}
                   <br />
                   <br />
-                  {cancelPlanButton}
+                  {p.cancel_date ? (
+                    <>
+                      You have cancelled your plan and it will be removed at the
+                      end of the period.
+                    </>
+                  ) : (
+                    cancelPlanButton
+                  )}
                 </>
               ) : (
                 ""

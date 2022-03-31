@@ -179,8 +179,8 @@ export const SignUp = (props: Props): ReactElement | null => {
     value: string,
     type: string,
     placeholder: string,
-    autocomplete: string = "off",
-    autofocus: boolean = false
+    autocomplete = "off",
+    autofocus = false
   ) => (
     <TextField
       variant="outlined"
