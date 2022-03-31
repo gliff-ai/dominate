@@ -62,7 +62,7 @@ export const SignUp = (props: Props): ReactElement | null => {
     setOpen(true);
   };
 
-  const tierId = query.get("tier_id") || null; // This is only used for custom plans
+  const tierId = parseInt(query.get("tier_id") || "", 10) || null; // This is only used for custom plans
   const inviteId = query.get("invite_id") || null;
 
   useMountEffect(() => {
@@ -138,7 +138,8 @@ export const SignUp = (props: Props): ReactElement | null => {
         signUp.name,
         signUp.teamId as number,
         signUp.inviteId as string,
-        signUp.acceptedTermsAndConditions
+        signUp.acceptedTermsAndConditions,
+        tierId as number
       );
 
       if (profile) {

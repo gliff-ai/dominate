@@ -6,7 +6,8 @@ export const createUserProfile = (
   teamId: number | null = null,
   inviteId: string | null = null,
   acceptedTermsAndConditions = false,
-  recovery: string
+  recovery: string,
+  tierId: number | null = null
 ): Promise<UserProfile> =>
   apiRequest<UserProfile>("/user/", "POST", {
     name,
@@ -14,6 +15,7 @@ export const createUserProfile = (
     invite_id: inviteId,
     accepted_terms_and_conditions: acceptedTermsAndConditions,
     recovery_key: recovery,
+    tier_id: tierId,
   });
 
 export const getUserProfile = (): Promise<UserProfile> =>

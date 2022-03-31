@@ -24,6 +24,7 @@ import {
   getPlan,
   getPayment,
   createCheckoutSession,
+  cancelPlan,
 } from "@/services/billing";
 
 import type {
@@ -83,7 +84,7 @@ export function Billing(): JSX.Element {
   const classes = useStyle();
   const auth = useAuth();
   const [limits, setLimits] = useState<Limits | null>(null);
-  const [plan, setPlan] = useState<Plan | null | "CUSTOM">(null);
+  const [plan, setPlan] = useState<Plan | null>(null);
   const [payment, setPayment] = useState<Payment | null | false>(null);
   const [invoices, setInvoices] = useState<Invoice[] | null | false>(null);
 
@@ -150,10 +151,6 @@ export function Billing(): JSX.Element {
             }
           });
           void getPayment().then((p) => setPayment(p ?? false));
-        } else {
-          setPlan("CUSTOM");
-          setInvoices(false);
-          setPayment(false);
         }
       });
     }
@@ -193,41 +190,63 @@ export function Billing(): JSX.Element {
                 </td>
               </tr>
 
-              <tr>
-                <td colSpan={2}>
-                  <br />
-                  <BaseTextButton
-                    text={"Change Plan"}
-                    style={{ margin: "0 auto", display: "block" }}
-                  />
-                </td>
-              </tr>
+              {!payment ? null : (
+                <>
+                  <tr>
+                    <td colSpan={2}>
+                      <br />
+                      <BaseTextButton
+                        text={"Change Plan"}
+                        style={{ margin: "0 auto", display: "block" }}
+                      />
+                    </td>
+                  </tr>
 
-              <tr>
-                <td colSpan={2}>
-                  <br />
-                  <BaseTextButton
-                    text={"Purchase Addons"}
-                    style={{ margin: "0 auto", display: "block" }}
-                    onClick={() => {
-                      setAddonDialogOpen(true);
-                      void getAddonPrices().then(setAddonPrices);
-                    }}
-                  />
-                </td>
-              </tr>
+                  <tr>
+                    <td colSpan={2}>
+                      <br />
+                      <BaseTextButton
+                        text={"Purchase Addons"}
+                        style={{ margin: "0 auto", display: "block" }}
+                        onClick={() => {
+                          setAddonDialogOpen(true);
+                          void getAddonPrices().then(setAddonPrices);
+                        }}
+                      />
+                    </td>
+                  </tr>
+                </>
+              )}
             </tbody>
           </table>
         )
       }
-      action={{
-        tooltip: "Add Addons",
-        icon: imgSrc("add"),
-        onClick: () => {
-          setAddonDialogOpen(true);
-          void getAddonPrices().then(setAddonPrices);
-        },
+      action={
+        !plan?.is_custom
+          ? {
+              tooltip: "Add Addons",
+              icon: imgSrc("add"),
+              onClick: () => {
+                setAddonDialogOpen(true);
+                void getAddonPrices().then(setAddonPrices);
+              },
+            }
+          : undefined
+      }
+    />
+  );
+
+  const cancelPlanButton = (
+    <BaseTextButton
+      text={"Cancel Plan"}
+      onClick={async () => {
+        await cancelPlan();
+        const p = await getPlan();
+        if (p) {
+          setPlan(p);
+        }
       }}
+      style={{ margin: "0 auto", display: "block" }}
     />
   );
 
@@ -240,6 +259,9 @@ export function Billing(): JSX.Element {
             plansMap[p.tier_name].name
           }{" "}
           plan at the end of your trial.
+          <br />
+          <br />
+          {cancelPlanButton}
         </>
       ) : (
         <>
@@ -255,7 +277,7 @@ export function Billing(): JSX.Element {
 
   const planDescription = (p: Plan) => (
     <>
-      <Grid item xs={p.is_trial ? 12 : 4}>
+      <Grid item xs={p.is_trial || p.is_custom ? 12 : 4}>
         <div
           style={{
             width: "100%",
@@ -264,7 +286,9 @@ export function Billing(): JSX.Element {
           }}
         >
           <SVG
-            src={plansMap[p.tier_name].icon}
+            src={
+              p.is_custom ? plansMap.CUSTOM.icon : plansMap[p.tier_name].icon
+            }
             style={{ width: "100px", height: "100px", margin: "auto" }}
           />
         </div>
@@ -288,21 +312,34 @@ export function Billing(): JSX.Element {
             </>
           ) : (
             <>
-              Your current plan is <strong>{plansMap[p.tier_name].name}</strong>{" "}
-              with{" "}
+              Your current plan is{" "}
               <strong>
-                {Object.values(p.addons).filter((a) => !!a).length}
+                {p.is_custom ? p.tier_name : plansMap[p.tier_name].name}
               </strong>{" "}
-              addons
-              <br />
-              The current period ends on:{" "}
-              {new Date(p.current_period_end * 1000).toLocaleDateString()}
+              {!p.is_custom ? (
+                <>
+                  {" "}
+                  with{" "}
+                  <strong>
+                    {Object.values(p.addons).filter((a) => !!a).length}
+                  </strong>{" "}
+                  addons
+                  <br />
+                  The current period ends on:{" "}
+                  {new Date(p.current_period_end * 1000).toLocaleDateString()}
+                  <br />
+                  <br />
+                  {cancelPlanButton}
+                </>
+              ) : (
+                ""
+              )}
             </>
           )}
         </div>
       </Grid>
 
-      {!p.is_trial ? (
+      {!p.is_trial && !p.is_custom ? (
         <Grid item xs={5}>
           <table className={classes.baseTable}>
             <thead>
@@ -346,29 +383,9 @@ export function Billing(): JSX.Element {
       <GliffCard
         title="Plan"
         el={
-          plan !== "CUSTOM" ? (
-            <Grid container spacing={3}>
-              {planDescription(plan)}
-            </Grid>
-          ) : (
-            <Grid container spacing={3}>
-              {" "}
-              <div
-                style={{ width: "100%", padding: "75px", textAlign: "center" }}
-              >
-                <SVG
-                  src={plansMap.CUSTOM.icon}
-                  style={{ width: "100px", height: "100px", margin: "auto" }}
-                />
-              </div>
-              <h6
-                style={{ width: "100%", textAlign: "center", fontSize: "14px" }}
-              >
-                You are on a custom plan. Please contact us for information and
-                invoicing
-              </h6>
-            </Grid>
-          )
+          <Grid container spacing={3}>
+            {planDescription(plan)}
+          </Grid>
         }
       />
     );
@@ -378,7 +395,7 @@ export function Billing(): JSX.Element {
     <GliffCard title="Payment Details" el={<LoadingSpinner />} />
   );
 
-  if (payment !== null) {
+  if (payment !== null && !plan?.is_custom) {
     paymentElement = (
       <GliffCard
         title="Payment Details"
@@ -396,11 +413,21 @@ export function Billing(): JSX.Element {
             </>
           ) : (
             <>
-              You have no payment method.
+              You have no payment method. <br />
+              <br />
               {addPaymentButton()}
             </>
           )
         }
+      />
+    );
+  }
+
+  if (payment !== null && plan?.is_custom) {
+    paymentElement = (
+      <GliffCard
+        title="Payment Details"
+        el={<>Please contact us to change or update your payment method</>}
       />
     );
   }

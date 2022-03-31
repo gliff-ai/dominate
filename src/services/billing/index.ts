@@ -43,4 +43,7 @@ export const createCheckoutSession = (): Promise<CheckoutSession | null> =>
     "POST"
   );
 
+export const cancelPlan = (): Promise<null> =>
+  apiRequest<null>("/billing/cancel/", "POST");
+
 export { AddonPrices, Invoice, Limits, Plan, Payment };
