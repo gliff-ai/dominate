@@ -306,7 +306,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
 
   useEffect(() => {
     if (annotationsObject !== undefined && isCompleteButtonClicked) {
-      saveAnnotation(annotationsObject as Annotations);
+      saveAnnotation(annotationsObject);
       isCompleteButtonClicked = false;
     }
   }, [isComplete]);
