@@ -1244,7 +1244,7 @@ export class DominateStore {
     setTask({
       isLoading: true,
       description: "Saving annotation in progress, please wait...",
-      progress: 35,
+      progress: 15,
     });
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
@@ -1271,6 +1271,12 @@ export class DominateStore {
       await collection.setContent(JSON.stringify(galleryTiles));
       await collectionManager.transaction(collection);
     }
+
+    setTask({
+      isLoading: true,
+      description: "Saving annotation in progress, please wait...",
+      progress: 40,
+    });
 
     const annotationUid = tile.annotationUID[username];
     const auditUid = tile.auditUID[username];
