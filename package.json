@@ -42,7 +42,7 @@
     "@gliff-ai/annotate": "^4.0.1",
     "@gliff-ai/audit": "^1.5.0",
     "@gliff-ai/curate": "^5.0.2",
-    "@gliff-ai/manage": "^2.1.2",
+    "@gliff-ai/manage": "^3.0.0",
     "@gliff-ai/style": "^8.5.0",
     "@gliff-ai/upload": "^1.2.5",
     "@material-ui/types": "^5.1.0",
