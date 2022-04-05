@@ -9,7 +9,7 @@ import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import { Annotations, getTiffData } from "@gliff-ai/annotate";
 import { DominateStore } from "@/store";
-import { Slices, MetaItem, GalleryTile } from "@/store/interfaces";
+import { GalleryTile, Slices, MetaItem } from "@/interfaces";
 import {
   ConfirmationDialog,
   MessageDialog,
@@ -99,7 +99,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       if (!auth?.user?.username) return;
 
       storeInstance
-        .getImagesMeta(collectionUid, auth?.user.username)
+        .getImagesMeta(collectionUid)
         .then((items) => {
           const { tiles: gallery, galleryMeta } = items;
           setStateIfMounted(gallery, setCollectionContent, isMounted.current);
@@ -180,7 +180,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     newMultiLabel: boolean
   ) => {
     props.storeInstance
-      .updateCollectionMeta(collectionUid, {
+      .updateGalleryMeta(collectionUid, {
         defaultLabels: newDefaultLabels,
         restrictLabels: newRestrictLabels,
         multiLabel: newMultiLabel,
@@ -334,11 +334,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     // compress data and save to disk:
     const date = new Date();
     const projectName = await props.storeInstance
-      .getCollectionsMeta()
-      .then(
-        (collections) =>
-          collections.filter((c) => c.uid === collectionUid)[0].name
-      )
+      .getCollectionMeta(collectionUid)
+      .then((collection) => collection.name)
       .catch((err) => {
         logger.log(err);
         return "";
