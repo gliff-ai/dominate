@@ -237,10 +237,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     [navigate]
   );
 
-  const launchDocs = useCallback(
-    () => window.open("https://docs.gliff.app/", "_blank"),
-    [window]
-  );
+  const launchDocs = () => window.open("https://docs.gliff.app/", "_blank");
 
   // These require trailing slashes otherwise Safari won't send the Auth Token (as django will 301)
   const services = {
