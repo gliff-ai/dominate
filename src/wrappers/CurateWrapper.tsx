@@ -145,7 +145,10 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
       canvas.height = 128;
       const ctx = canvas.getContext("2d");
       if (ctx) {
-        ctx.drawImage(slicesData[i][0][0], 0, 0, 128, 128);
+        ctx.globalCompositeOperation = "lighter";
+        slicesData[i][0].forEach((channel) => {
+          ctx.drawImage(channel, 0, 0, 128, 128);
+        });
         thumbnails.push(canvas.toDataURL());
       }
     }

@@ -31,6 +31,8 @@ type ImageBitmapBlob = ImageBitmap;
 type Channels = ImageBitmapBlob[];
 type Slices = Channels[];
 
+type Metadata = MetaItem[];
+
 const migrations = {};
 migrations["gliff.gallery.meta"] = GalleryMetaMigrations;
 migrations["gliff.gallery.content"] = GalleryContentMigrations;
@@ -54,6 +56,7 @@ export type {
   ImageBitmapBlob,
   Channels,
   Slices,
+  Metadata,
 };
 
 export { migrations };
