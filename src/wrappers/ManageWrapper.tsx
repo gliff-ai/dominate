@@ -10,7 +10,7 @@ import { useAuth, UserAccess } from "@/hooks/use-auth";
 import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
 import { trustedServicesAPI, TrustedService } from "@/services/trustedServices";
 import { jsPluginsAPI, JsPlugin } from "@/services/plugins";
-import { GalleryTile } from "@/store/interfaces";
+import { GalleryTile } from "@/interfaces";
 import { PluginType, Plugin } from "@/plugins";
 
 type Progress = {
