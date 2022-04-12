@@ -80,10 +80,8 @@ const UserInterface = (props: Props): ReactElement | null => {
   const [tooSmall, setTooSmall] = useState(false);
 
   const handleResize = useCallback(() => {
-    console.log(`tooSmall: ${tooSmall}`);
     const tooSmallNow = window.innerWidth < 700 || window.innerHeight < 300;
     if (tooSmall !== tooSmallNow) {
-      console.log(`setting tooSmall to ${tooSmallNow}`);
       setTooSmall(tooSmallNow);
     }
   }, [tooSmall]);
