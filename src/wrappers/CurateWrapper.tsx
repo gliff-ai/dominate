@@ -65,6 +65,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [restrictLabels, setRestrictLabels] = useState<boolean>(false); // more input for curate
   const { collectionUid = "" } = useParams<string>(); // uid of selected gallery, from URL
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
+  const [collectionTitle, setCollectionTitle] = useState<string>();
 
   // multi-label image download dialog state:
   const [showMultilabelConfirm, setShowMultilabelConfirm] =
@@ -100,6 +101,11 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         .then((items) => {
           const { tiles, galleryMeta } = items;
           setStateIfMounted(tiles, setCollectionContent, isMounted.current);
+          setStateIfMounted(
+            galleryMeta?.name,
+            setCollectionTitle,
+            isMounted.current
+          );
           // owners and members can view the images in a project
           const canViewAllImages = isOwnerOrMember();
           // discard imageUID, annotationUID and auditUID, and unpack item.metadata:
@@ -462,10 +468,13 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     void fetchPlugins();
   }, [fetchPlugins]);
 
+  const tier = auth?.userProfile?.team.tier;
+  const tierIsAllowed = tier && tier.id > 0;
+
   useEffect(() => {
     props.setProductNavbarData({
       teamName: auth?.userProfile?.team.name || "",
-      projectName: "",
+      projectName: collectionTitle || "",
       imageName: "",
       buttonBack: (
         <IconButton
@@ -473,20 +482,22 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           tooltip={{
             name: `Return to MANAGE `,
           }}
+          tooltipPlacement="bottom"
           icon={icons.navigationMANAGE}
         />
       ),
-      buttonForward: (
+      buttonForward: tierIsAllowed ? (
         <IconButton
           onClick={() => navigate(`/audit/${collectionUid}`)}
           tooltip={{
-            name: `Navigate to AUDIT`,
+            name: `Open ${collectionTitle} in AUDIT`,
           }}
+          tooltipPlacement="bottom"
           icon={icons.navigationAUDIT}
         />
-      ),
+      ) : null,
     });
-  }, []);
+  }, [collectionTitle]);
 
   if (!props.storeInstance || !auth?.user || !collectionUid || !auth.userAccess)
     return null;

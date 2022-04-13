@@ -62,7 +62,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   productSectionGrid: {
     position: "absolute",
     top: "50%",
-    left: "50%",
+    left: "68%",
     transform: "translate(-50%, -50%)",
   },
   navGrid: {
@@ -81,7 +81,9 @@ const useStyles = makeStyles((theme: Theme) => ({
     color: "#000000",
   },
 }));
+
 interface Props {
+  productSection: JSX.Element | null;
   productNavbarData: ProductNavbarData;
   storeInstance: DominateStore;
 }
@@ -211,6 +213,9 @@ export const NavBar = (props: Props): ReactElement | null => {
             />
           </Grid>
           <ProductsNavbar productNavbarData={props.productNavbarData} />
+          <Grid className={classes.productSectionGrid}>
+            {props.productSection}
+          </Grid>
           <Grid className={classes.navGrid}>
             <nav className={classes.navLinks}>
               {auth.user ? (

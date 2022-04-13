@@ -61,6 +61,8 @@ const UserInterface = (props: Props): ReactElement | null => {
   const [isLoading, setIsLoading] = useState(false);
   const location = useLocation();
   const [isOverflow, setIsOverflow] = useState(true);
+  const [productSection, setProductSection] =
+    useState<JSX.Element | null>(null);
   const [productNavbarData, setProductNavbarData] = useState<ProductNavbarData>(
     {
       teamName: "",
@@ -126,6 +128,7 @@ const UserInterface = (props: Props): ReactElement | null => {
             <ProgressSnackbar task={task} setTask={setTask} />
             <CssBaseline />
             <NavBar
+              productSection={productSection}
               productNavbarData={productNavbarData}
               storeInstance={storeInstance}
             />
@@ -192,6 +195,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                           setIsLoading={setIsLoading}
                           task={task}
                           setTask={setTask}
+                          setProductSection={setProductSection}
                           setProductNavbarData={setProductNavbarData}
                         />
                       }

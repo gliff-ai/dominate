@@ -21,7 +21,7 @@ interface Props {
   task: Task;
   setTask: (task: Task) => void;
   setProductNavbarData: (data: ProductNavbarData) => void;
-  // setProductSection: (productSection: JSX.Element | null) => void;
+  setProductSection: (productSection: JSX.Element | null) => void;
 }
 
 const useStyle = makeStyles({
@@ -59,6 +59,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [imageUids, setImageUids] = useState<string[] | null>(null);
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
   const [plugins, setPlugins] = useState<PluginObject | null>(null);
+  const [collectionTitle, setCollectionTitle] = useState<string>();
 
   const isMounted = useRef(false);
   const classes = useStyle();
@@ -99,7 +100,9 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
                 item.imageUID
             )
             .map((item) => item.imageUID);
+          const projectName = items.galleryMeta.name;
           setStateIfMounted(imageUIDs, setImageUids, isMounted.current);
+          setStateIfMounted(projectName, setCollectionTitle, isMounted.current);
           const fileInfo = items.tiles.find(
             (item) => item.imageUID === imageUid
           )?.fileInfo;
@@ -119,41 +122,41 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   );
 
   function updateProductSection(): void {
-    // props.setProductSection(
-    //   <div className={classes.sectionContainer}>
-    //     <Card className={`${classes.cardSize} ${classes.cardLeft}`}>
-    //       <IconButton
-    //         icon={icons.previousNext}
-    //         tooltip={{ name: "Previous Image" }}
-    //         onClick={() => cycleImage(false)}
-    //         tooltipPlacement="bottom"
-    //         disabled={!canCycle()}
-    //         size="small"
-    //       />
-    //     </Card>
-    //     <Card className={classes.cardSize}>
-    //       <IconButton
-    //         icon={icons.tick}
-    //         tooltip={{ name: "Mark Annotation As Complete" }}
-    //         onClick={() => setIsComplete((prevIsComplete) => !prevIsComplete)}
-    //         fill={isComplete}
-    //         tooltipPlacement="bottom"
-    //         size="small"
-    //       />
-    //     </Card>
-    //     <Card className={`${classes.cardSize} ${classes.cardRight}`}>
-    //       <IconButton
-    //         className={classes.rotateIcon}
-    //         icon={icons.previousNext}
-    //         tooltip={{ name: "Next Image" }}
-    //         onClick={() => cycleImage()}
-    //         tooltipPlacement="bottom"
-    //         disabled={!canCycle()}
-    //         size="small"
-    //       />
-    //     </Card>
-    //   </div>
-    // );
+    props.setProductSection(
+      <div className={classes.sectionContainer}>
+        <Card className={`${classes.cardSize} ${classes.cardLeft}`}>
+          <IconButton
+            icon={icons.previousNext}
+            tooltip={{ name: "Previous Image" }}
+            onClick={() => cycleImage(false)}
+            tooltipPlacement="bottom"
+            disabled={!canCycle()}
+            size="small"
+          />
+        </Card>
+        <Card className={classes.cardSize}>
+          <IconButton
+            icon={icons.tick}
+            tooltip={{ name: "Mark Annotation As Complete" }}
+            onClick={() => setIsComplete((prevIsComplete) => !prevIsComplete)}
+            fill={isComplete}
+            tooltipPlacement="bottom"
+            size="small"
+          />
+        </Card>
+        <Card className={`${classes.cardSize} ${classes.cardRight}`}>
+          <IconButton
+            className={classes.rotateIcon}
+            icon={icons.previousNext}
+            tooltip={{ name: "Next Image" }}
+            onClick={() => cycleImage()}
+            tooltipPlacement="bottom"
+            disabled={!canCycle()}
+            size="small"
+          />
+        </Card>
+      </div>
+    );
   }
 
   useEffect(() => {
@@ -321,20 +324,21 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   useEffect(() => {
     props.setProductNavbarData({
       teamName: auth?.userProfile?.team.name || "",
-      projectName: "",
-      imageName: "",
+      projectName: collectionTitle || "",
+      imageName: imageFileInfo?.fileName || "",
       buttonBack: (
         <IconButton
           onClick={() => navigate(`/curate/${collectionUid}`)}
           tooltip={{
-            name: `Return to CURATE `,
+            name: `Open ${collectionTitle} in CURATE `,
           }}
+          tooltipPlacement="bottom"
           icon={icons.navigationCURATE}
         />
       ),
       buttonForward: null,
     });
-  }, []);
+  }, [imageFileInfo, collectionTitle]);
 
   if (
     !props.storeInstance ||

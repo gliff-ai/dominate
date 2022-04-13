@@ -1,16 +1,16 @@
 import { ReactElement, useState, useEffect, useRef } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation, useParams, useNavigate } from "react-router-dom";
 import makeStyles from "@mui/styles/makeStyles";
 import { Button, ButtonGroup, Grid } from "@mui/material";
 import { theme, IconButton, icons } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
-import { GalleryTile } from "@/store/interfaces";
 
 const useStyles = makeStyles({
   buttonGroup: {
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    height: "42px",
   },
   productSectionGrid: {
     position: "absolute",
@@ -21,6 +21,7 @@ const useStyles = makeStyles({
   buttonBorder: {
     backgroundColor: "white !important",
     borderColor: "#dadde9 !important",
+    cursor: "default",
   },
 });
 
@@ -45,25 +46,6 @@ export function ProductsNavbar({
   const { buttonBack, teamName, projectName, imageName, buttonForward } =
     productNavbarData;
 
-  // const fetchImageItems = useStore(
-  //   // doesn't actually fetch image items, fetches gallery collection content
-  //   props,
-  //   (storeInstance) => {
-  //     // fetches images via DominateStore, and assigns them to imageItems state
-  //     if (!auth?.user?.username) return;
-  //     storeInstance
-  //       .getImagesMeta(collectionUid, auth?.user.username)
-  //       .then((items) => {
-  //         const { tiles, galleryMeta } = items;
-  //         setStateIfMounted(tiles, setCollectionContent, isMounted.current);
-  //         console.log(items?.galleryMeta?.name);
-  //       })
-  //       .catch((err) => {
-  //         logger.log(err);
-  //       });
-  //   }
-  // );
-
   return (
     // FIXME move CSS to STYLE
     <Grid className={classes.productSectionGrid}>
@@ -78,12 +60,12 @@ export function ProductsNavbar({
           padding: "1px",
         }}
       >
-        <Button className={classes.buttonBorder}>{buttonBack}</Button>
+        <div style={{ borderRight: "1px solid #dadde9" }}>{buttonBack}</div>
         <Button className={classes.buttonBorder}>
-          {teamName} ^-^ {projectName !== "" && `—${projectName}`}
-          {imageName !== "" && `—${imageName}`}
+          {teamName} {projectName !== "" && `— ${projectName}`}
+          {imageName !== "" && ` — ${imageName}`}
         </Button>
-        <Button className={classes.buttonBorder}>{buttonForward}</Button>
+        <div style={{ borderLeft: "1px solid #dadde9" }}>{buttonForward}</div>
       </ButtonGroup>
     </Grid>
   );
