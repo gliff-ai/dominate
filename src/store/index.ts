@@ -594,7 +594,7 @@ export class DominateStore {
     imageContents: string[] | Uint8Array[],
     task: Task,
     setTask: (task: Task) => void
-  ): Promise<void> => {
+  ): Promise<GalleryTile[] | void> => {
     try {
       // Create/upload new store item for the image:
       const createdTime = new Date().getTime();
@@ -625,11 +625,14 @@ export class DominateStore {
         );
       }
 
-      setTask({ ...task, progress: 30 });
+      setTask({ ...task, progress: 10 });
 
       // save new image items:
       const newCollections = await Promise.all(collectionPromises);
-      await this.batchUpload(collectionManager, newCollections);
+      const imageUploadPromise = this.batchUpload(
+        collectionManager,
+        newCollections
+      );
 
       const newTiles: GalleryTile[] = [];
       for (let i = 0; i < imageFileInfos.length; i += 1) {
@@ -647,7 +650,7 @@ export class DominateStore {
         });
       }
 
-      setTask({ ...task, progress: 65 });
+      setTask({ ...task, progress: 33 });
 
       // save new gallery tiles:
       const collection = await this.fetch(collectionManager, collectionUid);
@@ -656,9 +659,12 @@ export class DominateStore {
         (JSON.parse(oldContent) as GalleryTile[]).concat(newTiles)
       );
       await collection.setContent(newContent);
-      setTask({ ...task, progress: 75 });
-      await collectionManager.upload(collection);
+      setTask({ ...task, progress: 66 });
+      const galleryTilesUploadPromise = collectionManager.upload(collection);
+      await Promise.all([imageUploadPromise, galleryTilesUploadPromise]);
       setTask({ ...task, progress: 100 });
+
+      return newTiles;
     } catch (err) {
       logger.error(err);
     }

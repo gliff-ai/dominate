@@ -156,16 +156,20 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.setTask({ ...props.task, progress: 10 });
 
     // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
-    await props.storeInstance.createImage(
-      collectionUid,
-      imageFileInfo,
-      thumbnails,
-      stringifiedSlices,
-      props.task,
-      props.setTask
-    );
-
-    fetchImageItems();
+    props.storeInstance
+      .createImage(
+        collectionUid,
+        imageFileInfo,
+        thumbnails,
+        stringifiedSlices,
+        props.task,
+        props.setTask
+      )
+      .then((newTiles) => {
+        if (newTiles) {
+          setMetadata(metadata.concat(convertGalleryToMetadata(newTiles)));
+        }
+      });
   };
 
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
