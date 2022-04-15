@@ -3,6 +3,8 @@ import {
   Account,
   Collection,
   CollectionManager,
+  Item,
+  ItemManager,
   toBase64,
   OutputFormat,
   CollectionAccessLevel,
@@ -239,7 +241,10 @@ export class DominateStore {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
 
     return {
       uid: collectionUid,
@@ -256,7 +261,10 @@ export class DominateStore {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
 
     const meta = collection.getMeta();
     collection.setMeta({
@@ -279,7 +287,10 @@ export class DominateStore {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
 
     const oldMeta = collection.getMeta();
     collection.setMeta({
@@ -388,7 +399,10 @@ export class DominateStore {
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
     const jsonString = await collection.getContent(OutputFormat.String);
 
     const json = JSON.parse(jsonString) as GalleryTile[];
@@ -418,7 +432,10 @@ export class DominateStore {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
 
     return { ...collection.getMeta(), uid: collection.uid };
   };
@@ -431,7 +448,10 @@ export class DominateStore {
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const invitationManager = this.etebaseInstance.getInvitationManager();
 
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
     const memberManager = collectionManager.getMemberManager(collection);
     const members = await memberManager.list();
     const invitations = await invitationManager.listOutgoing();
@@ -526,7 +546,10 @@ export class DominateStore {
     const store = this.etebaseInstance;
 
     const collectionManager = store.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
     const memberManager = collectionManager.getMemberManager(collection);
     const members = await memberManager.list();
 
@@ -580,7 +603,10 @@ export class DominateStore {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
     const memberManager = collectionManager.getMemberManager(collection);
     await memberManager.remove(username);
 
@@ -650,7 +676,10 @@ export class DominateStore {
       setTask({ ...task, progress: 65 });
 
       // save new gallery tiles:
-      const collection = await this.fetch(collectionManager, collectionUid);
+      const collection = await this.fetchCollection(
+        collectionManager,
+        collectionUid
+      );
       const oldContent = await collection.getContent(OutputFormat.String);
       const newContent = JSON.stringify(
         (JSON.parse(oldContent) as GalleryTile[]).concat(newTiles)
@@ -671,7 +700,10 @@ export class DominateStore {
   ): Promise<void> => {
     // get gallery items metadata from gallery collection:
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
     const oldContent = await collection.getContent(OutputFormat.String);
 
     // iterate through GalleryTile's, find the one whose imageUID matches imageUid, set its imageLabesl to newLabels:
@@ -698,7 +730,10 @@ export class DominateStore {
 
     // get gallery items metadata from gallery collection:
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
     const oldContentString = await collection.getContent(OutputFormat.String);
     const oldContent = JSON.parse(oldContentString) as GalleryTile[];
 
@@ -740,10 +775,10 @@ export class DominateStore {
     setTask({ isLoading: true, description: "Image deletion", progress: 50 });
 
     // delete image, annotation and audit items:
-    const allItems: Collection[] = await this.fetchMulti(
-      collectionManager,
-      imageUIDs.concat(annotationUIDs).concat(auditUIDs),
-      collectionUid
+    const itemManager = collectionManager.getItemManager(collection);
+    const allItems: Item[] = await this.fetchMulti(
+      itemManager,
+      imageUIDs.concat(annotationUIDs).concat(auditUIDs)
     );
 
     setTask({ isLoading: true, description: "Image deletion", progress: 75 });
@@ -752,7 +787,7 @@ export class DominateStore {
       item.delete();
     });
 
-    await this.batchUpload(collectionManager, allItems);
+    await itemManager.batch(allItems);
 
     setTask({ isLoading: false, description: "Image deletion", progress: 100 });
   };
@@ -762,7 +797,10 @@ export class DominateStore {
     username: string
   ): Promise<void> => {
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
     const content = JSON.parse(
       await collection.getContent(OutputFormat.String)
     ) as GalleryTile[];
@@ -784,7 +822,10 @@ export class DominateStore {
     // retrieves the Annotations object by the specified user for the specified image
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
     const content = JSON.parse(
       await collection.getContent(OutputFormat.String)
     ) as GalleryTile[];
@@ -796,10 +837,9 @@ export class DominateStore {
     )
       return null;
 
-    const annotationItem = await this.fetch(
-      collectionManager,
-      galleryTile.annotationUID[username],
-      collectionUid
+    const annotationItem = await this.fetchItem(
+      collectionManager.getItemManager(collection),
+      galleryTile.annotationUID[username]
     );
     const annotationContent = await annotationItem.getContent(
       OutputFormat.String
@@ -819,7 +859,10 @@ export class DominateStore {
     // retrieves the Annotations objects for all images by all users
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
     const tiles = JSON.parse(
       await collection.getContent(OutputFormat.String)
     ) as GalleryTile[];
@@ -828,9 +871,8 @@ export class DominateStore {
       ...tiles.map((tile) => Object.values(tile.annotationUID))
     ); // [im0_ann0, im0_ann1, im0_ann2, im1_ann0, im1_ann1, ...]
     const annotationItems = await this.fetchMulti(
-      collectionManager,
-      annotationUIDs,
-      collectionUid
+      collectionManager.getItemManager(collection),
+      annotationUIDs
     );
 
     const annotationItemContents = await Promise.all(
@@ -870,11 +912,13 @@ export class DominateStore {
     };
   };
 
-  preMigrate = async (collection: Collection): Promise<Collection> => {
+  preMigrate = async (
+    etebaseObject: Collection | Item
+  ): Promise<Collection | Item> => {
     // migrates a versionless etebase object of unknown structure to V0 of whatever type it is
     /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
 
-    const meta: any = collection.getMeta();
+    const meta: any = etebaseObject.getMeta();
 
     if (!("type" in meta)) {
       // pre-migration-system Gallery collections don't have a type field in metadata, because we thought we didn't need it
@@ -885,7 +929,7 @@ export class DominateStore {
     }
     if ((meta as ItemMetadata).type === "gliff.gallery") {
       const content = JSON.parse(
-        await collection.getContent(OutputFormat.String)
+        await etebaseObject.getContent(OutputFormat.String)
       ) as any[];
 
       // migrate GalleryTiles if necessary:
@@ -939,7 +983,7 @@ export class DominateStore {
         (meta as { multiLabel: boolean }).multiLabel = false;
       }
 
-      await collection.setContent(JSON.stringify(content));
+      await etebaseObject.setContent(JSON.stringify(content));
     } else if ((meta as ItemMetadata).type === "gliff.image") {
       if (!("fileInfo" in meta)) {
         // package file metadata fields into FileInfo:
@@ -983,28 +1027,34 @@ export class DominateStore {
     (meta as BaseMeta).meta_version = 0;
     (meta as BaseMeta).content_version = 0;
 
-    collection.setMeta(meta);
+    etebaseObject.setMeta(meta);
 
-    return collection;
+    return etebaseObject;
 
     /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
   };
 
   migrate = async (
-    collectionManager: CollectionManager,
-    collection_: Collection
-  ): Promise<Collection> => {
+    manager: CollectionManager | ItemManager,
+    collection_: Collection | Item
+  ): Promise<Collection | Item> => {
     /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
-    let collection = collection_;
-    let meta = collection.getMeta<BaseMeta>();
-    let content = JSON.parse(await collection.getContent(OutputFormat.String));
+    let etebaseObject = collection_;
+    let meta = etebaseObject.getMeta<BaseMeta>();
+    let content = JSON.parse(
+      await etebaseObject.getContent(OutputFormat.String)
+    );
 
     // pre-migrate to V0 if necessary:
     if (!("meta_version" in meta)) {
-      collection = await this.preMigrate(collection);
-      await collectionManager.upload(collection);
-      meta = collection.getMeta<BaseMeta>();
-      content = JSON.parse(await collection.getContent(OutputFormat.String));
+      etebaseObject = await this.preMigrate(etebaseObject);
+      if (manager instanceof CollectionManager) {
+        manager.upload(etebaseObject as Collection);
+      } else {
+        manager.batch([etebaseObject as Item]);
+      }
+      meta = etebaseObject.getMeta<BaseMeta>();
+      content = JSON.parse(await etebaseObject.getContent(OutputFormat.String));
     }
 
     // migrate if necessary:
@@ -1049,49 +1099,50 @@ export class DominateStore {
     }
 
     if (migrate) {
-      collection.setMeta(meta);
-      await collection.setContent(JSON.stringify(content));
-      await collectionManager.upload(collection);
+      // upload migrated object:
+      etebaseObject.setMeta(meta);
+      await etebaseObject.setContent(JSON.stringify(content));
+      if (manager instanceof CollectionManager) {
+        manager.upload(etebaseObject as Collection);
+      } else {
+        manager.batch([etebaseObject as Item]);
+      }
     }
 
-    return collection;
+    return etebaseObject;
 
     /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
   };
 
-  fetch = async (
-    collectionManager: CollectionManager,
-    uid: string,
-    galleryUid: string | null = null
+  fetchCollection = async (
+    manager: CollectionManager,
+    uid: string
   ): Promise<Collection> => {
     // fetch collection:
-    let collection: Collection;
-    try {
-      collection = await collectionManager.fetch(uid);
-    } catch (e) {
-      // it's an Item, convert it to a Collection:
-      if (galleryUid === null)
-        throw Error(
-          "Attempting to convert an Item to a Collection without a galleryUid!"
-        );
-      const gallery = await collectionManager.fetch(galleryUid);
-      const itemManager = collectionManager.getItemManager(gallery);
-      const item = await itemManager.fetch(uid);
-      const meta = item.getMeta();
-      const content = await item.getContent(OutputFormat.String);
-      collection = await collectionManager.create(
-        meta.type as string,
-        meta,
-        content
-      );
-      await collectionManager.upload(collection);
+    let etebaseObject = await manager.fetch(uid);
+    etebaseObject = (await this.migrate(manager, etebaseObject)) as Collection;
+    return etebaseObject;
+  };
 
-      // update UID in galleryTiles:
-      await this.updateUids(gallery, uid, collection.uid);
-    }
+  fetchItem = async (manager: ItemManager, uid: string): Promise<Item> => {
+    // fetch item:
+    let etebaseObject = await manager.fetch(uid);
+    etebaseObject = (await this.migrate(manager, etebaseObject)) as Item;
+    return etebaseObject;
+  };
 
-    collection = await this.migrate(collectionManager, collection);
-    return collection;
+  fetchMulti = async (
+    itemManager: ItemManager,
+    UIDs: string[]
+  ): Promise<Item[]> => {
+    let items = (await itemManager.fetchMulti(UIDs)).data;
+    // re-order the retrieved items to the match UIDs:
+    items = UIDs.map((uid) => items.find((item) => item.uid === uid) as Item);
+    // migrate:
+    items = await Promise.all(
+      items.map((item) => this.migrate(itemManager, item) as Promise<Item>)
+    );
+    return items;
   };
 
   updateUids = async (
@@ -1121,18 +1172,6 @@ export class DominateStore {
       const newGallery = await collectionManager.fetch(gallery.uid);
       await this.updateUids(newGallery, oldUid, newUid);
     }
-  };
-
-  fetchMulti = async (
-    collectionManager: CollectionManager,
-    UIDs: string[],
-    galleryUid: string | null = null
-  ): Promise<Collection[]> => {
-    const promises = UIDs.map((uid) =>
-      this.fetch(collectionManager, uid, galleryUid)
-    );
-    const collections = await Promise.all(promises);
-    return collections;
   };
 
   batchUpload = async (
@@ -1204,7 +1243,10 @@ export class DominateStore {
     }
 
     // Update collection content JSON:
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
     const tileIdx = galleryTiles.findIndex(
@@ -1236,9 +1278,8 @@ export class DominateStore {
     username: string
   ): Promise<void> => {
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(
+    const collection = await this.fetchCollection(
       collectionManager,
-      collectionUid,
       collectionUid
     );
     setTask({
@@ -1283,19 +1324,16 @@ export class DominateStore {
     if (!annotationUid || !auditUid) return;
 
     // Retrieve items
-    const items = await this.fetchMulti(
-      collectionManager,
-      [annotationUid, auditUid],
-      collectionUid
-    );
+    const itemManager = collectionManager.getItemManager(collection);
+    const items = await this.fetchMulti(itemManager, [annotationUid, auditUid]);
     setTask({
       isLoading: true,
       description: "Saving annotation in progress, please wait...",
       progress: 70,
     });
 
-    let annotationItem: Collection;
-    let auditItem: Collection;
+    let annotationItem: Item;
+    let auditItem: Item;
     if (items[0].getMeta().type === "gliff.annotation") {
       // note: this check should be obsolete since adding this.fetchMulti
       [annotationItem, auditItem] = items;
@@ -1318,16 +1356,20 @@ export class DominateStore {
     await auditItem.setContent(JSON.stringify(auditData));
 
     // Save changes
-    await this.batchUpload(collectionManager, [annotationItem, auditItem]);
+    await itemManager.batch([annotationItem, auditItem]);
   };
 
-  getItem = async (
-    collectionUid: string,
-    itemUid: string
-  ): Promise<Collection> => {
+  getItem = async (collectionUid: string, itemUid: string): Promise<Item> => {
     // Retrieve item from a collection.
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const item = await this.fetch(collectionManager, itemUid, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
+    const item = await this.fetchItem(
+      collectionManager.getItemManager(collection),
+      itemUid
+    );
     return item;
   };
 
@@ -1337,14 +1379,16 @@ export class DominateStore {
     // Retrive all image items from a collection
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
 
     const imageItems = await this.fetchMulti(
-      collectionManager,
-      galleryTiles.map((tile) => tile.imageUID),
-      collectionUid
+      collectionManager.getItemManager(collection),
+      galleryTiles.map((tile) => tile.imageUID)
     );
 
     const imageContents = await Promise.all(
@@ -1362,7 +1406,10 @@ export class DominateStore {
 
     // get collection content JSON:
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
     const collectionContent = await collection.getContent(OutputFormat.String);
     // get tiles:
     const tiles = JSON.parse(collectionContent) as GalleryTile[];
@@ -1372,9 +1419,8 @@ export class DominateStore {
     if (auditUIDs.length === 0) return [];
 
     const auditItems = await this.fetchMulti(
-      collectionManager,
-      auditUIDs,
-      collectionUid
+      collectionManager.getItemManager(collection),
+      auditUIDs
     );
 
     const auditStrings: string[] = await Promise.all(
@@ -1424,7 +1470,10 @@ export class DominateStore {
       return;
     }
     const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetch(collectionManager, collectionUid);
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
     const oldContent = await collection.getContent(OutputFormat.String);
 
     let newContent: GalleryTile[] = JSON.parse(oldContent) as GalleryTile[];
