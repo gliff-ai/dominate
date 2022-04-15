@@ -10,18 +10,16 @@ const useStyles = makeStyles({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
-    height: "42px",
   },
   productSectionGrid: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
+    display: "flex",
+    alignItems: "center",
   },
   buttonBorder: {
     backgroundColor: "white !important",
     borderColor: "#dadde9 !important",
     cursor: "default",
+    height: "42px",
   },
 });
 

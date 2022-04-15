@@ -29,6 +29,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     backgroundColor: `${theme.palette.secondary.light} !important`,
     height: "90px",
     paddingTop: "9px",
+    justifyContent: "space-between",
   },
   svgMedium: {
     width: "22px",
@@ -58,15 +59,15 @@ const useStyles = makeStyles((theme: Theme) => ({
   logo: {
     marginBottom: "5px",
     marginTop: "7px",
+    marginRight: "180px",
   },
   productSectionGrid: {
-    position: "absolute",
-    top: "50%",
-    left: "68%",
-    transform: "translate(-50%, -50%)",
+    marginLeft: "30px",
+  },
+  productSectionDiv: {
+    display: "flex",
   },
   navGrid: {
-    marginLeft: "auto",
     height: "90px",
   },
   navLinks: {
@@ -120,6 +121,10 @@ export const NavBar = (props: Props): ReactElement | null => {
       "/request-recover",
       "/recover",
     ].includes(window.location.pathname);
+
+  // If the URL begins with /annotate/ the productSection is rendered
+  const hasProductSection = (): boolean =>
+    window.location.pathname.startsWith("/annotate/");
 
   if (!auth) return null;
   if (!hasNavbar()) return null;
@@ -203,7 +208,7 @@ export const NavBar = (props: Props): ReactElement | null => {
   return (
     <AppBar position="sticky" className={classes.appBar} elevation={0}>
       <Toolbar>
-        <Grid container direction="row" alignContent="space-between">
+        <Grid container direction="row" justifyContent="space-between">
           <Grid className={classes.logo}>
             <img
               src={imgSrc("gliff-web-master-black")}
@@ -212,10 +217,14 @@ export const NavBar = (props: Props): ReactElement | null => {
               alt="gliff logo"
             />
           </Grid>
-          <ProductsNavbar productNavbarData={props.productNavbarData} />
-          <Grid className={classes.productSectionGrid}>
-            {props.productSection}
-          </Grid>
+          <div className={classes.productSectionDiv}>
+            <ProductsNavbar productNavbarData={props.productNavbarData} />
+            {hasProductSection() ? (
+              <Grid className={classes.productSectionGrid}>
+                {props.productSection}
+              </Grid>
+            ) : null}
+          </div>
           <Grid className={classes.navGrid}>
             <nav className={classes.navLinks}>
               {auth.user ? (
