@@ -667,6 +667,7 @@ export class DominateStore {
       return newTiles;
     } catch (err) {
       logger.error(err);
+      return undefined;
     }
   };
 
