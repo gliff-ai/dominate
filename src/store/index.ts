@@ -626,17 +626,21 @@ export class DominateStore {
       const createdTime = new Date().getTime();
       // Retrieve collectionManager
       const collectionManager = this.etebaseInstance.getCollectionManager();
+      const collection = await this.fetchCollection(
+        collectionManager,
+        collectionUid
+      );
+      const itemManager = collectionManager.getItemManager(collection);
 
-      const collectionPromises: Promise<Collection>[] = [];
+      const itemPromises: Promise<Item>[] = [];
 
       for (let i = 0; i < imageFileInfos.length; i += 1) {
         const imageFileInfo = imageFileInfos[i];
         const imageContent = imageContents[i];
 
         // Create new image item and add it to the collection
-        collectionPromises.push(
-          collectionManager.create<ImageMeta>(
-            "gliff.image",
+        itemPromises.push(
+          itemManager.create<ImageMeta>(
             {
               type: "gliff.image",
               meta_version: 0,
@@ -654,19 +658,19 @@ export class DominateStore {
       setTask({ ...task, progress: 30 });
 
       // save new image items:
-      const newCollections = await Promise.all(collectionPromises);
-      await this.batchUpload(collectionManager, newCollections);
+      const newItems = await Promise.all(itemPromises);
+      await itemManager.batch(newItems);
 
       const newTiles: GalleryTile[] = [];
       for (let i = 0; i < imageFileInfos.length; i += 1) {
         // Add the image's metadata/thumbnail and a pointer to the image item to the gallery's content:
         newTiles.push({
-          id: newCollections[i].uid, // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
+          id: newItems[i].uid, // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
           thumbnail: thumbnails[i],
           imageLabels: [],
           assignees: [],
           fileInfo: imageFileInfos[i],
-          imageUID: newCollections[i].uid,
+          imageUID: newItems[i].uid,
           annotationUID: {},
           annotationComplete: {},
           auditUID: {},
@@ -676,10 +680,6 @@ export class DominateStore {
       setTask({ ...task, progress: 65 });
 
       // save new gallery tiles:
-      const collection = await this.fetchCollection(
-        collectionManager,
-        collectionUid
-      );
       const oldContent = await collection.getContent(OutputFormat.String);
       const newContent = JSON.stringify(
         (JSON.parse(oldContent) as GalleryTile[]).concat(newTiles)
@@ -1194,11 +1194,15 @@ export class DominateStore {
 
     // Retrieve collectionManager
     const collectionManager = this.etebaseInstance.getCollectionManager();
+    const collection = await this.fetchCollection(
+      collectionManager,
+      collectionUid
+    );
+    const itemManager = collectionManager.getItemManager(collection);
 
     // Create new Annotation item
     const createdTime = new Date().getTime();
-    const annotationsItem = await collectionManager.create<AnnotationMeta>(
-      "gliff.annotation",
+    const annotationsItem = await itemManager.create<AnnotationMeta>(
       {
         type: "gliff.annotation",
         meta_version: 1,
@@ -1211,8 +1215,7 @@ export class DominateStore {
     );
 
     // Create new Audit item:
-    const auditItem = await collectionManager.create<AuditMeta>(
-      "gliff.audit",
+    const auditItem = await itemManager.create<AuditMeta>(
       {
         type: "gliff.audit",
         meta_version: 0,
@@ -1232,7 +1235,7 @@ export class DominateStore {
     }
 
     // Store annotationsItem and auditItem inside the collection:
-    await this.batchUpload(collectionManager, [annotationsItem, auditItem]);
+    await itemManager.batch([annotationsItem, auditItem]);
 
     if (setTask) {
       setTask({
@@ -1243,10 +1246,6 @@ export class DominateStore {
     }
 
     // Update collection content JSON:
-    const collection = await this.fetchCollection(
-      collectionManager,
-      collectionUid
-    );
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
     const tileIdx = galleryTiles.findIndex(
