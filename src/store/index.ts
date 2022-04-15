@@ -1049,9 +1049,9 @@ export class DominateStore {
     if (!("meta_version" in meta)) {
       etebaseObject = await this.preMigrate(etebaseObject);
       if (manager instanceof CollectionManager) {
-        manager.upload(etebaseObject as Collection);
+        await manager.upload(etebaseObject as Collection);
       } else {
-        manager.batch([etebaseObject as Item]);
+        await manager.batch([etebaseObject as Item]);
       }
       meta = etebaseObject.getMeta<BaseMeta>();
       content = JSON.parse(await etebaseObject.getContent(OutputFormat.String));
@@ -1103,9 +1103,9 @@ export class DominateStore {
       etebaseObject.setMeta(meta);
       await etebaseObject.setContent(JSON.stringify(content));
       if (manager instanceof CollectionManager) {
-        manager.upload(etebaseObject as Collection);
+        await manager.upload(etebaseObject as Collection);
       } else {
-        manager.batch([etebaseObject as Item]);
+        await manager.batch([etebaseObject as Item]);
       }
     }
 
