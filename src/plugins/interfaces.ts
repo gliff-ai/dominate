@@ -1,4 +1,4 @@
-import { MetaItem } from "@/store/interfaces";
+import { MetaItem } from "@/interfaces";
 
 // NOTE: Product, PluginType and Plugin are also defined in MANAGE
 
@@ -25,6 +25,7 @@ interface Plugin {
 }
 
 interface PluginElement {
+  type?: string; // added by DOMINATE, not by the plugin's creator
   name: string;
   tooltip: string;
   onClick: (data: PluginDataIn) => Promise<PluginDataOut>;

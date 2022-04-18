@@ -37,7 +37,7 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
     (storeInstance) => {
       if (!auth?.user?.username) return;
       storeInstance
-        .getImagesMeta(collectionUid, auth?.user.username)
+        .getImagesMeta(collectionUid)
         .then((items) => {
           const { galleryMeta } = items;
           setStateIfMounted(

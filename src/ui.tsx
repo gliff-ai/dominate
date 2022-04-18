@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState } from "react";
+import { ReactElement, useCallback, useEffect, useState } from "react";
 import { Route, Routes, Navigate, useLocation } from "react-router-dom";
 import {
   CssBaseline,
@@ -91,22 +91,19 @@ const UserInterface = (props: Props): ReactElement | null => {
   //   setProductSection(null); // clear product section
   // }, [window.location.pathname]);
 
-  const [dimensions, setDimensions] = useState({
-    height: window.innerHeight,
-    width: window.innerWidth,
-  });
+  const [tooSmall, setTooSmall] = useState(false);
+
+  const handleResize = useCallback(() => {
+    const tooSmallNow = window.innerWidth < 700 || window.innerHeight < 300;
+    if (tooSmall !== tooSmallNow) {
+      setTooSmall(tooSmallNow);
+    }
+  }, [tooSmall]);
 
   useEffect(() => {
-    function handleResize() {
-      setDimensions({
-        height: window.innerHeight,
-        width: window.innerWidth,
-      });
-    }
-
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
-  });
+  }, [tooSmall]);
 
   const classes = useStyles(isOverflow);
 
@@ -118,7 +115,7 @@ const UserInterface = (props: Props): ReactElement | null => {
   return (
     <StyledEngineProvider injectFirst>
       <ThemeProvider theme={theme}>
-        {dimensions.width < 700 || dimensions.height < 300 ? (
+        {tooSmall ? (
           <BasicPage
             view={<UnsupportedScreenSizeErrorPage />}
             title={<>Oops!</>}

@@ -7,11 +7,16 @@ import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annota
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { icons, IconButton, Task } from "@gliff-ai/style";
 import { ProductNavbarData } from "@/components";
+import { OutputFormat } from "etebase";
 import { DominateStore } from "@/store";
-import { AnnotationMeta } from "@/store/interfaces";
+import { AnnotationMeta, GalleryMeta } from "@/interfaces";
 import { parseStringifiedSlices } from "@/imageConversions";
 import { useAuth, useStore } from "@/hooks";
-import { setStateIfMounted } from "@/helpers";
+import {
+  convertMetadataToGalleryTiles,
+  setStateIfMounted,
+  MetaItemWithId,
+} from "@/helpers";
 import { UserAccess } from "@/hooks/use-auth";
 import { initPluginObjects, PluginObject, Product } from "@/plugins";
 
@@ -46,6 +51,11 @@ const useStyle = makeStyles({
   rotateIcon: { transform: "rotate(180deg)" },
 });
 
+let isCompleteButtonClicked = false;
+// Tells a useEffect hook that isComplete changed because the button was clicked, not
+// because isComplete has just loaded from store. This is a common problem with hooks, with no clear solution:
+// https://stackoverflow.com/questions/56247433/how-to-use-setstate-callback-on-react-hooks
+
 export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const navigate = useNavigate();
   const auth = useAuth();
@@ -60,6 +70,10 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
   const [plugins, setPlugins] = useState<PluginObject | null>(null);
   const [collectionTitle, setCollectionTitle] = useState<string>();
+
+  const [defaultLabels, setDefaultLabels] = useState<string[]>([]);
+  const [restrictLabels, setRestrictLabels] = useState<boolean>(false);
+  const [multiLabel, setMultiLabel] = useState<boolean>(true);
 
   const isMounted = useRef(false);
   const classes = useStyle();
@@ -90,7 +104,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       const canViewAllImages = isOwnerOrMember();
 
       storeInstance
-        .getImagesMeta(collectionUid, auth?.user.username)
+        .getImagesMeta(collectionUid)
         .then((items) => {
           const imageUIDs = items.tiles
             .filter(
@@ -107,11 +121,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             (item) => item.imageUID === imageUid
           )?.fileInfo;
           if (fileInfo) {
-            setStateIfMounted(
-              new ImageFileInfo(fileInfo),
-              setImageFileInfo,
-              isMounted.current
-            );
+            setStateIfMounted(fileInfo, setImageFileInfo, isMounted.current);
           }
         })
         .catch((e) => {
@@ -138,7 +148,10 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
           <IconButton
             icon={icons.tick}
             tooltip={{ name: "Mark Annotation As Complete" }}
-            onClick={() => setIsComplete((prevIsComplete) => !prevIsComplete)}
+            onClick={() => {
+              setIsComplete((prevIsComplete) => !prevIsComplete);
+              isCompleteButtonClicked = true;
+            }}
             fill={isComplete}
             tooltipPlacement="bottom"
             size="small"
@@ -172,6 +185,14 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   useEffect(() => {
     if (!collectionUid) return;
     fetchImageItems();
+    props.storeInstance
+      .getCollectionMeta(collectionUid)
+      .then((meta: GalleryMeta) => {
+        setDefaultLabels(meta.defaultLabels);
+        setRestrictLabels(meta.restrictLabels);
+        setMultiLabel(meta.multiLabel);
+      })
+      .catch((e) => console.error(e));
   }, [collectionUid, fetchImageItems]);
 
   useEffect(() => {
@@ -221,15 +242,25 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   }, [isComplete, currImageIdx, imageUids]);
 
   useEffect(() => {
-    const getImage = (): void => {
+    const getImage = (): Promise<string> =>
       // Retrieve image item and set it as state
+      // DominateStore needs to be able to redirect to a new URL if/when converting the image from collection to item, because the UID will change,
+      // but it can't useNavigate by itself because it's not a function component, so pass it here:
+      // props.storeInstance.giveNavigate(navigate);
       props.storeInstance
-        .getImage(collectionUid, imageUid)
-        .then((image) => {
-          setStateIfMounted(image, setImageContent, isMounted.current);
+        .getItem(collectionUid, imageUid)
+        .then(async (image) => {
+          setStateIfMounted(
+            await image.getContent(OutputFormat.String),
+            setImageContent,
+            isMounted.current
+          );
+          return image.uid;
         })
-        .catch((e) => console.error(e));
-    };
+        .catch((e) => {
+          console.error(e);
+          return "";
+        });
 
     const createAnnotationsObject = (): Annotations | undefined => {
       if (!auth?.user?.username) return undefined;
@@ -254,11 +285,11 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       return newAnnotationsObject;
     };
 
-    const getAnnotationsObject = (): void => {
-      if (!auth?.user?.username) return;
+    const getAnnotationsObject = (): Promise<void> => {
+      if (!auth?.user?.username) return Promise.resolve();
 
       // Set state for annotation items.
-      props.storeInstance
+      return props.storeInstance
         .getAnnotationsObject(collectionUid, imageUid, auth?.user.username)
         .then(
           (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
@@ -278,8 +309,15 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     };
 
     // launches image and annotation retrieval on page load
-    getImage();
-    getAnnotationsObject();
+    Promise.all([getImage(), getAnnotationsObject()])
+      .then(([newImageUid, _]) => {
+        if (newImageUid !== imageUid) {
+          // redirect if image UID has changed due to item -> collection migration:
+          console.log("redirecting in AnnotateWrapper");
+          navigate(`/annotate/${collectionUid}/${newImageUid}`);
+        }
+      })
+      .catch((e) => console.error(e));
   }, [
     collectionUid,
     imageUid,
@@ -287,8 +325,14 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     props.storeInstance.ready,
     auth,
     isMounted,
-    isComplete,
   ]);
+
+  useEffect(() => {
+    if (annotationsObject !== undefined && isCompleteButtonClicked) {
+      saveAnnotation(annotationsObject);
+      isCompleteButtonClicked = false;
+    }
+  }, [isComplete]);
 
   const fetchPlugins = useCallback(async () => {
     if (!auth?.user || collectionUid === "") return;
@@ -305,6 +349,17 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       console.error(e);
     }
   }, [auth, collectionUid, isMounted]);
+
+  const saveMetadataCallback = useCallback(
+    (data: { collectionUid: string; metadata: MetaItemWithId[] }) => {
+      const newTiles = convertMetadataToGalleryTiles(data.metadata);
+      void props.storeInstance
+        .updateGallery(data.collectionUid, newTiles)
+        .then(() => fetchImageItems())
+        .catch((error) => console.error(error));
+    },
+    [props.storeInstance]
+  );
 
   useEffect(() => {
     void fetchPlugins();
@@ -364,6 +419,10 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
           ? () => navigate(`/manage/plugins`)
           : null
       }
+      defaultLabels={defaultLabels}
+      restrictLabels={restrictLabels}
+      multiLabel={multiLabel}
+      saveMetadataCallback={saveMetadataCallback}
     />
   );
 };
