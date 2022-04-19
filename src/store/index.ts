@@ -1034,12 +1034,57 @@ export class DominateStore {
     /* eslint-enable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
   };
 
+  correctPluginModifications = async (
+    manager: CollectionManager | ItemManager,
+    etebaseObject: Collection | Item
+  ): Promise<void> => {
+    // corrects modifications made by plugins that deviate from the interfaces
+    // should become obsolete once we learn how to import the interfaces into the gliff-sdk
+
+    let meta = etebaseObject.getMeta<BaseMeta>();
+    const content = JSON.parse(
+      await etebaseObject.getContent(OutputFormat.String)
+    ) as any[];
+    let migrate = false;
+    if (meta.type === "gliff.gallery") {
+      for (let i = 0; i < content.length; i += 1) {
+        if (!("fileInfo" in content[i]) && "metadata" in content[i]) {
+          // rename tile.metadata -> tile.fileInfo
+          content[i].fileInfo = content[i].metadata;
+          migrate = true;
+        }
+        if (
+          "imageName" in content[i].fileInfo &&
+          !("fileName" in content[i].fileInfo)
+        ) {
+          // rename imageName -> fileName
+          content[i].fileInfo.fileName = content[i].fileInfo.imageName;
+          migrate = true;
+        }
+      }
+    } else if (meta.type === "gliff.image") {
+      if ("imageName" in meta && !("name" in meta)) {
+        (meta as ImageMeta).name = (meta as any).imageName;
+        migrate = true;
+      }
+    }
+    if (migrate) {
+      etebaseObject.setMeta(meta);
+      await etebaseObject.setContent(JSON.stringify(content));
+      if (manager instanceof CollectionManager) {
+        await manager.upload(etebaseObject as Collection);
+      } else {
+        await manager.batch([etebaseObject as Item]);
+      }
+    }
+  };
+
   migrate = async (
     manager: CollectionManager | ItemManager,
-    collection_: Collection | Item
+    etebaseObject_: Collection | Item
   ): Promise<Collection | Item> => {
     /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
-    let etebaseObject = collection_;
+    let etebaseObject = etebaseObject_;
     let meta = etebaseObject.getMeta<BaseMeta>();
     let content = JSON.parse(
       await etebaseObject.getContent(OutputFormat.String)
@@ -1056,6 +1101,8 @@ export class DominateStore {
       meta = etebaseObject.getMeta<BaseMeta>();
       content = JSON.parse(await etebaseObject.getContent(OutputFormat.String));
     }
+
+    await this.correctPluginModifications(manager, etebaseObject);
 
     // migrate if necessary:
     let migrate = false;
