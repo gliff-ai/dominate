@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
 import { ChangeEvent, FormEvent, useState, ReactElement } from "react";
-import { loadStripe } from "@stripe/stripe-js";
 import {
   TextField,
   Link,
@@ -8,18 +7,14 @@ import {
   Checkbox,
   FormControlLabel,
 } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+
 import { WarningSnackbar } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
-import { createCheckoutSession, getInvite } from "@/services/user";
+import { getInvite } from "@/services/user";
 import { RecoveryKey } from "@/views/RecoveryKey";
 import { MessageAlert, SubmitButton } from "@/components";
 import { VerificationSent } from "@/views/VerificationSent";
 import { useMountEffect } from "@/hooks/use-mountEffect";
-
-const STRIPE_KEY = import.meta.env.VITE_STRIPE_KEY;
-
-const stripePromise = loadStripe(STRIPE_KEY);
 
 const query = new URLSearchParams(window.location.search);
 
@@ -33,31 +28,13 @@ type SignupForm = {
   acceptedTermsAndConditions: boolean;
 };
 
-const useStyles = makeStyles(() => ({
-  haveAccount: {
-    width: "fit-content",
-    marginRight: "auto",
-    marginLeft: "auto",
-    marginBottom: "187px",
-  },
-  haveAccountText: {
-    display: "inline",
-    marginRight: "20px",
-  },
-}));
-
-type State =
-  | "1-Signup"
-  | "2-RecoveryKey"
-  | "3-BillingFailed"
-  | "4-VerificationSent";
+type State = "1-Signup" | "2-RecoveryKey" | "3-VerificationSent";
 
 interface Props {
   // eslint-disable-next-line react/require-default-props
   state?: State;
 }
 export const SignUp = (props: Props): ReactElement | null => {
-  const classes = useStyles();
   const auth = useAuth();
 
   const [state, setState] = useState<State>(props.state || "1-Signup");
@@ -70,7 +47,7 @@ export const SignUp = (props: Props): ReactElement | null => {
   const [storeError, setStoreError] = useState({});
   const [termsAndConditionsError, setTermsAndConditionsError] = useState("");
   const [recoveryKey, setRecoveryKey] = useState<string[] | null>(null);
-  const [user, setUser] = useState<{ email: string; id: number } | null>(null);
+
   const [signUp, setSignUp] = useState<SignupForm>({
     name: "",
     email: "",
@@ -85,7 +62,7 @@ export const SignUp = (props: Props): ReactElement | null => {
     setOpen(true);
   };
 
-  const tierId = query.get("tier_id") || null;
+  const tierId = parseInt(query.get("tier_id") || "", 10) || null; // This is only used for custom plans
   const inviteId = query.get("invite_id") || null;
 
   useMountEffect(() => {
@@ -161,10 +138,11 @@ export const SignUp = (props: Props): ReactElement | null => {
         signUp.name,
         signUp.teamId as number,
         signUp.inviteId as string,
-        signUp.acceptedTermsAndConditions
+        signUp.acceptedTermsAndConditions,
+        tierId as number
       );
+
       if (profile) {
-        setUser(profile.profile);
         setRecoveryKey(profile.recoveryKey);
         setState("2-RecoveryKey");
       }
@@ -184,44 +162,6 @@ export const SignUp = (props: Props): ReactElement | null => {
     }
   };
 
-  const billing = async () => {
-    if (!tierId || inviteId) {
-      setState("4-VerificationSent");
-      return;
-    }
-
-    const stripe = await stripePromise;
-
-    if (!user || !stripe) {
-      return;
-    }
-
-    try {
-      const session = await createCheckoutSession(tierId, user.id, user.email);
-
-      if (!session) {
-        // There's no need to use Stripe for this tier
-        setState("4-VerificationSent");
-        return;
-      }
-
-      const { id: sessionId } = session;
-
-      // When the customer clicks on the button, redirect them to Checkout.
-      const result = await stripe.redirectToCheckout({
-        sessionId,
-      });
-
-      if (result.error) {
-        console.error(result.error);
-      }
-    } catch (error) {
-      console.error(error);
-      setStoreError(error);
-      setOpen(true);
-    }
-  };
-
   const err = (
     <WarningSnackbar
       open={open}
@@ -234,65 +174,51 @@ export const SignUp = (props: Props): ReactElement | null => {
     />
   );
 
+  const textField = (
+    name: string,
+    value: string,
+    type: string,
+    placeholder: string,
+    autocomplete = "off",
+    autofocus = false
+  ) => (
+    <TextField
+      variant="outlined"
+      margin="normal"
+      required
+      fullWidth
+      id={name}
+      name={name}
+      autoComplete={autocomplete || name}
+      autoFocus={autofocus}
+      type={type}
+      onChange={handleChange}
+      value={value}
+      placeholder={placeholder}
+    />
+  );
+
   const signupForm = (
     <>
       <form onSubmit={onSubmitForm}>
-        <TextField
-          variant="outlined"
-          margin="normal"
-          required
-          fullWidth
-          id="email"
-          name="email"
-          autoComplete="email"
-          autoFocus
-          type="email"
-          onChange={handleChange}
-          value={signUp.email}
-          placeholder="E-mail *"
-        />
+        {textField("email", signUp.email, "email", "E-mail *", "email", true)}
         <MessageAlert severity="error" message={emailError} />
-        <TextField
-          variant="outlined"
-          margin="normal"
-          required
-          fullWidth
-          id="name"
-          name="name"
-          autoComplete="full_name"
-          type="text"
-          onChange={handleChange}
-          value={signUp.name}
-          placeholder="Name *"
-        />
+        {textField("name", signUp.name, "text", "Name *", "full_name")}
         <MessageAlert severity="error" message={nameError} />
-        <TextField
-          variant="outlined"
-          margin="normal"
-          required
-          fullWidth
-          name="password"
-          type="password"
-          id="password"
-          autoComplete="new-password"
-          value={signUp.password}
-          onChange={handleChange}
-          placeholder="Password *"
-        />
-
-        <TextField
-          variant="outlined"
-          margin="normal"
-          required
-          fullWidth
-          name="confirmPassword"
-          type="password"
-          id="confirmPassword"
-          autoComplete="off"
-          value={signUp.confirmPassword}
-          onChange={handleChange}
-          placeholder="Confirm Password *"
-        />
+        {textField(
+          "password",
+          signUp.password,
+          "password",
+          "Password *",
+          "new-password"
+        )}
+        {textField(
+          "confirmPassword",
+          signUp.confirmPassword,
+          "password",
+          "Confirm Password *",
+          "off"
+        )}
         <MessageAlert severity="error" message={passwordError} />
 
         <FormControlLabel
@@ -332,8 +258,18 @@ export const SignUp = (props: Props): ReactElement | null => {
 
         <SubmitButton loading={loading} value="Next" />
 
-        <div className={classes.haveAccount}>
-          <Typography className={classes.haveAccountText} variant="body2">
+        <div
+          style={{
+            width: "fit-content",
+            marginRight: "auto",
+            marginLeft: "auto",
+            marginBottom: "187px",
+          }}
+        >
+          <Typography
+            style={{ display: "inline", marginRight: "20px" }}
+            variant="body2"
+          >
             Already have an account?&nbsp;
             <Link color="secondary" href="/signin">
               Sign In
@@ -353,30 +289,16 @@ export const SignUp = (props: Props): ReactElement | null => {
   if (state === "2-RecoveryKey" && recoveryKey) {
     return (
       <>
-        <RecoveryKey recoveryKey={recoveryKey} callback={billing} />
+        <RecoveryKey
+          recoveryKey={recoveryKey}
+          callback={() => setState("3-VerificationSent")}
+        />
         {err}
       </>
     );
   }
 
-  if (state === "3-BillingFailed") {
-    // This should be infrequent as Stripe will normally catch errors within Checkout
-    return (
-      <>
-        <p>
-          There was an error processing your payment. Please&nbsp;
-          <Link color="secondary" href="/signin">
-            Sign In
-          </Link>
-          &nbsp; and upgrade your account from the billing page
-        </p>
-
-        <p>Alternatively, contact us at contact@gliff.ai for help</p>
-      </>
-    );
-  }
-
-  if (state === "4-VerificationSent") {
+  if (state === "3-VerificationSent") {
     return (
       <>
         <VerificationSent />
