@@ -1041,7 +1041,8 @@ export class DominateStore {
     // corrects modifications made by plugins that deviate from the interfaces
     // should become obsolete once we learn how to import the interfaces into the gliff-sdk
 
-    let meta = etebaseObject.getMeta<BaseMeta>();
+    /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
+    const meta = etebaseObject.getMeta<BaseMeta>();
     const content = JSON.parse(
       await etebaseObject.getContent(OutputFormat.String)
     ) as any[];
@@ -1077,6 +1078,8 @@ export class DominateStore {
         await manager.batch([etebaseObject as Item]);
       }
     }
+
+    /* eslint-ensable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
   };
 
   migrate = async (
