@@ -1094,7 +1094,9 @@ export class DominateStore {
     try {
       content = JSON.parse(await etebaseObject.getContent(OutputFormat.String));
     } catch (e) {
-      console.error(e);
+      console.error(
+        "Looks like your project is corrupted. Please contact the gliff.ai team to fix this - contact@gliff.ai"
+      );
     }
 
     // pre-migrate to V0 if necessary:
