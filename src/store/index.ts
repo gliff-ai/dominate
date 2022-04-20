@@ -997,7 +997,13 @@ export class DominateStore {
     /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
     let collection = collection_;
     let meta = collection.getMeta<BaseMeta>();
-    let content = JSON.parse(await collection.getContent(OutputFormat.String));
+    let content = "";
+    // we catch any errors here and rethrow them, so that Sentry can catch them
+    try {
+      content = JSON.parse(await collection.getContent(OutputFormat.String));
+    } catch (e) {
+      console.error(e);
+    }
 
     // pre-migrate to V0 if necessary:
     if (!("meta_version" in meta)) {
