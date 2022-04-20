@@ -995,12 +995,12 @@ export class DominateStore {
     collection_: Collection
   ): Promise<Collection> => {
     /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
-    let collection = collection_;
-    let meta = collection.getMeta<BaseMeta>();
+    let etebaseObject = etebaseObject_;
+    let meta = etebaseObject.getMeta<BaseMeta>();
     let content = "";
     // we catch any errors here and rethrow them, so that Sentry can catch them
     try {
-      content = JSON.parse(await collection.getContent(OutputFormat.String));
+      content = JSON.parse(await etebaseObject.getContent(OutputFormat.String));
     } catch (e) {
       console.error(e);
     }
