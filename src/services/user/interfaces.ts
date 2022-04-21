@@ -1,7 +1,3 @@
-export interface CheckoutSession {
-  id: string;
-}
-
 export interface User {
   username: string | null;
   authToken: string | null;

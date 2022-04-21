@@ -6,8 +6,9 @@ import makeStyles from "@mui/styles/makeStyles";
 import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { icons, IconButton, Task } from "@gliff-ai/style";
+import { OutputFormat } from "etebase";
 import { DominateStore } from "@/store";
-import { AnnotationMeta, GalleryMeta } from "@/store/interfaces";
+import { AnnotationMeta, GalleryMeta } from "@/interfaces";
 import { parseStringifiedSlices } from "@/imageConversions";
 import { useAuth, useStore } from "@/hooks";
 import {
@@ -100,7 +101,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       const canViewAllImages = isOwnerOrMember();
 
       storeInstance
-        .getImagesMeta(collectionUid, auth?.user.username)
+        .getImagesMeta(collectionUid)
         .then((items) => {
           const imageUIDs = items.tiles
             .filter(
@@ -236,15 +237,25 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   }, [isComplete, currImageIdx, imageUids]);
 
   useEffect(() => {
-    const getImage = (): void => {
+    const getImage = (): Promise<string> =>
       // Retrieve image item and set it as state
+      // DominateStore needs to be able to redirect to a new URL if/when converting the image from collection to item, because the UID will change,
+      // but it can't useNavigate by itself because it's not a function component, so pass it here:
+      // props.storeInstance.giveNavigate(navigate);
       props.storeInstance
-        .getImage(collectionUid, imageUid)
-        .then((image) => {
-          setStateIfMounted(image, setImageContent, isMounted.current);
+        .getItem(collectionUid, imageUid)
+        .then(async (image) => {
+          setStateIfMounted(
+            await image.getContent(OutputFormat.String),
+            setImageContent,
+            isMounted.current
+          );
+          return image.uid;
         })
-        .catch((e) => console.error(e));
-    };
+        .catch((e) => {
+          console.error(e);
+          return "";
+        });
 
     const createAnnotationsObject = (): Annotations | undefined => {
       if (!auth?.user?.username) return undefined;
@@ -269,11 +280,11 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       return newAnnotationsObject;
     };
 
-    const getAnnotationsObject = (): void => {
-      if (!auth?.user?.username) return;
+    const getAnnotationsObject = (): Promise<void> => {
+      if (!auth?.user?.username) return Promise.resolve();
 
       // Set state for annotation items.
-      props.storeInstance
+      return props.storeInstance
         .getAnnotationsObject(collectionUid, imageUid, auth?.user.username)
         .then(
           (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
@@ -293,8 +304,16 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
     };
 
     // launches image and annotation retrieval on page load
-    getImage();
-    getAnnotationsObject();
+    Promise.all([getImage(), getAnnotationsObject()])
+      .then(([newImageUid, _]) => {
+        if (newImageUid !== imageUid) {
+          // redirect if image UID has changed due to item -> collection migration:
+          // commented out for now until we re-add item -> collection conversion
+          // console.log("redirecting in AnnotateWrapper");
+          // navigate(`/annotate/${collectionUid}/${newImageUid}`);
+        }
+      })
+      .catch((e) => console.error(e));
   }, [
     collectionUid,
     imageUid,
