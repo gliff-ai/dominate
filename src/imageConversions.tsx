@@ -134,7 +134,7 @@ async function convertUint8ArrayToImageBitmap(
 async function mixBase64Channels(channels: string[]): Promise<string> {
   // converts an [R,G,B] array of base64 images to a single RGB base64 image
 
-  const images = channels.map(
+  const imagePromises = channels.map(
     (c) =>
       new Promise<HTMLImageElement>((resolve) => {
         const image = new Image();
@@ -146,7 +146,7 @@ async function mixBase64Channels(channels: string[]): Promise<string> {
       })
   );
 
-  return await Promise.all(images).then((images) => {
+  const b64RGB = await Promise.all(imagePromises).then((images) => {
     const canvas = document.createElement("canvas");
     canvas.width = images[0].width;
     canvas.height = images[0].height;
@@ -161,6 +161,8 @@ async function mixBase64Channels(channels: string[]): Promise<string> {
     }
     return "";
   });
+
+  return b64RGB;
 }
 
 export {
