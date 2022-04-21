@@ -1093,9 +1093,15 @@ export class DominateStore {
     /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-call */
     let etebaseObject = etebaseObject_;
     let meta = etebaseObject.getMeta<BaseMeta>();
-    let content = JSON.parse(
-      await etebaseObject.getContent(OutputFormat.String)
-    );
+    let content = "";
+    // we catch any errors here and rethrow them, so that Sentry can catch them
+    try {
+      content = JSON.parse(await etebaseObject.getContent(OutputFormat.String));
+    } catch (e) {
+      console.error(
+        "Looks like your project is corrupted. Please contact the gliff.ai team to fix this - contact@gliff.ai"
+      );
+    }
 
     // pre-migrate to V0 if necessary:
     if (!("meta_version" in meta)) {
