@@ -131,9 +131,42 @@ async function convertUint8ArrayToImageBitmap(
   });
 }
 
+async function mixBase64Channels(channels: string[]): Promise<string> {
+  // converts an [R,G,B] array of base64 images to a single RGB base64 image
+
+  const images = channels.map(
+    (c) =>
+      new Promise<HTMLImageElement>((resolve) => {
+        const image = new Image();
+
+        image.onload = () => {
+          resolve(image);
+        };
+        image.src = `data:image/png;base64,${c}`;
+      })
+  );
+
+  return await Promise.all(images).then((images) => {
+    const canvas = document.createElement("canvas");
+    canvas.width = images[0].width;
+    canvas.height = images[0].height;
+    const ctx = canvas.getContext("2d");
+
+    if (ctx) {
+      ctx.globalCompositeOperation = "lighter";
+      images.forEach((canvas) => {
+        ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height);
+      });
+      return canvas.toDataURL();
+    }
+    return "";
+  });
+}
+
 export {
   stringifySlices,
   parseStringifiedSlices,
   convertImageBitmapToUint8Array,
   convertUint8ArrayToImageBitmap,
+  mixBase64Channels,
 };

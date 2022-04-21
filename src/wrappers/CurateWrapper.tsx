@@ -15,7 +15,7 @@ import {
   MessageDialog,
 } from "@/components/message/ConfirmationDialog";
 
-import { stringifySlices } from "@/imageConversions";
+import { stringifySlices, mixBase64Channels } from "@/imageConversions";
 import { useAuth, UserAccess } from "@/hooks/use-auth";
 import { useMountEffect } from "@/hooks/use-mountEffect";
 import { useStore } from "@/hooks/use-store";
@@ -289,7 +289,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             if (collectionContent[i].imageLabels.length === 0) {
               unlabelledFolder.file(
                 collectionContent[i].fileInfo.fileName,
-                images[i].content,
+                mixBase64Channels(JSON.parse(images[i].content)),
                 {
                   base64: true,
                 }
