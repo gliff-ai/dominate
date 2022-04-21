@@ -1047,9 +1047,19 @@ export class DominateStore {
 
     /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
     const meta = etebaseObject.getMeta<BaseMeta>();
-    const content = JSON.parse(
-      await etebaseObject.getContent(OutputFormat.String)
-    ) as any[];
+    let content;
+    try {
+      content = JSON.parse(
+        await etebaseObject.getContent(OutputFormat.String)
+      ) as any[];
+    } catch (e) {
+      console.error(
+        `Failed to parse JSON content of ${
+          etebaseObject.uid
+        }: ${await etebaseObject.getContent(OutputFormat.String)}`
+      );
+    }
+
     let migrate = false;
     if (meta.type === "gliff.gallery") {
       for (let i = 0; i < content.length; i += 1) {
