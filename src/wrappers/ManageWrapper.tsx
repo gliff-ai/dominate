@@ -40,6 +40,15 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     [props.storeInstance]
   );
 
+  const deleteProject = useCallback(
+    async ({ projectUid }): Promise<boolean> => {
+      const result = await props.storeInstance.deleteCollection(projectUid);
+
+      return result;
+    },
+    [props.storeInstance]
+  );
+
   const createProject = useCallback(
     async ({ name }) => {
       const uid = await props.storeInstance.createCollection(name);
@@ -245,6 +254,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     loginUser: "POST /user/login", // Not used, we pass an authd user down
     getProjects,
     getProject,
+    deleteProject,
     getCollectionMembers,
     getCollectionsMembers,
     createProject,

@@ -362,7 +362,9 @@ export class DominateStore {
     const { data } = await collectionManager.list(type);
 
     const settledPromises = await Promise.allSettled(
-      data.map(this.wrangleCollectionsContent)
+      data
+        .filter((collection) => !collection.isDeleted)
+        .map(this.wrangleCollectionsContent)
     );
 
     const resolved: {
@@ -430,7 +432,10 @@ export class DominateStore {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     const { data } = await collectionManager.list(type);
-    this.collectionsMeta = data.map(this.wrangleGallery);
+    this.collectionsMeta = data
+      .filter((collection) => !collection.isDeleted)
+      .map(this.wrangleGallery);
+
     return this.collectionsMeta;
   };
 
@@ -446,6 +451,24 @@ export class DominateStore {
     );
 
     return { ...collection.getMeta(), uid: collection.uid };
+  };
+
+  deleteCollection = async (collectionUid: string): Promise<boolean> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+    try {
+      const collectionManager = this.etebaseInstance.getCollectionManager();
+
+      const collection = await collectionManager.fetch(collectionUid);
+
+      collection.delete();
+
+      await collectionManager.upload(collection);
+
+      return true;
+    } catch (e) {
+      console.error(e);
+    }
+    return false;
   };
 
   getCollectionMembers = async (
@@ -505,20 +528,22 @@ export class DominateStore {
     } = {};
 
     await Promise.allSettled(
-      data.map(async (collection) => {
-        const memberManager = collectionManager.getMemberManager(collection);
-        const members = await memberManager.list();
-        const invitations = await invitationManager.listOutgoing();
+      data
+        .filter((collection) => !collection.isDeleted)
+        .map(async (collection) => {
+          const memberManager = collectionManager.getMemberManager(collection);
+          const members = await memberManager.list();
+          const invitations = await invitationManager.listOutgoing();
 
-        return {
-          uid: collection.uid,
-          data: this.reshapeMembers(
-            collection.uid,
-            members?.data,
-            invitations?.data
-          ),
-        };
-      })
+          return {
+            uid: collection.uid,
+            data: this.reshapeMembers(
+              collection.uid,
+              members?.data,
+              invitations?.data
+            ),
+          };
+        })
     ).then((results) =>
       results.forEach((result) => {
         if (result.status === "fulfilled") {
