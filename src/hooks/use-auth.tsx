@@ -30,9 +30,10 @@ interface Context {
   signup: (username: string, password: string) => Promise<User>;
   createProfile: (
     name: string,
-    teamId?: number,
-    inviteId?: string,
-    acceptedTermsAndConditions?: boolean
+    teamId: number | undefined,
+    inviteId: string | undefined,
+    acceptedTermsAndConditions: boolean,
+    tierId: number | undefined
   ) => Promise<{ profile: UserProfile; recoveryKey: string[] } | null>;
 }
 
@@ -135,7 +136,8 @@ function useProvideAuth(storeInstance: DominateStore) {
     name: string,
     teamId: number,
     inviteId: string,
-    acceptedTermsAndConditions: boolean
+    acceptedTermsAndConditions: boolean,
+    tierId?: number
   ): Promise<{ profile: UserProfile; recoveryKey: string[] } | null> => {
     if (!storeInstance.getUser()) return null;
 
@@ -149,7 +151,8 @@ function useProvideAuth(storeInstance: DominateStore) {
       teamId,
       inviteId,
       acceptedTermsAndConditions,
-      savedSession
+      savedSession,
+      tierId
     );
 
     return {

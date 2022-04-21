@@ -1,27 +1,13 @@
 import { apiRequest } from "@/api";
-import { CheckoutSession, UserProfile, Invite } from "./interfaces";
-
-export const createCheckoutSession = (
-  tier_id: string,
-  user_id: number,
-  user_email: string
-): Promise<CheckoutSession | null> =>
-  apiRequest<CheckoutSession | null>(
-    "/billing/create-checkout-session/",
-    "POST",
-    {
-      tier_id,
-      user_id,
-      user_email,
-    }
-  );
+import { UserProfile, Invite } from "./interfaces";
 
 export const createUserProfile = (
   name: string,
   teamId: number | null = null,
   inviteId: string | null = null,
   acceptedTermsAndConditions = false,
-  recovery: string
+  recovery: string,
+  tierId: number | null = null
 ): Promise<UserProfile> =>
   apiRequest<UserProfile>("/user/", "POST", {
     name,
@@ -29,6 +15,7 @@ export const createUserProfile = (
     invite_id: inviteId,
     accepted_terms_and_conditions: acceptedTermsAndConditions,
     recovery_key: recovery,
+    tier_id: tierId,
   });
 
 export const getUserProfile = (): Promise<UserProfile> =>

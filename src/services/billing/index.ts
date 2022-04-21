@@ -1,6 +1,14 @@
 import { apiRequest } from "@/api";
 
-import type { AddonPrices, Invoice, Limits, Plan, Payment } from "./interfaces";
+import type {
+  AddonPrices,
+  Invoice,
+  Limits,
+  Plan,
+  Plans,
+  Payment,
+  CheckoutSession,
+} from "./interfaces";
 
 export const getLimits = (): Promise<Limits> =>
   apiRequest<Limits>("/billing/limits", "GET");
@@ -13,11 +21,14 @@ export const getInvoices = (): Promise<Invoice[]> =>
 export const getPlan = (): Promise<Plan> =>
   apiRequest<Plan>("/billing/plan", "GET");
 
+export const getAllPlans = (): Promise<Plans> =>
+  apiRequest<Plans>("/billing/plans", "GET");
+
 export const getAddonPrices = (): Promise<AddonPrices> =>
   apiRequest<AddonPrices>("/billing/addon-prices", "GET");
 
-export const getPayment = (): Promise<Payment> =>
-  apiRequest<Payment>("/billing/payment-method", "GET");
+export const getPayment = (): Promise<Payment | null> =>
+  apiRequest<Payment | null>("/billing/payment-method", "GET");
 
 export const addAddons = (
   users: number,
@@ -30,4 +41,18 @@ export const addAddons = (
     collaborators,
   });
 
-export { AddonPrices, Invoice, Limits, Plan, Payment };
+export const upgradePlan = (tier_id: number): Promise<Plan> =>
+  apiRequest<Plan>("/billing/plan/", "POST", {
+    tier_id,
+  });
+
+export const createCheckoutSession = (): Promise<CheckoutSession | null> =>
+  apiRequest<CheckoutSession | null>(
+    "/billing/create-checkout-session/",
+    "POST"
+  );
+
+export const cancelPlan = (): Promise<null> =>
+  apiRequest<null>("/billing/cancel/", "POST");
+
+export { AddonPrices, Invoice, Limits, Plan, Payment, Plans };
