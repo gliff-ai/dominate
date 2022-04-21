@@ -6,8 +6,8 @@ import makeStyles from "@mui/styles/makeStyles";
 import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { icons, IconButton, Task } from "@gliff-ai/style";
-import { ProductNavbarData } from "@/components";
 import { OutputFormat } from "etebase";
+import { ProductNavbarData } from "@/components";
 import { DominateStore } from "@/store";
 import { AnnotationMeta, GalleryMeta } from "@/interfaces";
 import { parseStringifiedSlices } from "@/imageConversions";
@@ -69,7 +69,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [imageUids, setImageUids] = useState<string[] | null>(null);
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
   const [plugins, setPlugins] = useState<PluginObject | null>(null);
-  const [collectionTitle, setCollectionTitle] = useState<string>();
+  const [collectionTitle, setCollectionTitle] = useState<string>("");
 
   const [defaultLabels, setDefaultLabels] = useState<string[]>([]);
   const [restrictLabels, setRestrictLabels] = useState<boolean>(false);

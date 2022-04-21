@@ -127,7 +127,6 @@ const UserInterface = (props: Props): ReactElement | null => {
             <NavBar
               productSection={productSection}
               productNavbarData={productNavbarData}
-              storeInstance={storeInstance}
             />
             <div className={isOverflow ? classes.overflow : classes.noOverflow}>
               <PageSpinner isLoading={isLoading} />

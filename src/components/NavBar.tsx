@@ -86,7 +86,6 @@ const useStyles = makeStyles((theme: Theme) => ({
 interface Props {
   productSection: JSX.Element | null;
   productNavbarData: ProductNavbarData;
-  storeInstance: DominateStore;
 }
 export const NavBar = (props: Props): ReactElement | null => {
   // Get auth state and re-render anytime it changes

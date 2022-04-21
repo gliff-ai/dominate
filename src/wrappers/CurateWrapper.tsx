@@ -69,7 +69,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const [multiLabel, setMultiLabel] = useState<boolean>(true); // more input for curate
   const { collectionUid = "" } = useParams<string>(); // uid of selected gallery, from URL
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
-  const [collectionTitle, setCollectionTitle] = useState<string>();
+  const [collectionTitle, setCollectionTitle] = useState<string>("");
 
   // multi-label image download dialog state:
   const [showMultilabelConfirm, setShowMultilabelConfirm] =

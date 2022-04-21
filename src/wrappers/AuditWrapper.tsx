@@ -26,7 +26,7 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<AnnotationSession[] | null>(null);
   const isMounted = useRef(false);
-  const [collectionTitle, setCollectionTitle] = useState<string>();
+  const [collectionTitle, setCollectionTitle] = useState<string>("");
   const [imageData, setImageData] = useState<ImageData>({
     imageName: "",
     imageUid: "",
