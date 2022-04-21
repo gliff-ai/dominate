@@ -10,6 +10,7 @@ const useStyles = makeStyles({
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    height: "42px",
   },
   productSectionGrid: {
     display: "flex",
@@ -19,7 +20,10 @@ const useStyles = makeStyles({
     backgroundColor: "white !important",
     borderColor: "#dadde9 !important",
     cursor: "default",
-    height: "42px",
+    paddingLeft: "30px",
+    paddingRight: "30px",
+    textAlign: "center",
+    textTransform: "none",
   },
 });
 
@@ -51,7 +55,7 @@ export function ProductsNavbar({
         className={classes.buttonGroup}
         orientation="horizontal"
         variant="text"
-        aria-label="outlined  button group"
+        aria-label="outlined primary button group"
         style={{
           backgroundColor: "white",
           color: "white",
