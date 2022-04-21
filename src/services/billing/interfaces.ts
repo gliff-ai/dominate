@@ -28,6 +28,8 @@ export interface Plan {
   tier_id: number;
   current_period_end: number;
   current_period_start: number;
+  cancel_date: number;
+  trial_end: number;
   base_price: number;
   addons: {
     project: Addon;
@@ -36,6 +38,16 @@ export interface Plan {
   };
   billed_usage: number;
   billed_usage_gb_price: number;
+  is_custom: boolean;
+  is_trial: boolean;
+}
+
+export interface Plans {
+  tiers: {
+    id: number;
+    name: "PRO" | "TEAM" | "COMMUNITY";
+    price: number;
+  }[];
 }
 
 export interface Addon {
@@ -55,4 +67,8 @@ export interface Payment {
   expiry: string;
   brand: string;
   name: string;
+}
+
+export interface CheckoutSession {
+  id: string;
 }

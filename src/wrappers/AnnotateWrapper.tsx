@@ -313,8 +313,9 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       .then(([newImageUid, _]) => {
         if (newImageUid !== imageUid) {
           // redirect if image UID has changed due to item -> collection migration:
-          console.log("redirecting in AnnotateWrapper");
-          navigate(`/annotate/${collectionUid}/${newImageUid}`);
+          // commented out for now until we re-add item -> collection conversion
+          // console.log("redirecting in AnnotateWrapper");
+          // navigate(`/annotate/${collectionUid}/${newImageUid}`);
         }
       })
       .catch((e) => console.error(e));
