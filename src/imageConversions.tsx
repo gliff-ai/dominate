@@ -154,10 +154,10 @@ async function mixBase64Channels(channels: string[]): Promise<string> {
 
     if (ctx) {
       ctx.globalCompositeOperation = "lighter";
-      images.forEach((canvas) => {
-        ctx.drawImage(canvas, 0, 0, canvas.width, canvas.height);
+      images.forEach((image) => {
+        ctx.drawImage(image, 0, 0, image.width, image.height);
       });
-      return canvas.toDataURL();
+      return canvas.toDataURL().replace("data:image/png;base64,", "");
     }
     return "";
   });

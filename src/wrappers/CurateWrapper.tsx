@@ -289,7 +289,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             if (collectionContent[i].imageLabels.length === 0) {
               unlabelledFolder.file(
                 collectionContent[i].fileInfo.fileName,
-                mixBase64Channels(JSON.parse(images[i].content)),
+                await mixBase64Channels(JSON.parse(images[i].content)[0]),
                 {
                   base64: true,
                 }
