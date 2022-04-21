@@ -1191,6 +1191,10 @@ export class DominateStore {
     itemManager: ItemManager,
     UIDs: string[]
   ): Promise<Item[]> => {
+    if (UIDs.length === 0) {
+      // itemManager.fetchMulti will die messily if we pass it an empty UID array
+      return [];
+    }
     let items = (await itemManager.fetchMulti(UIDs)).data;
     // re-order the retrieved items to the match UIDs:
     items = UIDs.map((uid) => items.find((item) => item.uid === uid) as Item);
