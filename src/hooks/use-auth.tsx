@@ -98,8 +98,15 @@ function useProvideAuth(storeInstance: DominateStore) {
           setUserProfile(profile);
           setUserAccess(getUserAccess(profile));
 
-          update({ name: profile.name, userId: profile.id.toString() });
+          update({
+            name: profile.name,
+            userId: profile.id.toString(),
+            customAttributes: {
+              user_level: getUserAccess(profile),
+            },
+          });
         },
+
         () => {
           // 401 / 403 error, so clear saved session:
           localStorage.removeItem("etebaseInstance");
