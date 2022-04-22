@@ -6,6 +6,7 @@ import { CaptureConsole } from "@sentry/integrations";
 import LogRocket from "logrocket";
 import setupLogRocketReact from "logrocket-react";
 import { BrowserRouter } from "react-router-dom";
+import { IntercomProvider } from "react-use-intercom";
 import StylesProvider from "@mui/styles/StylesProvider";
 import { generateClassName } from "@gliff-ai/style";
 import { SentryErrorPage, BasicPage } from "@/views";
@@ -15,6 +16,8 @@ import UserInterface from "@/ui";
 import { ProvideAuth } from "@/hooks";
 
 const IS_MONITORED = import.meta.env.VITE_IS_MONITORED === "true";
+
+const INTERCOM_APP_ID = "fhkh0l1p";
 
 // User info is added in the `use-auth` hook
 if (IS_MONITORED) {
@@ -75,11 +78,13 @@ ReactDOM.render(
       fallback={<BasicPage view={<SentryErrorPage />} title={<>Oops!</>} />}
       showDialog
     >
-      <ProvideAuth storeInstance={storeInstance}>
-        <StylesProvider generateClassName={generateClassName("dominate")}>
-          <UserInterface storeInstance={storeInstance} />
-        </StylesProvider>
-      </ProvideAuth>
+      <IntercomProvider appId={INTERCOM_APP_ID} autoBoot>
+        <ProvideAuth storeInstance={storeInstance}>
+          <StylesProvider generateClassName={generateClassName("dominate")}>
+            <UserInterface storeInstance={storeInstance} />
+          </StylesProvider>
+        </ProvideAuth>
+      </IntercomProvider>
     </Sentry.ErrorBoundary>
   </BrowserRouter>,
 
