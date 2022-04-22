@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState, useContext, createContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useIntercom } from "react-use-intercom";
 
 import { DominateStore } from "@/store";
 import { User, UserProfile } from "@/services/user/interfaces";
@@ -45,6 +46,7 @@ export const useAuth = (): Context | null => useContext(authContext);
 
 // Provider hook that creates auth object and handles state
 function useProvideAuth(storeInstance: DominateStore) {
+  const { update } = useIntercom();
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [ready, setReady] = useState<boolean>(false);
@@ -95,6 +97,8 @@ function useProvideAuth(storeInstance: DominateStore) {
         (profile) => {
           setUserProfile(profile);
           setUserAccess(getUserAccess(profile));
+
+          update({ name: profile.name, userId: profile.id.toString() });
         },
         () => {
           // 401 / 403 error, so clear saved session:
