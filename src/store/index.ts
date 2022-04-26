@@ -620,7 +620,7 @@ export class DominateStore {
     imageContents: string[] | Uint8Array[],
     task: Task,
     setTask: (task: Task) => void
-  ): Promise<void> => {
+  ): Promise<GalleryTile[] | void> => {
     try {
       // Create/upload new store item for the image:
       const createdTime = new Date().getTime();
@@ -655,11 +655,11 @@ export class DominateStore {
         );
       }
 
-      setTask({ ...task, progress: 30 });
+      setTask({ ...task, progress: 10 });
 
       // save new image items:
       const newItems = await Promise.all(itemPromises);
-      await itemManager.batch(newItems);
+      const imageUploadPromise = itemManager.batch(newItems);
 
       const newTiles: GalleryTile[] = [];
       for (let i = 0; i < imageFileInfos.length; i += 1) {
@@ -677,7 +677,7 @@ export class DominateStore {
         });
       }
 
-      setTask({ ...task, progress: 65 });
+      setTask({ ...task, progress: 33 });
 
       // save new gallery tiles:
       const oldContent = await collection.getContent(OutputFormat.String);
@@ -685,11 +685,15 @@ export class DominateStore {
         (JSON.parse(oldContent) as GalleryTile[]).concat(newTiles)
       );
       await collection.setContent(newContent);
-      setTask({ ...task, progress: 75 });
-      await collectionManager.upload(collection);
+      setTask({ ...task, progress: 66 });
+      const galleryTilesUploadPromise = collectionManager.upload(collection);
+      await Promise.all([imageUploadPromise, galleryTilesUploadPromise]);
       setTask({ ...task, progress: 100 });
+
+      return newTiles;
     } catch (err) {
       logger.error(err);
+      return undefined;
     }
   };
 
@@ -1043,9 +1047,19 @@ export class DominateStore {
 
     /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
     const meta = etebaseObject.getMeta<BaseMeta>();
-    const content = JSON.parse(
-      await etebaseObject.getContent(OutputFormat.String)
-    ) as any[];
+    let content;
+    try {
+      content = JSON.parse(
+        await etebaseObject.getContent(OutputFormat.String)
+      ) as any[];
+    } catch (e) {
+      console.error(
+        `Failed to parse JSON content of ${
+          etebaseObject.uid
+        }: ${await etebaseObject.getContent(OutputFormat.String)}`
+      );
+    }
+
     let migrate = false;
     if (meta.type === "gliff.gallery") {
       for (let i = 0; i < content.length; i += 1) {
@@ -1191,6 +1205,10 @@ export class DominateStore {
     itemManager: ItemManager,
     UIDs: string[]
   ): Promise<Item[]> => {
+    if (UIDs.length === 0) {
+      // itemManager.fetchMulti will die messily if we pass it an empty UID array
+      return [];
+    }
     let items = (await itemManager.fetchMulti(UIDs)).data;
     // re-order the retrieved items to the match UIDs:
     items = UIDs.map((uid) => items.find((item) => item.uid === uid) as Item);

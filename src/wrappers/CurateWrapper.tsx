@@ -15,7 +15,7 @@ import {
   MessageDialog,
 } from "@/components/message/ConfirmationDialog";
 
-import { stringifySlices } from "@/imageConversions";
+import { stringifySlices, mixBase64Channels } from "@/imageConversions";
 import { useAuth, UserAccess } from "@/hooks/use-auth";
 import { useMountEffect } from "@/hooks/use-mountEffect";
 import { useStore } from "@/hooks/use-store";
@@ -156,16 +156,21 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.setTask({ ...props.task, progress: 10 });
 
     // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
-    await props.storeInstance.createImage(
-      collectionUid,
-      imageFileInfo,
-      thumbnails,
-      stringifiedSlices,
-      props.task,
-      props.setTask
-    );
-
-    fetchImageItems();
+    await props.storeInstance
+      .createImage(
+        collectionUid,
+        imageFileInfo,
+        thumbnails,
+        stringifiedSlices,
+        props.task,
+        props.setTask
+      )
+      .then((newTiles) => {
+        if (newTiles) {
+          setMetadata(metadata.concat(convertGalleryToMetadata(newTiles)));
+        }
+      })
+      .catch((err) => logger.error(err));
   };
 
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
@@ -289,7 +294,9 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
             if (collectionContent[i].imageLabels.length === 0) {
               unlabelledFolder.file(
                 collectionContent[i].fileInfo.fileName,
-                images[i].content,
+                mixBase64Channels(
+                  (JSON.parse(images[i].content) as string[][])[0]
+                ),
                 {
                   base64: true,
                 }
