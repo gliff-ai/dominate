@@ -54,7 +54,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     async ({ name }) => {
       const uid = await props.storeInstance.createCollection(name);
 
-      const team = await props.storeInstance.getTeam;
+      return uid;
     },
     [props.storeInstance]
   );
