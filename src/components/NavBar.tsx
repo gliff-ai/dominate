@@ -2,6 +2,7 @@ import { ReactElement, useState, useEffect } from "react";
 import {
   AppBar,
   Avatar,
+  Button,
   Grid,
   IconButton,
   Menu,
@@ -59,7 +60,6 @@ const useStyles = makeStyles((theme: Theme) => ({
   logo: {
     marginBottom: "5px",
     marginTop: "7px",
-    marginRight: "180px",
   },
   productSectionGrid: {
     marginLeft: "30px",
@@ -80,6 +80,22 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   accessibleName: {
     color: "#000000",
+  },
+  productLocation:{
+    border: "1px solid",
+    borderColor: "#DADDE9",
+    borderRadius: "9px",
+    height: "42px",
+    verticalAlign: "middle",
+    fontFamily: "Roboto",
+    fontWeight: "500",
+    fontSize: "0.875rem",
+    lineHeight: "1.75",
+    display: "flex",
+    padding: "10px",
+  },
+  productLocationText:{
+    margin: "auto",
   },
 }));
 
@@ -224,8 +240,12 @@ export const NavBar = (props: Props): ReactElement | null => {
               </Grid>
             ) : null}
           </div>
+          
           <Grid className={classes.navGrid}>
             <nav className={classes.navLinks}>
+              <div className={classes.productLocation}>
+                <p className={classes.productLocationText}>Hello worm</p>
+              </div>
               {auth.user ? (
                 <>{accountMenu}</>
               ) : (
