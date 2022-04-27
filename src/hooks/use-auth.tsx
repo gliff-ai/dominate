@@ -122,7 +122,7 @@ function useProvideAuth(storeInstance: DominateStore) {
 
   const getInstance = (): DominateStore => storeInstance;
 
-  const signin = (username, password): Promise<User> =>
+  const signin = (username: string, password: string): Promise<User> =>
     storeInstance
       .login(username.trim().toLowerCase(), password)
       .then((storeUser) => {
@@ -130,7 +130,7 @@ function useProvideAuth(storeInstance: DominateStore) {
         return storeUser;
       });
 
-  const signup = (email, password): Promise<User> =>
+  const signup = (email: string, password: string): Promise<User> =>
     storeInstance
       .signup(email.trim().toLowerCase(), password)
       .then((storeUser) => {
