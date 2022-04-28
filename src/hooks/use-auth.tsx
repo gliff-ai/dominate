@@ -122,17 +122,21 @@ function useProvideAuth(storeInstance: DominateStore) {
 
   const getInstance = (): DominateStore => storeInstance;
 
-  const signin = (username, password): Promise<User> =>
-    storeInstance.login(username, password).then((storeUser) => {
-      updateUser(storeUser);
-      return storeUser;
-    });
+  const signin = (username: string, password: string): Promise<User> =>
+    storeInstance
+      .login(username.trim().toLowerCase(), password)
+      .then((storeUser) => {
+        updateUser(storeUser);
+        return storeUser;
+      });
 
-  const signup = (email, password): Promise<User> =>
-    storeInstance.signup(email, password).then((storeUser) => {
-      updateUser(storeUser);
-      return storeUser;
-    });
+  const signup = (email: string, password: string): Promise<User> =>
+    storeInstance
+      .signup(email.trim().toLowerCase(), password)
+      .then((storeUser) => {
+        updateUser(storeUser);
+        return storeUser;
+      });
 
   const signout = (): Promise<boolean> =>
     storeInstance.logout().then((response) => {

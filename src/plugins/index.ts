@@ -6,7 +6,10 @@ import { initJsPluginObjects } from "./jsPlugin";
 
 import { initTrustedServiceObjects } from "./trustedService";
 
-async function getPlugins(currentProduct: Product, collectionUid: string) {
+async function getPlugins(
+  currentProduct: Product,
+  collectionUid: string
+): Promise<Plugin[] | null> {
   // Get plugins data from STORE
   try {
     const newPlugins = (
