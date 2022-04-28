@@ -1,6 +1,7 @@
 interface ImportMeta {
   env: {
     VITE_STORE_URL: string;
+    VITE_DEMO_DATA_URL: string;
     VITE_STRIPE_KEY: string;
     VITE_IS_MONITORED: string;
     VITE_SENTRY_ENVIRONMENT?:
