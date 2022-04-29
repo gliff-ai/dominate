@@ -1,6 +1,7 @@
 import axios from "axios";
 import { useState, useContext, createContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { useIntercom } from "react-use-intercom";
 
 import { DominateStore } from "@/store";
 import { User, UserProfile } from "@/services/user/interfaces";
@@ -45,6 +46,7 @@ export const useAuth = (): Context | null => useContext(authContext);
 
 // Provider hook that creates auth object and handles state
 function useProvideAuth(storeInstance: DominateStore) {
+  const { update } = useIntercom();
   const [user, setUser] = useState<User | null>(null);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [ready, setReady] = useState<boolean>(false);
@@ -95,7 +97,16 @@ function useProvideAuth(storeInstance: DominateStore) {
         (profile) => {
           setUserProfile(profile);
           setUserAccess(getUserAccess(profile));
+
+          update({
+            name: profile.name,
+            userId: profile.id.toString(),
+            customAttributes: {
+              user_level: getUserAccess(profile),
+            },
+          });
         },
+
         () => {
           // 401 / 403 error, so clear saved session:
           localStorage.removeItem("etebaseInstance");
@@ -111,17 +122,21 @@ function useProvideAuth(storeInstance: DominateStore) {
 
   const getInstance = (): DominateStore => storeInstance;
 
-  const signin = (username, password): Promise<User> =>
-    storeInstance.login(username, password).then((storeUser) => {
-      updateUser(storeUser);
-      return storeUser;
-    });
+  const signin = (username: string, password: string): Promise<User> =>
+    storeInstance
+      .login(username.trim().toLowerCase(), password)
+      .then((storeUser) => {
+        updateUser(storeUser);
+        return storeUser;
+      });
 
-  const signup = (email, password): Promise<User> =>
-    storeInstance.signup(email, password).then((storeUser) => {
-      updateUser(storeUser);
-      return storeUser;
-    });
+  const signup = (email: string, password: string): Promise<User> =>
+    storeInstance
+      .signup(email.trim().toLowerCase(), password)
+      .then((storeUser) => {
+        updateUser(storeUser);
+        return storeUser;
+      });
 
   const signout = (): Promise<boolean> =>
     storeInstance.logout().then((response) => {
