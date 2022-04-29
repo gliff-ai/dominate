@@ -24,6 +24,7 @@ import {
   BaseProductIcon,
 } from "@/components";
 import { DominateStore } from "@/store";
+import { Annotate } from "@/wrappers";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -38,8 +39,8 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginLeft: "-1px",
   },
   avatarUser: {
-    width: "64px !important",
-    height: "64px !important",
+    width: "40px !important",
+    height: "40px !important",
     backgroundColor: `${theme.palette.text.secondary} !important`,
     "&:hover": {
       backgroundColor: `${theme.palette.text.secondary} !important`,
@@ -62,6 +63,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     marginTop: "7px",
   },
   productSectionGrid: {
+    paddingTop: "0px",
     marginLeft: "30px",
   },
   productSectionDiv: {
@@ -81,7 +83,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   accessibleName: {
     color: "#000000",
   },
-  productLocation:{
+  productLocation: {
     border: "1px solid",
     borderColor: "#DADDE9",
     borderRadius: "9px",
@@ -92,10 +94,23 @@ const useStyles = makeStyles((theme: Theme) => ({
     fontSize: "0.875rem",
     lineHeight: "1.75",
     display: "flex",
-    padding: "10px",
+    paddingLeft: "10px",
+    paddingRight: "10px",
   },
-  productLocationText:{
+  productLocationText: {
     margin: "auto",
+  },
+  productLocationImage: {
+    margin: "auto",
+    paddingRight: "10px",
+    height: "40px",
+    width: "40px",
+  },
+  document: {
+    margin: "auto",
+    marginLeft: "40px",
+    padding: "10px",
+    height: "65px",
   },
 }));
 
@@ -151,12 +166,7 @@ export const NavBar = (props: Props): ReactElement | null => {
 
   const accountMenu = (
     <>
-      <IconButton
-        onClick={handleClick}
-        aria-controls="menu"
-        style={{ paddingTop: 0 }}
-        size="large"
-      >
+      <IconButton onClick={handleClick} aria-controls="menu" size="large">
         <HtmlTooltip
           title={<Typography>Account</Typography>}
           placement="bottom"
@@ -240,12 +250,22 @@ export const NavBar = (props: Props): ReactElement | null => {
               </Grid>
             ) : null}
           </div>
-          
+
           <Grid className={classes.navGrid}>
             <nav className={classes.navLinks}>
               <div className={classes.productLocation}>
-                <p className={classes.productLocationText}>Hello worm</p>
+                <img
+                  className={classes.productLocationImage}
+                  src={imgSrc("annotate")}
+                  alt="ANNOTATE"
+                />
+                <p className={classes.productLocationText}>ANNOTATE</p>
               </div>
+              <img
+                className={classes.document}
+                src={imgSrc("document")}
+                alt="help-center"
+              />
               {auth.user ? (
                 <>{accountMenu}</>
               ) : (
