@@ -245,11 +245,12 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       props.storeInstance
         .getItem(collectionUid, imageUid)
         .then(async (image) => {
-          setStateIfMounted(
-            await image.getContent(OutputFormat.String),
-            setImageContent,
-            isMounted.current
-          );
+          try {
+            const content = await image.getContent(OutputFormat.String);
+            setStateIfMounted(content, setImageContent, isMounted.current);
+          } catch (e) {
+            console.error(e);
+          }
           return image.uid;
         })
         .catch((e) => {
