@@ -183,7 +183,12 @@ const UserInterface = (props: Props): ReactElement | null => {
                   path="manage/*"
                   element={
                     <PrivateRoute
-                      element={<Manage storeInstance={storeInstance} />}
+                      element={
+                        <Manage
+                          storeInstance={storeInstance}
+                          setTask={setTask}
+                        />
+                      }
                     />
                   }
                 />
