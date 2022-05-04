@@ -24,7 +24,7 @@
     "@types/jest": "^27.4.1",
     "@types/libsodium-wrappers": "^0.7.9",
     "@types/logrocket-react": "^3.0.0",
-    "@types/react": "^17.0.31",
+    "@types/react": "^18.0.8",
     "@types/react-dom": "^17.0.2",
     "@types/resize-observer-browser": "^0.1.5",
     "eslint": "^7.25.0",
