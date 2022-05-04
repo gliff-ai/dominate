@@ -87,8 +87,6 @@ async function loadNonTiffImageFromURL(
           }
         }
 
-        console.log(fileInfo.size);
-
         resolve({
           imageContent: JSON.stringify([base64Channels]),
           thumbnail: makeThumbnail(image),
