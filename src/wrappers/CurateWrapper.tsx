@@ -88,7 +88,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     () =>
       auth?.userAccess === UserAccess.Owner ||
       auth?.userAccess === UserAccess.Member,
-    [auth]
+    [auth?.userAccess]
   );
 
   const fetchImageItems = useStore(
@@ -123,7 +123,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           logger.log(err);
         });
     },
-    [collectionUid]
+    [collectionUid, auth]
   );
 
   const addImagesToGallery = async (
@@ -156,21 +156,21 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
     props.setTask({ ...props.task, progress: 10 });
 
     // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
-    await props.storeInstance
-      .createImage(
+    try {
+      const newTiles = await props.storeInstance.createImage(
         collectionUid,
         imageFileInfo,
         thumbnails,
         stringifiedSlices,
-        props.task,
         props.setTask
-      )
-      .then((newTiles) => {
-        if (newTiles) {
-          setMetadata(metadata.concat(convertGalleryToMetadata(newTiles)));
-        }
-      })
-      .catch((err) => logger.error(err));
+      );
+
+      if (newTiles) {
+        setMetadata(metadata.concat(convertGalleryToMetadata(newTiles)));
+      }
+    } catch (e) {
+      console.error(e);
+    }
   };
 
   const saveLabelsCallback = (imageUid: string, newLabels: string[]): void => {
