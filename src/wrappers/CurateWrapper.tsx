@@ -234,9 +234,18 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
   const downloadDataset = async (): Promise<void> => {
     const zip = new JSZip();
 
-    const images = await props.storeInstance.getAllImages(collectionUid);
+    const images = await props.storeInstance.getAllImages(
+      collectionUid,
+      props.setTask
+    );
     const { meta: annotationsMeta, annotations } =
       await props.storeInstance.getAllAnnotationsObjects(collectionUid);
+
+    props.setTask({
+      description: "Writing annotation data",
+      isLoading: true,
+      progress: 60,
+    });
 
     let allnames: string[] = collectionContent.map(
       (tile) => tile.fileInfo.fileName
@@ -255,6 +264,12 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
     // make images directory:
     const imagesFolder = zip.folder("images") as JSZip;
+
+    props.setTask({
+      description: "Writing images",
+      isLoading: true,
+      progress: 75,
+    });
 
     if (multi) {
       // put all images in the root of images directory:
@@ -312,6 +327,11 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         .flat(2)
         .filter((annotation) => annotation.brushStrokes.length > 0).length > 0
     ) {
+      props.setTask({
+        description: "Generating label images",
+        isLoading: true,
+        progress: 85,
+      });
       // create tiff label images (one for each annotator for this image):
 
       const maskFolder = zip.folder("masks") as JSZip;
@@ -340,6 +360,12 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         });
       });
     }
+
+    props.setTask({
+      description: "Compressing data",
+      isLoading: true,
+      progress: 90,
+    });
 
     // compress data and save to disk:
     const date = new Date();
