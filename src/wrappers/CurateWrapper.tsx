@@ -393,7 +393,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   const getProfiles = useCallback((): void => {
     if (
-      !auth?.ready ||
+      !auth?.userProfileReady ||
       auth?.userAccess === UserAccess.Collaborator ||
       profiles
     )
