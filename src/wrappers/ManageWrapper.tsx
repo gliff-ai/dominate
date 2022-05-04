@@ -1,17 +1,20 @@
-import { ReactElement, useCallback } from "react";
+import { ReactElement, SetStateAction, useCallback, Dispatch } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
   UserInterface as Manage,
   ProvideAuth /* TODO export Services */,
 } from "@gliff-ai/manage";
-import { DominateStore, API_URL } from "@/store";
+import { ImageFileInfo } from "@gliff-ai/upload";
+import { Task } from "@gliff-ai/style";
+import { DominateStore, API_URL, DEMO_DATA_URL } from "@/store";
 import { useAuth, UserAccess } from "@/hooks/use-auth";
 import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
 import { trustedServicesAPI, TrustedService } from "@/services/trustedServices";
 import { jsPluginsAPI, JsPlugin } from "@/services/plugins";
-import { GalleryTile } from "@/interfaces";
+import { FileInfo, GalleryTile } from "@/interfaces";
 import { PluginType, Plugin } from "@/plugins";
+import { loadNonTiffImageFromURL } from "@/imageConversions";
 
 type Progress = {
   [uid: string]: { complete: number; total: number };
@@ -19,6 +22,7 @@ type Progress = {
 
 interface Props {
   storeInstance: DominateStore;
+  setTask: Dispatch<SetStateAction<Task>>;
 }
 
 export const ManageWrapper = (props: Props): ReactElement | null => {
@@ -248,7 +252,96 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
 
   const launchDocs = () => window.open("https://docs.gliff.app/", "_blank");
 
-  // These require trailing slashes otherwise Safari won't send the Auth Token (as django will 301)
+  const incrementTaskProgress = useCallback(
+    (increment: number) => () => {
+      props.setTask((prevTask) => ({
+        ...prevTask,
+        progress: (prevTask.progress as number) + increment,
+      }));
+    },
+    [props.setTask]
+  );
+
+  const downloadDemoData = useCallback(async (): Promise<void> => {
+    props.setTask({
+      isLoading: true,
+      description: "Downloading demo data.",
+      progress: 0,
+    });
+
+    try {
+      // create a new project
+      const projectUid = await props.storeInstance.createCollection(
+        "Giraffes-Hippos Demo"
+      );
+
+      // fetch the metadata
+      const metadata: {
+        name: string;
+        fileInfo: FileInfo;
+        imageLabels: string[];
+      }[] = await (await fetch(`${DEMO_DATA_URL}/metadata.json`)).json();
+
+      const progressIncrement = Math.round(40 / (metadata.length * 2));
+      const fileInfos: ImageFileInfo[] = [];
+      const imageContents: string[] = [];
+      const allImageLabels: string[][] = [];
+      const thumbnails: string[] = [];
+
+      incrementTaskProgress(5);
+
+      // loop through the matadata and load all the images
+      await Promise.allSettled(
+        metadata.map(async (imeta): Promise<{
+          imageFileInfo: FileInfo;
+          thumbnail: string;
+          imageContent: string;
+        }> => {
+          const result = await loadNonTiffImageFromURL(
+            `${DEMO_DATA_URL}/${imeta?.name}`,
+            imeta?.name,
+            incrementTaskProgress(progressIncrement),
+            imeta?.fileInfo
+          );
+          return result;
+        })
+      ).then((results) =>
+        results.forEach((result, i) => {
+          if (result?.status === "fulfilled" && result?.value) {
+            const { imageFileInfo, thumbnail, imageContent } = result.value;
+
+            fileInfos.push(imageFileInfo);
+            thumbnails.push(thumbnail);
+            imageContents.push(imageContent);
+            allImageLabels.push(metadata[i].imageLabels);
+          }
+        })
+      );
+
+      // upload the images to STORE
+      await props.storeInstance.createImage(
+        projectUid,
+        fileInfos,
+        thumbnails,
+        imageContents,
+        props.setTask,
+        allImageLabels
+      );
+
+      props.setTask({
+        isLoading: false,
+        description: "Downloading demo data.",
+        progress: 100,
+      });
+    } catch (e) {
+      console.error(e);
+    }
+  }, [
+    props.storeInstance.createCollection,
+    props.storeInstance.createImage,
+    props.setTask,
+  ]);
+
   const services = {
     queryTeam: "GET /team/",
     loginUser: "POST /user/login", // Not used, we pass an authd user down
@@ -269,6 +362,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     deletePlugin,
     getAnnotationProgress,
     launchDocs,
+    downloadDemoData,
   };
 
   if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
