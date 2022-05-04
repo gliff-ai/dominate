@@ -672,7 +672,7 @@ export class DominateStore {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     try {
-      setTask((prevTask) => ({ ...prevTask, progress: 40 }));
+      setTask((prevTask) => ({ ...prevTask, progress: 45 }));
 
       // fetch the collectionManager, the collection and the itemManager
       const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -687,21 +687,21 @@ export class DominateStore {
       const newTiles: GalleryTile[] = [];
       const createdTime = new Date().getTime();
       await Promise.allSettled(
-        imageFileInfos.map(
-          async (imageFileInfo, i) =>
-            await itemManager.create<ImageMeta>(
-              {
-                type: "gliff.image",
-                meta_version: 0,
-                content_version: 0,
-                name: imageFileInfo.fileName,
-                createdTime,
-                modifiedTime: createdTime,
-                fileInfo: imageFileInfo,
-              },
-              imageContents[i]
-            )
-        )
+        imageFileInfos.map(async (imageFileInfo, i) => {
+          const result = await itemManager.create<ImageMeta>(
+            {
+              type: "gliff.image",
+              meta_version: 0,
+              content_version: 0,
+              name: imageFileInfo.fileName,
+              createdTime,
+              modifiedTime: createdTime,
+              fileInfo: imageFileInfo,
+            },
+            imageContents[i]
+          );
+          return result;
+        })
       ).then((results) => {
         results.forEach((result, i) => {
           if (result.status === "fulfilled") {
@@ -728,7 +728,7 @@ export class DominateStore {
         });
       });
 
-      setTask((prevTask) => ({ ...prevTask, progress: 40 }));
+      setTask((prevTask) => ({ ...prevTask, progress: 55 }));
 
       let itemsUploadPromise;
       const numOfImages = imageFileInfos.length;
@@ -746,39 +746,38 @@ export class DominateStore {
 
         // create promise for uploading all image items to STORE
         itemsUploadPromise = Promise.all(
-          startOfBatch.map(
-            async (index, i) =>
-              await itemManager.batch(
-                newItems.slice(index, startOfBatch[i + 1])
-              )
-          )
+          startOfBatch.map(async (index, i) => {
+            const result = await itemManager.batch(
+              newItems.slice(index, startOfBatch[i + 1])
+            );
+            return result;
+          })
         );
       } else {
         // create promise for uploading all image items to STORE
         itemsUploadPromise = itemManager.batch(newItems);
       }
 
-      setTask((prevTask) => ({ ...prevTask, progress: 50 }));
+      setTask((prevTask) => ({ ...prevTask, progress: 55 }));
 
       // add the new gallery tiles to the gliff.gallery's content and update the content
       const galleryUploadPromise = new Promise((resolve, reject) => {
-        try {
-          (async (): Promise<void> => {
-            const oldContent = await collection.getContent(OutputFormat.String);
+        (async (): Promise<void> => {
+          const oldContent = await collection.getContent(OutputFormat.String);
 
-            const newContent = JSON.stringify(
-              (JSON.parse(oldContent) as GalleryTile[]).concat(newTiles)
-            );
+          const newContent = JSON.stringify(
+            (JSON.parse(oldContent) as GalleryTile[]).concat(newTiles)
+          );
 
-            await collection.setContent(newContent);
+          await collection.setContent(newContent);
 
-            await collectionManager.transaction(collection);
-          })();
-          resolve(undefined);
-        } catch (e) {
-          console.error(e);
-          reject();
-        }
+          await collectionManager.transaction(collection);
+        })()
+          .then(() => resolve(undefined))
+          .catch((e) => {
+            console.error(e);
+            reject();
+          });
       });
 
       setTask((prevTask) => ({ ...prevTask, progress: 75 }));
