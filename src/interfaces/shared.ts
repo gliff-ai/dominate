@@ -18,4 +18,9 @@ interface FileInfo {
   content_hash?: string; // we use this for making sure we don't have duplicate images in a dataset
 }
 
-export { FileInfo, BaseMeta };
+interface DemoMetadata {
+  name: string;
+  fileInfo: FileInfo;
+  imageLabels: string[];
+}
+export { FileInfo, BaseMeta, DemoMetadata };

@@ -12,7 +12,7 @@ import { useAuth, UserAccess } from "@/hooks/use-auth";
 import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
 import { trustedServicesAPI, TrustedService } from "@/services/trustedServices";
 import { jsPluginsAPI, JsPlugin } from "@/services/plugins";
-import { FileInfo, GalleryTile } from "@/interfaces";
+import { FileInfo, GalleryTile, DemoMetadata } from "@/interfaces";
 import { PluginType, Plugin } from "@/plugins";
 import { loadNonTiffImageFromURL } from "@/imageConversions";
 
@@ -276,11 +276,9 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
       );
 
       // fetch the metadata
-      const metadata: {
-        name: string;
-        fileInfo: FileInfo;
-        imageLabels: string[];
-      }[] = await (await fetch(`${DEMO_DATA_URL}/metadata.json`)).json();
+      const metadata: DemoMetadata[] = (await (
+        await fetch(`${DEMO_DATA_URL}/metadata.json`)
+      ).json()) as DemoMetadata[];
 
       const progressIncrement = Math.round(40 / (metadata.length * 2));
       const fileInfos: ImageFileInfo[] = [];
