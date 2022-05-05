@@ -419,7 +419,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
 
   const getProfiles = useCallback((): void => {
     if (
-      !auth?.ready ||
+      !auth?.userProfileReady ||
       auth?.userAccess === UserAccess.Collaborator ||
       profiles
     )
@@ -464,7 +464,7 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
         .then(() => fetchImageItems())
         .catch((error) => console.error(error));
     },
-    [props.storeInstance]
+    [props.storeInstance, fetchImageItems]
   );
 
   useEffect(() => {

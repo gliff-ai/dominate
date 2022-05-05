@@ -6,31 +6,37 @@ export const PrivateRoute = (props: RouteProps): ReactElement | null => {
   const auth = useAuth();
   const [element, setElement] = useState<ReactElement>(<></>);
 
+  const { userProfileReady, loaded, user, userProfile } = auth || {};
+
   useEffect(() => {
-    // catch the situation where the effect
-    // has switched from true to false
-    // and just return (this shouldn't happen)
-    if (!auth?.ready) {
+    if (!loaded) {
       return;
     }
 
     // if no authorised user at all
     // redirect to signin
-    if (!auth?.user) {
+    if (!user) {
       setElement(<Navigate to="/signin" />);
     }
 
     // if no verified email
     // redirect to request verification email page
     else if (
-      !auth?.userProfile?.email_verified &&
+      userProfile?.email_verified === false &&
       props.path !== "request-verify-email"
     ) {
       setElement(<Navigate to="/request-verify-email" />);
     }
-  }, [auth, props.path]);
 
-  if (!auth) return null;
+    // We can render the route now
+    if (loaded && userProfileReady && user) {
+      setElement(<>props.element</>);
+    }
+  }, [userProfileReady, user, userProfile, loaded, props.path]);
+
+  if (!auth) {
+    return null;
+  }
 
   // default to just following the route
   /* eslint-disable react/jsx-props-no-spreading */

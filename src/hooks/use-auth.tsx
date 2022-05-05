@@ -20,9 +20,10 @@ export enum UserAccess {
 }
 
 interface Context {
-  user: User | null;
+  user: User | null | undefined;
   userProfile: UserProfile | null;
-  ready: boolean;
+  userProfileReady: boolean; // Not sure if this could be replaced by just inspecting the user profile?
+  loaded: boolean;
   userAccess: UserAccess | null;
   getInstance: () => DominateStore;
   changePassword: (newPassword: string) => Promise<boolean>;
@@ -47,14 +48,22 @@ export const useAuth = (): Context | null => useContext(authContext);
 // Provider hook that creates auth object and handles state
 function useProvideAuth(storeInstance: DominateStore) {
   const { update } = useIntercom();
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null | undefined>(undefined);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [ready, setReady] = useState<boolean>(false);
+  const [userProfileReady, setUserProfileReady] = useState<boolean>(false);
+  const [loaded, setLoaded] = useState<boolean>(false);
   const [userAccess, setUserAccess] = useState<UserAccess | null>(null);
 
   const navigate = useNavigate();
 
-  useEffect(() => setReady(!!userProfile), [userProfile]);
+  useEffect(() => setUserProfileReady(!!userProfile), [userProfile]);
+  useEffect(
+    () =>
+      setLoaded(
+        user !== undefined
+      ) /* it's null if we don't have one, or a User obj */,
+    [user]
+  );
 
   const getUserAccess = (profile: UserProfile): UserAccess | null => {
     if (!profile?.id) return null;
@@ -110,7 +119,7 @@ function useProvideAuth(storeInstance: DominateStore) {
         () => {
           // 401 / 403 error, so clear saved session:
           localStorage.removeItem("etebaseInstance");
-          setReady(true);
+          setUserProfileReady(true);
           navigate("signin");
         }
       );
@@ -122,17 +131,21 @@ function useProvideAuth(storeInstance: DominateStore) {
 
   const getInstance = (): DominateStore => storeInstance;
 
-  const signin = (username, password): Promise<User> =>
-    storeInstance.login(username, password).then((storeUser) => {
-      updateUser(storeUser);
-      return storeUser;
-    });
+  const signin = (username: string, password: string): Promise<User> =>
+    storeInstance
+      .login(username.trim().toLowerCase(), password)
+      .then((storeUser) => {
+        updateUser(storeUser);
+        return storeUser;
+      });
 
-  const signup = (email, password): Promise<User> =>
-    storeInstance.signup(email, password).then((storeUser) => {
-      updateUser(storeUser);
-      return storeUser;
-    });
+  const signup = (email: string, password: string): Promise<User> =>
+    storeInstance
+      .signup(email.trim().toLowerCase(), password)
+      .then((storeUser) => {
+        updateUser(storeUser);
+        return storeUser;
+      });
 
   const signout = (): Promise<boolean> =>
     storeInstance.logout().then((response) => {
@@ -192,8 +205,9 @@ function useProvideAuth(storeInstance: DominateStore) {
   return {
     user,
     userProfile,
-    ready,
+    userProfileReady,
     userAccess,
+    loaded,
     signin,
     signout,
     signup,
