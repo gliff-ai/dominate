@@ -38,7 +38,9 @@ export const ManageWrapper = ({
   const auth = useAuth();
   const navigate = useNavigate();
 
-  const getProjects = useCallback(async (): Promise<GalleryMeta[]> => {
+  const getProjects = useCallback(async (): Promise<
+    GalleryMeta[] | undefined
+  > => {
     const projects = await storeInstance.getCollectionsMeta();
 
     return projects;
