@@ -393,6 +393,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         />
       ),
       buttonForward: null,
+      productLocation: "ANNOTATE",
+      productLocationIcon: "annotate",
     });
   }, [imageFileInfo, collectionTitle]);
 

@@ -70,6 +70,8 @@ const UserInterface = (props: Props): ReactElement | null => {
       imageName: "",
       buttonBack: null,
       buttonForward: null,
+      productLocation: "",
+      productLocationIcon: "",
     }
   );
 

@@ -236,6 +236,8 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
       imageName: "",
       buttonBack: null,
       buttonForward: null,
+      productLocation: "MANAGE",
+      productLocationIcon: "manage",
     });
   }, []);
 

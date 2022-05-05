@@ -33,6 +33,8 @@ interface ProductNavbarData {
   imageName: string; // fetched in ANNOTATE or AUDIT
   buttonBack: ReactElement | null;
   buttonForward: ReactElement | null;
+  productLocation: string;
+  productLocationIcon: string;
 }
 
 interface Props {

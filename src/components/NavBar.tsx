@@ -256,10 +256,10 @@ export const NavBar = (props: Props): ReactElement | null => {
               <div className={classes.productLocation}>
                 <img
                   className={classes.productLocationImage}
-                  src={imgSrc("annotate")}
+                  src={imgSrc(props.productNavbarData.productLocationIcon)}
                   alt="ANNOTATE"
                 />
-                <p className={classes.productLocationText}>ANNOTATE</p>
+                <p className={classes.productLocationText}>{props.productNavbarData.productLocation}</p>
               </div>
               <img
                 className={classes.document}

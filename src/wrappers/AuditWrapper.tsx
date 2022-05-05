@@ -132,6 +132,8 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
             icon={icons.navigationANNOTATE}
           />
         ),
+      productLocation: "AUDIT",
+      productLocationIcon: "audit",
     });
   }, [collectionTitle, imageData]);
 

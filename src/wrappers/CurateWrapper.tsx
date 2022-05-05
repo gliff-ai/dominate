@@ -498,6 +498,8 @@ export const CurateWrapper = (props: Props): ReactElement | null => {
           icon={icons.navigationAUDIT}
         />
       ) : null,
+      productLocation: "CURATE",
+      productLocationIcon: "curate",
     });
   }, [collectionTitle]);
 
