@@ -61,6 +61,7 @@ const useStyles = makeStyles((theme: Theme) => ({
   logo: {
     marginBottom: "5px",
     marginTop: "7px",
+    marginRight: "200px",
   },
   productSectionGrid: {
     paddingTop: "0px",
@@ -108,9 +109,8 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   document: {
     margin: "auto",
-    marginLeft: "40px",
     padding: "10px",
-    height: "65px",
+    height: "68px",
   },
 }));
 
@@ -259,13 +259,22 @@ export const NavBar = (props: Props): ReactElement | null => {
                   src={imgSrc(props.productNavbarData.productLocationIcon)}
                   alt="ANNOTATE"
                 />
-                <p className={classes.productLocationText}>{props.productNavbarData.productLocation}</p>
+                <p className={classes.productLocationText}>
+                  {props.productNavbarData.productLocation}
+                </p>
               </div>
-              <img
-                className={classes.document}
-                src={imgSrc("document")}
-                alt="help-center"
-              />
+              <Button
+                style={{
+                  marginLeft: "40px",
+                }}
+                onClick={() => window.open("https://docs.gliff.app/", "_blank")}
+              >
+                <img
+                  className={classes.document}
+                  src={imgSrc("document")}
+                  alt="help-center"
+                />
+              </Button>
               {auth.user ? (
                 <>{accountMenu}</>
               ) : (
