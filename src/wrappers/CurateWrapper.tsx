@@ -24,6 +24,7 @@ import {
 
 import { stringifySlices, mixBase64Channels } from "@/imageConversions";
 import { useAuth, UserAccess } from "@/hooks/use-auth";
+import { useStore, usePlugins } from "@/hooks";
 import { apiRequest } from "@/api";
 import {
   uniquifyFilenames,
@@ -32,8 +33,7 @@ import {
   convertMetadataToGalleryTiles,
   MetaItemWithId,
 } from "@/helpers";
-
-import { initPluginObjects, PluginObject, Product } from "@/plugins";
+import { Product } from "@/plugins";
 
 const logger = console;
 
@@ -70,11 +70,11 @@ export const CurateWrapper = ({
   const navigate = useNavigate();
   const auth = useAuth();
 
+  const { collectionUid = "" } = useParams<string>(); // uid of selected gallery, from URL
   const [metadata, setMetadata] = useState<MetaItem[]>([]); // the array of image metadata (including thumbnails) passed into curate
   const [defaultLabels, setDefaultLabels] = useState<string[]>([]); // more input for curate
   const [restrictLabels, setRestrictLabels] = useState<boolean>(false); // more input for curate
   const [multiLabel, setMultiLabel] = useState<boolean>(true); // more input for curate
-  const { collectionUid = "" } = useParams<string>(); // uid of selected gallery, from URL
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
 
   // multi-label image download dialog state:
@@ -89,7 +89,7 @@ export const CurateWrapper = ({
   // no images to download message state:
   const [showNoImageMessage, setShowNoImageMessage] = useState<boolean>(false);
   const [profiles, setProfiles] = useState<Profile[] | null>(null);
-  const [plugins, setPlugins] = useState<PluginObject | null>(null);
+  const plugins = usePlugins(collectionUid, auth, Product.CURATE);
   const isMounted = useRef(false);
 
   const isOwnerOrMember = useMemo(
@@ -101,33 +101,37 @@ export const CurateWrapper = ({
     [auth?.userAccess]
   );
 
-  const fetchImageItems = useCallback(() => {
-    // doesn't actually fetch image items, fetches gallery collection content
-    // fetches images via DominateStore, and assigns them to imageItems state
+  const fetchImageItems = useStore(
+    storeInstance,
+    () => {
+      // doesn't actually fetch image items, fetches gallery collection content
+      // fetches images via DominateStore, and assigns them to imageItems state
 
-    if (!auth?.user?.username || !collectionUid || isOwnerOrMember === null)
-      return;
+      if (!auth?.user?.username || !collectionUid || isOwnerOrMember === null)
+        return;
 
-    void storeInstance
-      .getImagesMeta(collectionUid)
-      .then(({ tiles: gallery, galleryMeta }) => {
-        setCollectionContent(gallery);
+      void storeInstance
+        .getImagesMeta(collectionUid)
+        .then(({ tiles: gallery, galleryMeta }) => {
+          setCollectionContent(gallery);
 
-        const newMetadata = convertGalleryToMetadata(gallery);
-        // if user is collaborator, include only images assigned to them.
-        newMetadata.filter(
-          ({ assignees }) =>
-            isOwnerOrMember ||
-            (assignees as string[]).includes(auth?.user?.username as string)
-        );
-        setMetadata(newMetadata);
+          const newMetadata = convertGalleryToMetadata(gallery);
+          // if user is collaborator, include only images assigned to them.
+          newMetadata.filter(
+            ({ assignees }) =>
+              isOwnerOrMember ||
+              (assignees as string[]).includes(auth?.user?.username as string)
+          );
+          setMetadata(newMetadata);
 
-        setDefaultLabels(galleryMeta.defaultLabels);
-        setRestrictLabels(galleryMeta.restrictLabels);
-        setMultiLabel(galleryMeta.multiLabel);
-      })
-      .catch((err) => logger.log(err));
-  }, [storeInstance, auth?.user?.username, collectionUid, isOwnerOrMember]);
+          setDefaultLabels(galleryMeta.defaultLabels);
+          setRestrictLabels(galleryMeta.restrictLabels);
+          setMultiLabel(galleryMeta.multiLabel);
+        })
+        .catch((err) => logger.log(err));
+    },
+    [auth?.user?.username, collectionUid, isOwnerOrMember]
+  );
 
   const addImagesToGallery = async (
     imageFileInfo: ImageFileInfo[],
@@ -435,15 +439,6 @@ export const CurateWrapper = ({
     // get image thumbnails and metadata (should run once at mount)
     fetchImageItems();
   }, [fetchImageItems]);
-
-  useEffect(() => {
-    // fetch plugins (should run once at mount)
-    if (!auth?.user?.username || collectionUid === "") return;
-
-    void initPluginObjects(Product.CURATE, collectionUid, auth.user.username)
-      .then(setPlugins)
-      .catch((e) => console.error(e));
-  }, [auth?.user?.username, collectionUid]);
 
   if (!storeInstance || !auth?.user || !collectionUid || !auth.userAccess)
     return null;

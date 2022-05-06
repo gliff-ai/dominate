@@ -17,14 +17,14 @@ import { OutputFormat } from "etebase";
 import { DominateStore } from "@/store";
 import { AnnotationMeta, GalleryMeta } from "@/interfaces";
 import { parseStringifiedSlices } from "@/imageConversions";
-import { useAuth } from "@/hooks";
+import { useAuth, useStore, usePlugins } from "@/hooks";
+import { UserAccess } from "@/hooks/use-auth";
 import {
   convertMetadataToGalleryTiles,
   setStateIfMounted,
   MetaItemWithId,
 } from "@/helpers";
-import { UserAccess } from "@/hooks/use-auth";
-import { initPluginObjects, PluginObject, Product } from "@/plugins";
+import { Product } from "@/plugins";
 
 interface Props {
   storeInstance: DominateStore;
@@ -70,7 +70,9 @@ export const AnnotateWrapper = ({
 }: Props): ReactElement | null => {
   const navigate = useNavigate();
   const auth = useAuth();
+
   const { collectionUid = "", imageUid = "" } = useParams();
+
   const [imageContent, setImageContent] = useState<string | null>(null);
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
   const [imageFileInfo, setImageFileInfo] = useState<ImageFileInfo>();
@@ -79,11 +81,10 @@ export const AnnotateWrapper = ({
   const [isComplete, setIsComplete] = useState<boolean>(false);
   const [imageUids, setImageUids] = useState<string[] | null>(null);
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
-  const [plugins, setPlugins] = useState<PluginObject | null>(null);
-
   const [defaultLabels, setDefaultLabels] = useState<string[]>([]);
   const [restrictLabels, setRestrictLabels] = useState<boolean>(false);
   const [multiLabel, setMultiLabel] = useState<boolean>(true);
+  const plugins = usePlugins(collectionUid, auth, Product.ANNOTATE);
 
   const isMounted = useRef(false);
   const classes = useStyle();
@@ -117,46 +118,44 @@ export const AnnotateWrapper = ({
     [auth?.userAccess]
   );
 
-  const fetchImageItems = useCallback(() => {
-    // fetch the images' uids and metadata (i.e., imageFileInfo)
-    if (
-      !auth?.user?.username ||
-      !collectionUid ||
-      !imageUid ||
-      isOwnerOrMember === null
-    )
-      return;
-
-    void storeInstance
-      .getImagesMeta(collectionUid)
-      .then((items) => {
-        const newImageUIDs = items.tiles
-          .filter(
-            ({ assignees, imageUID }) =>
-              (isOwnerOrMember ||
-                assignees.includes(auth?.user?.username as string)) &&
-              imageUID
-          )
-          .map(({ imageUID }) => imageUID);
-        setStateIfMounted(newImageUIDs, setImageUids, isMounted.current);
-
-        const fileInfo = items.tiles.find(
-          (item) => item.imageUID === imageUid
-        )?.fileInfo;
-        if (fileInfo) {
-          setStateIfMounted(fileInfo, setImageFileInfo, isMounted.current);
-        }
-      })
-      .catch((e) => {
-        console.error(e);
-      });
-  }, [
+  const fetchImageItems = useStore(
     storeInstance,
-    auth?.user?.username,
-    collectionUid,
-    isOwnerOrMember,
-    imageUid,
-  ]);
+    () => {
+      // fetch the images' uids and metadata (i.e., imageFileInfo)
+      if (
+        !auth?.user?.username ||
+        !collectionUid ||
+        !imageUid ||
+        isOwnerOrMember === null
+      )
+        return;
+
+      void storeInstance
+        .getImagesMeta(collectionUid)
+        .then((items) => {
+          const newImageUIDs = items.tiles
+            .filter(
+              ({ assignees, imageUID }) =>
+                (isOwnerOrMember ||
+                  assignees.includes(auth?.user?.username as string)) &&
+                imageUID
+            )
+            .map(({ imageUID }) => imageUID);
+          setStateIfMounted(newImageUIDs, setImageUids, isMounted.current);
+
+          const fileInfo = items.tiles.find(
+            (item) => item.imageUID === imageUid
+          )?.fileInfo;
+          if (fileInfo) {
+            setStateIfMounted(fileInfo, setImageFileInfo, isMounted.current);
+          }
+        })
+        .catch((e) => {
+          console.error(e);
+        });
+    },
+    [auth?.user?.username, collectionUid, isOwnerOrMember, imageUid]
+  );
 
   const updateProductSection = useCallback((): void => {
     setProductSection(
@@ -380,15 +379,6 @@ export const AnnotateWrapper = ({
     saveAnnotation(annotationsObject);
     isCompleteButtonClicked = false;
   }, [saveAnnotation, annotationsObject]);
-
-  useEffect(() => {
-    // fetch plugins (should run once at mount)
-    if (!auth?.user?.username || collectionUid === "") return;
-
-    void initPluginObjects(Product.ANNOTATE, collectionUid, auth.user.username)
-      .then(setPlugins)
-      .catch((e) => console.error(e));
-  }, [auth?.user?.username, collectionUid]);
 
   useEffect(() => {
     // set slicesData (should run when imageContent changes, provided imageContent is set)
