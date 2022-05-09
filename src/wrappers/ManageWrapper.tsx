@@ -270,18 +270,17 @@ export const ManageWrapper = ({
     [setTask]
   );
 
-  const downloadDemoData = useCallback(async (): Promise<void> => {
+  const downloadDemoData = useCallback(async (): Promise<string | null> => {
     setTask({
       isLoading: true,
       description: "Downloading demo data.",
       progress: 0,
     });
 
+    let projectUid: string | null = null;
     try {
       // create a new project
-      const projectUid = await storeInstance.createCollection(
-        "Giraffes-Hippos Demo"
-      );
+      projectUid = await storeInstance.createCollection("Giraffes-Hippos Demo");
 
       // fetch the metadata
       const metadata: DemoMetadata[] = (await (
@@ -342,6 +341,7 @@ export const ManageWrapper = ({
     } catch (e) {
       console.error(e);
     }
+    return projectUid;
   }, [storeInstance, setTask, incrementTaskProgress]);
 
   const services = useMemo(
