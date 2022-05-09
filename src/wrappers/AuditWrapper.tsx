@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState, useRef } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import UserInterface, { AnnotationSession } from "@gliff-ai/audit";
@@ -20,22 +20,26 @@ interface Props {
   setProductNavbarData: (data: ProductNavbarData) => void;
 }
 
-export const AuditWrapper = (props: Props): ReactElement | null => {
+export const AuditWrapper = ({
+  storeInstance,
+  setProductNavbarData,
+}: Props): ReactElement | null => {
   const { collectionUid = "" } = useParams<string>(); // uid of selected gallery, from URL
   const auth = useAuth();
   const navigate = useNavigate();
   const [sessions, setSessions] = useState<AnnotationSession[] | null>(null);
-  const isMounted = useRef(false);
   const [collectionTitle, setCollectionTitle] = useState<string>("");
   const [imageData, setImageData] = useState<ImageData>({
     imageName: "",
     imageUid: "",
   });
 
+  const isMounted = useRef(false);
+
   const fetchCollectionTitle = useStore(
-    props,
-    (storeInstance) => {
-      if (!auth?.user?.username) return;
+    storeInstance,
+    () => {
+      if (!auth?.user?.username || !collectionUid) return;
       storeInstance
         .getImagesMeta(collectionUid)
         .then((items) => {
@@ -50,29 +54,21 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
           logger.log(err);
         });
     },
-    [collectionUid]
+    [auth?.user?.username, collectionUid]
   );
 
   useEffect(() => {
+    // fetch audit data (should run once at mount)
     const fetchAudit = async () => {
-      const sessionsData = await props.storeInstance.getAudits(collectionUid);
-      setStateIfMounted(sessionsData, setSessions, isMounted.current);
+      const sessionsData = await storeInstance.getAudits(collectionUid);
+      setSessions(sessionsData);
     };
 
     // fetch latest ANNOTATE audit from store on page load:
     fetchAudit().catch((e) => {
       console.error(e);
     });
-  }, [collectionUid, props.storeInstance]);
-
-  useEffect(() => {
-    // runs at mounted
-    isMounted.current = true;
-    return () => {
-      // runs at dismount
-      isMounted.current = false;
-    };
-  }, []);
+  }, [collectionUid, storeInstance]);
 
   useEffect(() => {
     const tier = auth?.userProfile?.team.tier;
@@ -80,7 +76,7 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
       // no AUDIT on free tier
       navigate("/manage");
     }
-  }, [auth, navigate]);
+  }, [auth?.userProfile?.team.tier, navigate]);
 
   useEffect(() => {
     if (!collectionUid) return;
@@ -88,7 +84,7 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
   }, [collectionUid, fetchCollectionTitle, isMounted, auth]);
 
   useEffect(() => {
-    props.setProductNavbarData({
+    setProductNavbarData({
       teamName: auth?.userProfile?.team.name || "",
       projectName: collectionTitle || "",
       imageName: imageData?.imageName || "",
@@ -137,16 +133,13 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
     });
   }, [collectionTitle, imageData]);
 
-  if (!auth) return null;
-  if (!collectionUid) return null;
+  if (!auth || !collectionUid || sessions === null) return null;
 
-  return sessions !== null ? (
+  return (
     <UserInterface
       sessions={sessions}
       setProductsNavbarImageData={setImageData}
       showAppBar={false}
     />
-  ) : (
-    <></>
   );
 };

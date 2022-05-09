@@ -8,9 +8,10 @@ import {
   toBase64,
   OutputFormat,
   CollectionAccessLevel,
+  SignedInvitationRead,
   ItemMetadata,
 } from "etebase";
-
+import { CollectionMember } from "etebase/dist/lib/OnlineManagers";
 import { Task } from "@gliff-ai/style";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
@@ -29,6 +30,13 @@ import {
 } from "@/interfaces";
 
 const logger = console;
+
+// TODO: move somewhere else
+type ProjectMember = {
+  name?: string;
+  username: string;
+  isPending: boolean;
+};
 
 const getRandomValueFromArrayOrString = (
   dictionary: string | string[],
@@ -442,7 +450,7 @@ export class DominateStore {
 
   getCollectionMembers = async (
     collectionUid: string
-  ): Promise<{ usernames: string[]; pendingUsernames: string[] } | null> => {
+  ): Promise<ProjectMember[] | null> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -456,24 +464,36 @@ export class DominateStore {
     const members = await memberManager.list();
     const invitations = await invitationManager.listOutgoing();
 
-    return {
-      usernames: members.data.map(({ username }) => username),
-      pendingUsernames: invitations.data
-        .filter((item) => item.collection === collectionUid)
-        .map(({ username }) => username)
-        .filter((item, i, array) => array.indexOf(item) === i), // filter out duplicates
-    };
+    return this.reshapeMembers(collectionUid, members?.data, invitations?.data);
   };
+
+  reshapeMembers = (
+    collectionUid: string,
+    collectionMembers: CollectionMember[],
+    collectionInvitedMembers: SignedInvitationRead[]
+  ): ProjectMember[] =>
+    collectionMembers
+      .map(({ username, accessLevel }) => ({
+        username,
+        isPending: false,
+        accessLevel,
+      }))
+      .concat(
+        collectionInvitedMembers
+          .filter((item) => item.collection === collectionUid)
+          .filter((item, i, array) => array.indexOf(item) === i) // filter out duplicats
+          .map(({ username, accessLevel }) => ({
+            username,
+            isPending: true,
+            accessLevel,
+          }))
+      );
 
   getCollectionsMembers = async (
     type = "gliff.gallery"
-  ): Promise<
-    {
-      uid: string;
-      usernames: string[];
-      pendingUsernames: string[];
-    }[]
-  > => {
+  ): Promise<{
+    [uid: string]: ProjectMember[];
+  }> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -481,10 +501,9 @@ export class DominateStore {
     const { data } = await collectionManager.list(type);
 
     const resolved: {
-      uid: string;
-      usernames: string[];
-      pendingUsernames: string[];
-    }[] = [];
+      [uid: string]: ProjectMember[];
+    } = {};
+
     await Promise.allSettled(
       data.map(async (collection) => {
         const memberManager = collectionManager.getMemberManager(collection);
@@ -493,17 +512,17 @@ export class DominateStore {
 
         return {
           uid: collection.uid,
-          usernames: members.data.map(({ username }) => username),
-          pendingUsernames: invitations.data
-            .filter((item) => item.collection === collection.uid)
-            .map(({ username }) => username)
-            .filter((item, i, array) => array.indexOf(item) === i), // filter out duplicates
+          data: this.reshapeMembers(
+            collection.uid,
+            members?.data,
+            invitations?.data
+          ),
         };
       })
     ).then((results) =>
       results.forEach((result) => {
         if (result.status === "fulfilled") {
-          resolved.push(result.value);
+          resolved[result.value.uid] = result.value.data;
         }
       })
     );
@@ -1047,9 +1066,19 @@ export class DominateStore {
 
     /* eslint-disable @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access */
     const meta = etebaseObject.getMeta<BaseMeta>();
-    const content = JSON.parse(
-      await etebaseObject.getContent(OutputFormat.String)
-    ) as any[];
+    let content;
+    try {
+      content = JSON.parse(
+        await etebaseObject.getContent(OutputFormat.String)
+      ) as any[];
+    } catch (e) {
+      console.error(
+        `Failed to parse JSON content of ${
+          etebaseObject.uid
+        }: ${await etebaseObject.getContent(OutputFormat.String)}`
+      );
+    }
+
     let migrate = false;
     if (meta.type === "gliff.gallery") {
       for (let i = 0; i < content.length; i += 1) {
@@ -1195,6 +1224,10 @@ export class DominateStore {
     itemManager: ItemManager,
     UIDs: string[]
   ): Promise<Item[]> => {
+    if (UIDs.length === 0) {
+      // itemManager.fetchMulti will die messily if we pass it an empty UID array
+      return [];
+    }
     let items = (await itemManager.fetchMulti(UIDs)).data;
     // re-order the retrieved items to the match UIDs:
     items = UIDs.map((uid) => items.find((item) => item.uid === uid) as Item);

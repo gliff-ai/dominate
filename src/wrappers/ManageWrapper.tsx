@@ -43,16 +43,6 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     [props.storeInstance]
   );
 
-  const getCollectionMembers = useCallback(
-    async ({ collectionUid }) => {
-      const members = await props.storeInstance.getCollectionMembers(
-        collectionUid
-      );
-      return members;
-    },
-    [props.storeInstance]
-  );
-
   const createProject = useCallback(
     async ({ name }) => {
       const uid = await props.storeInstance.createCollection(name);
@@ -157,58 +147,73 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     [props.storeInstance]
   );
 
-  const getAnnotationProgress = async (
-    username: string,
-    collectionUid?: string
-  ): Promise<Progress> => {
-    const isOwnerOrMember =
-      auth?.userAccess === UserAccess.Owner ||
-      auth?.userAccess === UserAccess.Member;
+  const getAnnotationProgress = useCallback(
+    async ({
+      username,
+      projectUid,
+    }: {
+      username: string;
+      projectUid?: string;
+    }): Promise<Progress> => {
+      const isOwnerOrMember =
+        auth?.userAccess === UserAccess.Owner ||
+        auth?.userAccess === UserAccess.Member;
 
-    let collectionsContent: {
-      uid: string;
-      content: GalleryTile[];
-    }[];
-    if (collectionUid !== undefined) {
-      collectionsContent = [
-        await props.storeInstance.getCollectionContent(collectionUid),
-      ];
-    } else {
-      collectionsContent = await props.storeInstance.getCollectionsContent();
-    }
+      let collectionsContent: {
+        uid: string;
+        content: GalleryTile[];
+      }[];
 
-    const progress: Progress = {};
-    collectionsContent.forEach(({ uid, content }) => {
-      progress[uid] = { complete: 0, total: 0 };
-      content.forEach(({ assignees = [], annotationComplete = {} }) => {
-        if (assignees.length === 0) return;
+      if (projectUid !== undefined) {
+        collectionsContent = [
+          await props.storeInstance.getCollectionContent(projectUid),
+        ];
+      } else {
+        collectionsContent = await props.storeInstance.getCollectionsContent();
+      }
 
-        // NOTE: '|| 0' was added to handle the case of images assigned before
-        // the 'annotationComplete' field was added to the GalleryTile interface.
-        if (isOwnerOrMember) {
-          progress[uid].total += assignees.length;
-          progress[uid].complete += assignees
-            .map((assignee) => Number(annotationComplete[assignee]) || 0)
-            .concat([0]) // added to handle case of unassigned images
-            .reduce((a, b) => a + b);
-        } else {
-          progress[uid].total += 1;
-          progress[uid].complete += Number(annotationComplete[username]) || 0;
-        }
+      const progress: Progress = {};
+
+      collectionsContent.forEach(({ uid, content }) => {
+        progress[uid] = { complete: 0, total: 0 };
+
+        content.forEach(({ assignees = [], annotationComplete = {} }) => {
+          if (assignees.length === 0) return;
+
+          // NOTE: '|| 0' was added to handle the case of images assigned before
+          // the 'annotationComplete' field was added to the GalleryTile interface.
+          if (isOwnerOrMember) {
+            progress[uid].total += assignees.length;
+            progress[uid].complete += assignees
+              .map((assignee) => Number(annotationComplete[assignee]) || 0)
+              .concat([0]) // added to handle case of unassigned images
+              .reduce((a, b) => a + b);
+          } else {
+            progress[uid].total += 1;
+            progress[uid].complete += Number(annotationComplete[username]) || 0;
+          }
+        });
       });
-    });
-    return progress;
-  };
+      return progress;
+    },
+    [auth, props.storeInstance]
+  );
+
+  const getCollectionMembers = useCallback(
+    async ({ collectionUid }) => {
+      const result = await props.storeInstance.getCollectionMembers(
+        collectionUid
+      );
+
+      return result;
+    },
+    [props.storeInstance]
+  );
 
   const getCollectionsMembers = useCallback(async () => {
     const result = await props.storeInstance.getCollectionsMembers();
 
-    const members = {};
-    result.forEach(({ uid, usernames, pendingUsernames }) => {
-      members[uid] = { usernames, pendingUsernames };
-    });
-
-    return members;
+    return result;
   }, [props.storeInstance]);
 
   const removeFromProject = useCallback(
@@ -221,13 +226,21 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     [props.storeInstance]
   );
 
-  const launchCurate = (projectUid: string): void =>
-    // Open the selected project in curate
-    navigate(`/curate/${projectUid}`);
+  const launchCurate = useCallback(
+    (projectUid: string): void =>
+      // Open the selected project in curate
+      navigate(`/curate/${projectUid}`),
+    [navigate]
+  );
 
-  const launchAudit = (projectUid: string): void =>
-    // Open the selected project in audit
-    navigate(`/audit/${projectUid}`);
+  const launchAudit = useCallback(
+    (projectUid: string): void =>
+      // Open the selected project in audit
+      navigate(`/audit/${projectUid}`),
+    [navigate]
+  );
+
+  const launchDocs = () => window.open("https://docs.gliff.app/", "_blank");
 
   useEffect(() => {
     props.setProductNavbarData({
@@ -259,6 +272,8 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     getPlugins,
     updatePlugin,
     deletePlugin,
+    getAnnotationProgress,
+    launchDocs,
   };
 
   if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
@@ -281,7 +296,6 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
         launchAuditCallback={
           auth?.userProfile.team.tier.id > 1 ? launchAudit : null
         }
-        getAnnotationProgress={getAnnotationProgress}
       />
     </ProvideAuth>
   );
