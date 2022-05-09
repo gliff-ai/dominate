@@ -427,14 +427,13 @@ export class DominateStore {
 
   getCollectionsMeta = async (
     type = "gliff.gallery"
-  ): Promise<GalleryMeta[] | undefined> => {
+  ): Promise<GalleryMeta[]> => {
     if (this.collections.length > 0) return this.collectionsMeta;
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     const { data } = await collectionManager.list(type);
-    if (data.length === 0) return undefined; // return undefined if no project has ever been created
 
     this.collectionsMeta = data
       .filter((collection) => !collection.isDeleted)
