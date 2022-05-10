@@ -227,3 +227,4 @@ export function ProvideAuth(props: Props): React.ReactElement {
     <authContext.Provider value={auth}>{props.children}</authContext.Provider>
   );
 }
+export { Context as AuthContext };
