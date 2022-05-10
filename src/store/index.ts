@@ -12,6 +12,8 @@ import {
   ItemMetadata,
   base64,
 } from "etebase";
+import axios from "axios";
+
 import { CollectionMember } from "etebase/dist/lib/OnlineManagers";
 import { Task } from "@gliff-ai/style";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
@@ -29,9 +31,6 @@ import {
   AuditMeta,
   migrations,
 } from "@/interfaces";
-
-import { apiRequest } from "@/api";
-import axios from "axios";
 
 const logger = console;
 
