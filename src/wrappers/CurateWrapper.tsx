@@ -407,10 +407,20 @@ export const CurateWrapper = ({
       .then((team) => {
         const newProfiles = team.profiles
           .filter(({ is_trusted_service }) => !is_trusted_service)
-          .map(({ email, name }) => ({
-            email,
-            name,
-          })) as Profile[];
+          .map(({ id, email, name, is_collaborator }) => {
+            let access = UserAccess.Collaborator;
+            if (id === team?.owner.id) {
+              access = UserAccess.Owner;
+            } else if (!is_collaborator) {
+              access = UserAccess.Member;
+            }
+            return {
+              email,
+              name,
+              access,
+            };
+          }) as Profile[];
+
         if (newProfiles.length !== 0) {
           setProfiles(newProfiles);
         }
