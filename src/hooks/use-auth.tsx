@@ -5,18 +5,12 @@ import { useIntercom } from "react-use-intercom";
 
 import { DominateStore } from "@/store";
 import { User, UserProfile } from "@/services/user/interfaces";
-import { createUserProfile, getUserProfile } from "@/services/user";
+import { createUserProfile, getUserProfile, UserAccess } from "@/services/user";
 import { useMountEffect } from "./use-mountEffect";
 
 interface Props {
   children: React.ReactElement;
   storeInstance: DominateStore;
-}
-
-export enum UserAccess {
-  Owner = "owner",
-  Member = "member",
-  Collaborator = "collaborator",
 }
 
 interface Context {
