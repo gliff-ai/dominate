@@ -26,7 +26,7 @@ interface Context {
   loaded: boolean;
   userAccess: UserAccess | null;
   getInstance: () => DominateStore;
-  changePassword: (newPassword: string) => Promise<boolean>;
+  changePassword: (newPassword: string) => Promise<{ recoveryKey: string[] }>;
   signin: (username: string, password: string) => Promise<User>;
   signout: () => Promise<boolean>;
   signup: (username: string, password: string) => Promise<User>;
@@ -153,8 +153,10 @@ function useProvideAuth(storeInstance: DominateStore) {
       return response;
     });
 
-  const changePassword = (newPassword: string): Promise<boolean> =>
-    storeInstance.changePassword(newPassword).then(signout);
+  const changePassword = async (
+    newPassword: string
+  ): Promise<{ recoveryKey: string[] }> =>
+    storeInstance.changePassword(newPassword);
 
   const createProfile = async (
     name: string,

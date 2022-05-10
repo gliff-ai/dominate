@@ -10,6 +10,7 @@ import {
   CollectionAccessLevel,
   SignedInvitationRead,
   ItemMetadata,
+  base64,
 } from "etebase";
 import { CollectionMember } from "etebase/dist/lib/OnlineManagers";
 import { Task } from "@gliff-ai/style";
@@ -28,6 +29,9 @@ import {
   AuditMeta,
   migrations,
 } from "@/interfaces";
+
+import { apiRequest } from "@/api";
+import axios from "axios";
 
 const logger = console;
 
@@ -119,7 +123,6 @@ export class DominateStore {
 
       const newSession = await this.etebaseInstance.save();
 
-      // TODO: encrypt this!
       localStorage.setItem("etebaseInstance", newSession);
 
       await this.etebaseInstance.fetchToken();
@@ -168,7 +171,6 @@ export class DominateStore {
 
     const newSession = await this.etebaseInstance.save();
 
-    // TODO: encrypt this!
     localStorage.setItem("etebaseInstance", newSession);
 
     this.isLoggedIn = true;
@@ -186,8 +188,28 @@ export class DominateStore {
     return true;
   };
 
-  changePassword = async (newPassword: string): Promise<void> =>
-    this.etebaseInstance.changePassword(newPassword);
+  changePassword = async (
+    newPassword: string,
+    customAccount?: Account
+  ): Promise<{ recoveryKey: string[] }> => {
+    const account = customAccount || this.etebaseInstance;
+    await account.changePassword(newPassword);
+
+    const { readable: recoveryKey, hashed } = this.generateRecoveryKey();
+    const savedSession = await account.save(hashed);
+
+    await axios.request({
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${account.authToken || ""}`,
+      },
+      url: `${API_URL}/user/`,
+      data: { recovery_key: savedSession },
+    });
+
+    return { recoveryKey };
+  };
 
   #hashRecoveryPhrase = (phrase: string): Uint8Array =>
     sodium.crypto_generichash(32, sodium.from_string(phrase.replace(/ /g, "")));
@@ -196,7 +218,7 @@ export class DominateStore {
     session: string,
     phrase: string,
     newPassword: string
-  ): Promise<boolean> => {
+  ): Promise<{ recoveryKey: string[] } | null> => {
     try {
       const key = this.#hashRecoveryPhrase(phrase);
 
@@ -204,12 +226,12 @@ export class DominateStore {
 
       await account.fetchToken();
 
-      await account.changePassword(newPassword);
+      const { recoveryKey } = await this.changePassword(newPassword, account);
 
-      return true;
+      return { recoveryKey }; // show this to user
     } catch (e) {
       logger.error(e);
-      return false;
+      return null;
     }
   };
 
