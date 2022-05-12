@@ -241,21 +241,12 @@ export const CurateWrapper = ({
   const downloadDataset = async (): Promise<void> => {
     const zip = new JSZip();
 
-<<<<<<< HEAD
-    const images = await storeInstance.getAllImages(collectionUid);
+    const images = await storeInstance.getAllImages(collectionUid, setTask);
     const { annotations } = await storeInstance.getAllAnnotationsObjects(
       collectionUid
     );
-=======
-    const images = await props.storeInstance.getAllImages(
-      collectionUid,
-      props.setTask
-    );
-    const { meta: annotationsMeta, annotations } =
-      await props.storeInstance.getAllAnnotationsObjects(collectionUid);
->>>>>>> ff0417f9f2f1661f44dfc2e99607da3595f171b3
 
-    props.setTask({
+    setTask({
       description: "Writing annotation data",
       isLoading: true,
       progress: 60,
@@ -279,7 +270,7 @@ export const CurateWrapper = ({
     // make images directory:
     const imagesFolder = zip.folder("images") as JSZip;
 
-    props.setTask({
+    setTask({
       description: "Writing images",
       isLoading: true,
       progress: 75,
@@ -341,7 +332,7 @@ export const CurateWrapper = ({
         .flat(2)
         .filter((annotation) => annotation.brushStrokes.length > 0).length > 0
     ) {
-      props.setTask({
+      setTask({
         description: "Generating label images",
         isLoading: true,
         progress: 85,
@@ -375,7 +366,7 @@ export const CurateWrapper = ({
       });
     }
 
-    props.setTask({
+    setTask({
       description: "Compressing data",
       isLoading: true,
       progress: 90,
