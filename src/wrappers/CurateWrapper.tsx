@@ -241,10 +241,14 @@ export const CurateWrapper = ({
   const downloadDataset = async (): Promise<void> => {
     const zip = new JSZip();
 
-    const images = await storeInstance.getAllImages(collectionUid, setTask);
-    const { annotations } = await storeInstance.getAllAnnotationsObjects(
-      collectionUid
-    );
+    setTask({ description: "Downloading data", isLoading: true, progress: 10 });
+    const imagePromises = storeInstance.getAllImages(collectionUid);
+    const annotationPromises =
+      storeInstance.getAllAnnotationsObjects(collectionUid);
+    const [images, { annotations }] = await Promise.all([
+      imagePromises,
+      annotationPromises,
+    ]);
 
     setTask({
       description: "Writing annotation data",
@@ -393,6 +397,11 @@ export const CurateWrapper = ({
           content,
           `${date.getFullYear()}${month}${day}_${hours}${minutes}_${projectName}.zip`
         );
+        setTask({
+          description: "Download complete",
+          isLoading: true,
+          progress: 100,
+        });
       })
       .catch((err) => {
         logger.log(err);
