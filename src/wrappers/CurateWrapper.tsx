@@ -175,6 +175,7 @@ export const CurateWrapper = ({
       .then((newTiles) => {
         if (newTiles) {
           setMetadata(metadata.concat(convertGalleryToMetadata(newTiles)));
+          setCollectionContent(collectionContent.concat(newTiles));
         }
       })
       .catch((err) => logger.error(err));
@@ -246,7 +247,7 @@ export const CurateWrapper = ({
       isLoading: true,
       progress: 10,
     });
-    const imagePromises = storeInstance.getAllImages(collectionUid);
+    const imagePromises = storeInstance.getAllImages(collectionUid, setTask);
     const annotationPromises =
       storeInstance.getAllAnnotationsObjects(collectionUid);
     const [images, { annotations }] = await Promise.all([
