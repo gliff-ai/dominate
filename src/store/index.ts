@@ -1466,23 +1466,42 @@ export class DominateStore {
   };
 
   getAllImages = async (
-    collectionUid: string
+    collectionUid: string,
+    setTask: ((task: Task) => void) | undefined = undefined
   ): Promise<{ meta: ImageMeta; content: string }[]> => {
     // Retrive all image items from a collection
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
+    if (setTask)
+      setTask({
+        description: "Fetching image references",
+        isLoading: true,
+        progress: 0,
+      });
     const collection = await this.fetchCollection(
       collectionManager,
       collectionUid
     );
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
+    if (setTask)
+      setTask({
+        description: "Fetching images",
+        isLoading: true,
+        progress: 10,
+      });
 
     const imageItems = await this.fetchMulti(
       collectionManager.getItemManager(collection),
       galleryTiles.map((tile) => tile.imageUID)
     );
 
+    if (setTask)
+      setTask({
+        description: "Decrypting images",
+        isLoading: true,
+        progress: 30,
+      });
     const imageContents = await Promise.all(
       imageItems.map((item) => item.getContent(OutputFormat.String))
     );
