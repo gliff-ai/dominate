@@ -241,7 +241,11 @@ export const CurateWrapper = ({
   const downloadDataset = async (): Promise<void> => {
     const zip = new JSZip();
 
-    setTask({ description: "Downloading data", isLoading: true, progress: 10 });
+    setTask({
+      description: "Downloading data...",
+      isLoading: true,
+      progress: 10,
+    });
     const imagePromises = storeInstance.getAllImages(collectionUid);
     const annotationPromises =
       storeInstance.getAllAnnotationsObjects(collectionUid);
@@ -251,7 +255,7 @@ export const CurateWrapper = ({
     ]);
 
     setTask({
-      description: "Writing annotation data",
+      description: "Writing annotation data...",
       isLoading: true,
       progress: 60,
     });
@@ -275,9 +279,9 @@ export const CurateWrapper = ({
     const imagesFolder = zip.folder("images") as JSZip;
 
     setTask({
-      description: "Writing images",
+      description: "Writing images...",
       isLoading: true,
-      progress: 75,
+      progress: 70,
     });
 
     if (multi) {
@@ -337,9 +341,9 @@ export const CurateWrapper = ({
         .filter((annotation) => annotation.brushStrokes.length > 0).length > 0
     ) {
       setTask({
-        description: "Generating label images",
+        description: "Generating label images...",
         isLoading: true,
-        progress: 85,
+        progress: 75,
       });
       // create tiff label images (one for each annotator for this image):
 
@@ -371,9 +375,9 @@ export const CurateWrapper = ({
     }
 
     setTask({
-      description: "Compressing data",
+      description: "Compressing data...",
       isLoading: true,
-      progress: 90,
+      progress: 85,
     });
 
     // compress data and save to disk:
