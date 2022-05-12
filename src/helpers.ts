@@ -1,4 +1,9 @@
-import { Annotation, Spline, BoundingBox } from "@gliff-ai/annotate";
+import {
+  Annotation,
+  Spline,
+  BoundingBox,
+  evaluateBezier,
+} from "@gliff-ai/annotate";
 import { GalleryTile, MetaItem } from "@/interfaces";
 
 export function setStateIfMounted(
@@ -26,6 +31,13 @@ export const uniquifyFilenames = (filenames: string[]): string[] => {
     }
   }
   return filenames;
+};
+
+const convertBezierSpline = (spline: Spline): Spline => {
+  if (spline.isBezier) {
+    spline.coordinates = evaluateBezier(spline.coordinates);
+  }
+  return spline;
 };
 
 export const makeAnnotationsJson = (
@@ -62,7 +74,7 @@ export const makeAnnotationsJson = (
         labels: annotation.labels,
         segmaskName: annotation.brushStrokes.length > 0 ? maskName : undefined,
         colour: annotation.brushStrokes[0]?.brush.color, // colour of this annotation in the segmask image
-        spline: annotation.spline,
+        spline: convertBezierSpline(annotation.spline),
         boundingBox: annotation.boundingBox,
       }));
     }),
