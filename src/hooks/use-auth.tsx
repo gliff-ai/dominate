@@ -5,18 +5,12 @@ import { useIntercom } from "react-use-intercom";
 
 import { DominateStore } from "@/store";
 import { User, UserProfile } from "@/services/user/interfaces";
-import { createUserProfile, getUserProfile } from "@/services/user";
+import { createUserProfile, getUserProfile, UserAccess } from "@/services/user";
 import { useMountEffect } from "./use-mountEffect";
 
 interface Props {
   children: React.ReactElement;
   storeInstance: DominateStore;
-}
-
-export enum UserAccess {
-  Owner = "owner",
-  Member = "member",
-  Collaborator = "collaborator",
 }
 
 interface Context {
@@ -26,7 +20,7 @@ interface Context {
   loaded: boolean;
   userAccess: UserAccess | null;
   getInstance: () => DominateStore;
-  changePassword: (newPassword: string) => Promise<boolean>;
+  changePassword: (newPassword: string) => Promise<{ recoveryKey: string[] }>;
   signin: (username: string, password: string) => Promise<User>;
   signout: () => Promise<boolean>;
   signup: (username: string, password: string) => Promise<User>;
@@ -153,8 +147,10 @@ function useProvideAuth(storeInstance: DominateStore) {
       return response;
     });
 
-  const changePassword = (newPassword: string): Promise<boolean> =>
-    storeInstance.changePassword(newPassword).then(signout);
+  const changePassword = async (
+    newPassword: string
+  ): Promise<{ recoveryKey: string[] }> =>
+    storeInstance.changePassword(newPassword);
 
   const createProfile = async (
     name: string,
