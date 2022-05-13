@@ -19,15 +19,15 @@ import { useCallback } from "react";
 import { DominateStore } from "@/store";
 
 const useStore = (
-  props: { storeInstance: DominateStore },
-  fn: (storeInstance: DominateStore) => void,
+  storeInstance: DominateStore,
+  fn: () => void,
   deps: unknown[] = []
 ): (() => void) =>
   useCallback(() => {
-    if (props.storeInstance.ready) {
-      fn.call(this, props.storeInstance);
+    if (storeInstance.ready) {
+      fn.call(this, storeInstance);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [props.storeInstance, props.storeInstance.ready, ...deps]);
+  }, [storeInstance, storeInstance.ready, ...deps]);
 
 export { useStore };

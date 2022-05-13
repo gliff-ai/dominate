@@ -1,4 +1,4 @@
-import { ReactElement, useEffect, useState, useRef } from "react";
+import { ReactElement, useEffect, useRef, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
 import UserInterface, { AnnotationSession } from "@gliff-ai/audit";
@@ -10,7 +10,7 @@ interface Props {
   storeInstance: DominateStore;
 }
 
-export const AuditWrapper = (props: Props): ReactElement | null => {
+export const AuditWrapper = ({ storeInstance }: Props): ReactElement | null => {
   const { collectionUid = "" } = useParams(); // uid of selected gallery, from URL
   const auth = useAuth();
   const navigate = useNavigate();
@@ -18,8 +18,9 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
   const isMounted = useRef(false);
 
   useEffect(() => {
+    // fetch audit data (should run once at mount)
     const fetchAudit = async () => {
-      const sessionsData = await props.storeInstance.getAudits(collectionUid);
+      const sessionsData = await storeInstance.getAudits(collectionUid);
       setStateIfMounted(sessionsData, setSessions, isMounted.current);
     };
 
@@ -27,16 +28,7 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
     fetchAudit().catch((e) => {
       console.error(e);
     });
-  }, [collectionUid, props.storeInstance]);
-
-  useEffect(() => {
-    // runs at mounted
-    isMounted.current = true;
-    return () => {
-      // runs at dismount
-      isMounted.current = false;
-    };
-  }, []);
+  }, [collectionUid, storeInstance]);
 
   useEffect(() => {
     const tier = auth?.userProfile?.team.tier;
@@ -44,14 +36,9 @@ export const AuditWrapper = (props: Props): ReactElement | null => {
       // no AUDIT on free tier
       navigate("/manage");
     }
-  }, [auth, navigate]);
+  }, [auth?.userProfile?.team.tier, navigate]);
 
-  if (!auth) return null;
-  if (!collectionUid) return null;
+  if (!auth || !collectionUid || sessions === null) return null;
 
-  return sessions !== null ? (
-    <UserInterface sessions={sessions} showAppBar={false} />
-  ) : (
-    <></>
-  );
+  return <UserInterface sessions={sessions} showAppBar={false} />;
 };

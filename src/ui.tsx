@@ -47,17 +47,19 @@ const useStyles = makeStyles(() => ({
   },
 }));
 
-const UserInterface = (props: Props): ReactElement | null => {
-  const { storeInstance } = props;
+const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
+  const location = useLocation();
   const [task, setTask] = useState<Task>({
     isLoading: false,
     description: "",
   });
   const [isLoading, setIsLoading] = useState(false);
-  const location = useLocation();
   const [isOverflow, setIsOverflow] = useState(true);
   const [productSection, setProductSection] =
     useState<JSX.Element | null>(null);
+  const [tooSmall, setTooSmall] = useState(false);
+
+  const classes = useStyles(isOverflow);
 
   useEffect(() => {
     // Paths we never scroll on because it messes with canvases etc
@@ -73,11 +75,10 @@ const UserInterface = (props: Props): ReactElement | null => {
   }, [location]);
 
   useEffect(() => {
+    // clear product navbar (will be replaced soon)
     if (!productSection) return;
-    setProductSection(null); // clear product section
+    setProductSection(null);
   }, [window.location.pathname]);
-
-  const [tooSmall, setTooSmall] = useState(false);
 
   const handleResize = useCallback(() => {
     const tooSmallNow = window.innerWidth < 700 || window.innerHeight < 300;
@@ -87,11 +88,11 @@ const UserInterface = (props: Props): ReactElement | null => {
   }, [tooSmall]);
 
   useEffect(() => {
+    // runs at mount
     window.addEventListener("resize", handleResize);
+    // runs at dismount
     return () => window.removeEventListener("resize", handleResize);
   }, [tooSmall]);
-
-  const classes = useStyles(isOverflow);
 
   usePrompt(
     "Operations are still pending, are you sure you want to leave the page?",
@@ -196,12 +197,7 @@ const UserInterface = (props: Props): ReactElement | null => {
                   path="audit/:collectionUid"
                   element={
                     <PrivateRoute
-                      element={
-                        <Audit
-                          storeInstance={storeInstance}
-                          // setIsLoading={setIsLoading}
-                        />
-                      }
+                      element={<Audit storeInstance={storeInstance} />}
                     />
                   }
                 />

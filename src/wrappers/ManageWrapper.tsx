@@ -14,8 +14,12 @@ import {
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { Task } from "@gliff-ai/style";
 import { DominateStore, API_URL, DEMO_DATA_URL } from "@/store";
-import { useAuth, UserAccess } from "@/hooks/use-auth";
-import { inviteNewCollaborator, inviteNewUser } from "@/services/user";
+import { useAuth } from "@/hooks/use-auth";
+import {
+  inviteNewCollaborator,
+  inviteNewUser,
+  UserAccess,
+} from "@/services/user";
 import { trustedServicesAPI, TrustedService } from "@/services/trustedServices";
 import { jsPluginsAPI, JsPlugin } from "@/services/plugins";
 import { FileInfo, GalleryTile, DemoMetadata, GalleryMeta } from "@/interfaces";

@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { DominateStore } from "@/store";
 import { MessageAlert, SubmitButton } from "@/components";
 import { imgSrc } from "@/imgSrc";
+import { RecoveryKeyDialog } from "@/components/RecoveryKeyDialog";
 
 const useStyles = makeStyles(() => ({
   paper: {
@@ -33,10 +34,11 @@ interface Props {
 export const ResetPassword = (props: Props): ReactElement | null => {
   const classes = useStyles();
   const auth = useAuth();
-  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [passwordError, setPasswordError] = useState("");
   const [storeError, setStoreError] = useState({});
+  const [recoveryKey, setRecoveryKey] = useState<string[] | null>(null);
+
   const [password, setPassword] = useState({
     newPassword: "",
     confirmPassword: "",
@@ -87,10 +89,9 @@ export const ResetPassword = (props: Props): ReactElement | null => {
       setLoading(true);
       auth
         .changePassword(password.newPassword)
-        .then(() => {
+        .then((result) => {
           setLoading(false);
-          // TODO: toast to say success!
-          setTimeout(() => navigate("/signin"), 3000);
+          setRecoveryKey(result.recoveryKey);
         })
         .catch((e) => {
           setLoading(false);
@@ -116,6 +117,7 @@ export const ResetPassword = (props: Props): ReactElement | null => {
     <></>
   ) : (
     <div className={classes.paper}>
+      <RecoveryKeyDialog recoveryKey={recoveryKey} />
       <form onSubmit={onFormSubmit}>
         <TextField
           variant="outlined"
