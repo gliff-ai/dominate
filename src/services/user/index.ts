@@ -1,5 +1,5 @@
 import { apiRequest } from "@/api";
-import { UserProfile, Invite } from "./interfaces";
+import { UserProfile, Invite, UserAccess } from "./interfaces";
 
 export const createUserProfile = (
   name: string,
@@ -34,3 +34,5 @@ export const getRecoverySession = (
   uid: string
 ): Promise<{ recovery_key: string }> =>
   apiRequest<{ recovery_key: string }>(`/user/recover/${uid}`, "GET");
+
+export { UserAccess };
