@@ -111,6 +111,7 @@ export const annotations: Annotation[][][] = [
           coordinates: [],
           spaceTimeInfo: { z: 0, t: 0 },
           isClosed: false,
+          isBezier: false,
         },
         boundingBox: {
           coordinates: {
@@ -1909,6 +1910,7 @@ export const annotations: Annotation[][][] = [
           coordinates: [],
           spaceTimeInfo: { z: 0, t: 0 },
           isClosed: false,
+          isBezier: false,
         },
         boundingBox: {
           coordinates: {
@@ -1930,6 +1932,7 @@ export const annotations: Annotation[][][] = [
           coordinates: [],
           spaceTimeInfo: { z: 0, t: 0 },
           isClosed: false,
+          isBezier: false,
         },
         boundingBox: {
           coordinates: {
@@ -1970,6 +1973,7 @@ export const annotations: Annotation[][][] = [
           ],
           spaceTimeInfo: { z: 0, t: 0 },
           isClosed: true,
+          isBezier: false,
         },
         boundingBox: {
           coordinates: {
@@ -1999,6 +2003,7 @@ export const expectedOutput = [
             coordinates: [],
             spaceTimeInfo: { z: 0, t: 0 },
             isClosed: false,
+            isBezier: false,
           },
           boundingBox: {
             coordinates: {
@@ -2022,6 +2027,7 @@ export const expectedOutput = [
             coordinates: [],
             spaceTimeInfo: { z: 0, t: 0 },
             isClosed: false,
+            isBezier: false,
           },
           boundingBox: {
             coordinates: {
@@ -2037,6 +2043,7 @@ export const expectedOutput = [
             coordinates: [],
             spaceTimeInfo: { z: 0, t: 0 },
             isClosed: false,
+            isBezier: false,
           },
           boundingBox: {
             coordinates: {
@@ -2078,6 +2085,7 @@ export const expectedOutput = [
             ],
             spaceTimeInfo: { z: 0, t: 0 },
             isClosed: true,
+            isBezier: false,
           },
           boundingBox: {
             coordinates: {

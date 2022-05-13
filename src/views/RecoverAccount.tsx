@@ -8,6 +8,7 @@ import { getRecoverySession } from "@/services/user";
 import { DominateStore } from "@/store";
 import { MessageAlert, SubmitButton } from "@/components";
 import { useMountEffect } from "@/hooks/use-mountEffect";
+import { RecoveryKeyDialog } from "@/components/RecoveryKeyDialog";
 
 const useStyles = makeStyles(() => ({
   forgotPasswordText: {
@@ -40,6 +41,7 @@ export const RecoverAccount = (props: Props): JSX.Element => {
   const [recoverySession, setRecoverySession] = useState("");
   const [loading, setLoading] = useState(false);
   const [recoveryError, setRecoveryError] = useState("");
+  const [recoveryKey, setRecoveryKey] = useState<string[] | null>(null);
   const [recover, setRecover] = useState({
     newPassword: "",
     recoveryKey: "",
@@ -70,8 +72,6 @@ export const RecoverAccount = (props: Props): JSX.Element => {
     // Reset any errors
     setRecoveryError("");
 
-    // Convert their input to the format we expect
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const restoredSession = await storeInstance.restoreSession(
       recoverySession,
       recover.recoveryKey,
@@ -80,9 +80,11 @@ export const RecoverAccount = (props: Props): JSX.Element => {
 
     if (restoredSession) {
       setLoading(false);
-      navigate("/signin");
+      setRecoveryKey(restoredSession.recoveryKey);
     } else {
-      setRecoveryError("Couldn't recover account with those details");
+      setRecoveryError(
+        "Couldn't recover account with those details. Please contact support@gliff.ai."
+      );
     }
   };
 
@@ -97,6 +99,7 @@ export const RecoverAccount = (props: Props): JSX.Element => {
 
   return (
     <>
+      <RecoveryKeyDialog recoveryKey={recoveryKey} />
       <form onSubmit={onSubmitForm}>
         <TextField
           variant="outlined"
