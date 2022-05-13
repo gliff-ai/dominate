@@ -1,8 +1,13 @@
-export interface User {
+interface User {
   username: string | null;
   authToken: string | null;
 }
 
+enum UserAccess {
+  Owner = "owner",
+  Member = "member",
+  Collaborator = "collaborator",
+}
 interface Team {
   id: number;
   owner_id: number;
@@ -12,8 +17,7 @@ interface Team {
   };
   usage: number;
 }
-
-export interface UserProfile {
+interface UserProfile {
   id: number;
   name: string;
   team: Team;
@@ -21,8 +25,10 @@ export interface UserProfile {
   email: string;
   is_collaborator: boolean;
 }
-
-export interface Invite {
+interface Invite {
   email: string;
   team_id: number;
 }
+
+export { UserAccess };
+export type { User, Team, UserProfile, Invite };
