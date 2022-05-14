@@ -37,7 +37,7 @@ module.exports = {
   },
 
   transform: {
-    "^.+\\.(jsx|js)$": "babel-jest",
+    "^.+\\.(jsx|js)$": ["babel-jest", { configFile: "./babel.test.config.js" }],
     "^.+\\.(ts|tsx)$": "ts-jest",
   },
 };
