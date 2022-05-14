@@ -23,9 +23,8 @@ import {
 } from "@/components/message/ConfirmationDialog";
 
 import { stringifySlices, mixBase64Channels } from "@/imageConversions";
-import { useAuth, UserAccess } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks/use-auth";
 import { useStore, usePlugins } from "@/hooks";
-import { apiRequest } from "@/api";
 import {
   uniquifyFilenames,
   makeAnnotationsJson,
@@ -34,26 +33,10 @@ import {
   MetaItemWithId,
 } from "@/helpers";
 import { Product } from "@/plugins";
+import { UserAccess } from "@/services/user";
+import { getTeam, Profile } from "@/services/team";
 
 const logger = console;
-
-// NOTE: Profile and Team are taken from MANAGE
-interface Profile {
-  email: string;
-  name: string;
-  is_collaborator: boolean;
-  is_trusted_service: boolean;
-}
-
-interface Team {
-  profiles: Profile[];
-  pending_invites: Array<{
-    email: string;
-    sent_date: string;
-    is_collaborator: boolean;
-  }>;
-}
-
 interface Props {
   storeInstance: DominateStore;
   setIsLoading: (isLoading: boolean) => void;
@@ -94,9 +77,9 @@ export const CurateWrapper = ({
 
   const isOwnerOrMember = useMemo(
     () =>
-      auth?.userAccess
-        ? auth.userAccess === UserAccess.Owner ||
-          auth.userAccess === UserAccess.Member
+      auth?.userAccess !== null
+        ? auth?.userAccess === UserAccess.Owner ||
+          auth?.userAccess === UserAccess.Member
         : null,
     [auth?.userAccess]
   );
@@ -457,14 +440,24 @@ export const CurateWrapper = ({
     // get profiles (should run once at mount)
     if (!auth?.userProfileReady || !isOwnerOrMember) return;
 
-    void apiRequest("/team/", "GET")
-      .then((team: Team) => {
+    getTeam()
+      .then((team) => {
         const newProfiles = team.profiles
           .filter(({ is_trusted_service }) => !is_trusted_service)
-          .map(({ email, name }) => ({
-            email,
-            name,
-          })) as Profile[];
+          .map(({ id, email, name, is_collaborator }) => {
+            let access = UserAccess.Collaborator;
+            if (id === team?.owner.id) {
+              access = UserAccess.Owner;
+            } else if (!is_collaborator) {
+              access = UserAccess.Member;
+            }
+            return {
+              email,
+              name,
+              access,
+            };
+          }) as Profile[];
+
         if (newProfiles.length !== 0) {
           setProfiles(newProfiles);
         }
@@ -477,7 +470,12 @@ export const CurateWrapper = ({
     fetchImageItems();
   }, [fetchImageItems]);
 
-  if (!storeInstance || !auth?.user || !collectionUid || !auth.userAccess)
+  if (
+    !storeInstance ||
+    !auth?.user ||
+    !collectionUid ||
+    auth?.userAccess === null
+  )
     return null;
 
   return (
