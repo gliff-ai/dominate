@@ -1,3 +1,5 @@
+import { jest, describe, beforeEach, test, expect } from "@jest/globals";
+
 import { makeAnnotationsJson, uniquifyFilenames } from "@/helpers";
 import {
   names,

@@ -1,9 +1,6 @@
-import {
-  Annotation,
-  Spline,
-  BoundingBox,
-  evaluateBezier,
-} from "@gliff-ai/annotate";
+import type { Annotation, Spline, BoundingBox } from "@gliff-ai/annotate";
+
+import { evaluateBezier } from "@gliff-ai/annotate/dist/evaluateBezier";
 import { GalleryTile, MetaItem } from "@/interfaces";
 
 export function setStateIfMounted(
@@ -126,7 +123,7 @@ export function convertMetadataToGalleryTiles(
   excludedKeys: string[] = EXCLUDED_KEYS
 ): { [id: string]: Partial<GalleryTile> } {
   /*  Convert Matadata object to an object that maps IDs to GalleryTile objects.
-      The returned map can be used to update the Gallery object. 
+      The returned map can be used to update the Gallery object.
       Any extra field that should never be overridden can be added to EXCLUDED_KEYS. */
 
   const newTiles = {};
