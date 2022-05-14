@@ -32,7 +32,11 @@ export const uniquifyFilenames = (filenames: string[]): string[] => {
 
 const convertBezierSpline = (spline: Spline): Spline => {
   if (spline.isBezier) {
-    spline.coordinates = evaluateBezier(spline.coordinates);
+    spline.coordinates = (
+      evaluateBezier as (
+        coordinates: { x: number; y: number }[]
+      ) => { x: number; y: number }[]
+    )(spline.coordinates); // Typing is temp until TS4.7 which will let us export them
   }
   return spline;
 };
