@@ -158,6 +158,7 @@ export const CurateWrapper = ({
       .then((newTiles) => {
         if (newTiles) {
           setMetadata(metadata.concat(convertGalleryToMetadata(newTiles)));
+          setCollectionContent(collectionContent.concat(newTiles));
         }
       })
       .catch((err) => logger.error(err));
@@ -224,10 +225,24 @@ export const CurateWrapper = ({
   const downloadDataset = async (): Promise<void> => {
     const zip = new JSZip();
 
-    const images = await storeInstance.getAllImages(collectionUid);
-    const { annotations } = await storeInstance.getAllAnnotationsObjects(
-      collectionUid
-    );
+    setTask({
+      description: "Downloading data...",
+      isLoading: true,
+      progress: 10,
+    });
+    const imagePromises = storeInstance.getAllImages(collectionUid, setTask);
+    const annotationPromises =
+      storeInstance.getAllAnnotationsObjects(collectionUid);
+    const [images, { annotations }] = await Promise.all([
+      imagePromises,
+      annotationPromises,
+    ]);
+
+    setTask({
+      description: "Writing annotation data...",
+      isLoading: true,
+      progress: 60,
+    });
 
     let allnames: string[] = collectionContent.map(
       (tile) => tile.fileInfo.fileName
@@ -246,6 +261,12 @@ export const CurateWrapper = ({
 
     // make images directory:
     const imagesFolder = zip.folder("images") as JSZip;
+
+    setTask({
+      description: "Writing images...",
+      isLoading: true,
+      progress: 70,
+    });
 
     if (multi) {
       // put all images in the root of images directory:
@@ -303,6 +324,11 @@ export const CurateWrapper = ({
         .flat(2)
         .filter((annotation) => annotation.brushStrokes.length > 0).length > 0
     ) {
+      setTask({
+        description: "Generating label images...",
+        isLoading: true,
+        progress: 75,
+      });
       // create tiff label images (one for each annotator for this image):
 
       const maskFolder = zip.folder("masks") as JSZip;
@@ -332,6 +358,12 @@ export const CurateWrapper = ({
       });
     }
 
+    setTask({
+      description: "Compressing data...",
+      isLoading: true,
+      progress: 85,
+    });
+
     // compress data and save to disk:
     const date = new Date();
     const projectName = await storeInstance
@@ -353,6 +385,11 @@ export const CurateWrapper = ({
           content,
           `${date.getFullYear()}${month}${day}_${hours}${minutes}_${projectName}.zip`
         );
+        setTask({
+          description: "Download complete",
+          isLoading: true,
+          progress: 100,
+        });
       })
       .catch((err) => {
         logger.log(err);

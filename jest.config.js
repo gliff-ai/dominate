@@ -26,7 +26,7 @@ module.exports = {
   transformIgnorePatterns: [
     // any package that contains ES6 modules needs to be transpiled, so tell jest to ignore everything in node_modules except ES6 modules
     // (would ignore everything in node_modules by default: https://jestjs.io/docs/en/configuration.html#transformignorepatterns-arraystring )
-    "/node_modules/(?!@gliff-ai/*)", // default is "/node_modules/"
+    // "/node_modules/(?!@gliff-ai/*)", // default is "/node_modules/"
     "\\.pnp\\.[^\\/]+$", // unchanged from default
   ],
 
@@ -37,7 +37,7 @@ module.exports = {
   },
 
   transform: {
-    "^.+\\.(jsx|js)$": "babel-jest",
+    "^.+\\.(jsx|js)$": ["babel-jest", { configFile: "./babel.test.config.js" }],
     "^.+\\.(ts|tsx)$": "ts-jest",
   },
 };
