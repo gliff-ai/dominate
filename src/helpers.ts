@@ -1,4 +1,6 @@
-import { Annotation, Spline, BoundingBox } from "@gliff-ai/annotate";
+import type { Annotation, Spline, BoundingBox } from "@gliff-ai/annotate";
+
+import { evaluateBezier } from "@gliff-ai/annotate/dist/evaluateBezier";
 import { GalleryTile, MetaItem } from "@/interfaces";
 
 export function setStateIfMounted(
@@ -26,6 +28,17 @@ export const uniquifyFilenames = (filenames: string[]): string[] => {
     }
   }
   return filenames;
+};
+
+const convertBezierSpline = (spline: Spline): Spline => {
+  if (spline.isBezier) {
+    spline.coordinates = (
+      evaluateBezier as (
+        coordinates: { x: number; y: number }[]
+      ) => { x: number; y: number }[]
+    )(spline.coordinates); // Typing is temp until TS4.7 which will let us export them
+  }
+  return spline;
 };
 
 export const makeAnnotationsJson = (
@@ -62,7 +75,7 @@ export const makeAnnotationsJson = (
         labels: annotation.labels,
         segmaskName: annotation.brushStrokes.length > 0 ? maskName : undefined,
         colour: annotation.brushStrokes[0]?.brush.color, // colour of this annotation in the segmask image
-        spline: annotation.spline,
+        spline: convertBezierSpline(annotation.spline),
         boundingBox: annotation.boundingBox,
       }));
     }),
@@ -114,7 +127,7 @@ export function convertMetadataToGalleryTiles(
   excludedKeys: string[] = EXCLUDED_KEYS
 ): { [id: string]: Partial<GalleryTile> } {
   /*  Convert Matadata object to an object that maps IDs to GalleryTile objects.
-      The returned map can be used to update the Gallery object. 
+      The returned map can be used to update the Gallery object.
       Any extra field that should never be overridden can be added to EXCLUDED_KEYS. */
 
   const newTiles = {};

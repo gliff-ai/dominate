@@ -70,7 +70,7 @@ export function RecoveryKey({ recoveryKey, callback }: Props): ReactElement {
       </Typography>
       <Typography className={classes.recoveryKeyParagraph}>
         Please keep your recovery key stored in a safe place as this is the
-        <em> only</em> time you will be shown. We <em>do not</em> store your own
+        <em> only</em> time you will be shown. We <em>do not</em> store your
         recovery key, if you lose this we will be unable to recover your data
         attached to the account.
       </Typography>

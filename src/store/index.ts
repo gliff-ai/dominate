@@ -10,7 +10,10 @@ import {
   CollectionAccessLevel,
   SignedInvitationRead,
   ItemMetadata,
+  base64,
 } from "etebase";
+import axios from "axios";
+
 import { CollectionMember } from "etebase/dist/lib/OnlineManagers";
 import { Task } from "@gliff-ai/style";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
@@ -119,7 +122,6 @@ export class DominateStore {
 
       const newSession = await this.etebaseInstance.save();
 
-      // TODO: encrypt this!
       localStorage.setItem("etebaseInstance", newSession);
 
       await this.etebaseInstance.fetchToken();
@@ -168,7 +170,6 @@ export class DominateStore {
 
     const newSession = await this.etebaseInstance.save();
 
-    // TODO: encrypt this!
     localStorage.setItem("etebaseInstance", newSession);
 
     this.isLoggedIn = true;
@@ -186,8 +187,28 @@ export class DominateStore {
     return true;
   };
 
-  changePassword = async (newPassword: string): Promise<void> =>
-    this.etebaseInstance.changePassword(newPassword);
+  changePassword = async (
+    newPassword: string,
+    customAccount?: Account
+  ): Promise<{ recoveryKey: string[] }> => {
+    const account = customAccount || this.etebaseInstance;
+    await account.changePassword(newPassword);
+
+    const { readable: recoveryKey, hashed } = this.generateRecoveryKey();
+    const savedSession = await account.save(hashed);
+
+    await axios.request({
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Token ${account.authToken || ""}`,
+      },
+      url: `${API_URL}/user/`,
+      data: { recovery_key: savedSession },
+    });
+
+    return { recoveryKey };
+  };
 
   #hashRecoveryPhrase = (phrase: string): Uint8Array =>
     sodium.crypto_generichash(32, sodium.from_string(phrase.replace(/ /g, "")));
@@ -196,7 +217,7 @@ export class DominateStore {
     session: string,
     phrase: string,
     newPassword: string
-  ): Promise<boolean> => {
+  ): Promise<{ recoveryKey: string[] } | null> => {
     try {
       const key = this.#hashRecoveryPhrase(phrase);
 
@@ -204,12 +225,12 @@ export class DominateStore {
 
       await account.fetchToken();
 
-      await account.changePassword(newPassword);
+      const { recoveryKey } = await this.changePassword(newPassword, account);
 
-      return true;
+      return { recoveryKey }; // show this to user
     } catch (e) {
       logger.error(e);
-      return false;
+      return null;
     }
   };
 
@@ -1466,23 +1487,42 @@ export class DominateStore {
   };
 
   getAllImages = async (
-    collectionUid: string
+    collectionUid: string,
+    setTask: ((task: Task) => void) | undefined = undefined
   ): Promise<{ meta: ImageMeta; content: string }[]> => {
     // Retrive all image items from a collection
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
+    if (setTask)
+      setTask({
+        description: "Fetching image references",
+        isLoading: true,
+        progress: 0,
+      });
     const collection = await this.fetchCollection(
       collectionManager,
       collectionUid
     );
     const collectionContent = await collection.getContent(OutputFormat.String);
     const galleryTiles = JSON.parse(collectionContent) as GalleryTile[];
+    if (setTask)
+      setTask({
+        description: "Fetching images",
+        isLoading: true,
+        progress: 10,
+      });
 
     const imageItems = await this.fetchMulti(
       collectionManager.getItemManager(collection),
       galleryTiles.map((tile) => tile.imageUID)
     );
 
+    if (setTask)
+      setTask({
+        description: "Decrypting images",
+        isLoading: true,
+        progress: 30,
+      });
     const imageContents = await Promise.all(
       imageItems.map((item) => item.getContent(OutputFormat.String))
     );

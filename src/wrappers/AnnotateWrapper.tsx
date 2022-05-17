@@ -17,9 +17,9 @@ import { OutputFormat } from "etebase";
 import { ProductNavbarData } from "@/components";
 import { DominateStore } from "@/store";
 import { AnnotationMeta, GalleryMeta } from "@/interfaces";
+import { UserAccess } from "@/services/user";
 import { parseStringifiedSlices } from "@/imageConversions";
 import { useAuth, useStore, usePlugins } from "@/hooks";
-import { UserAccess } from "@/hooks/use-auth";
 import {
   convertMetadataToGalleryTiles,
   setStateIfMounted,
@@ -121,9 +121,9 @@ export const AnnotateWrapper = ({
 
   const isOwnerOrMember = useMemo(
     () =>
-      auth?.userAccess
-        ? auth.userAccess === UserAccess.Owner ||
-          auth.userAccess === UserAccess.Member
+      auth?.userAccess !== null
+        ? auth?.userAccess === UserAccess.Owner ||
+          auth?.userAccess === UserAccess.Member
         : null,
     [auth?.userAccess]
   );
