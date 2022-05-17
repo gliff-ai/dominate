@@ -91,7 +91,7 @@ const useStyles = makeStyles((theme: Theme) => ({
     height: "42px",
     verticalAlign: "middle",
     fontFamily: "Roboto",
-    fontWeight: "500",
+    fontWeight: "400",
     fontSize: "0.875rem",
     lineHeight: "1.75",
     display: "flex",
@@ -109,8 +109,11 @@ const useStyles = makeStyles((theme: Theme) => ({
   },
   document: {
     margin: "auto",
-    padding: "10px",
-    height: "68px",
+    borderRadius: "50%",
+    height: "48px",
+    "&:hover": {
+      backgroundColor: "#02FFAD",
+    },
   },
 }));
 

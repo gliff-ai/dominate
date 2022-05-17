@@ -27,6 +27,7 @@ const useStyles = makeStyles({
     fontFamily: "Roboto",
     fontWeight: "400",
     fontSize: "16px",
+    color: "#2B2F3A",
   },
 });
 
