@@ -1,4 +1,11 @@
-import { ReactElement, useState, useEffect, useRef, useCallback } from "react";
+import {
+  ReactElement,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
@@ -11,14 +18,14 @@ import { ProductNavbarData } from "@/components";
 import { DominateStore } from "@/store";
 import { AnnotationMeta, GalleryMeta } from "@/interfaces";
 import { parseStringifiedSlices } from "@/imageConversions";
-import { useAuth, useStore } from "@/hooks";
+import { useAuth, useStore, usePlugins } from "@/hooks";
+import { UserAccess } from "@/hooks/use-auth";
 import {
   convertMetadataToGalleryTiles,
   setStateIfMounted,
   MetaItemWithId,
 } from "@/helpers";
-import { UserAccess } from "@/hooks/use-auth";
-import { initPluginObjects, PluginObject, Product } from "@/plugins";
+import { Product } from "@/plugins";
 
 interface Props {
   storeInstance: DominateStore;
@@ -62,10 +69,19 @@ let isCompleteButtonClicked = false;
 // because isComplete has just loaded from store. This is a common problem with hooks, with no clear solution:
 // https://stackoverflow.com/questions/56247433/how-to-use-setstate-callback-on-react-hooks
 
-export const AnnotateWrapper = (props: Props): ReactElement | null => {
+export const AnnotateWrapper = ({
+  storeInstance,
+  setIsLoading,
+  task,
+  setTask,
+  setProductSection,
+  setProductNavbarData,
+}: Props): ReactElement | null => {
   const navigate = useNavigate();
   const auth = useAuth();
+
   const { collectionUid = "", imageUid = "" } = useParams();
+
   const [imageContent, setImageContent] = useState<string | null>(null);
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
   const [imageFileInfo, setImageFileInfo] = useState<ImageFileInfo>();
@@ -74,55 +90,71 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   const [isComplete, setIsComplete] = useState<boolean>(false);
   const [imageUids, setImageUids] = useState<string[] | null>(null);
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
-  const [plugins, setPlugins] = useState<PluginObject | null>(null);
   const [collectionTitle, setCollectionTitle] = useState<string>("");
-
   const [defaultLabels, setDefaultLabels] = useState<string[]>([]);
   const [restrictLabels, setRestrictLabels] = useState<boolean>(false);
   const [multiLabel, setMultiLabel] = useState<boolean>(true);
+  const plugins = usePlugins(collectionUid, auth, Product.ANNOTATE);
 
   const isMounted = useRef(false);
   const classes = useStyle();
 
-  const canCycle = (): boolean =>
-    Boolean(imageUids && currImageIdx !== null && imageUids?.length > 1);
+  const canCycle = useMemo(
+    (): boolean =>
+      Boolean(imageUids && currImageIdx !== null && imageUids?.length > 1),
+    [imageUids, currImageIdx]
+  );
 
-  function cycleImage(forward = true): void {
-    if (!imageUids || currImageIdx === null) return;
-    const inc = forward ? 1 : -1;
-    const newIndex = (currImageIdx + inc + imageUids.length) % imageUids.length;
-    setImageContent(null);
-    setSlicesData(null);
-    navigate(`/annotate/${collectionUid}/${imageUids[newIndex]}`);
-  }
+  const cycleImage = useCallback(
+    (forward = true): void => {
+      if (!imageUids || currImageIdx === null || !collectionUid) return;
 
-  const isOwnerOrMember = useCallback(
+      const inc = forward ? 1 : -1;
+      const newIndex =
+        (currImageIdx + inc + imageUids.length) % imageUids.length;
+      setImageContent(null);
+      setSlicesData(null);
+      navigate(`/annotate/${collectionUid}/${imageUids[newIndex]}`);
+    },
+    [imageUids, currImageIdx, navigate, collectionUid]
+  );
+
+  const isOwnerOrMember = useMemo(
     () =>
-      auth?.userAccess === UserAccess.Owner ||
-      auth?.userAccess === UserAccess.Member,
-    [auth]
+      auth?.userAccess
+        ? auth.userAccess === UserAccess.Owner ||
+          auth.userAccess === UserAccess.Member
+        : null,
+    [auth?.userAccess]
   );
 
   const fetchImageItems = useStore(
-    props,
-    (storeInstance) => {
-      if (!auth?.user?.username) return;
-      const canViewAllImages = isOwnerOrMember();
+    storeInstance,
+    () => {
+      // fetch the images' uids and metadata (i.e., imageFileInfo)
+      if (
+        !auth?.user?.username ||
+        !collectionUid ||
+        !imageUid ||
+        isOwnerOrMember === null
+      )
+        return;
 
-      storeInstance
+      void storeInstance
         .getImagesMeta(collectionUid)
         .then((items) => {
-          const imageUIDs = items.tiles
+          const newImageUIDs = items.tiles
             .filter(
-              (item) =>
-                (canViewAllImages ||
-                  item.assignees.includes(auth?.user?.username as string)) &&
-                item.imageUID
+              ({ assignees, imageUID }) =>
+                (isOwnerOrMember ||
+                  assignees.includes(auth?.user?.username as string)) &&
+                imageUID
             )
-            .map((item) => item.imageUID);
+            .map(({ imageUID }) => imageUID);
           const projectName = items.galleryMeta.name;
-          setStateIfMounted(imageUIDs, setImageUids, isMounted.current);
+          setStateIfMounted(newImageUIDs, setImageUids, isMounted.current);
           setStateIfMounted(projectName, setCollectionTitle, isMounted.current);
+
           const fileInfo = items.tiles.find(
             (item) => item.imageUID === imageUid
           )?.fileInfo;
@@ -134,11 +166,11 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
           console.error(e);
         });
     },
-    [collectionUid, isMounted, auth]
+    [auth?.user?.username, collectionUid, isOwnerOrMember, imageUid]
   );
 
-  function updateProductSection(): void {
-    props.setProductSection(
+  const updateProductSection = useCallback((): void => {
+    setProductSection(
       <div className={classes.sectionContainer}>
         <Card className={`${classes.cardSize} ${classes.cardLeft}`}>
           <IconButton
@@ -146,7 +178,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             tooltip={{ name: "Previous Image" }}
             onClick={() => cycleImage(false)}
             tooltipPlacement="bottom"
-            disabled={!canCycle()}
+            disabled={!canCycle}
             size="small"
           />
         </Card>
@@ -170,28 +202,93 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             tooltip={{ name: "Next Image" }}
             onClick={() => cycleImage()}
             tooltipPlacement="bottom"
-            disabled={!canCycle()}
+            disabled={!canCycle}
             size="small"
           />
         </Card>
       </div>
     );
-  }
+  }, [isComplete, canCycle, imageUids, currImageIdx, cycleImage]);
+
+  const saveMetadataCallback = useCallback(
+    (data: { collectionUid: string; metadata: MetaItemWithId[] }) => {
+      const newTiles = convertMetadataToGalleryTiles(data.metadata);
+      void storeInstance
+        .updateGallery(data.collectionUid, newTiles)
+        .then(() => fetchImageItems())
+        .catch((error) => console.error(error));
+    },
+    [storeInstance, fetchImageItems]
+  );
+
+  const saveAnnotation = useCallback(
+    (newAnnotationsObject: Annotations): void => {
+      if (!auth?.user?.username) return;
+
+      // Save annotations data
+      setTask({
+        isLoading: true,
+        description: "Saving annotation in progress, please wait...",
+        progress: 0,
+      });
+      const annotationsData = newAnnotationsObject.getAllAnnotations();
+
+      const auditData = newAnnotationsObject.getAuditObject();
+
+      storeInstance
+        .updateAnnotation(
+          collectionUid,
+          imageUid,
+          annotationsData,
+          auditData,
+          isComplete,
+          task,
+          setTask,
+          auth.user.username
+        )
+        .then(() => {
+          setTask({
+            isLoading: true,
+            description: "Saving annotation complete!",
+            progress: 100,
+          });
+          setTimeout(() => {
+            setTask({ isLoading: false, description: "" });
+          }, 5000);
+        })
+        .catch((e) => console.error(e));
+    },
+    [
+      storeInstance,
+      setTask,
+      auth?.user?.username,
+      collectionUid,
+      imageUid,
+      isComplete,
+      task,
+    ]
+  );
 
   useEffect(() => {
     // runs at mount
     isMounted.current = true;
-    props.setIsLoading(true);
+    setIsLoading(true);
     return () => {
       // runs at dismount
       isMounted.current = false;
     };
-  }, []);
+  }, [setIsLoading]);
 
   useEffect(() => {
-    if (!collectionUid) return;
+    // fetch the images' uids and metadata (should run every time imageUid changes)
     fetchImageItems();
-    props.storeInstance
+  }, [storeInstance, fetchImageItems]);
+
+  useEffect(() => {
+    // fetch all labels (should run once at mount)
+    if (!collectionUid) return;
+
+    storeInstance
       .getCollectionMeta(collectionUid)
       .then((meta: GalleryMeta) => {
         setDefaultLabels(meta.defaultLabels);
@@ -199,61 +296,15 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
         setMultiLabel(meta.multiLabel);
       })
       .catch((e) => console.error(e));
-  }, [collectionUid, fetchImageItems]);
-
-  useEffect(() => {
-    if (!imageUids) return;
-    setCurrImageIdx(imageUids.indexOf(imageUid));
-  }, [imageUids, imageUid]);
-
-  const saveAnnotation = (newAnnotationsObject: Annotations): void => {
-    if (!auth?.user?.username) return;
-
-    // Save annotations data
-    props.setTask({
-      isLoading: true,
-      description: "Saving annotation in progress, please wait...",
-      progress: 0,
-    });
-    const annotationsData = newAnnotationsObject.getAllAnnotations();
-
-    const auditData = newAnnotationsObject.getAuditObject();
-
-    props.storeInstance
-      .updateAnnotation(
-        collectionUid,
-        imageUid,
-        annotationsData,
-        auditData,
-        isComplete,
-        props.task,
-        props.setTask,
-        auth.user.username
-      )
-      .then(() => {
-        props.setTask({
-          isLoading: true,
-          description: "Saving annotation complete!",
-          progress: 100,
-        });
-        setTimeout(() => {
-          props.setTask({ isLoading: false, description: "" });
-        }, 5000);
-      })
-      .catch((e) => console.error(e));
-  };
-
-  useEffect(() => {
-    updateProductSection();
-  }, [isComplete, currImageIdx, imageUids]);
+  }, [storeInstance, collectionUid]);
 
   useEffect(() => {
     const getImage = (): Promise<string> =>
       // Retrieve image item and set it as state
       // DominateStore needs to be able to redirect to a new URL if/when converting the image from collection to item, because the UID will change,
       // but it can't useNavigate by itself because it's not a function component, so pass it here:
-      // props.storeInstance.giveNavigate(navigate);
-      props.storeInstance
+      // storeInstance.giveNavigate(navigate);
+      storeInstance
         .getItem(collectionUid, imageUid)
         .then(async (image) => {
           setStateIfMounted(
@@ -277,7 +328,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       const annotationsData = newAnnotationsObject.getAllAnnotations();
       const auditData = newAnnotationsObject.getAuditObject();
 
-      props.storeInstance
+      storeInstance
         .createAnnotation(
           collectionUid,
           imageUid,
@@ -295,8 +346,8 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       if (!auth?.user?.username) return Promise.resolve();
 
       // Set state for annotation items.
-      return props.storeInstance
-        .getAnnotationsObject(collectionUid, imageUid, auth?.user.username)
+      return storeInstance
+        .getAnnotationsObject(collectionUid, imageUid, auth.user.username)
         .then(
           (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
             setStateIfMounted(
@@ -326,65 +377,47 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       })
       .catch((e) => console.error(e));
   }, [
+    storeInstance,
     collectionUid,
     imageUid,
-    props.storeInstance,
-    props.storeInstance.ready,
-    auth,
-    isMounted,
+    isComplete,
+    auth?.user?.username,
   ]);
 
   useEffect(() => {
-    if (annotationsObject !== undefined && isCompleteButtonClicked) {
-      saveAnnotation(annotationsObject);
-      isCompleteButtonClicked = false;
-    }
-  }, [isComplete]);
+    // trigger save annotation (should run when annotationsObject changes, provided the complete button has been clicked).
+    if (annotationsObject === undefined || !isCompleteButtonClicked) return;
 
-  const fetchPlugins = useCallback(async () => {
-    if (!auth?.user || collectionUid === "") return;
-    try {
-      const newPlugins = await initPluginObjects(
-        Product.ANNOTATE,
-        collectionUid,
-        auth?.user?.username as string
-      );
-      if (newPlugins) {
-        setStateIfMounted(newPlugins, setPlugins, isMounted.current);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, [auth, collectionUid, isMounted]);
-
-  const saveMetadataCallback = useCallback(
-    (data: { collectionUid: string; metadata: MetaItemWithId[] }) => {
-      const newTiles = convertMetadataToGalleryTiles(data.metadata);
-      void props.storeInstance
-        .updateGallery(data.collectionUid, newTiles)
-        .then(() => fetchImageItems())
-        .catch((error) => console.error(error));
-    },
-    [props.storeInstance]
-  );
+    saveAnnotation(annotationsObject);
+    isCompleteButtonClicked = false;
+  }, [saveAnnotation, annotationsObject]);
 
   useEffect(() => {
-    void fetchPlugins();
-  }, [fetchPlugins]);
+    // set slicesData (should run when imageContent changes, provided imageContent is set)
+    // we use isMounted here because this useEffect takes a long time to complete.
+    if (!imageContent || !isMounted.current) return;
+
+    parseStringifiedSlices(imageContent)
+      .then((newSlicesData) => {
+        setStateIfMounted(newSlicesData, setSlicesData, isMounted.current);
+      })
+      .catch((e) => console.error(e));
+  }, [imageContent, isMounted]);
 
   useEffect(() => {
-    if (imageContent) {
-      // Set slicesData
-      parseStringifiedSlices(imageContent)
-        .then((newSlicesData) => {
-          setSlicesData(newSlicesData);
-        })
-        .catch((e) => console.error(e));
-    }
-  }, [imageContent]);
+    // set the current image index (should run when imageUid changes, provided imageUids is set)
+    if (!imageUids) return;
+
+    setCurrImageIdx(imageUids.indexOf(imageUid));
+  }, [imageUids, imageUid]);
 
   useEffect(() => {
-    props.setProductNavbarData({
+    // update the navbar's product section (will be replaced soon)
+    updateProductSection();
+  }, [updateProductSection]);
+
+  useEffect(() => {
+    setProductNavbarData({
       teamName: auth?.userProfile?.team.name || "",
       projectName: collectionTitle || "",
       imageName: imageFileInfo?.fileName || "",
@@ -405,7 +438,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
   }, [imageFileInfo, collectionTitle]);
 
   if (
-    !props.storeInstance ||
+    !storeInstance ||
     !collectionUid ||
     !imageUid ||
     !auth ||
@@ -420,11 +453,11 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
       imageFileInfo={imageFileInfo}
       annotationsObject={slicesData ? annotationsObject : undefined}
       saveAnnotationsCallback={saveAnnotation}
-      setIsLoading={props.setIsLoading}
+      setIsLoading={setIsLoading}
       userAccess={auth.userAccess}
       plugins={plugins}
       launchPluginSettingsCallback={
-        Number(auth?.userProfile?.team?.tier?.id) > 1 && isOwnerOrMember()
+        Number(auth?.userProfile?.team?.tier?.id) > 1 && isOwnerOrMember
           ? () => navigate(`/manage/plugins`)
           : null
       }
