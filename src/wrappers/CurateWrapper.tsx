@@ -514,7 +514,7 @@ export const CurateWrapper = ({
       productLocationIcon: "curate",
     });
   }, [collectionTitle]);
-  
+
   if (
     !storeInstance ||
     !auth?.user ||
