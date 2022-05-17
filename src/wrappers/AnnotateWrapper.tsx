@@ -39,13 +39,19 @@ const useStyle = makeStyles({
   cardSize: {
     width: 40,
     height: 40,
-    borderRadius: 0,
+    borderRadius: "1px",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    boxShadow: "none",
+    border: "1px solid rgb(218, 221, 233)",
   },
   cardLeft: {
     borderRadius: "6px 0 0 6px",
+  },
+  cardMiddle: {
+    borderRight: "0",
+    borderLeft: "0",
   },
   cardRight: { borderRadius: "0 6px 6px 0" },
   rotateIcon: { transform: "rotate(180deg)" },
@@ -144,7 +150,7 @@ export const AnnotateWrapper = (props: Props): ReactElement | null => {
             size="small"
           />
         </Card>
-        <Card className={classes.cardSize}>
+        <Card className={` ${classes.cardSize} ${classes.cardMiddle}`}>
           <IconButton
             icon={icons.tick}
             tooltip={{ name: "Mark Annotation As Complete" }}

@@ -24,6 +24,9 @@ const useStyles = makeStyles({
     paddingRight: "30px",
     textAlign: "center",
     textTransform: "none",
+    fontFamily: "Roboto",
+    fontWeight: "400",
+    fontSize: "16px",
   },
 });
 
