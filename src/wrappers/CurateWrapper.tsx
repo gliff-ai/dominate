@@ -218,8 +218,18 @@ export const CurateWrapper = ({
       });
   };
 
-  const annotateCallback = (imageUid: string): void => {
-    navigate(`/annotate/${collectionUid}/${imageUid}`);
+  const annotateCallback = (
+    imageUid: string,
+    username: string | null = null
+  ): void => {
+    if (username) {
+      const annotationUid = collectionContent.find(
+        (tile) => tile.imageUID === imageUid
+      )?.annotationUID[username];
+      navigate(`/annotate/${collectionUid}/${imageUid}/${annotationUid}`);
+    } else {
+      navigate(`/annotate/${collectionUid}/${imageUid}`);
+    }
   };
 
   const downloadDataset = async (): Promise<void> => {
