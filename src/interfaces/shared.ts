@@ -19,8 +19,8 @@ interface FileInfo {
 }
 
 interface DemoMetadata {
-  name: string;
-  fileInfo: FileInfo;
+  fileInfo: Pick<Partial<FileInfo>, "fileName" | "size">;
   imageLabels: string[];
 }
+
 export { FileInfo, BaseMeta, DemoMetadata };

@@ -59,7 +59,7 @@ export const ManageWrapper = ({
 
   const deleteProject = useCallback(
     async ({ projectUid }): Promise<boolean> => {
-      const result = await storeInstance.deleteCollection(projectUid);
+      const result = await storeInstance.deleteCollection(projectUid, setTask);
 
       return result;
     },
@@ -302,15 +302,14 @@ export const ManageWrapper = ({
       // loop through the matadata and load all the images
       await Promise.allSettled(
         metadata.map(async (imeta): Promise<{
-          imageFileInfo: FileInfo;
+          imageFileInfo: DemoMetadata["fileInfo"];
           thumbnail: string;
           imageContent: string;
         }> => {
           const result = await loadNonTiffImageFromURL(
-            `${DEMO_DATA_URL}/${imeta?.name}`,
-            imeta?.name,
-            incrementTaskProgress(progressIncrement),
-            imeta?.fileInfo
+            `${DEMO_DATA_URL}/${imeta?.fileInfo?.fileName as string}`,
+            imeta?.fileInfo,
+            incrementTaskProgress(progressIncrement)
           );
           return result;
         })
@@ -319,7 +318,7 @@ export const ManageWrapper = ({
           if (result?.status === "fulfilled" && result?.value) {
             const { imageFileInfo, thumbnail, imageContent } = result.value;
 
-            fileInfos.push(imageFileInfo);
+            fileInfos.push(imageFileInfo as FileInfo);
             thumbnails.push(thumbnail);
             imageContents.push(imageContent);
             allImageLabels.push(metadata[i].imageLabels);

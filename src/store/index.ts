@@ -477,16 +477,38 @@ export class DominateStore {
     return { ...collection.getMeta(), uid: collection.uid };
   };
 
-  deleteCollection = async (collectionUid: string): Promise<boolean> => {
+  deleteCollection = async (
+    collectionUid: string,
+    setTask: Dispatch<SetStateAction<Task>>
+  ): Promise<boolean> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
+    if (setTask)
+      setTask({
+        description: "Delete project",
+        isLoading: true,
+        progress: 0,
+      });
     try {
       const collectionManager = this.etebaseInstance.getCollectionManager();
 
       const collection = await collectionManager.fetch(collectionUid);
 
+      if (setTask)
+        setTask((task) => ({
+          ...task,
+          progress: 50,
+        }));
+
       collection.delete();
 
       await collectionManager.upload(collection);
+
+      if (setTask)
+        setTask((task) => ({
+          ...task,
+          isLoading: false,
+          progress: 100,
+        }));
 
       return true;
     } catch (e) {

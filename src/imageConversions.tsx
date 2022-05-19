@@ -1,4 +1,4 @@
-import { FileInfo } from "./interfaces";
+import { DemoMetadata, FileInfo } from "./interfaces";
 
 function stringifySlices(slicesData: ImageBitmap[][]): string {
   // Convert image data from ImageBitmap[][] to string of base64-ecoded images.
@@ -49,9 +49,8 @@ function makeThumbnail(
 
 async function loadNonTiffImageFromURL(
   url: string,
-  imageName: string,
-  incrementTask: () => void,
-  fileInfo: Pick<Partial<FileInfo>, "size">
+  fileInfo: DemoMetadata["fileInfo"],
+  incrementTask: () => void
 ): Promise<{
   imageContent: string;
   thumbnail: string;
@@ -91,7 +90,7 @@ async function loadNonTiffImageFromURL(
           imageContent: JSON.stringify([base64Channels]),
           thumbnail: makeThumbnail(image),
           imageFileInfo: {
-            fileName: imageName,
+            fileName: fileInfo.fileName as string,
             size: fileInfo.size as number,
             width: image.width,
             height: image.height,
@@ -102,7 +101,7 @@ async function loadNonTiffImageFromURL(
         });
 
         incrementTask();
-        console.log(`${imageName} loaded.`);
+        console.log(`${fileInfo.fileName as string} loaded.`);
       };
 
       image.onerror = function () {
