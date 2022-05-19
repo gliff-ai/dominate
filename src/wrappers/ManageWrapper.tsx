@@ -67,8 +67,8 @@ export const ManageWrapper = ({
   );
 
   const createProject = useCallback(
-    async ({ name }) => {
-      const uid = await storeInstance.createCollection(name);
+    async (projectDetails: { name: string; description?: string }) => {
+      const uid = await storeInstance.createCollection(projectDetails);
 
       return uid;
     },
@@ -158,15 +158,6 @@ export const ManageWrapper = ({
     }
     return trustedServicesAPI.deleteTrustedService(plugin as TrustedService);
   }, []);
-
-  const updateProjectName = useCallback(
-    async ({ projectUid, projectName }) => {
-      await storeInstance.updateCollectionName(projectUid, projectName);
-
-      return true;
-    },
-    [storeInstance]
-  );
 
   const getAnnotationProgress = useCallback(
     async ({
@@ -274,6 +265,24 @@ export const ManageWrapper = ({
     [setTask]
   );
 
+  const updateProjectDetails = useCallback(
+    async ({
+      projectUid,
+      projectDetails,
+    }: {
+      projectUid: string;
+      projectDetails: { name?: string; description?: string };
+    }): Promise<boolean> => {
+      const result = await storeInstance.updateCollectionMeta(
+        projectUid,
+        projectDetails
+      );
+
+      return result;
+    },
+    [storeInstance]
+  );
+
   const downloadDemoData = useCallback(async (): Promise<string | null> => {
     setTask({
       isLoading: true,
@@ -284,7 +293,9 @@ export const ManageWrapper = ({
     let projectUid: string | null = null;
     try {
       // create a new project
-      projectUid = await storeInstance.createCollection("Giraffes-Hippos Demo");
+      projectUid = await storeInstance.createCollection({
+        name: "Giraffes-Hippos Demo",
+      });
 
       // fetch the metadata
       const metadata: DemoMetadata[] = (await (
@@ -357,7 +368,7 @@ export const ManageWrapper = ({
       getCollectionMembers,
       getCollectionsMembers,
       createProject,
-      updateProjectName,
+      updateProjectDetails,
       inviteUser,
       inviteCollaborator,
       inviteToProject,
@@ -377,7 +388,7 @@ export const ManageWrapper = ({
       getCollectionMembers,
       getCollectionsMembers,
       createProject,
-      updateProjectName,
+      updateProjectDetails,
       inviteUser,
       inviteCollaborator,
       inviteToProject,
