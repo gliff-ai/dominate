@@ -45,8 +45,8 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
   );
 
   const createProject = useCallback(
-    async ({ name }) => {
-      const uid = await props.storeInstance.createCollection(name);
+    async (projectDetails: { name: string; description?: string }) => {
+      const uid = await props.storeInstance.createCollection(projectDetails);
 
       return uid;
     },
@@ -138,15 +138,6 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     }
     return trustedServicesAPI.deleteTrustedService(plugin as TrustedService);
   }, []);
-
-  const updateProjectName = useCallback(
-    async ({ projectUid, projectName }) => {
-      await props.storeInstance.updateCollectionName(projectUid, projectName);
-
-      return true;
-    },
-    [props.storeInstance]
-  );
 
   const getAnnotationProgress = useCallback(
     async ({
@@ -243,6 +234,24 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
 
   const launchDocs = () => window.open("https://docs.gliff.app/", "_blank");
 
+  const updateProjectDetails = useCallback(
+    async ({
+      projectUid,
+      projectDetails,
+    }: {
+      projectUid: string;
+      projectDetails: { name?: string; description?: string };
+    }): Promise<boolean> => {
+      const result = await props.storeInstance.updateCollectionMeta(
+        projectUid,
+        projectDetails
+      );
+
+      return result;
+    },
+    [props.storeInstance]
+  );
+
   // These require trailing slashes otherwise Safari won't send the Auth Token (as django will 301)
   const services = {
     queryTeam: "GET /team/",
@@ -252,7 +261,6 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     getCollectionMembers,
     getCollectionsMembers,
     createProject,
-    updateProjectName,
     inviteUser,
     inviteCollaborator,
     inviteToProject,
@@ -263,6 +271,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     deletePlugin,
     getAnnotationProgress,
     launchDocs,
+    updateProjectDetails,
   };
 
   if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)

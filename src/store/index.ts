@@ -283,26 +283,38 @@ export class DominateStore {
     };
   };
 
-  updateCollectionName = async (
+  updateCollectionMeta = async (
     collectionUid: string,
-    collectionName: string
-  ): Promise<void> => {
+    {
+      meta_version,
+      content_version,
+      type,
+      createdTime,
+      ...newMeta
+    }: Partial<GalleryMeta>
+  ): Promise<boolean> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
-    const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetchCollection(
-      collectionManager,
-      collectionUid
-    );
+    try {
+      const collectionManager = this.etebaseInstance.getCollectionManager();
+      const collection = await this.fetchCollection(
+        collectionManager,
+        collectionUid
+      );
 
-    const meta = collection.getMeta();
-    collection.setMeta({
-      ...meta,
-      modifiedTime: Date.now(),
-      name: collectionName,
-    });
+      const meta = collection.getMeta();
+      collection.setMeta({
+        ...meta,
+        modifiedTime: Date.now(),
+        ...newMeta,
+      });
 
-    await collectionManager.transaction(collection);
+      await collectionManager.transaction(collection);
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
   };
 
   updateGalleryMeta = async (
@@ -551,7 +563,13 @@ export class DominateStore {
     return resolved;
   };
 
-  createCollection = async (name: string): Promise<string> => {
+  createCollection = async ({
+    name,
+    description,
+  }: {
+    name: string;
+    description?: string;
+  }): Promise<string> => {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     // Create, encrypt and upload a new collection
@@ -564,7 +582,7 @@ export class DominateStore {
         name,
         createdTime: Date.now(),
         modifiedTime: Date.now(),
-        description: "[]",
+        description: description || "",
         defaultLabels: [],
         restrictLabels: false,
         multiLabel: true,
