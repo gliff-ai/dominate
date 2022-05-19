@@ -1,3 +1,6 @@
+// eslint-disable-next-line import/no-extraneous-dependencies
+import { describe, beforeEach, test, expect } from "@jest/globals";
+
 import { makeAnnotationsJson, uniquifyFilenames } from "@/helpers";
 import {
   names,
