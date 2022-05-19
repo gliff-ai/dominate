@@ -71,7 +71,7 @@ export const AnnotateWrapper = ({
   const navigate = useNavigate();
   const auth = useAuth();
 
-  const { collectionUid = "", imageUid = "" } = useParams();
+  const { collectionUid = "", imageUid = "", annotationUid = "" } = useParams();
 
   const [imageContent, setImageContent] = useState<string | null>(null);
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
@@ -330,12 +330,25 @@ export const AnnotateWrapper = ({
       return newAnnotationsObject;
     };
 
-    const getAnnotationsObject = (): Promise<void> => {
+    const getAnnotationsObject = async (): Promise<void> => {
       if (!auth?.user?.username) return Promise.resolve();
 
       // Set state for annotation items.
-      return storeInstance
-        .getAnnotationsObject(collectionUid, imageUid, auth.user.username)
+      const fetch = annotationUid
+        ? storeInstance
+            .getItem(collectionUid, annotationUid)
+            .then(async (item) => ({
+              meta: item.getMeta<AnnotationMeta>(),
+              annotations: new Annotations(
+                JSON.parse(await item.getContent(OutputFormat.String))
+              ) as Annotations,
+            }))
+        : storeInstance.getAnnotationsObject(
+            collectionUid,
+            imageUid,
+            auth.user.username
+          );
+      fetch
         .then(
           (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
             setStateIfMounted(
