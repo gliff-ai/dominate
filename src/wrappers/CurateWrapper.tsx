@@ -98,9 +98,9 @@ export const CurateWrapper = ({
         .then(({ tiles: gallery, galleryMeta }) => {
           setCollectionContent(gallery);
 
-          const newMetadata = convertGalleryToMetadata(gallery);
+          let newMetadata = convertGalleryToMetadata(gallery);
           // if user is collaborator, include only images assigned to them.
-          newMetadata.filter(
+          newMetadata = newMetadata.filter(
             ({ assignees }) =>
               isOwnerOrMember ||
               (assignees as string[]).includes(auth?.user?.username as string)
