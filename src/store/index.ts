@@ -1242,12 +1242,20 @@ export class DominateStore {
   };
 
   fetchMulti = async (
-    itemManager: ItemManager,
+    itemManager_: ItemManager | string, // ItemManager or collectionUid string
     UIDs: string[]
   ): Promise<Item[]> => {
     if (UIDs.length === 0) {
       // itemManager.fetchMulti will die messily if we pass it an empty UID array
       return [];
+    }
+    let itemManager;
+    if (itemManager_ instanceof ItemManager) {
+      itemManager = itemManager_;
+    } else {
+      const collectionManager = this.etebaseInstance.getCollectionManager();
+      const collection = await collectionManager.fetch(itemManager_);
+      itemManager = collectionManager.getItemManager(collection);
     }
     let items = (await itemManager.fetchMulti(UIDs)).data;
     // re-order the retrieved items to the match UIDs:

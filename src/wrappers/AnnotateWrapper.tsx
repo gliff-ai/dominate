@@ -84,6 +84,10 @@ export const AnnotateWrapper = ({
   const [defaultLabels, setDefaultLabels] = useState<string[]>([]);
   const [restrictLabels, setRestrictLabels] = useState<boolean>(false);
   const [multiLabel, setMultiLabel] = useState<boolean>(true);
+  const [userAnnotations, setUserAnnotations] = useState<{
+    [username: string]: Annotations;
+  }>({}); // object mapping usernames to annotations for the current image
+
   const plugins = usePlugins(collectionUid, auth, Product.ANNOTATE);
 
   const isMounted = useRef(false);
@@ -132,7 +136,7 @@ export const AnnotateWrapper = ({
 
       void storeInstance
         .getImagesMeta(collectionUid)
-        .then((items) => {
+        .then(async (items) => {
           const newImageUIDs = items.tiles
             .filter(
               ({ assignees, imageUID }) =>
@@ -148,6 +152,36 @@ export const AnnotateWrapper = ({
           )?.fileInfo;
           if (fileInfo) {
             setStateIfMounted(fileInfo, setImageFileInfo, isMounted.current);
+          }
+
+          if (!!annotationUid) {
+            // fetch all the annotationsObjects for this image:
+            const annotationsMap = items.tiles.find(
+              (item) => item.imageUID === imageUid
+            )?.annotationUID;
+            if (annotationsMap) {
+              const contentStrings = await Promise.all(
+                (
+                  await storeInstance.fetchMulti(
+                    collectionUid,
+                    Object.values(annotationsMap)
+                  )
+                ).map((item) => item.getContent(OutputFormat.String))
+              );
+
+              const object = Object.assign(
+                {},
+                ...Object.keys(annotationsMap).map((username, i) => ({
+                  [username]: new Annotations(JSON.parse(contentStrings[i])),
+                }))
+              );
+              setStateIfMounted(
+                // zip usernames and Annotations objects back together:
+                object,
+                setUserAnnotations,
+                isMounted.current
+              );
+            }
           }
         })
         .catch((e) => {
@@ -445,6 +479,8 @@ export const AnnotateWrapper = ({
       restrictLabels={restrictLabels}
       multiLabel={multiLabel}
       saveMetadataCallback={saveMetadataCallback}
+      readonly={!!annotationUid}
+      userAnnotations={userAnnotations}
     />
   );
 };
