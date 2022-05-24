@@ -20,7 +20,7 @@ import {
   AuditMetaMigrations,
   AuditContentMigrations,
 } from "./Audit";
-import { FileInfo, BaseMeta } from "./shared";
+import { FileInfo, BaseMeta, DemoMetadata } from "./shared";
 
 interface MetaItem {
   // as seen in CURATE
@@ -57,6 +57,7 @@ export type {
   Channels,
   Slices,
   Metadata,
+  DemoMetadata,
 };
 
 export { migrations };
