@@ -1,11 +1,19 @@
-import { ReactElement, useCallback } from "react";
+import {
+  ReactElement,
+  SetStateAction,
+  useCallback,
+  Dispatch,
+  useMemo,
+} from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
   UserInterface as Manage,
   ProvideAuth /* TODO export Services */,
 } from "@gliff-ai/manage";
-import { DominateStore, API_URL } from "@/store";
+import { ImageFileInfo } from "@gliff-ai/upload";
+import { Task } from "@gliff-ai/style";
+import { DominateStore, API_URL, DEMO_DATA_URL } from "@/store";
 import { useAuth } from "@/hooks/use-auth";
 import {
   inviteNewCollaborator,
@@ -14,8 +22,9 @@ import {
 } from "@/services/user";
 import { trustedServicesAPI, TrustedService } from "@/services/trustedServices";
 import { jsPluginsAPI, JsPlugin } from "@/services/plugins";
-import { GalleryTile } from "@/interfaces";
+import { FileInfo, GalleryTile, DemoMetadata, GalleryMeta } from "@/interfaces";
 import { PluginType, Plugin } from "@/plugins";
+import { loadNonTiffImageFromURL } from "@/imageConversions";
 
 type Progress = {
   [uid: string]: { complete: number; total: number };
@@ -23,34 +32,47 @@ type Progress = {
 
 interface Props {
   storeInstance: DominateStore;
+  setTask: Dispatch<SetStateAction<Task>>;
 }
 
-export const ManageWrapper = (props: Props): ReactElement | null => {
+export const ManageWrapper = ({
+  storeInstance,
+  setTask,
+}: Props): ReactElement | null => {
   const auth = useAuth();
   const navigate = useNavigate();
 
-  const getProjects = useCallback(async () => {
-    const projects = await props.storeInstance.getCollectionsMeta();
+  const getProjects = useCallback(async (): Promise<GalleryMeta[]> => {
+    const projects = await storeInstance.getCollectionsMeta();
 
     return projects;
-  }, [props.storeInstance]);
+  }, [storeInstance]);
 
   const getProject = useCallback(
     async ({ projectUid }) => {
-      const project = await props.storeInstance.getCollectionMeta(projectUid);
+      const project = await storeInstance.getCollectionMeta(projectUid);
 
       return project;
     },
-    [props.storeInstance]
+    [storeInstance]
+  );
+
+  const deleteProject = useCallback(
+    async ({ projectUid }): Promise<boolean> => {
+      const result = await storeInstance.deleteCollection(projectUid, setTask);
+
+      return result;
+    },
+    [storeInstance]
   );
 
   const createProject = useCallback(
     async (projectDetails: { name: string; description?: string }) => {
-      const uid = await props.storeInstance.createCollection(projectDetails);
+      const uid = await storeInstance.createCollection(projectDetails);
 
       return uid;
     },
-    [props.storeInstance]
+    [storeInstance]
   );
 
   const inviteUser = useCallback(async ({ email }) => {
@@ -64,7 +86,6 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
 
   const inviteCollaborator = useCallback(async ({ email }) => {
     // Invite them to create a gliff account
-
     const result = await inviteNewCollaborator(email);
 
     return true;
@@ -73,14 +94,14 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
 
   const inviteToProject = useCallback(
     async ({ projectUid, email }) => {
-      const result = await props.storeInstance.inviteUserToCollection(
+      const result = await storeInstance.inviteUserToCollection(
         projectUid,
         email
       );
 
       return true;
     },
-    [props.storeInstance]
+    [storeInstance]
   );
 
   const getPlugins = useCallback(async (): Promise<Plugin[]> => {
@@ -111,8 +132,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
         return null;
       }
       // First create a trusted service base user
-      const { key, email } =
-        await props.storeInstance.createTrustedServiceUser();
+      const { key, email } = await storeInstance.createTrustedServiceUser();
 
       // Set the user profile
       const res = await trustedServicesAPI.createTrustedService({
@@ -122,7 +142,7 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
 
       return { key, email };
     },
-    [props.storeInstance]
+    [storeInstance]
   );
 
   const updatePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
@@ -158,10 +178,10 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
 
       if (projectUid !== undefined) {
         collectionsContent = [
-          await props.storeInstance.getCollectionContent(projectUid),
+          await storeInstance.getCollectionContent(projectUid),
         ];
       } else {
-        collectionsContent = await props.storeInstance.getCollectionsContent();
+        collectionsContent = await storeInstance.getCollectionsContent();
       }
 
       const progress: Progress = {};
@@ -188,34 +208,32 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
       });
       return progress;
     },
-    [auth, props.storeInstance]
+    [auth?.userAccess, storeInstance]
   );
 
   const getCollectionMembers = useCallback(
     async ({ collectionUid }) => {
-      const result = await props.storeInstance.getCollectionMembers(
-        collectionUid
-      );
+      const result = await storeInstance.getCollectionMembers(collectionUid);
 
       return result;
     },
-    [props.storeInstance]
+    [storeInstance]
   );
 
   const getCollectionsMembers = useCallback(async () => {
-    const result = await props.storeInstance.getCollectionsMembers();
+    const result = await storeInstance.getCollectionsMembers();
 
     return result;
-  }, [props.storeInstance]);
+  }, [storeInstance]);
 
   const removeFromProject = useCallback(
     async ({ projectUid, email }): Promise<void> => {
-      const result = await props.storeInstance.revokeAccessToCollection(
+      const result = await storeInstance.revokeAccessToCollection(
         projectUid,
         email
       );
     },
-    [props.storeInstance]
+    [storeInstance]
   );
 
   const launchCurate = useCallback(
@@ -232,7 +250,20 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
     [navigate]
   );
 
-  const launchDocs = () => window.open("https://docs.gliff.app/", "_blank");
+  const launchDocs = useCallback(
+    () => window.open("https://docs.gliff.app/", "_blank"),
+    []
+  );
+
+  const incrementTaskProgress = useCallback(
+    (increment: number) => () => {
+      setTask((prevTask) => ({
+        ...prevTask,
+        progress: (prevTask.progress as number) + increment,
+      }));
+    },
+    [setTask]
+  );
 
   const updateProjectDetails = useCallback(
     async ({
@@ -242,47 +273,147 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
       projectUid: string;
       projectDetails: { name?: string; description?: string };
     }): Promise<boolean> => {
-      const result = await props.storeInstance.updateCollectionMeta(
+      const result = await storeInstance.updateCollectionMeta(
         projectUid,
         projectDetails
       );
 
       return result;
     },
-    [props.storeInstance]
+    [storeInstance]
   );
 
-  // These require trailing slashes otherwise Safari won't send the Auth Token (as django will 301)
-  const services = {
-    queryTeam: "GET /team/",
-    loginUser: "POST /user/login", // Not used, we pass an authd user down
-    getProjects,
-    getProject,
-    getCollectionMembers,
-    getCollectionsMembers,
-    createProject,
-    inviteUser,
-    inviteCollaborator,
-    inviteToProject,
-    removeFromProject,
-    createPlugin,
-    getPlugins,
-    updatePlugin,
-    deletePlugin,
-    getAnnotationProgress,
-    launchDocs,
-    updateProjectDetails,
-  };
+  const downloadDemoData = useCallback(async (): Promise<string | null> => {
+    setTask({
+      isLoading: true,
+      description: "Downloading demo data.",
+      progress: 0,
+    });
 
-  if (!auth || !props.storeInstance || !auth.user || !auth.userProfile)
-    return null;
+    let projectUid: string | null = null;
+    try {
+      // create a new project
+      projectUid = await storeInstance.createCollection({
+        name: "Giraffes-Hippos Demo",
+      });
 
-  const user = {
-    email: auth.user.username,
-    authToken: auth.user.authToken,
-    userAccess: auth.userAccess,
-    tierID: auth?.userProfile.team.tier.id,
-  };
+      // fetch the metadata
+      const metadata: DemoMetadata[] = (await (
+        await fetch(`${DEMO_DATA_URL}/metadata.json`)
+      ).json()) as DemoMetadata[];
+
+      const progressIncrement = Math.round(40 / (metadata.length * 2));
+      const fileInfos: ImageFileInfo[] = [];
+      const imageContents: string[] = [];
+      const allImageLabels: string[][] = [];
+      const thumbnails: string[] = [];
+
+      incrementTaskProgress(5);
+
+      // loop through the matadata and load all the images
+      await Promise.allSettled(
+        metadata.map(async (imeta): Promise<{
+          imageFileInfo: DemoMetadata["fileInfo"];
+          thumbnail: string;
+          imageContent: string;
+        }> => {
+          const result = await loadNonTiffImageFromURL(
+            `${DEMO_DATA_URL}/${imeta?.fileInfo?.fileName as string}`,
+            imeta?.fileInfo,
+            incrementTaskProgress(progressIncrement)
+          );
+          return result;
+        })
+      ).then((results) =>
+        results.forEach((result, i) => {
+          if (result?.status === "fulfilled" && result?.value) {
+            const { imageFileInfo, thumbnail, imageContent } = result.value;
+
+            fileInfos.push(imageFileInfo as FileInfo);
+            thumbnails.push(thumbnail);
+            imageContents.push(imageContent);
+            allImageLabels.push(metadata[i].imageLabels);
+          }
+        })
+      );
+
+      // upload the images to STORE
+      await storeInstance.createImage(
+        projectUid,
+        fileInfos,
+        thumbnails,
+        imageContents,
+        setTask,
+        allImageLabels
+      );
+
+      setTask({
+        isLoading: false,
+        description: "Downloading demo data.",
+        progress: 100,
+      });
+    } catch (e) {
+      console.error(e);
+    }
+    return projectUid;
+  }, [storeInstance, setTask, incrementTaskProgress]);
+
+  const services = useMemo(
+    () => ({
+      queryTeam: "GET /team/",
+      loginUser: "POST /user/login", // Not used, we pass an authd user down
+      getProjects,
+      getProject,
+      deleteProject,
+      getCollectionMembers,
+      getCollectionsMembers,
+      createProject,
+      updateProjectDetails,
+      inviteUser,
+      inviteCollaborator,
+      inviteToProject,
+      removeFromProject,
+      createPlugin,
+      getPlugins,
+      updatePlugin,
+      deletePlugin,
+      getAnnotationProgress,
+      launchDocs,
+      downloadDemoData,
+    }),
+    [
+      getProjects,
+      getProject,
+      deleteProject,
+      getCollectionMembers,
+      getCollectionsMembers,
+      createProject,
+      updateProjectDetails,
+      inviteUser,
+      inviteCollaborator,
+      inviteToProject,
+      removeFromProject,
+      createPlugin,
+      getPlugins,
+      updatePlugin,
+      deletePlugin,
+      getAnnotationProgress,
+      launchDocs,
+      downloadDemoData,
+    ]
+  );
+
+  const user = useMemo(
+    () => ({
+      email: auth?.user?.username,
+      authToken: auth?.user?.authToken,
+      userAccess: auth?.userAccess,
+      tierID: auth?.userProfile?.team?.tier?.id,
+    }),
+    [auth]
+  );
+
+  if (!storeInstance || !auth?.user || !auth?.userProfile) return null;
 
   return (
     <ProvideAuth>
