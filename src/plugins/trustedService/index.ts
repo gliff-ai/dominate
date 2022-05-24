@@ -10,20 +10,13 @@ function unpackUiElements(
   template: UiTemplate,
   user_username: string
 ): PluginElement[] {
-  return template.uiElements.map(
-    ({ apiEndpoint, uiParams }) =>
-      new TrustedServiceClass(
-        type,
-        name,
-        baseUrl,
-        apiEndpoint,
-        uiParams.tooltip,
-        {
-          plugin: username as string,
-          user: user_username,
-        }
-      )
-  );
+  // NOTE: having an array will make sense again once we introduce the toolbar.
+  return [
+    new TrustedServiceClass(type, name, baseUrl, template.ui.button.tooltip, {
+      plugin: username as string,
+      user: user_username,
+    }),
+  ];
 }
 
 async function initTrustedServiceObjects(
