@@ -1249,7 +1249,7 @@ export class DominateStore {
       // itemManager.fetchMulti will die messily if we pass it an empty UID array
       return [];
     }
-    let itemManager;
+    let itemManager: ItemManager;
     if (itemManager_ instanceof ItemManager) {
       itemManager = itemManager_;
     } else {

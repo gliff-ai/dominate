@@ -226,7 +226,9 @@ export const CurateWrapper = ({
       const annotationUid = collectionContent.find(
         (tile) => tile.imageUID === imageUid
       )?.annotationUID[username];
-      navigate(`/annotate/${collectionUid}/${imageUid}/${annotationUid}`);
+      if (annotationUid) {
+        navigate(`/annotate/${collectionUid}/${imageUid}/${annotationUid}`);
+      }
     } else {
       navigate(`/annotate/${collectionUid}/${imageUid}`);
     }

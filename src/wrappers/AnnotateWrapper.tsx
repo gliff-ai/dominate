@@ -154,7 +154,7 @@ export const AnnotateWrapper = ({
             setStateIfMounted(fileInfo, setImageFileInfo, isMounted.current);
           }
 
-          if (!!annotationUid) {
+          if (annotationUid) {
             // fetch all the annotationsObjects for this image:
             const annotationsMap = items.tiles.find(
               (item) => item.imageUID === imageUid
@@ -169,15 +169,15 @@ export const AnnotateWrapper = ({
                 ).map((item) => item.getContent(OutputFormat.String))
               );
 
-              const object = Object.assign(
+              const newUserAnnotations = Object.assign(
                 {},
                 ...Object.keys(annotationsMap).map((username, i) => ({
                   [username]: new Annotations(JSON.parse(contentStrings[i])),
                 }))
-              );
+              ) as { [username: string]: Annotations };
               setStateIfMounted(
                 // zip usernames and Annotations objects back together:
-                object,
+                newUserAnnotations,
                 setUserAnnotations,
                 isMounted.current
               );
@@ -375,14 +375,14 @@ export const AnnotateWrapper = ({
               meta: item.getMeta<AnnotationMeta>(),
               annotations: new Annotations(
                 JSON.parse(await item.getContent(OutputFormat.String))
-              ) as Annotations,
+              ),
             }))
         : storeInstance.getAnnotationsObject(
             collectionUid,
             imageUid,
             auth.user.username
           );
-      fetch
+      return fetch
         .then(
           (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
             setStateIfMounted(
