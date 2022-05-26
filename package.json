@@ -47,7 +47,7 @@
     "@gliff-ai/annotate": "^4.8.2",
     "@gliff-ai/audit": "^2.1.2",
     "@gliff-ai/curate": "^6.1.1",
-    "@gliff-ai/manage": "file:gliff-ai-manage-1.0.0.tgz",
+    "@gliff-ai/manage": "^5.0.8",
     "@gliff-ai/upload": "^1.2.5",
     "@material-ui/types": "^5.1.0",
     "@mui/icons-material": "^5.3.0",
