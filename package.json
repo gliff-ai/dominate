@@ -44,11 +44,10 @@
   "dependencies": {
     "@emotion/react": "^11.7.1",
     "@emotion/styled": "^11.6.0",
-    "@gliff-ai/annotate": "^4.4.5",
+    "@gliff-ai/annotate": "^4.8.2",
     "@gliff-ai/audit": "^2.1.2",
-    "@gliff-ai/curate": "file:gliff-ai-curate-1.0.0.tgz",
+    "@gliff-ai/curate": "^6.1.1",
     "@gliff-ai/manage": "file:gliff-ai-manage-1.0.0.tgz",
-    "@gliff-ai/style": "^13.0.1",
     "@gliff-ai/upload": "^1.2.5",
     "@material-ui/types": "^5.1.0",
     "@mui/icons-material": "^5.3.0",
