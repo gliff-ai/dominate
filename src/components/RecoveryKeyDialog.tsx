@@ -1,7 +1,12 @@
 import { useState } from "react";
-import { Typography, Button, Card } from "@mui/material";
 
-import { AdvancedDialog, theme } from "@gliff-ai/style";
+import {
+  AdvancedDialog,
+  theme,
+  Typography,
+  Button,
+  MuiCard,
+} from "@gliff-ai/style";
 import { useNavigate } from "react-router-dom";
 
 interface Props {
@@ -23,7 +28,7 @@ export const RecoveryKeyDialog = ({ recoveryKey }: Props): JSX.Element => {
       maxWidth="md"
       title="Recovery Key"
     >
-      <Card
+      <MuiCard
         sx={{
           width: "100%",
           height: "67px",
@@ -39,7 +44,7 @@ export const RecoveryKeyDialog = ({ recoveryKey }: Props): JSX.Element => {
         >
           {recoveryKey?.join(" ")}
         </Typography>
-      </Card>
+      </MuiCard>
 
       <Typography
         sx={{
