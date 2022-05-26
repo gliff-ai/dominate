@@ -152,7 +152,6 @@ export const CurateWrapper = ({
         imageFileInfo,
         thumbnails,
         stringifiedSlices,
-        task,
         setTask
       )
       .then((newTiles) => {
