@@ -79,7 +79,7 @@ ReactDOM.render(
       showDialog
     >
       <IntercomProvider appId={INTERCOM_APP_ID} autoBoot>
-        <ProvideAuth storeInstance={storeInstance}>
+        <ProvideAuth storeInstance={storeInstance} logrocket={LogRocket}>
           <StylesProvider generateClassName={generateClassName("dominate")}>
             <UserInterface storeInstance={storeInstance} />
           </StylesProvider>

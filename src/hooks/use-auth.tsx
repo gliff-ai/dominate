@@ -2,21 +2,17 @@ import axios from "axios";
 import { useState, useContext, createContext, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useIntercom } from "react-use-intercom";
+import type LogRocket from "logrocket";
 
 import { DominateStore } from "@/store";
 import { User, UserProfile } from "@/services/user/interfaces";
-import { createUserProfile, getUserProfile } from "@/services/user";
+import { createUserProfile, getUserProfile, UserAccess } from "@/services/user";
 import { useMountEffect } from "./use-mountEffect";
 
 interface Props {
   children: React.ReactElement;
   storeInstance: DominateStore;
-}
-
-export enum UserAccess {
-  Owner = "owner",
-  Member = "member",
-  Collaborator = "collaborator",
+  logrocket: typeof LogRocket;
 }
 
 interface Context {
@@ -26,7 +22,7 @@ interface Context {
   loaded: boolean;
   userAccess: UserAccess | null;
   getInstance: () => DominateStore;
-  changePassword: (newPassword: string) => Promise<boolean>;
+  changePassword: (newPassword: string) => Promise<{ recoveryKey: string[] }>;
   signin: (username: string, password: string) => Promise<User>;
   signout: () => Promise<boolean>;
   signup: (username: string, password: string) => Promise<User>;
@@ -46,7 +42,10 @@ const authContext = createContext<Context | null>(null);
 export const useAuth = (): Context | null => useContext(authContext);
 
 // Provider hook that creates auth object and handles state
-function useProvideAuth(storeInstance: DominateStore) {
+function useProvideAuth(
+  storeInstance: DominateStore,
+  logrocket: typeof LogRocket
+) {
   const { update } = useIntercom();
   const [user, setUser] = useState<User | null | undefined>(undefined);
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
@@ -96,10 +95,7 @@ function useProvideAuth(storeInstance: DominateStore) {
           Sentry.setUser({ email: authedUser.username || "" });
         });
 
-        void import("logrocket").then((Logrocket: any) => {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, no-underscore-dangle
-          Logrocket?._logger?.identify(authedUser.username);
-        });
+        logrocket.identify(authedUser.username);
       }
 
       void getUserProfile().then(
@@ -153,8 +149,10 @@ function useProvideAuth(storeInstance: DominateStore) {
       return response;
     });
 
-  const changePassword = (newPassword: string): Promise<boolean> =>
-    storeInstance.changePassword(newPassword).then(signout);
+  const changePassword = async (
+    newPassword: string
+  ): Promise<{ recoveryKey: string[] }> =>
+    storeInstance.changePassword(newPassword);
 
   const createProfile = async (
     name: string,
@@ -220,7 +218,7 @@ function useProvideAuth(storeInstance: DominateStore) {
 // Provider component that wraps your app and makes auth object
 // available to any child component that calls useAuth().
 export function ProvideAuth(props: Props): React.ReactElement {
-  const auth = useProvideAuth(props.storeInstance);
+  const auth = useProvideAuth(props.storeInstance, props.logrocket);
   return (
     <authContext.Provider value={auth}>{props.children}</authContext.Provider>
   );
