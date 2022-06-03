@@ -123,7 +123,8 @@ export const CurateWrapper = ({
     const thumbnails: string[] = [];
     const stringifiedSlices: string[] = [];
 
-    setTask({ ...task, progress: 0, description: "Making thumbnails..." });
+    // setTask({ ...task, progress: 0, description: "Making thumbnails..." });
+    await new Promise((resolve) => setTimeout(resolve, 50)); // gives the snackbar time to re-render
 
     for (let i = 0; i < imageFileInfo.length; i += 1) {
       // Stringify slices data and get image metadata

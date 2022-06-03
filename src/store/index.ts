@@ -883,6 +883,7 @@ export class DominateStore {
         description: "Upload complete",
         progress: 100,
       }));
+      await new Promise((resolve) => setTimeout(resolve, 100)); // gives the snackbar time to re-render
 
       return newTiles;
     } catch (err) {
