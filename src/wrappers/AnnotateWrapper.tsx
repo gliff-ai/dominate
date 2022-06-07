@@ -13,7 +13,7 @@ import makeStyles from "@mui/styles/makeStyles";
 import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { icons, IconButton, Task } from "@gliff-ai/style";
-import { OutputFormat } from "etebase";
+import { OutputFormat } from "@gliff-ai/etebase";
 import { DominateStore } from "@/store";
 import { AnnotationMeta, GalleryMeta } from "@/interfaces";
 import { UserAccess } from "@/services/user";
