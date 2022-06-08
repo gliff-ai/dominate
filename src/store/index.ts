@@ -11,11 +11,10 @@ import {
   CollectionAccessLevel,
   SignedInvitationRead,
   ItemMetadata,
-  base64,
-} from "etebase";
+} from "@gliff-ai/etebase";
 import axios from "axios";
 
-import { CollectionMember } from "etebase/dist/lib/OnlineManagers";
+import { CollectionMember } from "@gliff-ai/etebase/dist/lib/OnlineManagers";
 import { Task } from "@gliff-ai/style";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
