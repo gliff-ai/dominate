@@ -4,8 +4,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import UserInterface, { AnnotationSession } from "@gliff-ai/audit";
 import { IconButton, icons } from "@gliff-ai/style";
 import { DominateStore } from "@/store";
-import { useAuth } from "@/hooks/use-auth";
-import { useStore } from "@/hooks/use-store";
+import { useAuth, useStore } from "@/hooks";
 import { setStateIfMounted } from "@/helpers";
 import { ProductNavbarData } from "@/components";
 
@@ -129,7 +128,6 @@ export const AuditWrapper = ({
           />
         ),
       productLocation: "AUDIT",
-      productLocationIcon: "audit",
     });
   }, [collectionTitle, imageData]);
 

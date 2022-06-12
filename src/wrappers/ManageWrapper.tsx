@@ -254,7 +254,6 @@ export const ManageWrapper = (props: Props): ReactElement | null => {
       buttonBack: null,
       buttonForward: null,
       productLocation: "MANAGE",
-      productLocationIcon: "manage",
     });
   }, []);
 

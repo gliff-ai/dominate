@@ -1,8 +1,7 @@
 import { ReactElement, useState, useEffect, useRef } from "react";
 import { useLocation, useParams, useNavigate } from "react-router-dom";
 import makeStyles from "@mui/styles/makeStyles";
-import { Button, ButtonGroup, Grid } from "@mui/material";
-import { theme, IconButton, icons } from "@gliff-ai/style";
+import { Grid, Button, ButtonGroup } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 
 const useStyles = makeStyles({
@@ -38,7 +37,6 @@ interface ProductNavbarData {
   buttonBack: ReactElement | null;
   buttonForward: ReactElement | null;
   productLocation: string;
-  productLocationIcon: string;
 }
 
 interface Props {

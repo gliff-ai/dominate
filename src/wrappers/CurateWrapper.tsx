@@ -511,7 +511,6 @@ export const CurateWrapper = ({
         />
       ) : null,
       productLocation: "CURATE",
-      productLocationIcon: "curate",
     });
   }, [collectionTitle]);
 

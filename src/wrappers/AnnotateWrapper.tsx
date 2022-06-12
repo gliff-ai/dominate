@@ -433,7 +433,6 @@ export const AnnotateWrapper = ({
       ),
       buttonForward: null,
       productLocation: "ANNOTATE",
-      productLocationIcon: "annotate",
     });
   }, [imageFileInfo, collectionTitle]);
 

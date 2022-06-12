@@ -1,90 +1,91 @@
 import { ReactElement, useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import SVG from "react-inlinesvg";
 import {
+  HtmlTooltip,
+  MuiIconbutton,
   AppBar,
   Avatar,
   Button,
   Grid,
-  IconButton,
   Menu,
   MenuItem,
-  Theme,
+  theme,
   Toolbar,
   Typography,
-} from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
-import { Link, useNavigate } from "react-router-dom";
-import SVG from "react-inlinesvg";
-import { HtmlTooltip } from "@gliff-ai/style";
+} from "@gliff-ai/style";
 import { imgSrc } from "@/imgSrc";
 
 import { useAuth } from "@/hooks/use-auth";
-import {
-  ProductsNavbar,
-  ProductNavbarData,
-  BaseProductIcon,
-} from "@/components";
-import { DominateStore } from "@/store";
-import { Annotate } from "@/wrappers";
+import { ProductsNavbar, ProductNavbarData } from "@/components";
 
-const useStyles = makeStyles((theme: Theme) => ({
-  appBar: {
-    backgroundColor: `${theme.palette.secondary.light} !important`,
-    height: "90px",
-    paddingTop: "9px",
-    justifyContent: "space-between",
+const documentButton = {
+  marginLeft: "40px",
+  "& img": {
+    margin: "auto",
+    borderRadius: "50%",
+    height: "48px",
+    backgroundColor: "#FAFAFA",
   },
-  svgMedium: {
-    width: "22px",
-    height: "100%",
+  ".documentHover:hover": {
+    backgroundColor: "#02FFAD",
+  },
+};
+const svgMedium = {
+  marginLeft: "-1px",
+};
+const menuItem = {
+  opacity: "1",
+  "&:hover": {
+    background: theme.palette.primary.main,
+  },
+  "& a": {
+    color: theme.palette.text.primary,
+    textDecoration: "none",
+    fontSize: "1rem",
+    display: "inline-flex",
+  },
+  "& svg": {
     marginLeft: "-1px",
+    marginRight: "12px",
   },
-  avatarUser: {
-    width: "40px !important",
-    height: "40px !important",
+};
+const appBar = {
+  backgroundColor: `${theme.palette.secondary.light} !important`,
+  height: "90px",
+  paddingTop: "9px",
+  justifyContent: "space-between",
+};
+const logo = {
+  marginBottom: "5px",
+  marginTop: "7px",
+  marginRight: "200px",
+};
+const avatarUser = {
+  width: "40px !important",
+  height: "40px !important",
+  backgroundColor: `${theme.palette.text.secondary} !important`,
+  "&:hover": {
     backgroundColor: `${theme.palette.text.secondary} !important`,
-    "&:hover": {
-      backgroundColor: `${theme.palette.text.secondary} !important`,
-    },
   },
-  menuItem: {
-    opacity: "1",
-    "&:hover": {
-      background: theme.palette.primary.main,
-    },
-    "& a": {
-      color: theme.palette.text.primary,
-      textDecoration: "none",
-      fontSize: "1rem",
-      display: "inline-flex",
-    },
-  },
-  logo: {
-    marginBottom: "5px",
-    marginTop: "7px",
-    marginRight: "200px",
-  },
-  productSectionGrid: {
-    paddingTop: "0px",
-    marginLeft: "30px",
-  },
-  productSectionDiv: {
+};
+const productSectionGrid = {
+  paddingTop: "0px",
+  marginLeft: "30px",
+};
+const productSectionDiv = {
+  ".productNavbarData": {
     display: "flex",
   },
-  navGrid: {
-    height: "90px",
-  },
-  navLinks: {
+};
+const navGrid = {
+  height: "90px",
+  ".navLinks": {
     height: "100%",
     alignItems: "center",
     display: "flex",
   },
-  accessibleSvg: {
-    fill: "#000000",
-  },
-  accessibleName: {
-    color: "#000000",
-  },
-  productLocation: {
+  ".productLocation": {
     border: "1px solid",
     borderColor: "#DADDE9",
     borderRadius: "9px",
@@ -97,25 +98,18 @@ const useStyles = makeStyles((theme: Theme) => ({
     display: "flex",
     paddingLeft: "10px",
     paddingRight: "10px",
+    backgroundColor: "#FAFAFA",
   },
-  productLocationText: {
-    margin: "auto",
-  },
-  productLocationImage: {
+  ".productLocationImage": {
     margin: "auto",
     paddingRight: "10px",
     height: "40px",
     width: "40px",
   },
-  document: {
+  ".productLocationText": {
     margin: "auto",
-    borderRadius: "50%",
-    height: "48px",
-    "&:hover": {
-      backgroundColor: "#02FFAD",
-    },
   },
-}));
+};
 
 interface Props {
   productSection: JSX.Element | null;
@@ -125,7 +119,6 @@ export const NavBar = (props: Props): ReactElement | null => {
   // Get auth state and re-render anytime it changes
   const auth = useAuth();
   const navigate = useNavigate();
-  const classes = useStyles();
   const [userInitials, setUserInitials] = useState("");
   const [anchorElement, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -156,7 +149,7 @@ export const NavBar = (props: Props): ReactElement | null => {
     ].includes(window.location.pathname);
 
   // If the URL begins with /annotate/ the productSection is rendered
-  const hasProductSection = (): boolean =>
+  const isAnnotate = (): boolean =>
     window.location.pathname.startsWith("/annotate/");
 
   if (!auth) return null;
@@ -169,16 +162,16 @@ export const NavBar = (props: Props): ReactElement | null => {
 
   const accountMenu = (
     <>
-      <IconButton onClick={handleClick} aria-controls="menu" size="large">
+      <MuiIconbutton onClick={handleClick} aria-controls="menu" size="large">
         <HtmlTooltip
           title={<Typography>Account</Typography>}
           placement="bottom"
         >
-          <Avatar variant="circular" className={classes.avatarUser}>
+          <Avatar variant="circular" sx={avatarUser}>
             {userInitials}
           </Avatar>
         </HtmlTooltip>
-      </IconButton>
+      </MuiIconbutton>
       <Menu
         anchorEl={anchorElement}
         keepMounted
@@ -191,30 +184,26 @@ export const NavBar = (props: Props): ReactElement | null => {
           horizontal: "right",
         }}
       >
-        <MenuItem className={classes.menuItem}>
+        <MenuItem sx={{ ...menuItem }}>
           <Link to="/account" onClick={() => setAnchorEl(null)}>
-            <SVG
-              src={imgSrc("account-settings")}
-              className={classes.svgMedium}
-              style={{ marginRight: "12px" }}
-            />
+            <SVG src={imgSrc("account-settings")} width="22px" height="100%" />
             Account Settings
           </Link>
         </MenuItem>
         {showBilling ? (
-          <MenuItem className={classes.menuItem}>
+          <MenuItem sx={{ ...menuItem }}>
             <Link to="/billing" onClick={() => setAnchorEl(null)}>
               <SVG
                 src={imgSrc("account-settings")}
-                className={classes.svgMedium}
-                style={{ marginRight: "12px" }}
+                width="22px"
+                height="100%"
               />
               Billing
             </Link>
           </MenuItem>
         ) : null}
         <MenuItem
-          className={classes.menuItem}
+          sx={{ ...menuItem }}
           onClick={() =>
             auth.signout().then(() => {
               navigate("signin");
@@ -222,11 +211,7 @@ export const NavBar = (props: Props): ReactElement | null => {
             })
           }
         >
-          <SVG
-            src={imgSrc("log-out")}
-            className={classes.svgMedium}
-            style={{ marginRight: "12px" }}
-          />
+          <SVG src={imgSrc("log-out")} width="22px" height="100%" />
           Log out
         </MenuItem>
       </Menu>
@@ -234,10 +219,15 @@ export const NavBar = (props: Props): ReactElement | null => {
   );
 
   return (
-    <AppBar position="sticky" className={classes.appBar} elevation={0}>
+    <AppBar position="sticky" sx={appBar} elevation={0}>
       <Toolbar>
-        <Grid container direction="row" justifyContent="space-between">
-          <Grid className={classes.logo}>
+        <Grid
+          sx={productSectionDiv}
+          container
+          direction="row"
+          justifyContent="space-between"
+        >
+          <Grid sx={logo}>
             <img
               src={imgSrc("gliff-web-master-black")}
               width="79px"
@@ -245,35 +235,31 @@ export const NavBar = (props: Props): ReactElement | null => {
               alt="gliff logo"
             />
           </Grid>
-          <div className={classes.productSectionDiv}>
+          <div className="productNavbarData">
             <ProductsNavbar productNavbarData={props.productNavbarData} />
-            {hasProductSection() ? (
-              <Grid className={classes.productSectionGrid}>
-                {props.productSection}
-              </Grid>
+            {isAnnotate() ? (
+              <Grid sx={productSectionGrid}>{props.productSection}</Grid>
             ) : null}
           </div>
 
-          <Grid className={classes.navGrid}>
-            <nav className={classes.navLinks}>
-              <div className={classes.productLocation}>
+          <Grid sx={navGrid}>
+            <nav className="navLinks">
+              <div className="productLocation">
                 <img
-                  className={classes.productLocationImage}
-                  src={imgSrc(props.productNavbarData.productLocationIcon)}
-                  alt="ANNOTATE"
+                  className="productLocationImage"
+                  src={imgSrc(props.productNavbarData.productLocation)}
+                  alt={props.productNavbarData.productLocation}
                 />
-                <p className={classes.productLocationText}>
+                <p className="productLocationText">
                   {props.productNavbarData.productLocation}
                 </p>
               </div>
               <Button
-                style={{
-                  marginLeft: "40px",
-                }}
+                sx={documentButton}
                 onClick={() => window.open("https://docs.gliff.app/", "_blank")}
               >
                 <img
-                  className={classes.document}
+                  className="documentHover"
                   src={imgSrc("document")}
                   alt="help-center"
                 />

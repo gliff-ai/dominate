@@ -71,7 +71,6 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
       buttonBack: null,
       buttonForward: null,
       productLocation: "",
-      productLocationIcon: "",
     }
   );
 
