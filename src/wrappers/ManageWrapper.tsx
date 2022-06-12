@@ -1,11 +1,10 @@
-import { ReactElement, useCallback, useEffect, useState } from "react";
+import { ReactElement, useCallback, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 import {
   UserInterface as Manage,
   ProvideAuth /* TODO export Services */,
 } from "@gliff-ai/manage";
-import { IconButton, icons } from "@gliff-ai/style";
 import { DominateStore, API_URL } from "@/store";
 import { useAuth } from "@/hooks/use-auth";
 import {
@@ -15,7 +14,7 @@ import {
 } from "@/services/user";
 import { trustedServicesAPI, TrustedService } from "@/services/trustedServices";
 import { jsPluginsAPI, JsPlugin } from "@/services/plugins";
-import { ProductsNavbar, ProductNavbarData } from "@/components";
+import { ProductNavbarData } from "@/components";
 import { GalleryTile } from "@/interfaces";
 import { PluginType, Plugin } from "@/plugins";
 

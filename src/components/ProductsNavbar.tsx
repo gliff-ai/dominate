@@ -1,34 +1,31 @@
-import { ReactElement, useState, useEffect, useRef } from "react";
-import { useLocation, useParams, useNavigate } from "react-router-dom";
-import makeStyles from "@mui/styles/makeStyles";
+import { ReactElement } from "react";
+import { useLocation } from "react-router-dom";
 import { Grid, Button, ButtonGroup } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 
-const useStyles = makeStyles({
-  buttonGroup: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "42px",
-  },
-  productSectionGrid: {
-    display: "flex",
-    alignItems: "center",
-  },
-  buttonBorder: {
-    backgroundColor: "white !important",
-    borderColor: "#dadde9 !important",
-    cursor: "default",
-    paddingLeft: "30px",
-    paddingRight: "30px",
-    textAlign: "center",
-    textTransform: "none",
-    fontFamily: "Roboto",
-    fontWeight: "400",
-    fontSize: "16px",
-    color: "#2B2F3A",
-  },
-});
+const buttonBorder = {
+  backgroundColor: "white !important",
+  borderColor: "#dadde9 !important",
+  cursor: "default",
+  paddingLeft: "30px",
+  paddingRight: "30px",
+  textAlign: "center",
+  textTransform: "none",
+  fontFamily: "Roboto",
+  fontWeight: "400",
+  fontSize: "16px",
+  color: "#2B2F3A",
+};
+const buttonGroup = {
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+  height: "42px",
+};
+const productSectionGrid = {
+  display: "flex",
+  alignItems: "center",
+};
 
 interface ProductNavbarData {
   teamName: string; // fetched in MANAGE
@@ -46,7 +43,6 @@ interface Props {
 export function ProductsNavbar({
   productNavbarData,
 }: Props): ReactElement | null {
-  const classes = useStyles();
   const auth = useAuth();
   const location = useLocation();
   const { buttonBack, teamName, projectName, imageName, buttonForward } =
@@ -54,9 +50,9 @@ export function ProductsNavbar({
 
   return (
     // FIXME move CSS to STYLE
-    <Grid className={classes.productSectionGrid}>
+    <Grid sx={productSectionGrid}>
       <ButtonGroup
-        className={classes.buttonGroup}
+        sx={buttonGroup}
         orientation="horizontal"
         variant="text"
         aria-label="outlined primary button group"
@@ -67,7 +63,7 @@ export function ProductsNavbar({
         }}
       >
         <div style={{ borderRight: "1px solid #dadde9" }}>{buttonBack}</div>
-        <Button className={classes.buttonBorder}>
+        <Button sx={buttonBorder}>
           {teamName} {projectName !== "" && `— ${projectName}`}
           {imageName !== "" && ` — ${imageName}`}
         </Button>
