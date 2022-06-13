@@ -13,8 +13,8 @@ import makeStyles from "@mui/styles/makeStyles";
 import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { icons, IconButton, Task } from "@gliff-ai/style";
-import { OutputFormat } from "etebase";
 import { ProductNavbarData } from "@/components";
+import { OutputFormat } from "@gliff-ai/etebase";
 import { DominateStore } from "@/store";
 import { AnnotationMeta, GalleryMeta } from "@/interfaces";
 import { UserAccess } from "@/services/user";
@@ -307,11 +307,12 @@ export const AnnotateWrapper = ({
       storeInstance
         .getItem(collectionUid, imageUid)
         .then(async (image) => {
-          setStateIfMounted(
-            await image.getContent(OutputFormat.String),
-            setImageContent,
-            isMounted.current
-          );
+          try {
+            const content = await image.getContent(OutputFormat.String);
+            setStateIfMounted(content, setImageContent, isMounted.current);
+          } catch (e) {
+            console.error(e);
+          }
           return image.uid;
         })
         .catch((e) => {

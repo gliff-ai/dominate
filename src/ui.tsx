@@ -207,6 +207,7 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
                         <Manage
                           storeInstance={storeInstance}
                           setProductNavbarData={setProductNavbarData}
+                          setTask={setTask}
                         />
                       }
                     />

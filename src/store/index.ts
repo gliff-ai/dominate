@@ -1,3 +1,4 @@
+import { Dispatch, SetStateAction } from "react";
 import sodium from "libsodium-wrappers";
 import {
   Account,
@@ -10,11 +11,10 @@ import {
   CollectionAccessLevel,
   SignedInvitationRead,
   ItemMetadata,
-  base64,
-} from "etebase";
+} from "@gliff-ai/etebase";
 import axios from "axios";
 
-import { CollectionMember } from "etebase/dist/lib/OnlineManagers";
+import { CollectionMember } from "@gliff-ai/etebase/dist/lib/OnlineManagers";
 import { Task } from "@gliff-ai/style";
 import { Annotations, Annotation, AuditAction } from "@gliff-ai/annotate";
 import { AnnotationSession } from "@gliff-ai/audit";
@@ -50,6 +50,7 @@ const getRandomValueFromArrayOrString = (
   );
 
 export const STORE_URL = import.meta.env.VITE_STORE_URL;
+export const DEMO_DATA_URL = import.meta.env.VITE_DEMO_DATA_URL;
 export const SERVER_URL = `${STORE_URL}etebase`;
 export const API_URL = `${STORE_URL}django/api`;
 
@@ -283,26 +284,38 @@ export class DominateStore {
     };
   };
 
-  updateCollectionName = async (
+  updateCollectionMeta = async (
     collectionUid: string,
-    collectionName: string
-  ): Promise<void> => {
+    {
+      meta_version,
+      content_version,
+      type,
+      createdTime,
+      ...newMeta
+    }: Partial<GalleryMeta>
+  ): Promise<boolean> => {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
-    const collectionManager = this.etebaseInstance.getCollectionManager();
-    const collection = await this.fetchCollection(
-      collectionManager,
-      collectionUid
-    );
+    try {
+      const collectionManager = this.etebaseInstance.getCollectionManager();
+      const collection = await this.fetchCollection(
+        collectionManager,
+        collectionUid
+      );
 
-    const meta = collection.getMeta();
-    collection.setMeta({
-      ...meta,
-      modifiedTime: Date.now(),
-      name: collectionName,
-    });
+      const meta = collection.getMeta();
+      collection.setMeta({
+        ...meta,
+        modifiedTime: Date.now(),
+        ...newMeta,
+      });
 
-    await collectionManager.transaction(collection);
+      await collectionManager.transaction(collection);
+      return true;
+    } catch (e) {
+      console.error(e);
+      return false;
+    }
   };
 
   updateGalleryMeta = async (
@@ -383,7 +396,9 @@ export class DominateStore {
     const { data } = await collectionManager.list(type);
 
     const settledPromises = await Promise.allSettled(
-      data.map(this.wrangleCollectionsContent)
+      data
+        .filter((collection) => !collection.isDeleted)
+        .map(this.wrangleCollectionsContent)
     );
 
     const resolved: {
@@ -451,7 +466,11 @@ export class DominateStore {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     const { data } = await collectionManager.list(type);
-    this.collectionsMeta = data.map(this.wrangleGallery);
+
+    this.collectionsMeta = data
+      .filter((collection) => !collection.isDeleted)
+      .map(this.wrangleGallery);
+
     return this.collectionsMeta;
   };
 
@@ -467,6 +486,46 @@ export class DominateStore {
     );
 
     return { ...collection.getMeta(), uid: collection.uid };
+  };
+
+  deleteCollection = async (
+    collectionUid: string,
+    setTask: Dispatch<SetStateAction<Task>>
+  ): Promise<boolean> => {
+    if (!this.etebaseInstance) throw new Error("No store instance");
+    if (setTask)
+      setTask({
+        description: "Delete project",
+        isLoading: true,
+        progress: 0,
+      });
+    try {
+      const collectionManager = this.etebaseInstance.getCollectionManager();
+
+      const collection = await collectionManager.fetch(collectionUid);
+
+      if (setTask)
+        setTask((task) => ({
+          ...task,
+          progress: 50,
+        }));
+
+      collection.delete();
+
+      await collectionManager.upload(collection);
+
+      if (setTask)
+        setTask((task) => ({
+          ...task,
+          isLoading: false,
+          progress: 100,
+        }));
+
+      return true;
+    } catch (e) {
+      console.error(e);
+    }
+    return false;
   };
 
   getCollectionMembers = async (
@@ -526,20 +585,22 @@ export class DominateStore {
     } = {};
 
     await Promise.allSettled(
-      data.map(async (collection) => {
-        const memberManager = collectionManager.getMemberManager(collection);
-        const members = await memberManager.list();
-        const invitations = await invitationManager.listOutgoing();
+      data
+        .filter((collection) => !collection.isDeleted)
+        .map(async (collection) => {
+          const memberManager = collectionManager.getMemberManager(collection);
+          const members = await memberManager.list();
+          const invitations = await invitationManager.listOutgoing();
 
-        return {
-          uid: collection.uid,
-          data: this.reshapeMembers(
-            collection.uid,
-            members?.data,
-            invitations?.data
-          ),
-        };
-      })
+          return {
+            uid: collection.uid,
+            data: this.reshapeMembers(
+              collection.uid,
+              members?.data,
+              invitations?.data
+            ),
+          };
+        })
     ).then((results) =>
       results.forEach((result) => {
         if (result.status === "fulfilled") {
@@ -551,7 +612,13 @@ export class DominateStore {
     return resolved;
   };
 
-  createCollection = async (name: string): Promise<string> => {
+  createCollection = async ({
+    name,
+    description,
+  }: {
+    name: string;
+    description?: string;
+  }): Promise<string> => {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     // Create, encrypt and upload a new collection
@@ -564,7 +631,7 @@ export class DominateStore {
         name,
         createdTime: Date.now(),
         modifiedTime: Date.now(),
-        description: "[]",
+        description: description || "",
         defaultLabels: [],
         restrictLabels: false,
         multiLabel: true,
@@ -658,13 +725,17 @@ export class DominateStore {
     imageFileInfos: ImageFileInfo[],
     thumbnails: string[],
     imageContents: string[] | Uint8Array[],
-    task: Task,
-    setTask: (task: Task) => void
-  ): Promise<GalleryTile[] | void> => {
+    setTask: Dispatch<SetStateAction<Task>>,
+    imageLabels: string[][] | null = null,
+    maxBatchSize = 3000000
+  ): Promise<GalleryTile[] | null> => {
+    // Create/upload new gliff.image items to STORE.
+    if (!this.etebaseInstance) throw new Error("No store instance");
+
     try {
-      // Create/upload new store item for the image:
-      const createdTime = new Date().getTime();
-      // Retrieve collectionManager
+      setTask((prevTask) => ({ ...prevTask, progress: 45 }));
+
+      // fetch the collectionManager, the collection and the itemManager
       const collectionManager = this.etebaseInstance.getCollectionManager();
       const collection = await this.fetchCollection(
         collectionManager,
@@ -672,15 +743,13 @@ export class DominateStore {
       );
       const itemManager = collectionManager.getItemManager(collection);
 
-      const itemPromises: Promise<Item>[] = [];
-
-      for (let i = 0; i < imageFileInfos.length; i += 1) {
-        const imageFileInfo = imageFileInfos[i];
-        const imageContent = imageContents[i];
-
-        // Create new image item and add it to the collection
-        itemPromises.push(
-          itemManager.create<ImageMeta>(
+      // create new image items and the new gallery tiles
+      const newItems: Item[] = [];
+      const newTiles: GalleryTile[] = [];
+      const createdTime = new Date().getTime();
+      await Promise.allSettled(
+        imageFileInfos.map(async (imageFileInfo, i) => {
+          const result = await itemManager.create<ImageMeta>(
             {
               type: "gliff.image",
               meta_version: 0,
@@ -690,50 +759,98 @@ export class DominateStore {
               modifiedTime: createdTime,
               fileInfo: imageFileInfo,
             },
-            imageContent
-          )
-        );
-      }
+            imageContents[i]
+          );
+          return result;
+        })
+      ).then((results) => {
+        results.forEach((result, i) => {
+          if (result.status === "fulfilled") {
+            const newItem = result.value;
 
-      setTask({ ...task, progress: 10 });
+            newItems.push(newItem);
 
-      // save new image items:
-      const newItems = await Promise.all(itemPromises);
-      const imageUploadPromise = itemManager.batch(newItems);
-
-      const newTiles: GalleryTile[] = [];
-      for (let i = 0; i < imageFileInfos.length; i += 1) {
-        // Add the image's metadata/thumbnail and a pointer to the image item to the gallery's content:
-        newTiles.push({
-          id: newItems[i].uid, // an id representing the whole unit (image, annotation and audit), expected by curate. should be the same as imageUID (a convention for the sake of simplicity).
-          thumbnail: thumbnails[i],
-          imageLabels: [],
-          assignees: [],
-          fileInfo: imageFileInfos[i],
-          imageUID: newItems[i].uid,
-          annotationUID: {},
-          annotationComplete: {},
-          auditUID: {},
+            newTiles.push({
+              id: newItem.uid,
+              thumbnail: thumbnails[i],
+              imageLabels: imageLabels ? imageLabels[i] : [],
+              assignees: [],
+              fileInfo: imageFileInfos[i],
+              imageUID: newItem.uid,
+              annotationUID: {},
+              annotationComplete: {},
+              auditUID: {},
+            });
+          } else {
+            console.error(
+              `couldn't create item for image ${imageFileInfos[i].fileName}`
+            );
+          }
         });
+      });
+
+      setTask((prevTask) => ({ ...prevTask, progress: 55 }));
+
+      let itemsUploadPromise;
+      const numOfImages = imageFileInfos.length;
+      if (numOfImages > 1) {
+        const startOfBatch = [0];
+        let currBarch = imageFileInfos[0].size;
+        for (let i = 1; i < numOfImages; i += 1) {
+          if (currBarch + imageFileInfos[i].size > maxBatchSize) {
+            startOfBatch.push(i);
+            currBarch = 0;
+          }
+          currBarch += imageFileInfos[i].size;
+        }
+        startOfBatch.push(numOfImages);
+
+        // create promise for uploading all image items to STORE
+        itemsUploadPromise = Promise.all(
+          startOfBatch.map(async (index, i) => {
+            const result = await itemManager.batch(
+              newItems.slice(index, startOfBatch[i + 1])
+            );
+            return result;
+          })
+        );
+      } else {
+        // create promise for uploading all image items to STORE
+        itemsUploadPromise = itemManager.batch(newItems);
       }
 
-      setTask({ ...task, progress: 33 });
+      setTask((prevTask) => ({ ...prevTask, progress: 55 }));
 
-      // save new gallery tiles:
-      const oldContent = await collection.getContent(OutputFormat.String);
-      const newContent = JSON.stringify(
-        (JSON.parse(oldContent) as GalleryTile[]).concat(newTiles)
-      );
-      await collection.setContent(newContent);
-      setTask({ ...task, progress: 66 });
-      const galleryTilesUploadPromise = collectionManager.upload(collection);
-      await Promise.all([imageUploadPromise, galleryTilesUploadPromise]);
-      setTask({ ...task, progress: 100 });
+      // add the new gallery tiles to the gliff.gallery's content and update the content
+      const galleryUploadPromise = new Promise((resolve, reject) => {
+        (async (): Promise<void> => {
+          const oldContent = await collection.getContent(OutputFormat.String);
 
+          const newContent = JSON.stringify(
+            (JSON.parse(oldContent) as GalleryTile[]).concat(newTiles)
+          );
+
+          await collection.setContent(newContent);
+
+          await collectionManager.transaction(collection);
+        })()
+          .then(() => resolve(undefined))
+          .catch((e) => {
+            console.error(e);
+            reject();
+          });
+      });
+
+      setTask((prevTask) => ({ ...prevTask, progress: 75 }));
+
+      // resolve all promises: upload all the new items and update the gallery
+      await Promise.all([itemsUploadPromise, galleryUploadPromise]);
+
+      setTask((prevTask) => ({ ...prevTask, isLoading: false, progress: 100 }));
       return newTiles;
     } catch (err) {
       logger.error(err);
-      return undefined;
+      return null;
     }
   };
 
@@ -1365,6 +1482,7 @@ export class DominateStore {
     const tileIdx = galleryTiles.findIndex(
       (item) => item.imageUID === imageUid
     );
+
     galleryTiles[tileIdx].annotationUID[username] = annotationsItem.uid;
     galleryTiles[tileIdx].auditUID[username] = auditItem.uid;
     galleryTiles[tileIdx].annotationComplete[username] = isComplete;
