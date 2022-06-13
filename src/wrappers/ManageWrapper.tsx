@@ -294,17 +294,6 @@ export const ManageWrapper = ({
       progress: 0,
     });
 
-    useEffect(() => {
-      setProductNavbarData({
-        teamName: auth?.userProfile?.team.name || "",
-        projectName: "",
-        imageName: "",
-        buttonBack: null,
-        buttonForward: null,
-        productLocation: "MANAGE",
-      });
-    }, []);
-
     let projectUid: string | null = null;
     try {
       // create a new project
@@ -427,6 +416,17 @@ export const ManageWrapper = ({
     }),
     [auth]
   );
+
+  useEffect(() => {
+    setProductNavbarData({
+      teamName: auth?.userProfile?.team.name || "",
+      projectName: "",
+      imageName: "",
+      buttonBack: null,
+      buttonForward: null,
+      productLocation: "MANAGE",
+    });
+  }, []);
 
   if (!storeInstance || !auth?.user || !auth?.userProfile) return null;
 
