@@ -22,10 +22,7 @@ import {
 } from "./Audit";
 import { FileInfo, BaseMeta, DemoMetadata } from "./shared";
 
-interface MetaItem {
-  // as seen in CURATE
-  [index: string]: string | string[] | boolean | number;
-}
+import { MetaItem } from "@gliff-ai/curate";
 
 type ImageBitmapBlob = ImageBitmap;
 type Channels = ImageBitmapBlob[];
