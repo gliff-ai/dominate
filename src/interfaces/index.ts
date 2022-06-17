@@ -1,3 +1,4 @@
+import { MetaItem } from "@gliff-ai/curate";
 import {
   GalleryMeta,
   GalleryContent,
@@ -21,8 +22,6 @@ import {
   AuditContentMigrations,
 } from "./Audit";
 import { FileInfo, BaseMeta, DemoMetadata } from "./shared";
-
-import { MetaItem } from "@gliff-ai/curate";
 
 type ImageBitmapBlob = ImageBitmap;
 type Channels = ImageBitmapBlob[];
