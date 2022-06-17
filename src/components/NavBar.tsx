@@ -111,6 +111,21 @@ const navGrid = {
   },
 };
 
+const productLocationIcons = {
+  manage: imgSrc("manage"),
+  curate: imgSrc("curate"),
+  audit: imgSrc("audit"),
+  annotate: imgSrc("annotate"),
+};
+
+const getProductLocationIcon = (productLocation: string): string => {
+  if (productLocation === "manage") return productLocationIcons.manage;
+  if (productLocation === "curate") return productLocationIcons.curate;
+  if (productLocation === "audit") return productLocationIcons.audit;
+  if (productLocation === "annotate") return productLocationIcons.annotate;
+  return "";
+};
+
 interface Props {
   productSection: JSX.Element | null;
   productNavbarData: ProductNavbarData;
@@ -241,13 +256,14 @@ export const NavBar = (props: Props): ReactElement | null => {
               <Grid sx={productSectionGrid}>{props.productSection}</Grid>
             ) : null}
           </div>
-
           <Grid sx={navGrid}>
             <nav className="navLinks">
               <div className="productLocation">
                 <img
                   className="productLocationImage"
-                  src={imgSrc(props.productNavbarData.productLocation)}
+                  src={getProductLocationIcon(
+                    props.productNavbarData.productLocation.toLowerCase()
+                  )}
                   alt={props.productNavbarData.productLocation}
                 />
                 <p className="productLocationText">
