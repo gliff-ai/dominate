@@ -1,3 +1,4 @@
+import { MetaItem } from "@gliff-ai/curate";
 import {
   GalleryMeta,
   GalleryContent,
@@ -21,11 +22,6 @@ import {
   AuditContentMigrations,
 } from "./Audit";
 import { FileInfo, BaseMeta, DemoMetadata } from "./shared";
-
-interface MetaItem {
-  // as seen in CURATE
-  [index: string]: string | string[] | boolean | number;
-}
 
 type ImageBitmapBlob = ImageBitmap;
 type Channels = ImageBitmapBlob[];
