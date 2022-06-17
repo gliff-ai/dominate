@@ -90,13 +90,14 @@ export function convertGalleryToMetadata(gallery: GalleryTile[]): MetaItem[] {
 
   return gallery.map(
     ({ id, thumbnail, assignees = [], imageLabels = [], fileInfo }) =>
-      // keys included in the metada object (and displayed in CURATE).
+      // keys included in the metadata object (and displayed in CURATE).
       ({
         id,
         thumbnail,
         assignees,
         imageLabels,
         ...fileInfo,
+        size: fileInfo.size.toString(),
         imageName: fileInfo.fileName, // CURATE expects imageName rather than fileName.
       })
   );
