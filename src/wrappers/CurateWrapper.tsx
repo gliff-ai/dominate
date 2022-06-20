@@ -123,7 +123,8 @@ export const CurateWrapper = ({
     const thumbnails: string[] = [];
     const stringifiedSlices: string[] = [];
 
-    setTask({ ...task, progress: 0 });
+    // setTask({ ...task, progress: 0, description: "Making thumbnails..." });
+    await new Promise((resolve) => setTimeout(resolve, 50)); // gives the snackbar time to re-render
 
     for (let i = 0; i < imageFileInfo.length; i += 1) {
       // Stringify slices data and get image metadata
@@ -142,8 +143,6 @@ export const CurateWrapper = ({
         thumbnails.push(canvas.toDataURL());
       }
     }
-
-    setTask({ ...task, progress: 10 });
 
     // Store slices inside a new gliff.image item and add the metadata/thumbnail to the selected gallery
     await storeInstance
