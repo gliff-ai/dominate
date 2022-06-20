@@ -733,7 +733,11 @@ export class DominateStore {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     try {
-      setTask((prevTask) => ({ ...prevTask, progress: 45 }));
+      setTask((prevTask) => ({
+        ...prevTask,
+        progress: 10,
+        description: "Fetching collection...",
+      }));
 
       // fetch the collectionManager, the collection and the itemManager
       const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -742,6 +746,13 @@ export class DominateStore {
         collectionUid
       );
       const itemManager = collectionManager.getItemManager(collection);
+
+      setTask((prevTask) => ({
+        ...prevTask,
+        progress: 20,
+        description: "Creating image items...",
+      }));
+      await new Promise((resolve) => setTimeout(resolve, 50)); // gives the snackbar time to re-render
 
       // create new image items and the new gallery tiles
       const newItems: Item[] = [];
@@ -763,7 +774,13 @@ export class DominateStore {
           );
           return result;
         })
-      ).then((results) => {
+      ).then(async (results) => {
+        setTask((prevTask) => ({
+          ...prevTask,
+          progress: 30,
+          description: "Creating new tiles...",
+        }));
+        await new Promise((resolve) => setTimeout(resolve, 50)); // gives the snackbar time to re-render
         results.forEach((result, i) => {
           if (result.status === "fulfilled") {
             const newItem = result.value;
@@ -789,7 +806,12 @@ export class DominateStore {
         });
       });
 
-      setTask((prevTask) => ({ ...prevTask, progress: 55 }));
+      setTask((prevTask) => ({
+        ...prevTask,
+        progress: 35,
+        description: "Batching images...",
+      }));
+      await new Promise((resolve) => setTimeout(resolve, 50)); // gives the snackbar time to re-render
 
       let itemsUploadPromise;
       const numOfImages = imageFileInfos.length;
@@ -819,7 +841,12 @@ export class DominateStore {
         itemsUploadPromise = itemManager.batch(newItems);
       }
 
-      setTask((prevTask) => ({ ...prevTask, progress: 55 }));
+      setTask((prevTask) => ({
+        ...prevTask,
+        progress: 40,
+        description: "Updating collection...",
+      }));
+      await new Promise((resolve) => setTimeout(resolve, 50)); // gives the snackbar time to re-render
 
       // add the new gallery tiles to the gliff.gallery's content and update the content
       const galleryUploadPromise = new Promise((resolve, reject) => {
@@ -841,12 +868,22 @@ export class DominateStore {
           });
       });
 
-      setTask((prevTask) => ({ ...prevTask, progress: 75 }));
+      setTask((prevTask) => ({
+        ...prevTask,
+        progress: 50,
+        description: "Uploading...",
+      }));
 
       // resolve all promises: upload all the new items and update the gallery
       await Promise.all([itemsUploadPromise, galleryUploadPromise]);
 
-      setTask((prevTask) => ({ ...prevTask, isLoading: false, progress: 100 }));
+      setTask((prevTask) => ({
+        ...prevTask,
+        description: "Upload complete",
+        progress: 100,
+      }));
+      await new Promise((resolve) => setTimeout(resolve, 100)); // gives the snackbar time to re-render
+
       return newTiles;
     } catch (err) {
       logger.error(err);
