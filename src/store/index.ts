@@ -31,6 +31,7 @@ import {
   AuditMeta,
   migrations,
 } from "@/interfaces";
+import { isInstanceOf } from "@sentry/utils";
 
 const logger = console;
 
@@ -1014,30 +1015,42 @@ export class DominateStore {
 
   getAnnotationsObject = async (
     collectionUid: string,
-    imageUid: string,
-    username: string
+    annotation: { imageUid: string; username: string } | string
   ): Promise<{ meta: AnnotationMeta; annotations: Annotations } | null> => {
     // retrieves the Annotations object by the specified user for the specified image
+    // annotation can be either an {imageUid, username} object, in which case the
+    // annotationUID will be looked up from the gallery content, or it can just be
+    // the annotationUID
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await this.fetchCollection(
       collectionManager,
       collectionUid
     );
-    const content = JSON.parse(
-      await collection.getContent(OutputFormat.String)
-    ) as GalleryTile[];
-    const galleryTile = content.find((item) => item.imageUID === imageUid);
 
-    if (
-      !galleryTile?.annotationUID ||
-      galleryTile.annotationUID[username] === undefined
-    )
-      return null;
+    // look up annotationUID if necessary:
+    let annotationUID: string;
+    if (annotation instanceof Object) {
+      const { imageUid, username } = annotation;
+      const content = JSON.parse(
+        await collection.getContent(OutputFormat.String)
+      ) as GalleryTile[];
+      const galleryTile = content.find((item) => item.imageUID === imageUid);
+
+      if (
+        !galleryTile?.annotationUID ||
+        galleryTile.annotationUID[username] === undefined
+      )
+        return null;
+
+      annotationUID = galleryTile.annotationUID[username];
+    } else {
+      annotationUID = annotation;
+    }
 
     const annotationItem = await this.fetchItem(
       collectionManager.getItemManager(collection),
-      galleryTile.annotationUID[username]
+      annotationUID
     );
     const annotationContent = await annotationItem.getContent(
       OutputFormat.String

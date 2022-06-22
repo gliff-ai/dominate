@@ -181,7 +181,23 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
                   }
                 />
                 <Route
-                  path="annotate/:collectionUid/:imageUid/:annotationUid"
+                  path="annotate/:collectionUid/:imageUid/:annotationUid1"
+                  element={
+                    <PrivateRoute
+                      element={
+                        <Annotate
+                          storeInstance={storeInstance}
+                          setIsLoading={setIsLoading}
+                          task={task}
+                          setTask={setTask}
+                          setProductSection={setProductSection}
+                        />
+                      }
+                    />
+                  }
+                />
+                <Route
+                  path="annotate/:collectionUid/:imageUid/:annotationUid1/:annotationUid2"
                   element={
                     <PrivateRoute
                       element={

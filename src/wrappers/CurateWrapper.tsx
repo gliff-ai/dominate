@@ -218,12 +218,26 @@ export const CurateWrapper = ({
 
   const annotateCallback = (
     imageUid: string,
-    username: string | null = null
+    username1: string | null = null,
+    username2: string | null = null
   ): void => {
-    if (username) {
+    if (username1) {
       const annotationUid = collectionContent.find(
         (tile) => tile.imageUID === imageUid
-      )?.annotationUID[username];
+      )?.annotationUID[username1];
+      if (username2) {
+        const annotationUid2 = collectionContent.find(
+          (tile) => tile.imageUID === imageUid
+        )?.annotationUID[username2];
+        if (annotationUid && annotationUid2) {
+          console.log(
+            `/annotate/${collectionUid}/${imageUid}/${annotationUid}/${annotationUid2}`
+          );
+          navigate(
+            `/annotate/${collectionUid}/${imageUid}/${annotationUid}/${annotationUid2}`
+          );
+        }
+      }
       if (annotationUid) {
         navigate(`/annotate/${collectionUid}/${imageUid}/${annotationUid}`);
       }

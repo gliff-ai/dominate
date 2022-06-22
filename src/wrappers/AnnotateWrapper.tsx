@@ -71,12 +71,18 @@ export const AnnotateWrapper = ({
   const navigate = useNavigate();
   const auth = useAuth();
 
-  const { collectionUid = "", imageUid = "", annotationUid = "" } = useParams();
+  const {
+    collectionUid = "",
+    imageUid = "",
+    annotationUid1 = "",
+    annotationUid2 = "",
+  } = useParams();
 
   const [imageContent, setImageContent] = useState<string | null>(null);
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
   const [imageFileInfo, setImageFileInfo] = useState<ImageFileInfo>();
   const [annotationsObject, setAnnotationsObject] = useState<Annotations>();
+  const [annotationsObject2, setAnnotationsObject2] = useState<Annotations>();
 
   const [isComplete, setIsComplete] = useState<boolean>(false);
   const [imageUids, setImageUids] = useState<string[] | null>(null);
@@ -154,7 +160,7 @@ export const AnnotateWrapper = ({
             setStateIfMounted(fileInfo, setImageFileInfo, isMounted.current);
           }
 
-          if (annotationUid) {
+          if (annotationUid1) {
             // fetch all the annotationsObjects for this image:
             const annotationsMap = items.tiles.find(
               (item) => item.imageUID === imageUid
@@ -369,30 +375,49 @@ export const AnnotateWrapper = ({
       if (!auth?.user?.username) return Promise.resolve();
 
       // Set state for annotation items.
-      const fetch = annotationUid
-        ? storeInstance
-            .getItem(collectionUid, annotationUid)
-            .then(async (item) => ({
-              meta: item.getMeta<AnnotationMeta>(),
-              annotations: new Annotations(
-                JSON.parse(await item.getContent(OutputFormat.String))
-              ),
-            }))
-        : storeInstance.getAnnotationsObject(
-            collectionUid,
+      let fetch: Promise<{
+        annotations: Annotations;
+        meta: AnnotationMeta;
+      } | null>[] = [];
+      if (annotationUid1) {
+        fetch.push(
+          storeInstance.getAnnotationsObject(collectionUid, annotationUid1)
+        );
+      }
+      if (annotationUid2) {
+        fetch.push(
+          storeInstance.getAnnotationsObject(collectionUid, annotationUid2)
+        );
+      }
+      if (fetch.length === 0) {
+        // fetch annotation for currently signed in user
+        fetch.push(
+          storeInstance.getAnnotationsObject(collectionUid, {
             imageUid,
-            auth.user.username
-          );
-      return fetch
+            username: auth.user.username,
+          })
+        );
+      }
+      return Promise.all(fetch)
         .then(
-          (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
+          (
+            data: ({ annotations: Annotations; meta: AnnotationMeta } | null)[]
+          ) => {
+            console.log(annotationUid1, annotationUid2);
             setStateIfMounted(
-              data?.annotations || createAnnotationsObject(),
+              data[0]?.annotations || createAnnotationsObject(),
               setAnnotationsObject,
               isMounted.current
             );
+            if (data.length === 2) {
+              setStateIfMounted(
+                data[1]?.annotations,
+                setAnnotationsObject2,
+                isMounted.current
+              );
+            }
             setStateIfMounted(
-              data?.meta?.isComplete || false,
+              data[0]?.meta?.isComplete || false,
               setIsComplete,
               isMounted.current
             );
@@ -467,6 +492,7 @@ export const AnnotateWrapper = ({
       slicesData={slicesData}
       imageFileInfo={imageFileInfo}
       annotationsObject={slicesData ? annotationsObject : undefined}
+      annotationsObject2={annotationsObject2}
       saveAnnotationsCallback={saveAnnotation}
       setIsLoading={setIsLoading}
       userAccess={auth.userAccess}
@@ -480,7 +506,7 @@ export const AnnotateWrapper = ({
       restrictLabels={restrictLabels}
       multiLabel={multiLabel}
       saveMetadataCallback={saveMetadataCallback}
-      readonly={!!annotationUid}
+      readonly={!!annotationUid1}
       userAnnotations={userAnnotations}
     />
   );
