@@ -403,7 +403,6 @@ export const AnnotateWrapper = ({
           (
             data: ({ annotations: Annotations; meta: AnnotationMeta } | null)[]
           ) => {
-            console.log(annotationUid1, annotationUid2);
             setStateIfMounted(
               data[0]?.annotations || createAnnotationsObject(),
               setAnnotationsObject,
