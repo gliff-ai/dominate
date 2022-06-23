@@ -31,7 +31,6 @@ import {
   AuditMeta,
   migrations,
 } from "@/interfaces";
-import { isInstanceOf } from "@sentry/utils";
 
 const logger = console;
 

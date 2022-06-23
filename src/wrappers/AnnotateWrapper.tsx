@@ -375,7 +375,7 @@ export const AnnotateWrapper = ({
       if (!auth?.user?.username) return Promise.resolve();
 
       // Set state for annotation items.
-      let fetch: Promise<{
+      const fetch: Promise<{
         annotations: Annotations;
         meta: AnnotationMeta;
       } | null>[] = [];
