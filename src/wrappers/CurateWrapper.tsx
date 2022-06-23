@@ -230,12 +230,10 @@ export const CurateWrapper = ({
           (tile) => tile.imageUID === imageUid
         )?.annotationUID[username2];
         if (annotationUid && annotationUid2) {
-          console.log(
-            `/annotate/${collectionUid}/${imageUid}/${annotationUid}/${annotationUid2}`
-          );
           navigate(
             `/annotate/${collectionUid}/${imageUid}/${annotationUid}/${annotationUid2}`
           );
+          return;
         }
       }
       if (annotationUid) {
