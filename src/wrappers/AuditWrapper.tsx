@@ -83,10 +83,10 @@ export const AuditWrapper = ({
   }, [collectionUid, fetchCollectionTitle, isMounted, auth]);
 
   useEffect(() => {
-    //runs at mount
+    // runs at mount
     isMounted.current = true;
     return () => {
-      //runs at dismount
+      // runs at dismount
       isMounted.current = false;
     };
   }, []);
