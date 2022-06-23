@@ -53,7 +53,7 @@ export const AuditWrapper = ({
           logger.log(err);
         });
     },
-    [auth?.user?.username, collectionUid]
+    [auth?.user?.username, collectionUid, isMounted]
   );
 
   useEffect(() => {
@@ -81,6 +81,15 @@ export const AuditWrapper = ({
     if (!collectionUid) return;
     fetchCollectionTitle();
   }, [collectionUid, fetchCollectionTitle, isMounted, auth]);
+
+  useEffect(() => {
+    //runs at mount
+    isMounted.current = true;
+    return () => {
+      //runs at dismount
+      isMounted.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     setProductNavbarData({
