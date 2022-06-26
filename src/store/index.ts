@@ -1621,7 +1621,13 @@ export class DominateStore {
 
     // Update audit item
     auditItem.setMeta({ ...auditItem.getMeta(), modifiedTime });
-    await auditItem.setContent(JSON.stringify(auditData));
+    await auditItem.setContent(
+      JSON.stringify(
+        JSON.parse(await auditItem.getContent(OutputFormat.String)).concat(
+          auditData
+        )
+      )
+    );
 
     // Save changes
     await itemManager.batch([annotationItem, auditItem]);
