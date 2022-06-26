@@ -28,7 +28,7 @@ export const AuditWrapper = ({ storeInstance }: Props): ReactElement | null => {
     fetchAudit().catch((e) => {
       console.error(e);
     });
-  }, [collectionUid, storeInstance]);
+  }, [collectionUid, storeInstance, isMounted.current]);
 
   useEffect(() => {
     const tier = auth?.userProfile?.team.tier;
@@ -37,6 +37,15 @@ export const AuditWrapper = ({ storeInstance }: Props): ReactElement | null => {
       navigate("/manage");
     }
   }, [auth?.userProfile?.team.tier, navigate]);
+
+  useEffect(() => {
+    // runs at mount
+    isMounted.current = true;
+    return () => {
+      // runs at dismount
+      isMounted.current = false;
+    };
+  }, []);
 
   if (!auth || !collectionUid || sessions === null) return null;
 
