@@ -10,3 +10,4 @@ export {
 
 export { GliffCard } from "./GliffCard";
 export { CookieConsent } from "./CookieConsent";
+export { ZooDialog } from "./zoo/ZooDialog";
