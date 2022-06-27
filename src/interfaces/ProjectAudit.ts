@@ -12,6 +12,8 @@ interface ProjectAuditMetaV0 extends BaseMeta {
   galleryUID: string;
 }
 
+// ----------------------------- CONTENT -----------------------------
+
 interface UploadImageV0 {
   type: "uploadImage";
   imageName: string;
@@ -63,8 +65,6 @@ interface SetMultiLabelV0 {
   multiLabel: boolean;
 }
 
-// ----------------------------- CONTENT -----------------------------
-
 interface ProjectAuditActionV0 {
   action:
     | UploadImageV0
@@ -81,3 +81,13 @@ interface ProjectAuditActionV0 {
 }
 
 type ProjectAuditContentV0 = ProjectAuditActionV0[];
+
+const metaMigrations = [];
+const contentMigrations = [];
+
+export {
+  ProjectAuditMetaV0 as ProjectAuditMeta,
+  ProjectAuditContentV0 as ProjectAuditContent,
+  metaMigrations as ProjectAuditMetaMigrations,
+  contentMigrations as ProjectAuditContentMigrations,
+};
