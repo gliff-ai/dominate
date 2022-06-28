@@ -1861,6 +1861,8 @@ export class DominateStore {
 
     let newContent: GalleryTile[] = JSON.parse(oldContent) as GalleryTile[];
 
+    const projectAuditActions: ProjectAuditAction[] = [];
+
     imageUids.forEach((imageUid, i) => {
       newContent = newContent.map((item) => {
         if (item.imageUID === imageUid) {
@@ -1875,13 +1877,40 @@ export class DominateStore {
                 : false;
           });
 
+          newAssignees[i].forEach((username) => {
+            projectAuditActions.push({
+              action: {
+                type: "assignImage",
+                imageName: item.fileInfo.fileName,
+                imageUid: item.imageUID,
+                assigneeUsername: username,
+              },
+              username: this.etebaseInstance.user.username,
+              timestamp: Date.now(),
+            });
+          });
+
           return { ...item, assignees: newAssignees[i], annotationComplete };
         }
         return item;
       });
     });
 
+    // fetch project level audit and concatenate new actions in its content:
+    const projectAudit = await collectionManager.fetch(
+      collection.getMeta<GalleryMeta>().projectAuditUID
+    );
+
+    await projectAudit.setContent(
+      JSON.stringify(
+        JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
+          projectAuditActions
+        )
+      )
+    );
+
+    // upload:
     await collection.setContent(JSON.stringify(newContent));
-    await collectionManager.upload(collection);
+    await this.batchUpload(collectionManager, [collection, projectAudit]);
   };
 }

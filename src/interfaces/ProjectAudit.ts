@@ -31,7 +31,14 @@ interface AssignImageV0 {
   type: "assignImage";
   imageName: string;
   imageUid: string;
-  inviteeUsername: string;
+  assigneeUsername: string;
+}
+
+interface UnassignImageV0 {
+  type: "unassignImage";
+  imageName: string;
+  imageUid: string;
+  assigneeUsername: string;
 }
 
 interface UpdateImageLabelsV0 {
