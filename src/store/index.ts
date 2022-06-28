@@ -966,18 +966,44 @@ export class DominateStore {
     );
     const oldContent = await collection.getContent(OutputFormat.String);
 
-    // iterate through GalleryTile's, find the one whose imageUID matches imageUid, set its imageLabesl to newLabels:
+    // iterate through GalleryTile's, find the one whose imageUID matches imageUid, set its imageLabels to newLabels:
     let newContent: GalleryTile[] = JSON.parse(oldContent) as GalleryTile[];
+    let imageName: string = "";
     newContent = newContent.map((item) => {
       if (item.imageUID === imageUid) {
+        imageName = item.fileInfo.fileName;
         return { ...item, imageLabels: newLabels };
       }
       return item;
     });
 
-    // save updated metadata in store:
+    const projectAuditAction: ProjectAuditAction = {
+      action: {
+        type: "updateImageLabels",
+        imageName,
+        imageUid,
+        labels: newLabels,
+      },
+      username: this.etebaseInstance.user.username,
+      timestamp: Date.now(),
+    };
+
+    // fetch project level audit and concatenate new actions in its content:
+    const projectAudit = await collectionManager.fetch(
+      collection.getMeta<GalleryMeta>().projectAuditUID
+    );
+
+    await projectAudit.setContent(
+      JSON.stringify(
+        JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
+          projectAuditAction
+        )
+      )
+    );
+
+    // save updated metadata and audit in store:
     await collection.setContent(JSON.stringify(newContent));
-    await collectionManager.upload(collection);
+    await this.batchUpload(collectionManager, [collection, projectAudit]);
   };
 
   deleteImages = async (
