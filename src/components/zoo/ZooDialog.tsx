@@ -141,12 +141,7 @@ export function ZooDialog(props: Props): ReactElement {
               .map(
                 (item) =>
                   (!openCard || openCard === item.name) && (
-                    <Grid
-                      sx={{ height: "fit-content" }}
-                      item
-                      xs={3}
-                      spacing={1}
-                    >
+                    <Grid sx={{ height: "fit-content" }} item xs={3}>
                       <ZooCard
                         data={item}
                         isOpen={openCard === item.name}
