@@ -115,16 +115,13 @@ export function ZooDialog(props: Props): ReactElement {
               />
             </MuiCard>
           </div>
-
-          <MuiCard sx={{ marginTop: "20px" }} variant="outlined">
-            <SearchBar
-              filters={filters}
-              data={data}
-              updateData={() => {}}
-              getLabelsFromKeys={getLabelsFromKeys(PLUGINS_KEYLABELS_MAP)()}
-            />
-            <SearchFilterCard filters={filters} updateData={() => {}} />
-          </MuiCard>
+          <SearchBar
+            filters={filters}
+            data={data}
+            updateData={() => {}}
+            getLabelsFromKeys={getLabelsFromKeys(PLUGINS_KEYLABELS_MAP)()}
+          />
+          <SearchFilterCard filters={filters} updateData={() => {}} />
         </Grid>
         <Grid item xs={9}>
           <Grid
