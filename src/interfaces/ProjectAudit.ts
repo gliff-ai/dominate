@@ -89,6 +89,7 @@ const contentMigrations = [];
 export {
   ProjectAuditMetaV0 as ProjectAuditMeta,
   ProjectAuditContentV0 as ProjectAuditContent,
+  ProjectAuditActionV0 as ProjectAuditAction,
   metaMigrations as ProjectAuditMetaMigrations,
   contentMigrations as ProjectAuditContentMigrations,
 };

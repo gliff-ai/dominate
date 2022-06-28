@@ -24,6 +24,7 @@ import {
 import {
   ProjectAuditMeta,
   ProjectAuditContent,
+  ProjectAuditAction,
   ProjectAuditMetaMigrations,
   ProjectAuditContentMigrations,
 } from "./ProjectAudit";
@@ -57,6 +58,7 @@ export type {
   AuditMeta,
   ProjectAuditMeta,
   ProjectAuditContent,
+  ProjectAuditAction,
   FileInfo,
   MetaItem,
   ImageBitmapBlob,

@@ -31,8 +31,10 @@ import {
   AuditMeta,
   ProjectAuditMeta,
   ProjectAuditContent,
+  ProjectAuditAction,
   migrations,
 } from "@/interfaces";
+import { Output } from "@mui/icons-material";
 
 const logger = console;
 
@@ -624,7 +626,7 @@ export class DominateStore {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     // Create, encrypt and upload a new collection
-    const currentTime = Date.now();
+    const createdTime = Date.now();
     const collection = await collectionManager.create<GalleryMeta>(
       "gliff.gallery", // type
       {
@@ -632,12 +634,13 @@ export class DominateStore {
         meta_version: 0,
         content_version: 0,
         name,
-        createdTime: currentTime,
-        modifiedTime: currentTime,
+        createdTime,
+        modifiedTime: createdTime,
         description: description || "",
         defaultLabels: [],
         restrictLabels: false,
         multiLabel: true,
+        projectAuditUID: "",
       }, // metadata
       "[]" // content
     );
@@ -649,8 +652,8 @@ export class DominateStore {
         meta_version: 0,
         content_version: 0,
         name,
-        createdTime: currentTime,
-        modifiedTime: currentTime,
+        createdTime,
+        modifiedTime: createdTime,
         deletedTime: null,
         galleryUID: collection.uid,
       },
@@ -662,7 +665,7 @@ export class DominateStore {
       projectAuditUID: projectAudit.uid,
     });
 
-    await collectionManager.upload(collection);
+    await this.batchUpload(collectionManager, [collection, projectAudit]);
     return collection.uid;
   };
 
@@ -892,6 +895,37 @@ export class DominateStore {
           });
       });
 
+      // make project level audit actions for image uploads:
+      setTask((prevTask) => ({
+        ...prevTask,
+        progress: 45,
+        description: "Updating audit...",
+      }));
+      const uploadAuditActions: ProjectAuditAction[] = newTiles.map((tile) => ({
+        action: {
+          type: "uploadImage",
+          imageName: tile.fileInfo.fileName,
+          imageUid: tile.imageUID,
+        },
+        username: this.etebaseInstance.user.username,
+        timestamp: createdTime,
+      }));
+
+      // fetch project level audit and concatenate new actions in its content:
+      const projectAudit = await collectionManager.fetch(
+        collection.getMeta<GalleryMeta>().projectAuditUID
+      );
+
+      await projectAudit.setContent(
+        JSON.stringify(
+          JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
+            uploadAuditActions
+          )
+        )
+      );
+
+      const projectAuditUploadPromise = collectionManager.upload(projectAudit);
+
       setTask((prevTask) => ({
         ...prevTask,
         progress: 50,
@@ -899,7 +933,11 @@ export class DominateStore {
       }));
 
       // resolve all promises: upload all the new items and update the gallery
-      await Promise.all([itemsUploadPromise, galleryUploadPromise]);
+      await Promise.all([
+        itemsUploadPromise,
+        galleryUploadPromise,
+        projectAuditUploadPromise,
+      ]);
 
       setTask((prevTask) => ({
         ...prevTask,

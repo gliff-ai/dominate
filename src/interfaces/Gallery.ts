@@ -12,7 +12,7 @@ interface GalleryMetaV0 extends BaseMeta {
   defaultLabels: string[];
   restrictLabels: boolean;
   multiLabel: boolean;
-  projectAuditUID?: string; // must be optional because we don't know the projectAuditUID until we create the ProjectAudit
+  projectAuditUID: string;
 }
 
 // example new interface:
