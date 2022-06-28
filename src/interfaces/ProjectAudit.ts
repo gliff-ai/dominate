@@ -78,6 +78,7 @@ interface ProjectAuditActionV0 {
     | UploadImageV0
     | DeleteImageV0
     | AssignImageV0
+    | UnassignImageV0
     | UpdateImageLabelsV0
     | InviteUserV0
     | InviteAcceptedV0

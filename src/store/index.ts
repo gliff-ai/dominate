@@ -1093,13 +1093,43 @@ export class DominateStore {
       await collection.getContent(OutputFormat.String)
     ) as GalleryTile[];
 
+    const projectAuditActions: ProjectAuditAction[] = [];
+
     const newContent = content.map((tile) => ({
       ...tile,
-      assignees: tile?.assignees?.filter((a) => a !== username) || [], // unassign all items from a user
+      assignees:
+        tile?.assignees?.filter((a) => {
+          if (a !== username) {
+            projectAuditActions.push({
+              action: {
+                type: "unassignImage",
+                imageName: tile.fileInfo.fileName,
+                imageUid: tile.imageUID,
+                assigneeUsername: username,
+              },
+              username: this.etebaseInstance.user.username,
+              timestamp: Date.now(),
+            });
+            return true;
+          }
+        }) || [], // unassign all items from a user
     }));
 
+    // fetch project level audit and concatenate new actions in its content:
+    const projectAudit = await collectionManager.fetch(
+      collection.getMeta<GalleryMeta>().projectAuditUID
+    );
+
+    await projectAudit.setContent(
+      JSON.stringify(
+        JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
+          projectAuditActions
+        )
+      )
+    );
+
     await collection.setContent(JSON.stringify(newContent));
-    await collectionManager.transaction(collection);
+    await this.batchUpload(collectionManager, [collection, projectAudit]);
   };
 
   getAnnotationsObject = async (
