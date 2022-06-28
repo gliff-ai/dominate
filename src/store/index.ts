@@ -1032,6 +1032,34 @@ export class DominateStore {
     await collection.setContent(JSON.stringify(newContent));
     await collectionManager.upload(collection);
 
+    // make project level audit actions for image deletions:
+    const uploadAuditActions: ProjectAuditAction[] = oldContent
+      .filter((tile) => uidsToDelete.includes(tile.imageUID))
+      .map((tile) => ({
+        action: {
+          type: "deleteImage",
+          imageName: tile.fileInfo.fileName,
+          imageUid: tile.imageUID,
+        },
+        username: this.etebaseInstance.user.username,
+        timestamp: Date.now(),
+      }));
+
+    // fetch project level audit and concatenate new actions in its content:
+    const projectAudit = await collectionManager.fetch(
+      collection.getMeta<GalleryMeta>().projectAuditUID
+    );
+
+    await projectAudit.setContent(
+      JSON.stringify(
+        JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
+          uploadAuditActions
+        )
+      )
+    );
+
+    const projectAuditUploadPromise = collectionManager.upload(projectAudit);
+
     setTask({ isLoading: true, description: "Image deletion", progress: 50 });
 
     // delete image, annotation and audit items:
