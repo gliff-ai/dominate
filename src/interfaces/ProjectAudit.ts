@@ -6,9 +6,10 @@ interface ProjectAuditMetaV0 extends BaseMeta {
   meta_version: 0;
   content_version: 0;
   type: "gliff.projectAudit";
+  name: string; // should be the same as the project name
   createdTime: number;
   modifiedTime: number;
-  deletedTime: number;
+  deletedTime: number | null;
   galleryUID: string;
 }
 

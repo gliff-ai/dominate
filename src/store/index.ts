@@ -29,6 +29,8 @@ import {
   ImageMeta,
   AnnotationMeta,
   AuditMeta,
+  ProjectAuditMeta,
+  ProjectAuditContent,
   migrations,
 } from "@/interfaces";
 
@@ -622,6 +624,7 @@ export class DominateStore {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     // Create, encrypt and upload a new collection
+    const currentTime = Date.now();
     const collection = await collectionManager.create<GalleryMeta>(
       "gliff.gallery", // type
       {
@@ -629,8 +632,8 @@ export class DominateStore {
         meta_version: 0,
         content_version: 0,
         name,
-        createdTime: Date.now(),
-        modifiedTime: Date.now(),
+        createdTime: currentTime,
+        modifiedTime: currentTime,
         description: description || "",
         defaultLabels: [],
         restrictLabels: false,
@@ -638,6 +641,27 @@ export class DominateStore {
       }, // metadata
       "[]" // content
     );
+
+    const projectAudit = await collectionManager.create<ProjectAuditMeta>(
+      "gliff.projectMeta",
+      {
+        type: "gliff.projectAudit",
+        meta_version: 0,
+        content_version: 0,
+        name,
+        createdTime: currentTime,
+        modifiedTime: currentTime,
+        deletedTime: null,
+        galleryUID: collection.uid,
+      },
+      "[]"
+    );
+
+    collection.setMeta<GalleryMeta>({
+      ...collection.getMeta<GalleryMeta>(),
+      projectAuditUID: projectAudit.uid,
+    });
+
     await collectionManager.upload(collection);
     return collection.uid;
   };
