@@ -53,8 +53,18 @@ interface InviteUserV0 {
   inviteeUsername: string;
 }
 
-interface InviteAcceptedV0 {
-  type: "inviteAccepted";
+interface UserInviteAcceptedV0 {
+  type: "userInviteAccepted";
+  inviteeUsername: string;
+}
+
+interface InviteCollaboratorV0 {
+  type: "inviteCollaborator";
+  inviteeUsername: string;
+}
+
+interface CollaboratorInviteAcceptedV0 {
+  type: "collaboratorInviteAccepted";
   inviteeUsername: string;
 }
 
@@ -81,7 +91,9 @@ interface ProjectAuditActionV0 {
     | UnassignImageV0
     | UpdateImageLabelsV0
     | InviteUserV0
-    | InviteAcceptedV0
+    | UserInviteAcceptedV0
+    | InviteCollaboratorV0
+    | CollaboratorInviteAcceptedV0
     | SetDefaultLabelsV0
     | SetRestrictToDefaultLabelsV0
     | SetMultiLabelV0;

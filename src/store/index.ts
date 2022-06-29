@@ -715,6 +715,27 @@ export class DominateStore {
         CollectionAccessLevel.ReadWrite
       );
 
+      // update project level audit:
+      const projectAuditAction: ProjectAuditAction = {
+        action: { type: "inviteUser", inviteeUsername: userEmail },
+        username: this.etebaseInstance.user.username,
+        timestamp: Date.now(),
+      };
+
+      const projectAudit = await collectionManager.fetch(
+        collection.getMeta<GalleryMeta>().projectAuditUID
+      );
+
+      await projectAudit.setContent(
+        JSON.stringify(
+          JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
+            projectAuditAction
+          )
+        )
+      );
+
+      await collectionManager.upload(projectAudit);
+
       return true;
     } catch (e) {
       logger.log(e);
