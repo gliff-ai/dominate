@@ -32,9 +32,11 @@ import {
   convertMetadataToGalleryTiles,
   MetaItemWithId,
 } from "@/helpers";
-import { Product } from "@/plugins";
+import { Product, Plugin } from "@/plugins";
 import { UserAccess } from "@/services/user";
 import { getTeam, Profile } from "@/services/team";
+import { getPlugins } from "@/services/plugins";
+import { ZooDialog } from "@/components";
 
 const logger = console;
 interface Props {
@@ -73,6 +75,7 @@ export const CurateWrapper = ({
   const [showNoImageMessage, setShowNoImageMessage] = useState<boolean>(false);
   const [profiles, setProfiles] = useState<Profile[] | null>(null);
   const plugins = usePlugins(collectionUid, auth, Product.CURATE);
+  const [pluginData, setPluginData] = useState<Plugin[] | null>(null);
   const isMounted = useRef(false);
 
   const isOwnerOrMember = useMemo(
@@ -468,6 +471,11 @@ export const CurateWrapper = ({
     fetchImageItems();
   }, [fetchImageItems]);
 
+  useEffect(() => {
+    // get plugins data (should run once at mount)
+    void getPlugins().then(setPluginData);
+  }, []);
+
   if (
     !storeInstance ||
     !auth?.user ||
@@ -503,6 +511,7 @@ export const CurateWrapper = ({
             : null
         }
         saveMetadataCallback={saveMetadataCallback}
+        ZooDialog={<ZooDialog plugins={pluginData} datasets={[]} />}
       />
 
       <ConfirmationDialog
