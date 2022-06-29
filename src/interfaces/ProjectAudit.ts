@@ -73,9 +73,9 @@ interface SetDefaultLabelsV0 {
   defaultLabels: string[];
 }
 
-interface SetRestrictToDefaultLabelsV0 {
-  type: "setRestrictToDefaultLabels";
-  restrict: boolean;
+interface SetRestrictLabelsV0 {
+  type: "setRestrictLabels";
+  restrictLabels: boolean;
 }
 
 interface SetMultiLabelV0 {
@@ -95,7 +95,7 @@ interface ProjectAuditActionV0 {
     | InviteCollaboratorV0
     | CollaboratorInviteAcceptedV0
     | SetDefaultLabelsV0
-    | SetRestrictToDefaultLabelsV0
+    | SetRestrictLabelsV0
     | SetMultiLabelV0;
   username: string;
   timestamp: number;

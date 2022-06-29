@@ -338,14 +338,72 @@ export class DominateStore {
       collectionUid
     );
 
-    const oldMeta = collection.getMeta();
+    const oldMeta = collection.getMeta<GalleryMeta>();
     collection.setMeta({
       ...oldMeta,
       ...newMeta, // should overwrite any fields that are already in oldMeta
       modifiedTime: Date.now(),
     });
 
-    await collectionManager.upload(collection);
+    const projectAuditActions: ProjectAuditAction[] = [];
+
+    if (
+      newMeta.defaultLabels !== undefined &&
+      JSON.stringify(newMeta.defaultLabels) !==
+        JSON.stringify(oldMeta.defaultLabels)
+    ) {
+      projectAuditActions.push({
+        action: {
+          type: "setDefaultLabels",
+          defaultLabels: newMeta.defaultLabels,
+        },
+        username: this.etebaseInstance.user.username,
+        timestamp: Date.now(),
+      });
+    }
+
+    if (
+      newMeta.restrictLabels !== undefined &&
+      newMeta.restrictLabels !== oldMeta.restrictLabels
+    ) {
+      projectAuditActions.push({
+        action: {
+          type: "setRestrictLabels",
+          restrictLabels: newMeta.restrictLabels,
+        },
+        username: this.etebaseInstance.user.username,
+        timestamp: Date.now(),
+      });
+    }
+
+    if (
+      newMeta.multiLabel !== undefined &&
+      newMeta.multiLabel !== oldMeta.multiLabel
+    ) {
+      projectAuditActions.push({
+        action: { type: "setMultiLabel", multiLabel: newMeta.multiLabel },
+        username: this.etebaseInstance.user.username,
+        timestamp: Date.now(),
+      });
+    }
+
+    if (projectAuditActions.length > 0) {
+      const projectAudit = await collectionManager.fetch(
+        collection.getMeta<GalleryMeta>().projectAuditUID
+      );
+
+      await projectAudit.setContent(
+        JSON.stringify(
+          JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
+            projectAuditActions
+          )
+        )
+      );
+
+      await this.batchUpload(collectionManager, [collection, projectAudit]);
+    } else {
+      await collectionManager.upload(collection);
+    }
   };
 
   updateGallery = async (
