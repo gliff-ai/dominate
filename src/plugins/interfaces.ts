@@ -17,6 +17,8 @@ enum PluginType {
 interface Plugin {
   username?: string; // trusted-service username (i.e., email address)
   name: string; // plugin name
+  description: string;
+  author: string;
   type: PluginType;
   url: string; // base_url for trusted-services and url for plugins
   products: Product;
