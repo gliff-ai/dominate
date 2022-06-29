@@ -1,12 +1,10 @@
-import { jsPluginsAPI } from "@/services/plugins";
-import { trustedServicesAPI } from "@/services/trustedServices";
+import { jsPluginsAPI, trustedServicesAPI } from "@/services/plugins";
 import { Plugin, Product, PluginType, PluginObject } from "./interfaces";
-
 import { initJsPluginObjects } from "./jsPlugin";
 
 import { initTrustedServiceObjects } from "./trustedService";
 
-async function getPlugins(
+async function getActivePlugins(
   currentProduct: Product,
   collectionUid: string
 ): Promise<Plugin[] | null> {
@@ -36,7 +34,7 @@ async function initPluginObjects(
   // Initialise plugin objects
 
   try {
-    const plugins = await getPlugins(currentProduct, collectionUid);
+    const plugins = await getActivePlugins(currentProduct, collectionUid);
 
     if (plugins) {
       const jsPlugins = await initJsPluginObjects(plugins);
@@ -53,5 +51,5 @@ async function initPluginObjects(
   return null;
 }
 
-export { getPlugins, initPluginObjects, Product, PluginType };
+export { initPluginObjects, Product, PluginType };
 export type { Plugin, PluginObject };

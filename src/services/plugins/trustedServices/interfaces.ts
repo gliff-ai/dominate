@@ -1,4 +1,4 @@
-import { JsPlugin } from "../plugins/interfaces";
+import { JsPlugin } from "../jsPlugins/interfaces";
 
 export interface TrustedService extends JsPlugin {
   username: string;

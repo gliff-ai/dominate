@@ -4,6 +4,8 @@ import {
   useCallback,
   Dispatch,
   useMemo,
+  useState,
+  useEffect,
 } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -20,11 +22,16 @@ import {
   inviteNewUser,
   UserAccess,
 } from "@/services/user";
-import { trustedServicesAPI, TrustedService } from "@/services/trustedServices";
-import { jsPluginsAPI, JsPlugin } from "@/services/plugins";
+import {
+  getPlugins,
+  updatePlugin,
+  createPlugin,
+  deletePlugin,
+} from "@/services/plugins";
 import { FileInfo, GalleryTile, DemoMetadata, GalleryMeta } from "@/interfaces";
-import { PluginType, Plugin } from "@/plugins";
+import { Plugin } from "@/plugins";
 import { loadNonTiffImageFromURL } from "@/imageConversions";
+import { ZooDialog } from "@/components";
 
 type Progress = {
   [uid: string]: { complete: number; total: number };
@@ -40,6 +47,7 @@ export const ManageWrapper = ({
   setTask,
 }: Props): ReactElement | null => {
   const auth = useAuth();
+  const [plugins, setPlugins] = useState<Plugin[] | null>(null);
   const navigate = useNavigate();
 
   const getProjects = useCallback(async (): Promise<GalleryMeta[]> => {
@@ -103,61 +111,6 @@ export const ManageWrapper = ({
     },
     [storeInstance]
   );
-
-  const getPlugins = useCallback(async (): Promise<Plugin[]> => {
-    let allPlugins: Plugin[] = [];
-
-    try {
-      const trustedServices =
-        (await trustedServicesAPI.getTrustedService()) as Plugin[];
-      allPlugins = allPlugins.concat(trustedServices);
-    } catch (e) {
-      console.error(e);
-    }
-
-    try {
-      const jsplugins = (await jsPluginsAPI.getPlugins()) as Plugin[];
-      allPlugins = allPlugins.concat(jsplugins);
-    } catch (e) {
-      console.error(e);
-    }
-
-    return allPlugins;
-  }, []);
-
-  const createPlugin = useCallback(
-    async (plugin: Plugin): Promise<{ key: string; email: string } | null> => {
-      if (plugin.type === PluginType.Javascript) {
-        await jsPluginsAPI.createPlugin(plugin as JsPlugin);
-        return null;
-      }
-      // First create a trusted service base user
-      const { key, email } = await storeInstance.createTrustedServiceUser();
-
-      // Set the user profile
-      const res = await trustedServicesAPI.createTrustedService({
-        username: email,
-        ...plugin,
-      } as TrustedService);
-
-      return { key, email };
-    },
-    [storeInstance]
-  );
-
-  const updatePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
-    if (plugin.type === PluginType.Javascript) {
-      return jsPluginsAPI.updatePlugin(plugin as JsPlugin);
-    }
-    return trustedServicesAPI.updateTrustedService(plugin as TrustedService);
-  }, []);
-
-  const deletePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
-    if (plugin.type === PluginType.Javascript) {
-      return jsPluginsAPI.deletePlugin(plugin as JsPlugin);
-    }
-    return trustedServicesAPI.deleteTrustedService(plugin as TrustedService);
-  }, []);
 
   const getAnnotationProgress = useCallback(
     async ({
@@ -373,7 +326,7 @@ export const ManageWrapper = ({
       inviteCollaborator,
       inviteToProject,
       removeFromProject,
-      createPlugin,
+      createPlugin: createPlugin(storeInstance),
       getPlugins,
       updatePlugin,
       deletePlugin,
@@ -382,6 +335,7 @@ export const ManageWrapper = ({
       downloadDemoData,
     }),
     [
+      storeInstance,
       getProjects,
       getProject,
       deleteProject,
@@ -393,10 +347,6 @@ export const ManageWrapper = ({
       inviteCollaborator,
       inviteToProject,
       removeFromProject,
-      createPlugin,
-      getPlugins,
-      updatePlugin,
-      deletePlugin,
       getAnnotationProgress,
       launchDocs,
       downloadDemoData,
@@ -413,6 +363,11 @@ export const ManageWrapper = ({
     [auth]
   );
 
+  useEffect(() => {
+    // get plugins data (should run once at mount)
+    void getPlugins().then(setPlugins);
+  }, []);
+
   if (!storeInstance || !auth?.user || !auth?.userProfile) return null;
 
   return (
@@ -425,6 +380,7 @@ export const ManageWrapper = ({
         launchAuditCallback={
           auth?.userProfile.team.tier.id > 1 ? launchAudit : null
         }
+        ZooDialog={<ZooDialog plugins={plugins} datasets={[]} />}
       />
     </ProvideAuth>
   );
