@@ -1,16 +1,13 @@
-import { Divider, icons, MuiCard, theme } from "@gliff-ai/style";
 import { ReactElement, useMemo } from "react";
-
+import { Divider, icons, MuiCard, Box, Button, theme } from "@gliff-ai/style";
+import { DialogActions } from "@mui/material";
 import SVG from "react-inlinesvg";
 import { FilterDataItem } from "@gliff-ai/curate";
-import { Box, Button, DialogActions } from "@mui/material";
 
-export interface ZooCardData extends FilterDataItem {
+interface Data extends FilterDataItem {
   name: string;
   author: string;
   description: string;
-  security: string;
-  architecture: string;
   type: string;
 }
 
@@ -42,13 +39,13 @@ const InconText = ({
 InconText.defaultProps = { marginLeft: null };
 
 interface Props {
-  data: ZooCardData;
+  data: Data;
   isOpen: boolean;
   openCard: () => void;
   closeCard: () => void;
 }
 
-export const ZooCard = ({
+export const PluginsZooCard = ({
   data,
   isOpen,
   openCard,
@@ -115,10 +112,13 @@ export const ZooCard = ({
           padding: "10px",
         }}
       >
-        <InconText icon={icons.security} text={data.security} />
+        <InconText
+          icon={icons.security}
+          text={data.type === "Javascript" ? "Aluminuium" : "Titanium"}
+        />
         <InconText
           icon={icons.build}
-          text={data.architecture}
+          text={data.type === "Javascript" ? "Front-end" : "Back-end"}
           marginLeft="15px"
         />
         <InconText

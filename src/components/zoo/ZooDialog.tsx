@@ -15,7 +15,8 @@ import {
   SearchBar,
   SearchFilterCard,
 } from "@gliff-ai/curate";
-import { ZooCard, ZooCardData } from "./ZooCard";
+import { Plugin } from "@/plugins";
+import { PluginsZooCard } from "./PluginsZooCard";
 
 const PLUGINS_KEYLABELS_MAP = {
   name: "Name",
@@ -31,23 +32,37 @@ enum ActiveSection {
   datasets,
 }
 
-interface Props {
-  plugins: ZooCardData[];
-  datasets: ZooCardData[];
+interface Dataset {
+  name: string;
+  author: string;
+  type: string;
+  description: string;
+  url: string;
 }
 
-export function ZooDialog(props: Props): ReactElement {
+interface Props {
+  plugins: Plugin[] | null;
+  datasets: Dataset[] | null;
+}
+
+export function ZooDialog(props: Props): ReactElement | null {
   const [openCard, setOpenCard] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<ActiveSection>(
     ActiveSection.plugins
   );
+
   const filters = useMemo(() => new Filters(), [activeSection]);
 
   const data = useMemo(
     () =>
-      activeSection === ActiveSection.plugins ? props.plugins : props.datasets,
+      (activeSection === ActiveSection.plugins
+        ? props.plugins
+        : props.datasets
+      )?.map((d) => ({ ...d, filterShow: true, newGroup: false })),
     [activeSection, props.plugins, props.datasets]
   );
+
+  if (!data) return null;
 
   return (
     <Dialog
@@ -139,12 +154,14 @@ export function ZooDialog(props: Props): ReactElement {
                 (item) =>
                   (!openCard || openCard === item.name) && (
                     <Grid sx={{ height: "fit-content" }} item xs={3}>
-                      <ZooCard
-                        data={item}
-                        isOpen={openCard === item.name}
-                        openCard={() => setOpenCard(item.name)}
-                        closeCard={() => setOpenCard(null)}
-                      />
+                      {activeSection === ActiveSection.plugins ? (
+                        <PluginsZooCard
+                          data={item}
+                          isOpen={openCard === item.name}
+                          openCard={() => setOpenCard(item.name)}
+                          closeCard={() => setOpenCard(null)}
+                        />
+                      ) : null}
                     </Grid>
                   )
               )}
