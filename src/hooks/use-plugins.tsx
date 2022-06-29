@@ -6,7 +6,7 @@ export function usePlugins(
   collectionUid: string,
   auth: AuthContext | null,
   product: Product
-) {
+): PluginObject | null {
   const [plugins, setPlugins] = useState<PluginObject | null>(null);
 
   useEffect(() => {
@@ -15,7 +15,7 @@ export function usePlugins(
     void initPluginObjects(product, collectionUid, auth.user.username).then(
       setPlugins
     );
-  }, [auth?.user?.username, collectionUid]);
+  }, [auth?.user?.username, collectionUid, product]);
 
   return plugins;
 }
