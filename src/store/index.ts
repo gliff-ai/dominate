@@ -715,7 +715,13 @@ export class DominateStore {
         deletedTime: null,
         galleryUID: collection.uid,
       },
-      "[]"
+      JSON.stringify([
+        {
+          action: { type: "createProject", projectName: name, description },
+          username: this.etebaseInstance.user.username,
+          timestamp: Date.now(),
+        },
+      ])
     );
 
     collection.setMeta<GalleryMeta>({

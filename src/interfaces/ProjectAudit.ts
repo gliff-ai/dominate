@@ -15,6 +15,12 @@ interface ProjectAuditMetaV0 extends BaseMeta {
 
 // ----------------------------- CONTENT -----------------------------
 
+interface CreateProjectV0 {
+  type: "createProject";
+  projectName: string;
+  description: string;
+}
+
 interface UploadImageV0 {
   type: "uploadImage";
   imageName: string;
@@ -85,6 +91,7 @@ interface SetMultiLabelV0 {
 
 interface ProjectAuditActionV0 {
   action:
+    | CreateProjectV0
     | UploadImageV0
     | DeleteImageV0
     | AssignImageV0
