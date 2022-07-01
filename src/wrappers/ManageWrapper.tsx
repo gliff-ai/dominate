@@ -20,10 +20,10 @@ import {
   inviteNewUser,
   UserAccess,
 } from "@/services/user";
-import { trustedServicesAPI, TrustedService } from "@/services/trustedServices";
-import { jsPluginsAPI, JsPlugin } from "@/services/plugins";
+import { trustedServicesAPI, TrustedServiceOut } from "@/services/trustedServices";
+import { JsPluginOut, jsPluginsAPI } from "@/services/plugins";
 import { FileInfo, GalleryTile, DemoMetadata, GalleryMeta } from "@/interfaces";
-import { PluginType, Plugin } from "@/plugins";
+import { PluginType, PluginOut, PluginIn } from "@/plugins";
 import { loadNonTiffImageFromURL } from "@/imageConversions";
 
 type Progress = {
@@ -104,19 +104,19 @@ export const ManageWrapper = ({
     [storeInstance]
   );
 
-  const getPlugins = useCallback(async (): Promise<Plugin[]> => {
-    let allPlugins: Plugin[] = [];
+  const getPlugins = useCallback(async (): Promise<PluginIn[]> => {
+    let allPlugins: PluginIn[] = [];
 
     try {
       const trustedServices =
-        (await trustedServicesAPI.getTrustedService()) as Plugin[];
+        (await trustedServicesAPI.getTrustedService()) as PluginIn[];
       allPlugins = allPlugins.concat(trustedServices);
     } catch (e) {
       console.error(e);
     }
 
     try {
-      const jsplugins = (await jsPluginsAPI.getPlugins()) as Plugin[];
+      const jsplugins = (await jsPluginsAPI.getPlugins()) as PluginIn[];
       allPlugins = allPlugins.concat(jsplugins);
     } catch (e) {
       console.error(e);
@@ -126,9 +126,9 @@ export const ManageWrapper = ({
   }, []);
 
   const createPlugin = useCallback(
-    async (plugin: Plugin): Promise<{ key: string; email: string } | null> => {
+    async (plugin: PluginOut): Promise<{ key: string; email: string } | null> => {
       if (plugin.type === PluginType.Javascript) {
-        await jsPluginsAPI.createPlugin(plugin as JsPlugin);
+        await jsPluginsAPI.createPlugin(plugin as JsPluginOut);
         return null;
       }
       // First create a trusted service base user
@@ -138,25 +138,25 @@ export const ManageWrapper = ({
       const res = await trustedServicesAPI.createTrustedService({
         username: email,
         ...plugin,
-      } as TrustedService);
+      } as TrustedServiceOut);
 
       return { key, email };
     },
     [storeInstance]
   );
 
-  const updatePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
+  const updatePlugin = useCallback(async (plugin: PluginOut): Promise<number> => {
     if (plugin.type === PluginType.Javascript) {
-      return jsPluginsAPI.updatePlugin(plugin as JsPlugin);
+      return jsPluginsAPI.updatePlugin(plugin as JsPluginOut);
     }
-    return trustedServicesAPI.updateTrustedService(plugin as TrustedService);
+    return trustedServicesAPI.updateTrustedService(plugin as TrustedServiceOut);
   }, []);
 
-  const deletePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
+  const deletePlugin = useCallback(async (plugin: PluginOut): Promise<number> => {
     if (plugin.type === PluginType.Javascript) {
-      return jsPluginsAPI.deletePlugin(plugin as JsPlugin);
+      return jsPluginsAPI.deletePlugin(plugin as JsPluginOut);
     }
-    return trustedServicesAPI.deleteTrustedService(plugin as TrustedService);
+    return trustedServicesAPI.deleteTrustedService(plugin as TrustedServiceOut);
   }, []);
 
   const getAnnotationProgress = useCallback(

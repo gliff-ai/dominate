@@ -1,6 +1,6 @@
 import { jsPluginsAPI } from "@/services/plugins";
 import { trustedServicesAPI } from "@/services/trustedServices";
-import { Plugin, Product, PluginType, PluginObject } from "./interfaces";
+import { PluginIn, PluginOut, Product, PluginType, PluginObject } from "./interfaces";
 
 import { initJsPluginObjects } from "./jsPlugin";
 
@@ -9,14 +9,14 @@ import { initTrustedServiceObjects } from "./trustedService";
 async function getPlugins(
   currentProduct: Product,
   collectionUid: string
-): Promise<Plugin[] | null> {
+): Promise<PluginOut[] | null> {
   // Get plugins data from STORE
   try {
     const newPlugins = (
-      (await trustedServicesAPI.getTrustedService()) as Plugin[]
-    ).concat((await jsPluginsAPI.getPlugins()) as Plugin[]);
+      (await trustedServicesAPI.getTrustedService()) as PluginIn[]
+    ).concat((await jsPluginsAPI.getPlugins()) as PluginIn[]);
 
-    return newPlugins.filter(
+    return newPlugins.map((p) => ({...p, collection_uids: p.collection_uids.map(({uid})=>  uid)})).filter(
       ({ collection_uids, products, enabled }) =>
         collection_uids.includes(collectionUid) &&
         (products === currentProduct || products === Product.ALL) &&
@@ -54,4 +54,4 @@ async function initPluginObjects(
 }
 
 export { getPlugins, initPluginObjects, Product, PluginType };
-export type { Plugin, PluginObject };
+export type { PluginIn, PluginOut, PluginObject };

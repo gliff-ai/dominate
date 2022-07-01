@@ -21,7 +21,16 @@ interface Plugin {
   url: string; // base_url for trusted-services and url for plugins
   products: Product;
   enabled: boolean;
-  collection_uids: string[]; // collection uids for the projects the plugin has been added to
+}
+
+type CollectionUidsExtra = { uid: string; is_invite_pending: "True" | "False" };
+
+interface PluginIn extends Plugin {
+  collection_uids: CollectionUidsExtra[]; // collection uids for the projects the plugin has been added to
+}
+
+interface PluginOut extends Plugin {
+  collection_uids: string[];
 }
 
 interface PluginElement {
@@ -48,7 +57,9 @@ interface PluginDataOut {
 
 export { Product, PluginType };
 export type {
-  Plugin,
+  CollectionUidsExtra,
+  PluginOut,
+  PluginIn,
   PluginObject,
   PluginDataIn,
   PluginDataOut,

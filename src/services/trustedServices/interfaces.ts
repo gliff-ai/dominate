@@ -1,8 +1,11 @@
-import { JsPlugin } from "../plugins/interfaces";
+import { JsPluginIn, JsPluginOut } from "../plugins/interfaces";
 
-export interface TrustedService extends JsPlugin {
+interface TrustedService {
   username: string;
 }
+export interface TrustedServiceIn extends JsPluginIn, TrustedService {}
+export interface TrustedServiceOut extends JsPluginOut, TrustedService {}
+
 export interface UiTemplate {
   trustedService: string;
   uiElements: UiElement[];

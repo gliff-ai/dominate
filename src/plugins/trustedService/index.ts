@@ -1,12 +1,12 @@
 import Ajv from "ajv";
-import { Plugin, PluginType, PluginElement } from "@/plugins/interfaces";
+import { PluginOut, PluginType, PluginElement } from "@/plugins/interfaces";
 import { TrustedServiceClass } from "./TrustedServiceClass";
 import { UiTemplateSchema } from "./schemas";
 import { trustedServicesAPI } from "@/services/trustedServices";
 import { UiTemplate } from "@/services/trustedServices/interfaces";
 
 function unpackUiElements(
-  { type, username, name, url: baseUrl }: Plugin,
+  { type, username, name, url: baseUrl }: PluginOut,
   template: UiTemplate,
   user_username: string
 ): PluginElement[] {
@@ -27,7 +27,7 @@ function unpackUiElements(
 }
 
 async function initTrustedServiceObjects(
-  plugins: Plugin[],
+  plugins: PluginOut[],
   user_username: string
 ): Promise<{ [name: string]: PluginElement[] }> {
   // prepare for validating JSON file
