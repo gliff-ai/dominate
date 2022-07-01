@@ -1,6 +1,6 @@
 import { jsPluginsAPI } from "@/services/plugins";
 import { trustedServicesAPI } from "@/services/trustedServices";
-import { PluginIn, PluginOut, Product, PluginType, PluginObject } from "./interfaces";
+import { Plugin, Product, PluginType, PluginObject } from "./interfaces";
 
 import { initJsPluginObjects } from "./jsPlugin";
 
@@ -9,14 +9,17 @@ import { initTrustedServiceObjects } from "./trustedService";
 async function getPlugins(
   currentProduct: Product,
   collectionUid: string
-): Promise<PluginOut[] | null> {
+): Promise<Plugin[] | null> {
   // Get plugins data from STORE
   try {
     const newPlugins = (
-      (await trustedServicesAPI.getTrustedService()) as PluginIn[]
-    ).concat((await jsPluginsAPI.getPlugins()) as PluginIn[]);
+      (await trustedServicesAPI.getTrustedService()).map((p) => ({
+        ...p,
+        collection_uids: p.collection_uids.map(({ uid }) => uid),
+      })) as Plugin[]
+    ).concat((await jsPluginsAPI.getPlugins()) as Plugin[]);
 
-    return newPlugins.map((p) => ({...p, collection_uids: p.collection_uids.map(({uid})=>  uid)})).filter(
+    return newPlugins.filter(
       ({ collection_uids, products, enabled }) =>
         collection_uids.includes(collectionUid) &&
         (products === currentProduct || products === Product.ALL) &&
@@ -54,4 +57,4 @@ async function initPluginObjects(
 }
 
 export { getPlugins, initPluginObjects, Product, PluginType };
-export type { PluginIn, PluginOut, PluginObject };
+export type { Plugin, PluginObject };

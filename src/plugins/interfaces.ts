@@ -1,4 +1,5 @@
 import { MetaItem } from "@/interfaces";
+import { CollectionUidsWithExtra } from "@/services/trustedServices/interfaces";
 
 // NOTE: Product, PluginType and Plugin are also defined in MANAGE
 
@@ -21,16 +22,11 @@ interface Plugin {
   url: string; // base_url for trusted-services and url for plugins
   products: Product;
   enabled: boolean;
-}
-
-type CollectionUidsExtra = { uid: string; is_invite_pending: "True" | "False" };
-
-interface PluginIn extends Plugin {
-  collection_uids: CollectionUidsExtra[]; // collection uids for the projects the plugin has been added to
-}
-
-interface PluginOut extends Plugin {
   collection_uids: string[];
+}
+
+interface PluginWithExtra extends Omit<Plugin, "collection_uids"> {
+  collection_uids: CollectionUidsWithExtra[];
 }
 
 interface PluginElement {
@@ -57,9 +53,8 @@ interface PluginDataOut {
 
 export { Product, PluginType };
 export type {
-  CollectionUidsExtra,
-  PluginOut,
-  PluginIn,
+  Plugin,
+  PluginWithExtra,
   PluginObject,
   PluginDataIn,
   PluginDataOut,

@@ -20,11 +20,15 @@ import {
   inviteNewUser,
   UserAccess,
 } from "@/services/user";
-import { trustedServicesAPI, TrustedServiceOut } from "@/services/trustedServices";
-import { JsPluginOut, jsPluginsAPI } from "@/services/plugins";
+import {
+  trustedServicesAPI,
+  TrustedServiceOut,
+} from "@/services/trustedServices";
+import { JsPlugin, jsPluginsAPI } from "@/services/plugins";
 import { FileInfo, GalleryTile, DemoMetadata, GalleryMeta } from "@/interfaces";
-import { PluginType, PluginOut, PluginIn } from "@/plugins";
+import { PluginType, Plugin } from "@/plugins";
 import { loadNonTiffImageFromURL } from "@/imageConversions";
+import { PluginWithExtra } from "@/plugins/interfaces";
 
 type Progress = {
   [uid: string]: { complete: number; total: number };
@@ -104,19 +108,25 @@ export const ManageWrapper = ({
     [storeInstance]
   );
 
-  const getPlugins = useCallback(async (): Promise<PluginIn[]> => {
-    let allPlugins: PluginIn[] = [];
+  const getPlugins = useCallback(async (): Promise<PluginWithExtra[]> => {
+    let allPlugins: PluginWithExtra[] = [];
 
     try {
       const trustedServices =
-        (await trustedServicesAPI.getTrustedService()) as PluginIn[];
+        (await trustedServicesAPI.getTrustedService()) as PluginWithExtra[];
       allPlugins = allPlugins.concat(trustedServices);
     } catch (e) {
       console.error(e);
     }
 
     try {
-      const jsplugins = (await jsPluginsAPI.getPlugins()) as PluginIn[];
+      const jsplugins = (await jsPluginsAPI.getPlugins()).map((p) => ({
+        ...p,
+        collection_uids: p.collection_uids.map((uid) => ({
+          uid,
+          is_invite_pending: "False",
+        })),
+      })) as PluginWithExtra[];
       allPlugins = allPlugins.concat(jsplugins);
     } catch (e) {
       console.error(e);
@@ -126,9 +136,9 @@ export const ManageWrapper = ({
   }, []);
 
   const createPlugin = useCallback(
-    async (plugin: PluginOut): Promise<{ key: string; email: string } | null> => {
+    async (plugin: Plugin): Promise<{ key: string; email: string } | null> => {
       if (plugin.type === PluginType.Javascript) {
-        await jsPluginsAPI.createPlugin(plugin as JsPluginOut);
+        await jsPluginsAPI.createPlugin(plugin as JsPlugin);
         return null;
       }
       // First create a trusted service base user
@@ -145,16 +155,16 @@ export const ManageWrapper = ({
     [storeInstance]
   );
 
-  const updatePlugin = useCallback(async (plugin: PluginOut): Promise<number> => {
+  const updatePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
     if (plugin.type === PluginType.Javascript) {
-      return jsPluginsAPI.updatePlugin(plugin as JsPluginOut);
+      return jsPluginsAPI.updatePlugin(plugin as JsPlugin);
     }
     return trustedServicesAPI.updateTrustedService(plugin as TrustedServiceOut);
   }, []);
 
-  const deletePlugin = useCallback(async (plugin: PluginOut): Promise<number> => {
+  const deletePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
     if (plugin.type === PluginType.Javascript) {
-      return jsPluginsAPI.deletePlugin(plugin as JsPluginOut);
+      return jsPluginsAPI.deletePlugin(plugin as JsPlugin);
     }
     return trustedServicesAPI.deleteTrustedService(plugin as TrustedServiceOut);
   }, []);
