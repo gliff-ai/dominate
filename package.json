@@ -56,7 +56,7 @@
     "@mui/styles": "^5.8.4",
     "@mui/x-data-grid": "^5.12.3",
     "@sentry/integrations": "^6.19.7",
-    "@sentry/react": "^6.19.7",
+    "@sentry/react": "^7.4.1",
     "@sentry/tracing": "^6.19.7",
     "@stripe/stripe-js": "^1.32.0",
     "ajv": "^8.11.0",
