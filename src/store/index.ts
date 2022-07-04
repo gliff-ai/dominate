@@ -34,7 +34,6 @@ import {
   ProjectAuditAction,
   migrations,
 } from "@/interfaces";
-import { Output } from "@mui/icons-material";
 
 const logger = console;
 
@@ -1036,6 +1035,32 @@ export class DominateStore {
       logger.error(err);
       return null;
     }
+  };
+
+  logAuditActions = async (
+    projectAuditActions: ProjectAuditAction[],
+    gallery_: Collection | string
+  ): Promise<void> => {
+    // fetch project level audit and concatenate new actions in its content
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+
+    let gallery: Collection;
+    if (gallery_ instanceof Collection) gallery = gallery_;
+    else gallery = await collectionManager.fetch(gallery_);
+
+    const projectAudit = await collectionManager.fetch(
+      gallery.getMeta<GalleryMeta>().projectAuditUID
+    );
+
+    await projectAudit.setContent(
+      JSON.stringify(
+        JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
+          projectAuditActions
+        )
+      )
+    );
+
+    return collectionManager.upload(projectAudit);
   };
 
   setImageLabels = async (
