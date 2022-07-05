@@ -612,7 +612,7 @@ export class DominateStore {
     return resolved;
   };
 
-  createCollection = async ({
+  createGallery = async ({
     name,
     description,
   }: {

@@ -76,7 +76,7 @@ export const ManageWrapper = ({
 
   const createProject = useCallback(
     async (projectDetails: { name: string; description?: string }) => {
-      const uid = await storeInstance.createCollection(projectDetails);
+      const uid = await storeInstance.createGallery(projectDetails);
 
       return uid;
     },
@@ -246,7 +246,7 @@ export const ManageWrapper = ({
     let projectUid: string | null = null;
     try {
       // create a new project
-      projectUid = await storeInstance.createCollection({
+      projectUid = await storeInstance.createGallery({
         name: "Giraffes-Hippos Demo",
       });
 
