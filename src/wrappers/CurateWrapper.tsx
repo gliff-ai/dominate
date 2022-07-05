@@ -9,13 +9,14 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 
 import Curate from "@gliff-ai/curate";
-import { Task } from "@gliff-ai/style";
+import { Task, IconButton, icons } from "@gliff-ai/style";
 
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import { Annotations, getTiffData } from "@gliff-ai/annotate";
 import { DominateStore } from "@/store";
+import { ProductNavbarData } from "@/components";
 import { GalleryTile, Slices, MetaItem } from "@/interfaces";
 import {
   ConfirmationDialog,
@@ -31,6 +32,7 @@ import {
   convertGalleryToMetadata,
   convertMetadataToGalleryTiles,
   MetaItemWithId,
+  setStateIfMounted,
 } from "@/helpers";
 import { Product } from "@/plugins";
 import { UserAccess } from "@/services/user";
@@ -42,6 +44,7 @@ interface Props {
   setIsLoading: (isLoading: boolean) => void;
   task: Task;
   setTask: (task: Task) => void;
+  setProductNavbarData: (data: ProductNavbarData) => void;
 }
 
 export const CurateWrapper = ({
@@ -49,6 +52,7 @@ export const CurateWrapper = ({
   setIsLoading,
   task,
   setTask,
+  setProductNavbarData,
 }: Props): ReactElement | null => {
   const navigate = useNavigate();
   const auth = useAuth();
@@ -59,11 +63,13 @@ export const CurateWrapper = ({
   const [restrictLabels, setRestrictLabels] = useState<boolean>(false); // more input for curate
   const [multiLabel, setMultiLabel] = useState<boolean>(true); // more input for curate
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
+  const [collectionTitle, setCollectionTitle] = useState<string>("");
 
   // multi-label image download dialog state:
   const [showMultilabelConfirm, setShowMultilabelConfirm] =
     useState<boolean>(false);
   const [multi, setMulti] = useState<boolean>(false);
+  const plugins = usePlugins(collectionUid, auth, Product.CURATE);
 
   // image deletion dialog state:
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
@@ -72,7 +78,7 @@ export const CurateWrapper = ({
   // no images to download message state:
   const [showNoImageMessage, setShowNoImageMessage] = useState<boolean>(false);
   const [profiles, setProfiles] = useState<Profile[] | null>(null);
-  const plugins = usePlugins(collectionUid, auth, Product.CURATE);
+
   const isMounted = useRef(false);
 
   const isOwnerOrMember = useMemo(
@@ -97,6 +103,12 @@ export const CurateWrapper = ({
         .getImagesMeta(collectionUid)
         .then(({ tiles: gallery, galleryMeta }) => {
           setCollectionContent(gallery);
+
+          setStateIfMounted(
+            galleryMeta?.name,
+            setCollectionTitle,
+            isMounted.current
+          );
 
           const newMetadata = convertGalleryToMetadata(gallery);
           // if user is collaborator, include only images assigned to them.
@@ -467,6 +479,38 @@ export const CurateWrapper = ({
     // get image thumbnails and metadata (should run once at mount)
     fetchImageItems();
   }, [fetchImageItems]);
+
+  const tier = auth?.userProfile?.team.tier;
+  const tierIsAllowed = tier && tier.id > 0;
+
+  useEffect(() => {
+    setProductNavbarData({
+      teamName: auth?.userProfile?.team.name || "",
+      projectName: collectionTitle || "",
+      imageName: "",
+      buttonBack: (
+        <IconButton
+          onClick={() => navigate("/manage")}
+          tooltip={{
+            name: `Return to MANAGE `,
+          }}
+          tooltipPlacement="bottom"
+          icon={icons.navigationMANAGE}
+        />
+      ),
+      buttonForward: tierIsAllowed ? (
+        <IconButton
+          onClick={() => navigate(`/audit/${collectionUid}`)}
+          tooltip={{
+            name: `Open ${collectionTitle} in AUDIT`,
+          }}
+          tooltipPlacement="bottom"
+          icon={icons.navigationAUDIT}
+        />
+      ) : null,
+      productLocation: "CURATE",
+    });
+  }, [collectionTitle]);
 
   if (
     !storeInstance ||
