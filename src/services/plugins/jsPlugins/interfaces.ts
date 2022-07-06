@@ -1,6 +1,5 @@
-export interface JsPlugin {
+interface JsPlugin {
   type: "Javascript" | "Python" | "AI";
-  author?: string;
   name: string;
   description: string;
   url: string;
@@ -8,3 +7,13 @@ export interface JsPlugin {
   products: "CURATE" | "ANNOTATE" | "ALL";
   collection_uids: string[];
 }
+
+interface JsPluginIn extends JsPlugin {
+  author: string;
+}
+
+interface JsPluginOut extends JsPlugin {
+  origin_id: number | null;
+}
+
+export { JsPlugin, JsPluginIn, JsPluginOut };

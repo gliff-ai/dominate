@@ -1,6 +1,7 @@
 import { MetaItem } from "@/interfaces";
 
 // NOTE: Product, PluginType and Plugin are also defined in MANAGE
+// TODO: re-import these interfaces from MANAGE to avoid duplication!
 
 enum Product {
   "CURATE" = "CURATE",
@@ -18,7 +19,8 @@ interface Plugin {
   username?: string; // trusted-service username (i.e., email address)
   name: string; // plugin name
   description: string;
-  author: string;
+  author?: string;
+  origin_id?: number;
   type: PluginType;
   url: string; // base_url for trusted-services and url for plugins
   products: Product;

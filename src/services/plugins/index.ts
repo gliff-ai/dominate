@@ -1,4 +1,4 @@
-import { JsPlugin, jsPluginsAPI } from "./jsPlugins";
+import { JsPlugin, JsPluginOut, jsPluginsAPI } from "./jsPlugins";
 import { TrustedService, trustedServicesAPI } from "./trustedServices";
 import { Plugin, PluginType } from "@/plugins";
 import { DominateStore } from "@/store";
@@ -27,16 +27,15 @@ const getPlugins = async (): Promise<Plugin[]> => {
 };
 
 const createPlugin =
-  (storeInstance: DominateStore) =>
+  (teamId, storeInstance: DominateStore) =>
   async (plugin: Plugin): Promise<{ key: string; email: string } | null> => {
     if (plugin.type === PluginType.Javascript) {
-      await jsPluginsAPI.createPlugin(plugin as JsPlugin);
+      await jsPluginsAPI.createPlugin(plugin as JsPluginOut);
       return null;
     }
-    // First create a trusted service base user
+
     const { key, email } = await storeInstance.createTrustedServiceUser();
 
-    // Set the user profile
     const res = await trustedServicesAPI.createTrustedService({
       username: email,
       ...plugin,
