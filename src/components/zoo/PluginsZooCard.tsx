@@ -2,14 +2,7 @@ import { ReactElement, useMemo } from "react";
 import { Divider, icons, MuiCard, Box, Button, theme } from "@gliff-ai/style";
 import { DialogActions } from "@mui/material";
 import SVG from "react-inlinesvg";
-import { FilterDataItem } from "@gliff-ai/curate";
-
-interface Data extends FilterDataItem {
-  name: string;
-  author: string;
-  description: string;
-  type: string;
-}
+import { Plugin } from "@/plugins";
 
 const InconText = ({
   icon,
@@ -39,7 +32,7 @@ const InconText = ({
 InconText.defaultProps = { marginLeft: null };
 
 interface Props {
-  data: Data;
+  data: Plugin;
   isOpen: boolean;
   openCard: () => void;
   closeCard: () => void;

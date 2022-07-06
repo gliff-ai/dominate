@@ -14,6 +14,7 @@ import {
   getLabelsFromKeys,
   SearchBar,
   SearchFilterCard,
+  FilterData,
 } from "@gliff-ai/curate";
 import { Plugin } from "@/plugins";
 import { PluginsZooCard } from "./PluginsZooCard";
@@ -58,7 +59,11 @@ export function ZooDialog(props: Props): ReactElement | null {
       (activeSection === ActiveSection.plugins
         ? props.plugins
         : props.datasets
-      )?.map((d) => ({ ...d, filterShow: true, newGroup: false })),
+      )?.map((d: Plugin | Dataset) => ({
+        ...d,
+        filterShow: true,
+        newGroup: false,
+      })),
     [activeSection, props.plugins, props.datasets]
   );
 
@@ -124,7 +129,7 @@ export function ZooDialog(props: Props): ReactElement | null {
             <MuiCard sx={{ width: "fit-content" }} variant="outlined">
               <SortPopover
                 filters={filters}
-                data={data}
+                data={data as FilterData}
                 updateData={() => {}}
                 getLabelsFromKeys={getLabelsFromKeys(PLUGINS_KEYLABELS_MAP)()}
               />
@@ -132,7 +137,7 @@ export function ZooDialog(props: Props): ReactElement | null {
           </div>
           <SearchBar
             filters={filters}
-            data={data}
+            data={data as FilterData}
             updateData={() => {}}
             getLabelsFromKeys={getLabelsFromKeys(PLUGINS_KEYLABELS_MAP)()}
           />
@@ -153,10 +158,15 @@ export function ZooDialog(props: Props): ReactElement | null {
               .map(
                 (item) =>
                   (!openCard || openCard === item.name) && (
-                    <Grid sx={{ height: "fit-content" }} item xs={3}>
+                    <Grid
+                      key={item.name}
+                      sx={{ height: "fit-content" }}
+                      item
+                      xs={3}
+                    >
                       {activeSection === ActiveSection.plugins ? (
                         <PluginsZooCard
-                          data={item}
+                          data={item as Plugin}
                           isOpen={openCard === item.name}
                           openCard={() => setOpenCard(item.name)}
                           closeCard={() => setOpenCard(null)}
