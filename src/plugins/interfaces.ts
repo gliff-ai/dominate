@@ -20,7 +20,7 @@ interface Plugin {
   name: string; // plugin name
   description: string;
   author?: string;
-  origin_id?: number;
+  origin_id?: number | null;
   type: PluginType;
   url: string; // base_url for trusted-services and url for plugins
   products: Product;
