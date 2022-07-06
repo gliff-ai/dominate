@@ -48,6 +48,7 @@ export const ManageWrapper = ({
 }: Props): ReactElement | null => {
   const auth = useAuth();
   const [plugins, setPlugins] = useState<Plugin[] | null>(null);
+  const [rerender, setRerender] = useState<number>(0);
   const navigate = useNavigate();
 
   const getProjects = useCallback(async (): Promise<GalleryMeta[]> => {
@@ -311,6 +312,16 @@ export const ManageWrapper = ({
     return projectUid;
   }, [storeInstance, setTask, incrementTaskProgress]);
 
+  const rerenderWrapper = useCallback(
+    (func: (plugin: Plugin) => Promise<unknown>) =>
+      async (plugin: Plugin): Promise<unknown> => {
+        const res = await func(plugin);
+        setRerender((count) => count + 1);
+        return res;
+      },
+    [setRerender]
+  );
+
   const services = useMemo(
     () => ({
       queryTeam: "GET /team/",
@@ -326,10 +337,10 @@ export const ManageWrapper = ({
       inviteCollaborator,
       inviteToProject,
       removeFromProject,
-      createPlugin: createPlugin(storeInstance),
+      createPlugin: rerenderWrapper(createPlugin(storeInstance)),
       getPlugins,
-      updatePlugin,
-      deletePlugin,
+      updatePlugin: rerenderWrapper(updatePlugin),
+      deletePlugin: rerenderWrapper(deletePlugin),
       getAnnotationProgress,
       launchDocs,
       downloadDemoData,
@@ -350,6 +361,7 @@ export const ManageWrapper = ({
       getAnnotationProgress,
       launchDocs,
       downloadDemoData,
+      rerenderWrapper,
     ]
   );
 
@@ -366,7 +378,7 @@ export const ManageWrapper = ({
   useEffect(() => {
     // get plugins data (should run once at mount)
     void getPlugins().then(setPlugins);
-  }, []);
+  }, [rerender]);
 
   if (!storeInstance || !auth?.user || !auth?.userProfile) return null;
 
