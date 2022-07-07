@@ -11,6 +11,7 @@ import { useNavigate } from "react-router-dom";
 
 import {
   UserInterface as Manage,
+  Plugin,
   ProvideAuth /* TODO export Services */,
 } from "@gliff-ai/manage";
 import { ImageFileInfo } from "@gliff-ai/upload";
@@ -29,7 +30,6 @@ import {
   deletePlugin,
 } from "@/services/plugins";
 import { FileInfo, GalleryTile, DemoMetadata, GalleryMeta } from "@/interfaces";
-import { Plugin } from "@/plugins";
 import { loadNonTiffImageFromURL } from "@/imageConversions";
 import { ZooDialog } from "@/components";
 

@@ -7,7 +7,7 @@ import {
   MuiCard,
   theme,
 } from "@gliff-ai/style";
-
+import { Plugin } from "@gliff-ai/manage";
 import {
   SortPopover,
   Filters,
@@ -16,7 +16,6 @@ import {
   SearchFilterCard,
   FilterData,
 } from "@gliff-ai/curate";
-import { Plugin } from "@/plugins";
 import { PluginsZooCard } from "./PluginsZooCard";
 
 const PLUGINS_KEYLABELS_MAP = {

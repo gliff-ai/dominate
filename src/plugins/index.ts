@@ -1,4 +1,4 @@
-import { Product, Plugin, PluginType } from "@gliff-ai/manage";
+import { Product, Plugin } from "@gliff-ai/manage";
 import { jsPluginsAPI, trustedServicesAPI } from "@/services/plugins";
 import { PluginObject } from "./interfaces";
 import { initJsPluginObjects } from "./jsPlugin";
@@ -52,5 +52,5 @@ async function initPluginObjects(
   return null;
 }
 
-export { initPluginObjects, Product, PluginType };
-export type { Plugin, PluginObject };
+export { initPluginObjects };
+export type { PluginObject };

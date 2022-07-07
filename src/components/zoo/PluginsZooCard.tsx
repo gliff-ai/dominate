@@ -1,8 +1,8 @@
 import { ReactElement, useMemo } from "react";
+import { Plugin } from "@gliff-ai/manage";
 import { Divider, icons, MuiCard, Box, Button, theme } from "@gliff-ai/style";
 import { DialogActions } from "@mui/material";
 import SVG from "react-inlinesvg";
-import { Plugin } from "@/plugins";
 
 const InconText = ({
   icon,
