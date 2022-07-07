@@ -2,7 +2,8 @@ import { JsPlugin, JsPluginIn, JsPluginOut } from "../jsPlugins/interfaces";
 
 interface TrustedService extends JsPlugin {
   username: string;
-  // publicKey: string;
+  public_key: string;
+  encrypted_access_key: string;
 }
 
 interface TrustedServiceIn extends TrustedService, JsPluginIn {}

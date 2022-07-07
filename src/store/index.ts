@@ -31,6 +31,7 @@ import {
   AuditMeta,
   migrations,
 } from "@/interfaces";
+import { SealedCryptoBox } from "@/crypto/SealedCryptoBox";
 
 const logger = console;
 
@@ -136,7 +137,9 @@ export class DominateStore {
   };
 
   createTrustedServiceUser = async (): Promise<{
-    key: string;
+    publicKey: string;
+    encryptedAccessKey: string;
+    privateKey: string;
     email: string;
   }> => {
     function base64AddPadding(str: string) {
@@ -145,7 +148,10 @@ export class DominateStore {
 
     const email = `${sodium.randombytes_random()}@trustedservice.gliff.app`;
     const password = sodium.randombytes_buf(64, "base64");
-    const key = base64AddPadding(toBase64(`${email}:${password}`));
+    const accessKey = base64AddPadding(toBase64(`${email}:${password}`));
+
+    const crypto = SealedCryptoBox.keygen();
+    const ecryptedKey = SealedCryptoBox.encrypt(accessKey, crypto.publicKey);
 
     await Account.signup(
       {
@@ -156,7 +162,12 @@ export class DominateStore {
       SERVER_URL
     );
 
-    return { key, email };
+    return {
+      publicKey: crypto.publicKey,
+      encryptedAccessKey: ecryptedKey,
+      privateKey: crypto.privateKey,
+      email,
+    };
   };
 
   signup = async (email: string, password: string): Promise<User> => {

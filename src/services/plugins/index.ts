@@ -1,6 +1,6 @@
+import { Plugin, PluginType } from "@gliff-ai/manage";
 import { JsPlugin, JsPluginOut, jsPluginsAPI } from "./jsPlugins";
 import { TrustedService, trustedServicesAPI } from "./trustedServices";
-import { Plugin, PluginType } from "@/plugins";
 import { DominateStore } from "@/store";
 
 const getPlugins = async (): Promise<Plugin[]> => {
@@ -36,14 +36,17 @@ const createPlugin =
       return null;
     }
 
-    const { key, email } = await storeInstance.createTrustedServiceUser();
+    const { publicKey, encryptedAccessKey, privateKey, email } =
+      await storeInstance.createTrustedServiceUser();
 
     const res = await trustedServicesAPI.createTrustedService({
       username: email,
       ...plugin,
+      public_key: publicKey,
+      encrypted_access_key: encryptedAccessKey,
     } as TrustedService);
 
-    return { key, email };
+    return { key: privateKey, email };
   };
 
 const updatePlugin = async (plugin: Plugin): Promise<number> => {
