@@ -7,22 +7,24 @@ import { trustedServicesAPI } from "@/services/plugins";
 import { UiTemplate } from "@/services/plugins/trustedServices/interfaces";
 
 function unpackUiElements(
-  { type, username, name, url: baseUrl }: Plugin,
+  plugin: Plugin,
   template: UiTemplate,
   user_username: string
 ): PluginElement[] {
   return template.uiElements.map(
     ({ apiEndpoint, uiParams }) =>
       new TrustedServiceClass(
-        type,
-        name,
-        baseUrl,
+        plugin.type,
+        plugin.name,
+        plugin.url,
         apiEndpoint,
         uiParams.tooltip,
         {
-          plugin: username as string,
+          plugin: plugin.username as string,
           user: user_username,
-        }
+        },
+        plugin.public_key,
+        plugin.encrypted_access_key
       )
   );
 }
