@@ -12,6 +12,7 @@ import makeStyles from "@mui/styles/makeStyles";
 
 import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annotations is the annotation data / audit handling class, usually assigned to annotationsObject
 import { ImageFileInfo } from "@gliff-ai/upload";
+import { Product } from "@gliff-ai/manage";
 import { icons, IconButton, Task } from "@gliff-ai/style";
 import { OutputFormat } from "@gliff-ai/etebase";
 import { DominateStore } from "@/store";
@@ -24,7 +25,6 @@ import {
   setStateIfMounted,
   MetaItemWithId,
 } from "@/helpers";
-import { Product } from "@/plugins";
 
 interface Props {
   storeInstance: DominateStore;

@@ -15,6 +15,7 @@ import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import { Annotations, getTiffData } from "@gliff-ai/annotate";
+import { Product, Plugin } from "@gliff-ai/manage";
 import { DominateStore } from "@/store";
 import { GalleryTile, Slices, MetaItem } from "@/interfaces";
 import {
@@ -32,7 +33,6 @@ import {
   convertMetadataToGalleryTiles,
   MetaItemWithId,
 } from "@/helpers";
-import { Product, Plugin } from "@/plugins";
 import { UserAccess } from "@/services/user";
 import { getTeam, Profile } from "@/services/team";
 import { getPlugins } from "@/services/plugins";

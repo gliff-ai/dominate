@@ -1,5 +1,6 @@
 import Ajv from "ajv";
-import { Plugin, PluginType, PluginElement } from "@/plugins/interfaces";
+import { Plugin, PluginType } from "@gliff-ai/manage";
+import { PluginElement } from "@/plugins/interfaces";
 import { TrustedServiceClass } from "./TrustedServiceClass";
 import { UiTemplateSchema } from "./schemas";
 import { trustedServicesAPI } from "@/services/plugins";

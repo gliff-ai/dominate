@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import { initPluginObjects, PluginObject, Product } from "@/plugins";
+import { Product } from "@gliff-ai/manage";
+import { initPluginObjects, PluginObject } from "@/plugins";
 import { AuthContext } from "./use-auth";
 
 export function usePlugins(

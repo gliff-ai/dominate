@@ -1,5 +1,6 @@
+import { Product, Plugin, PluginType } from "@gliff-ai/manage";
 import { jsPluginsAPI, trustedServicesAPI } from "@/services/plugins";
-import { Plugin, Product, PluginType, PluginObject } from "./interfaces";
+import { PluginObject } from "./interfaces";
 import { initJsPluginObjects } from "./jsPlugin";
 
 import { initTrustedServiceObjects } from "./trustedService";
