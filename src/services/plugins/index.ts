@@ -27,8 +27,10 @@ const getPlugins = async (): Promise<Plugin[]> => {
 };
 
 const createPlugin =
-  (teamId, storeInstance: DominateStore) =>
+  (storeInstance: DominateStore) =>
   async (plugin: Plugin): Promise<{ key: string; email: string } | null> => {
+    plugin.origin_id = null; // FIXME: when plugins can be shared.
+
     if (plugin.type === PluginType.Javascript) {
       await jsPluginsAPI.createPlugin(plugin as JsPluginOut);
       return null;
