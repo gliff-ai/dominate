@@ -15,7 +15,7 @@ import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import { Annotations, getTiffData } from "@gliff-ai/annotate";
-import { Product, Plugin } from "@gliff-ai/manage";
+import { Product } from "@gliff-ai/manage";
 import { DominateStore } from "@/store";
 import { GalleryTile, Slices, MetaItem } from "@/interfaces";
 import {
@@ -25,7 +25,7 @@ import {
 
 import { stringifySlices, mixBase64Channels } from "@/imageConversions";
 import { useAuth } from "@/hooks/use-auth";
-import { useStore, usePlugins } from "@/hooks";
+import { useStore, usePlugins, useZooPlugins } from "@/hooks";
 import {
   uniquifyFilenames,
   makeAnnotationsJson,
@@ -35,7 +35,6 @@ import {
 } from "@/helpers";
 import { UserAccess } from "@/services/user";
 import { getTeam, Profile } from "@/services/team";
-import { getPlugins } from "@/services/plugins";
 import { ZooDialog } from "@/components";
 
 const logger = console;
@@ -75,7 +74,8 @@ export const CurateWrapper = ({
   const [showNoImageMessage, setShowNoImageMessage] = useState<boolean>(false);
   const [profiles, setProfiles] = useState<Profile[] | null>(null);
   const plugins = usePlugins(collectionUid, auth, Product.CURATE);
-  const [pluginData, setPluginData] = useState<Plugin[] | null>(null);
+  const zooPlugins = useZooPlugins();
+
   const isMounted = useRef(false);
 
   const isOwnerOrMember = useMemo(
@@ -108,6 +108,7 @@ export const CurateWrapper = ({
               isOwnerOrMember ||
               (assignees as string[]).includes(auth?.user?.username as string)
           );
+
           setMetadata(newMetadata);
 
           setDefaultLabels(galleryMeta.defaultLabels);
@@ -471,11 +472,6 @@ export const CurateWrapper = ({
     fetchImageItems();
   }, [fetchImageItems]);
 
-  useEffect(() => {
-    // get plugins data (should run once at mount)
-    void getPlugins().then(setPluginData);
-  }, []);
-
   if (
     !storeInstance ||
     !auth?.user ||
@@ -511,7 +507,7 @@ export const CurateWrapper = ({
             : null
         }
         saveMetadataCallback={saveMetadataCallback}
-        ZooDialog={<ZooDialog plugins={pluginData} datasets={[]} />}
+        ZooDialog={<ZooDialog plugins={zooPlugins} datasets={[]} />}
       />
 
       <ConfirmationDialog

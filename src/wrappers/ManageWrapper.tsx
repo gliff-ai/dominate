@@ -5,7 +5,6 @@ import {
   Dispatch,
   useMemo,
   useState,
-  useEffect,
 } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -17,7 +16,7 @@ import {
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { Task } from "@gliff-ai/style";
 import { DominateStore, API_URL, DEMO_DATA_URL } from "@/store";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth, useZooPlugins } from "@/hooks";
 import {
   inviteNewCollaborator,
   inviteNewUser,
@@ -47,9 +46,10 @@ export const ManageWrapper = ({
   setTask,
 }: Props): ReactElement | null => {
   const auth = useAuth();
-  const [plugins, setPlugins] = useState<Plugin[] | null>(null);
+  // const [zooPlugins, setZooPlugins] = useState<Plugin[] | null>(null);
   const [rerender, setRerender] = useState<number>(0);
   const navigate = useNavigate();
+  const zooPlugins = useZooPlugins(rerender);
 
   const getProjects = useCallback(async (): Promise<GalleryMeta[]> => {
     const projects = await storeInstance.getCollectionsMeta();
@@ -374,12 +374,6 @@ export const ManageWrapper = ({
     }),
     [auth]
   );
-
-  useEffect(() => {
-    // get plugins data (should run once at mount)
-    void getPlugins().then(setPlugins);
-  }, [rerender]);
-
   if (!storeInstance || !auth?.user || !auth?.userProfile) return null;
 
   return (
@@ -392,7 +386,7 @@ export const ManageWrapper = ({
         launchAuditCallback={
           auth?.userProfile.team.tier.id > 1 ? launchAudit : null
         }
-        ZooDialog={<ZooDialog plugins={plugins} datasets={[]} />}
+        ZooDialog={<ZooDialog plugins={zooPlugins} datasets={[]} />}
       />
     </ProvideAuth>
   );
