@@ -7,26 +7,25 @@ import { trustedServicesAPI } from "@/services/plugins";
 import { UiTemplate } from "@/services/plugins/trustedServices/interfaces";
 
 function unpackUiElements(
-  plugin: Plugin,
+  { type, name, url, username, public_key, encrypted_access_key }: Plugin,
   template: UiTemplate,
   user_username: string
 ): PluginElement[] {
-  return template.uiElements.map(
-    ({ apiEndpoint, uiParams }) =>
-      new TrustedServiceClass(
-        plugin.type,
-        plugin.name,
-        plugin.url,
-        apiEndpoint,
-        uiParams.tooltip,
-        {
-          plugin: plugin.username as string,
-          user: user_username,
-        },
-        plugin.public_key,
-        plugin.encrypted_access_key
-      )
-  );
+  // NOTE: having an array will make sense again once we introduce the toolbar.
+  return [
+    new TrustedServiceClass(
+      type,
+      name,
+      url,
+      template.ui.button.tooltip,
+      {
+        plugin: username as string,
+        user: user_username,
+      },
+      public_key,
+      encrypted_access_key
+    ),
+  ];
 }
 
 async function initTrustedServiceObjects(

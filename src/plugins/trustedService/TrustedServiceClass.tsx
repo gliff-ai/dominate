@@ -8,8 +8,6 @@ class TrustedServiceClass implements PluginElement {
 
   private baseUrl: string;
 
-  private apiEndpoint: string;
-
   private username: { plugin: string; user: string };
 
   private publicKey: string;
@@ -22,7 +20,6 @@ class TrustedServiceClass implements PluginElement {
     type: string,
     name: string,
     baseUrl: string,
-    apiEndpoint: string,
     tooltip: string,
     username: { plugin: string; user: string },
     publicKey: string,
@@ -31,7 +28,6 @@ class TrustedServiceClass implements PluginElement {
     this.type = type;
     this.name = name;
     this.baseUrl = baseUrl;
-    this.apiEndpoint = apiEndpoint;
     this.tooltip = tooltip;
     this.username = username;
     this.publicKey = publicKey;
@@ -46,7 +42,7 @@ class TrustedServiceClass implements PluginElement {
       encrypted_access_key: this.encryptedAccessKey,
     };
     const response = await apiRequest<PluginDataOut>(
-      this.apiEndpoint,
+      "/run/", // trusted-service API endpoint
       "POST",
       requestBody,
       this.baseUrl
