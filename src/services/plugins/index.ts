@@ -21,8 +21,6 @@ const getPlugins = async (): Promise<Plugin[]> => {
   } catch (e) {
     console.error(e);
   }
-  console.log(allPlugins);
-
   return allPlugins;
 };
 
