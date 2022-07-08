@@ -25,7 +25,9 @@ export class SealedCryptoBox {
 
   public static to_uint8array(value: string | Uint8Array): Uint8Array {
     return (
-      typeof value === "string" ? sodium.from_base64(value) : value
+      typeof value === "string"
+        ? sodium.from_base64(value, sodium.base64_variants.URLSAFE)
+        : value
     ) as Uint8Array;
   }
 
@@ -37,7 +39,7 @@ export class SealedCryptoBox {
       message,
       this.to_uint8array(publicKey)
     );
-    return sodium.to_base64(encodedMessage);
+    return sodium.to_base64(encodedMessage, sodium.base64_variants.URLSAFE);
   }
 
   public static decrypt(
@@ -50,14 +52,20 @@ export class SealedCryptoBox {
       this.to_uint8array(publicKey),
       this.to_uint8array(privateKey)
     );
-    return sodium.to_base64(decodedMessage);
+    return sodium.to_base64(decodedMessage, sodium.base64_variants.URLSAFE);
   }
 
   public get publicKey() {
-    return sodium.to_base64(this.keypair.publicKey);
+    return sodium.to_base64(
+      this.keypair.publicKey,
+      sodium.base64_variants.URLSAFE
+    );
   }
 
   public get privateKey() {
-    return sodium.to_base64(this.keypair.privateKey);
+    return sodium.to_base64(
+      this.keypair.privateKey,
+      sodium.base64_variants.URLSAFE
+    );
   }
 }
