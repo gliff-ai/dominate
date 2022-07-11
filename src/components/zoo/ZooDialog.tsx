@@ -17,6 +17,7 @@ import {
   FilterData,
 } from "@gliff-ai/curate";
 import { PluginsZooCard } from "./PluginsZooCard";
+import { useZooData } from "@/hooks";
 
 const PLUGINS_KEYLABELS_MAP = {
   name: "Name",
@@ -25,48 +26,34 @@ const PLUGINS_KEYLABELS_MAP = {
   author: "Author",
   security: "Security",
   architecture: "Architecture",
+  url: "URL",
+  enabled: "Enabled",
+  is_public: "Public",
+  collection_uids: "Project UIDs",
+  products: "Products",
 };
 
-enum ActiveSection {
+const EXCLUDED_KEYS = ["public_key", "encrypted_access_key", "username"];
+
+export enum ActiveSection {
   plugins,
   datasets,
 }
 
-interface Dataset {
-  name: string;
-  author: string;
-  type: string;
-  description: string;
-  url: string;
-}
-
 interface Props {
-  plugins: Plugin[] | null;
-  datasets: Dataset[] | null;
+  rerender?: number;
 }
 
-export function ZooDialog(props: Props): ReactElement | null {
+export function ZooDialog({ rerender }: Props): ReactElement | null {
   const [openCard, setOpenCard] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<ActiveSection>(
     ActiveSection.plugins
   );
+  const zoo = useZooData({ activeSection, rerender });
 
   const filters = useMemo(() => new Filters(), [activeSection]);
 
-  const data = useMemo(
-    () =>
-      (activeSection === ActiveSection.plugins
-        ? props.plugins
-        : props.datasets
-      )?.map((d: Plugin | Dataset) => ({
-        ...d,
-        filterShow: true,
-        newGroup: false,
-      })),
-    [activeSection, props.plugins, props.datasets]
-  );
-
-  if (!data) return null;
+  if (!zoo) return null;
 
   return (
     <Dialog
@@ -128,19 +115,24 @@ export function ZooDialog(props: Props): ReactElement | null {
             <MuiCard sx={{ width: "fit-content" }} variant="outlined">
               <SortPopover
                 filters={filters}
-                data={data as FilterData}
-                updateData={() => {}}
-                getLabelsFromKeys={getLabelsFromKeys(PLUGINS_KEYLABELS_MAP)()}
+                data={zoo.data as FilterData}
+                updateData={zoo.updateData}
+                getLabelsFromKeys={getLabelsFromKeys(PLUGINS_KEYLABELS_MAP)(
+                  EXCLUDED_KEYS
+                )}
+                showGroupBy={false}
               />
             </MuiCard>
           </div>
           <SearchBar
             filters={filters}
-            data={data as FilterData}
-            updateData={() => {}}
-            getLabelsFromKeys={getLabelsFromKeys(PLUGINS_KEYLABELS_MAP)()}
+            data={zoo.data as FilterData}
+            updateData={zoo.updateData}
+            getLabelsFromKeys={getLabelsFromKeys(PLUGINS_KEYLABELS_MAP)(
+              EXCLUDED_KEYS
+            )}
           />
-          <SearchFilterCard filters={filters} updateData={() => {}} />
+          <SearchFilterCard filters={filters} updateData={zoo.updateData} />
         </Grid>
         <Grid item xs={9}>
           <Grid
@@ -152,10 +144,10 @@ export function ZooDialog(props: Props): ReactElement | null {
             container
             spacing={2}
           >
-            {data
+            {zoo.data
               .filter(({ filterShow }) => filterShow)
               .map(
-                (item) =>
+                (item: Plugin) =>
                   (!openCard || openCard === item.name) && (
                     <Grid
                       key={item.name}
@@ -165,7 +157,7 @@ export function ZooDialog(props: Props): ReactElement | null {
                     >
                       {activeSection === ActiveSection.plugins ? (
                         <PluginsZooCard
-                          data={item as Plugin}
+                          data={item}
                           isOpen={openCard === item.name}
                           openCard={() => setOpenCard(item.name)}
                           closeCard={() => setOpenCard(null)}
@@ -180,3 +172,7 @@ export function ZooDialog(props: Props): ReactElement | null {
     </Dialog>
   );
 }
+
+ZooDialog.defaultProps = {
+  rerender: null,
+};

@@ -16,7 +16,7 @@ import {
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { Task } from "@gliff-ai/style";
 import { DominateStore, API_URL, DEMO_DATA_URL } from "@/store";
-import { useAuth, useZooPlugins } from "@/hooks";
+import { useAuth } from "@/hooks";
 import {
   inviteNewCollaborator,
   inviteNewUser,
@@ -49,7 +49,6 @@ export const ManageWrapper = ({
   // const [zooPlugins, setZooPlugins] = useState<Plugin[] | null>(null);
   const [rerender, setRerender] = useState<number>(0);
   const navigate = useNavigate();
-  const zooPlugins = useZooPlugins(rerender);
 
   const getProjects = useCallback(async (): Promise<GalleryMeta[]> => {
     const projects = await storeInstance.getCollectionsMeta();
@@ -386,7 +385,7 @@ export const ManageWrapper = ({
         launchAuditCallback={
           auth?.userProfile.team.tier.id > 1 ? launchAudit : null
         }
-        ZooDialog={<ZooDialog plugins={zooPlugins} datasets={[]} />}
+        ZooDialog={<ZooDialog rerender={rerender} />}
       />
     </ProvideAuth>
   );

@@ -25,7 +25,7 @@ import {
 
 import { stringifySlices, mixBase64Channels } from "@/imageConversions";
 import { useAuth } from "@/hooks/use-auth";
-import { useStore, usePlugins, useZooPlugins } from "@/hooks";
+import { useStore, usePlugins } from "@/hooks";
 import {
   uniquifyFilenames,
   makeAnnotationsJson,
@@ -74,7 +74,6 @@ export const CurateWrapper = ({
   const [showNoImageMessage, setShowNoImageMessage] = useState<boolean>(false);
   const [profiles, setProfiles] = useState<Profile[] | null>(null);
   const plugins = usePlugins(collectionUid, auth, Product.CURATE);
-  const zooPlugins = useZooPlugins();
 
   const isMounted = useRef(false);
 
@@ -507,7 +506,7 @@ export const CurateWrapper = ({
             : null
         }
         saveMetadataCallback={saveMetadataCallback}
-        ZooDialog={<ZooDialog plugins={zooPlugins} datasets={[]} />}
+        ZooDialog={<ZooDialog />}
       />
 
       <ConfirmationDialog
