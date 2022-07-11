@@ -45,7 +45,6 @@ export const PluginsZooCard = ({
   closeCard,
 }: Props): ReactElement => {
   const scale = useMemo((): number => Number(isOpen) + 1, [isOpen]);
-  console.log(scale);
 
   return (
     <MuiCard
