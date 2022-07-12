@@ -125,6 +125,37 @@ export const ManageWrapper = ({
     return allPlugins;
   }, []);
 
+  const logSetPlugin = (plugin: Plugin) => {
+    // log the new plugin configuration for all projects it's assigned to
+    plugin.collection_uids.map((coluid) => {
+      storeInstance.logAuditActions(
+        [
+          {
+            action: { type: "setPlugin", plugin },
+            username: auth?.user?.username as string,
+            timestamp: Date.now(),
+          },
+        ],
+        coluid
+      );
+    });
+  };
+
+  const logDeletePlugin = (plugin: Plugin) => {
+    plugin.collection_uids.map((coluid) => {
+      storeInstance.logAuditActions(
+        [
+          {
+            action: { type: "deletePlugin", plugin },
+            username: auth?.user?.username as string,
+            timestamp: Date.now(),
+          },
+        ],
+        coluid
+      );
+    });
+  };
+
   const createPlugin = useCallback(
     async (plugin: Plugin): Promise<{ key: string; email: string } | null> => {
       if (plugin.type === PluginType.Javascript) {
@@ -140,6 +171,8 @@ export const ManageWrapper = ({
         ...plugin,
       } as TrustedService);
 
+      logSetPlugin(plugin);
+
       return { key, email };
     },
     [storeInstance]
@@ -149,6 +182,7 @@ export const ManageWrapper = ({
     if (plugin.type === PluginType.Javascript) {
       return jsPluginsAPI.updatePlugin(plugin as JsPlugin);
     }
+    logSetPlugin(plugin);
     return trustedServicesAPI.updateTrustedService(plugin as TrustedService);
   }, []);
 
@@ -156,6 +190,7 @@ export const ManageWrapper = ({
     if (plugin.type === PluginType.Javascript) {
       return jsPluginsAPI.deletePlugin(plugin as JsPlugin);
     }
+    logDeletePlugin(plugin);
     return trustedServicesAPI.deleteTrustedService(plugin as TrustedService);
   }, []);
 
@@ -358,37 +393,6 @@ export const ManageWrapper = ({
     return projectUid;
   }, [storeInstance, setTask, incrementTaskProgress]);
 
-  const logSetPlugin = (plugin: Plugin) => {
-    // log the new plugin configuration for all projects it's assigned to
-    plugin.collection_uids.map((coluid) => {
-      storeInstance.logAuditActions(
-        [
-          {
-            action: { type: "setPlugin", plugin },
-            username: auth?.user?.username as string,
-            timestamp: Date.now(),
-          },
-        ],
-        coluid
-      );
-    });
-  };
-
-  const logDeletePlugin = (plugin: Plugin) => {
-    plugin.collection_uids.map((coluid) => {
-      storeInstance.logAuditActions(
-        [
-          {
-            action: { type: "deletePlugin", plugin },
-            username: auth?.user?.username as string,
-            timestamp: Date.now(),
-          },
-        ],
-        coluid
-      );
-    });
-  };
-
   const services = useMemo(
     () => ({
       queryTeam: "GET /team/",
@@ -404,19 +408,10 @@ export const ManageWrapper = ({
       inviteCollaborator,
       inviteToProject,
       removeFromProject,
-      createPlugin: (plugin: Plugin) => {
-        logSetPlugin(plugin);
-        createPlugin(plugin);
-      }, // this is only called by MANAGE/pluginsView when creating a plugin
+      createPlugin,
       getPlugins,
-      updatePlugin: (plugin: Plugin) => {
-        logSetPlugin(plugin);
-        updatePlugin(plugin);
-      },
-      deletePlugin: (plugin: Plugin) => {
-        logDeletePlugin(plugin);
-        deletePlugin(plugin);
-      },
+      updatePlugin,
+      deletePlugin,
       getAnnotationProgress,
       launchDocs,
       downloadDemoData,
