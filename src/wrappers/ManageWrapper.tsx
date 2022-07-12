@@ -358,6 +358,22 @@ export const ManageWrapper = ({
     return projectUid;
   }, [storeInstance, setTask, incrementTaskProgress]);
 
+  const logSetPlugin = (plugin: Plugin) => {
+    // log the new plugin configuration for all projects it's assigned to
+    plugin.collection_uids.map((coluid) => {
+      storeInstance.logAuditActions(
+        [
+          {
+            action: { type: "setPlugin", plugin },
+            username: auth?.user?.username as string,
+            timestamp: Date.now(),
+          },
+        ],
+        coluid
+      );
+    });
+  };
+
   const services = useMemo(
     () => ({
       queryTeam: "GET /team/",
@@ -373,9 +389,15 @@ export const ManageWrapper = ({
       inviteCollaborator,
       inviteToProject,
       removeFromProject,
-      createPlugin,
+      createPlugin: (plugin: Plugin) => {
+        logSetPlugin(plugin);
+        createPlugin(plugin);
+      }, // this is only called by MANAGE/pluginsView when creating a plugin
       getPlugins,
-      updatePlugin,
+      updatePlugin: (plugin: Plugin) => {
+        logSetPlugin(plugin);
+        updatePlugin(plugin);
+      },
       deletePlugin,
       getAnnotationProgress,
       launchDocs,

@@ -1,4 +1,5 @@
 import { BaseMeta } from "./shared";
+import { Plugin } from "@/plugins";
 
 // ----------------------------- META -----------------------------
 
@@ -89,6 +90,18 @@ interface SetMultiLabelV0 {
   multiLabel: boolean;
 }
 
+interface SetPluginV0 {
+  type: "setPlugin";
+  plugin: {
+    username?: string; // trusted-service username (i.e., email address)
+    name: string; // plugin name
+    type: "Javascript" | "Python" | "AI";
+    url: string; // base_url for trusted-services and url for plugins
+    products: "CURATE" | "ANNOTATE" | "ALL";
+    enabled: boolean;
+  };
+}
+
 interface ProjectAuditActionV0 {
   action:
     | CreateProjectV0
@@ -103,7 +116,8 @@ interface ProjectAuditActionV0 {
     | CollaboratorInviteAcceptedV0
     | SetDefaultLabelsV0
     | SetRestrictLabelsV0
-    | SetMultiLabelV0;
+    | SetMultiLabelV0
+    | SetPluginV0;
   username: string;
   timestamp: number;
 }
