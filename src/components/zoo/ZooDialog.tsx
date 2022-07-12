@@ -7,17 +7,15 @@ import {
   MuiCard,
   theme,
 } from "@gliff-ai/style";
-import { Plugin } from "@gliff-ai/manage";
 import {
   SortPopover,
   Filters,
   getLabelsFromKeys,
   SearchBar,
   SearchFilterCard,
-  FilterData,
 } from "@gliff-ai/curate";
 import { PluginsZooCard } from "./PluginsZooCard";
-import { useZooData } from "@/hooks";
+import { useZooData, ExtendedPlugin } from "@/hooks";
 
 const PLUGINS_KEYLABELS_MAP = {
   name: "Name",
@@ -115,7 +113,7 @@ export function ZooDialog({ rerender }: Props): ReactElement | null {
             <MuiCard sx={{ width: "fit-content" }} variant="outlined">
               <SortPopover
                 filters={filters}
-                data={zoo.data as FilterData}
+                data={zoo.data}
                 updateData={zoo.updateData}
                 getLabelsFromKeys={getLabelsFromKeys(PLUGINS_KEYLABELS_MAP)(
                   EXCLUDED_KEYS
@@ -126,7 +124,7 @@ export function ZooDialog({ rerender }: Props): ReactElement | null {
           </div>
           <SearchBar
             filters={filters}
-            data={zoo.data as FilterData}
+            data={zoo.data}
             updateData={zoo.updateData}
             getLabelsFromKeys={getLabelsFromKeys(PLUGINS_KEYLABELS_MAP)(
               EXCLUDED_KEYS
@@ -144,28 +142,30 @@ export function ZooDialog({ rerender }: Props): ReactElement | null {
             container
             spacing={2}
           >
-            {zoo.data
-              .filter(({ filterShow }) => filterShow)
-              .map(
-                (item: Plugin) =>
-                  (!openCard || openCard === item.name) && (
-                    <Grid
-                      key={item.name}
-                      sx={{ height: "fit-content" }}
-                      item
-                      xs={3}
-                    >
-                      {activeSection === ActiveSection.plugins ? (
-                        <PluginsZooCard
-                          data={item}
-                          isOpen={openCard === item.name}
-                          openCard={() => setOpenCard(item.name)}
-                          closeCard={() => setOpenCard(null)}
-                        />
-                      ) : null}
-                    </Grid>
-                  )
-              )}
+            {(
+              zoo.data.filter(
+                ({ filterShow }) => filterShow
+              ) as ExtendedPlugin[]
+            ).map(
+              (item) =>
+                (!openCard || openCard === item.name) && (
+                  <Grid
+                    key={item.name}
+                    sx={{ height: "fit-content" }}
+                    item
+                    xs={3}
+                  >
+                    {activeSection === ActiveSection.plugins ? (
+                      <PluginsZooCard
+                        data={item}
+                        isOpen={openCard === item.name}
+                        openCard={() => setOpenCard(item.name)}
+                        closeCard={() => setOpenCard(null)}
+                      />
+                    ) : null}
+                  </Grid>
+                )
+            )}
           </Grid>
         </Grid>
       </Grid>
