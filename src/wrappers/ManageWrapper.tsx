@@ -374,6 +374,21 @@ export const ManageWrapper = ({
     });
   };
 
+  const logDeletePlugin = (plugin: Plugin) => {
+    plugin.collection_uids.map((coluid) => {
+      storeInstance.logAuditActions(
+        [
+          {
+            action: { type: "deletePlugin", plugin },
+            username: auth?.user?.username as string,
+            timestamp: Date.now(),
+          },
+        ],
+        coluid
+      );
+    });
+  };
+
   const services = useMemo(
     () => ({
       queryTeam: "GET /team/",
@@ -398,7 +413,10 @@ export const ManageWrapper = ({
         logSetPlugin(plugin);
         updatePlugin(plugin);
       },
-      deletePlugin,
+      deletePlugin: (plugin: Plugin) => {
+        logDeletePlugin(plugin);
+        deletePlugin(plugin);
+      },
       getAnnotationProgress,
       launchDocs,
       downloadDemoData,

@@ -102,6 +102,18 @@ interface SetPluginV0 {
   };
 }
 
+interface DeletePluginV0 {
+  type: "deletePlugin";
+  plugin: {
+    username?: string; // trusted-service username (i.e., email address)
+    name: string; // plugin name
+    type: "Javascript" | "Python" | "AI";
+    url: string; // base_url for trusted-services and url for plugins
+    products: "CURATE" | "ANNOTATE" | "ALL";
+    enabled: boolean;
+  };
+}
+
 interface ProjectAuditActionV0 {
   action:
     | CreateProjectV0
@@ -117,7 +129,8 @@ interface ProjectAuditActionV0 {
     | SetDefaultLabelsV0
     | SetRestrictLabelsV0
     | SetMultiLabelV0
-    | SetPluginV0;
+    | SetPluginV0
+    | DeletePluginV0;
   username: string;
   timestamp: number;
 }
