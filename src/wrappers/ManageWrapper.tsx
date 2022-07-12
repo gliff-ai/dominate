@@ -8,11 +8,8 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 
-import {
-  UserInterface as Manage,
-  Plugin,
-  ProvideAuth /* TODO export Services */,
-} from "@gliff-ai/manage";
+import type { User, Services, Plugin } from "@gliff-ai/manage";
+import { UserInterface as Manage, ProvideAuth } from "@gliff-ai/manage";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { Task } from "@gliff-ai/style";
 import { DominateStore, API_URL, DEMO_DATA_URL } from "@/store";
@@ -46,7 +43,6 @@ export const ManageWrapper = ({
   setTask,
 }: Props): ReactElement | null => {
   const auth = useAuth();
-  // const [zooPlugins, setZooPlugins] = useState<Plugin[] | null>(null);
   const [rerender, setRerender] = useState<number>(0);
   const navigate = useNavigate();
 
@@ -203,11 +199,6 @@ export const ManageWrapper = ({
     [navigate]
   );
 
-  const launchDocs = useCallback(
-    () => window.open("https://docs.gliff.app/", "_blank"),
-    []
-  );
-
   const incrementTaskProgress = useCallback(
     (increment: number) => () => {
       setTask((prevTask) => ({
@@ -313,15 +304,15 @@ export const ManageWrapper = ({
 
   const rerenderWrapper = useCallback(
     (func: (plugin: Plugin) => Promise<unknown>) =>
-      async (plugin: Plugin): Promise<unknown> => {
-        const res = await func(plugin);
+      async (plugin: Record<string, unknown>): Promise<unknown> => {
+        const res = await func(plugin as unknown as Plugin);
         setRerender((count) => count + 1);
         return res;
       },
     [setRerender]
   );
 
-  const services = useMemo(
+  const services: Services = useMemo(
     () => ({
       queryTeam: "GET /team/",
       loginUser: "POST /user/login", // Not used, we pass an authd user down
@@ -341,7 +332,6 @@ export const ManageWrapper = ({
       updatePlugin: rerenderWrapper(updatePlugin),
       deletePlugin: rerenderWrapper(deletePlugin),
       getAnnotationProgress,
-      launchDocs,
       downloadDemoData,
     }),
     [
@@ -358,18 +348,17 @@ export const ManageWrapper = ({
       inviteToProject,
       removeFromProject,
       getAnnotationProgress,
-      launchDocs,
       downloadDemoData,
       rerenderWrapper,
     ]
   );
 
-  const user = useMemo(
+  const user: User = useMemo(
     () => ({
-      email: auth?.user?.username,
-      authToken: auth?.user?.authToken,
-      userAccess: auth?.userAccess,
-      tierID: auth?.userProfile?.team?.tier?.id,
+      email: auth?.user?.username || null,
+      authToken: auth?.user?.authToken || null,
+      userAccess: auth?.userAccess || null,
+      tierID: auth?.userProfile?.team?.tier?.id || null,
     }),
     [auth]
   );
@@ -383,8 +372,10 @@ export const ManageWrapper = ({
         apiUrl={API_URL}
         launchCurateCallback={launchCurate}
         launchAuditCallback={
-          auth?.userProfile.team.tier.id > 1 ? launchAudit : null
+          auth?.userProfile.team.tier.id > 1 ? launchAudit : undefined
         }
+        launchDocs={() => window.open("https://docs.gliff.app/", "_blank")}
+        showAppBar={false}
         ZooDialog={<ZooDialog rerender={rerender} />}
       />
     </ProvideAuth>

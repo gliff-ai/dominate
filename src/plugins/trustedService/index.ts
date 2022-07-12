@@ -22,8 +22,8 @@ function unpackUiElements(
         plugin: username as string,
         user: user_username,
       },
-      public_key,
-      encrypted_access_key
+      public_key as string,
+      encrypted_access_key as string
     ),
   ];
 }

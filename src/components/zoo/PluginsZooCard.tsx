@@ -74,7 +74,7 @@ export const PluginsZooCard = ({
         <div style={{ marginLeft: "10px" }}>
           <h3 style={{ lineHeight: "1px" }}>Plugin: {data.name}</h3>
           <span style={{ lineHeight: 0, color: theme.palette.text.secondary }}>
-            {data.author}
+            {data?.author}
           </span>
         </div>
       </div>

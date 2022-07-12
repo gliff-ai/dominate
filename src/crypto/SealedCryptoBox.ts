@@ -24,11 +24,9 @@ export class SealedCryptoBox {
   }
 
   public static to_uint8array(value: string | Uint8Array): Uint8Array {
-    return (
-      typeof value === "string"
-        ? sodium.from_base64(value, sodium.base64_variants.URLSAFE)
-        : value
-    ) as Uint8Array;
+    return typeof value === "string"
+      ? sodium.from_base64(value, sodium.base64_variants.URLSAFE)
+      : value;
   }
 
   public static encrypt(
