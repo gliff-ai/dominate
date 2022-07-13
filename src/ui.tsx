@@ -210,6 +210,7 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
                           task={task}
                           setTask={setTask}
                           setProductSection={setProductSection}
+                          setProductNavbarData={setProductNavbarData}
                         />
                       }
                     />
@@ -226,6 +227,7 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
                           task={task}
                           setTask={setTask}
                           setProductSection={setProductSection}
+                          setProductNavbarData={setProductNavbarData}
                         />
                       }
                     />
