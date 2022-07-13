@@ -14,6 +14,7 @@ import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annota
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { icons, IconButton, Task } from "@gliff-ai/style";
 import { OutputFormat } from "@gliff-ai/etebase";
+import { ProductNavbarData } from "@/components";
 import { DominateStore } from "@/store";
 import { AnnotationMeta, GalleryMeta } from "@/interfaces";
 import { UserAccess } from "@/services/user";
@@ -31,6 +32,7 @@ interface Props {
   setIsLoading: (isLoading: boolean) => void;
   task: Task;
   setTask: (task: Task) => void;
+  setProductNavbarData: (data: ProductNavbarData) => void;
   setProductSection: (productSection: JSX.Element | null) => void;
 }
 
@@ -44,13 +46,19 @@ const useStyle = makeStyles({
   cardSize: {
     width: 40,
     height: 40,
-    borderRadius: 0,
+    borderRadius: "1px",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    boxShadow: "none",
+    border: "1px solid rgb(218, 221, 233)",
   },
   cardLeft: {
     borderRadius: "6px 0 0 6px",
+  },
+  cardMiddle: {
+    borderRight: "0",
+    borderLeft: "0",
   },
   cardRight: { borderRadius: "0 6px 6px 0" },
   rotateIcon: { transform: "rotate(180deg)" },
@@ -67,6 +75,7 @@ export const AnnotateWrapper = ({
   task,
   setTask,
   setProductSection,
+  setProductNavbarData,
 }: Props): ReactElement | null => {
   const navigate = useNavigate();
   const auth = useAuth();
@@ -87,6 +96,7 @@ export const AnnotateWrapper = ({
   const [isComplete, setIsComplete] = useState<boolean>(false);
   const [imageUids, setImageUids] = useState<string[] | null>(null);
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
+  const [collectionTitle, setCollectionTitle] = useState<string>("");
   const [defaultLabels, setDefaultLabels] = useState<string[]>([]);
   const [restrictLabels, setRestrictLabels] = useState<boolean>(false);
   const [multiLabel, setMultiLabel] = useState<boolean>(true);
@@ -151,7 +161,9 @@ export const AnnotateWrapper = ({
                 imageUID
             )
             .map(({ imageUID }) => imageUID);
+          const projectName = items.galleryMeta.name;
           setStateIfMounted(newImageUIDs, setImageUids, isMounted.current);
+          setStateIfMounted(projectName, setCollectionTitle, isMounted.current);
 
           const fileInfo = items.tiles.find(
             (item) => item.imageUID === imageUid
@@ -210,7 +222,7 @@ export const AnnotateWrapper = ({
             size="small"
           />
         </Card>
-        <Card className={classes.cardSize}>
+        <Card className={` ${classes.cardSize} ${classes.cardMiddle}`}>
           <IconButton
             icon={icons.tick}
             tooltip={{ name: "Mark Annotation As Complete" }}
@@ -475,6 +487,26 @@ export const AnnotateWrapper = ({
     // update the navbar's product section (will be replaced soon)
     updateProductSection();
   }, [updateProductSection]);
+
+  useEffect(() => {
+    setProductNavbarData({
+      teamName: auth?.userProfile?.team.name || "",
+      projectName: collectionTitle || "",
+      imageName: imageFileInfo?.fileName || "",
+      buttonBack: (
+        <IconButton
+          onClick={() => navigate(`/curate/${collectionUid}`)}
+          tooltip={{
+            name: `Open ${collectionTitle} in CURATE `,
+          }}
+          tooltipPlacement="bottom"
+          icon={icons.navigationCURATE}
+        />
+      ),
+      buttonForward: null,
+      productLocation: "ANNOTATE",
+    });
+  }, [imageFileInfo, collectionTitle]);
 
   if (
     !storeInstance ||
