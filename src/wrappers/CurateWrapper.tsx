@@ -110,9 +110,9 @@ export const CurateWrapper = ({
             isMounted.current
           );
 
-          const newMetadata = convertGalleryToMetadata(gallery);
+          let newMetadata = convertGalleryToMetadata(gallery);
           // if user is collaborator, include only images assigned to them.
-          newMetadata.filter(
+          newMetadata = newMetadata.filter(
             ({ assignees }) =>
               isOwnerOrMember ||
               (assignees as string[]).includes(auth?.user?.username as string)
@@ -228,8 +228,32 @@ export const CurateWrapper = ({
       });
   };
 
-  const annotateCallback = (imageUid: string): void => {
-    navigate(`/annotate/${collectionUid}/${imageUid}`);
+  const annotateCallback = (
+    imageUid: string,
+    username1: string | null = null,
+    username2: string | null = null
+  ): void => {
+    if (username1) {
+      const annotationUid = collectionContent.find(
+        (tile) => tile.imageUID === imageUid
+      )?.annotationUID[username1];
+      if (username2) {
+        const annotationUid2 = collectionContent.find(
+          (tile) => tile.imageUID === imageUid
+        )?.annotationUID[username2];
+        if (annotationUid && annotationUid2) {
+          navigate(
+            `/annotate/${collectionUid}/${imageUid}/${annotationUid}/${annotationUid2}`
+          );
+          return;
+        }
+      }
+      if (annotationUid) {
+        navigate(`/annotate/${collectionUid}/${imageUid}/${annotationUid}`);
+      }
+    } else {
+      navigate(`/annotate/${collectionUid}/${imageUid}`);
+    }
   };
 
   const downloadDataset = async (): Promise<void> => {

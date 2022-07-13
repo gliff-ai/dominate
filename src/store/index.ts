@@ -1014,30 +1014,42 @@ export class DominateStore {
 
   getAnnotationsObject = async (
     collectionUid: string,
-    imageUid: string,
-    username: string
+    annotation: { imageUid: string; username: string } | string
   ): Promise<{ meta: AnnotationMeta; annotations: Annotations } | null> => {
     // retrieves the Annotations object by the specified user for the specified image
+    // annotation can be either an {imageUid, username} object, in which case the
+    // annotationUID will be looked up from the gallery content, or it can just be
+    // the annotationUID
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await this.fetchCollection(
       collectionManager,
       collectionUid
     );
-    const content = JSON.parse(
-      await collection.getContent(OutputFormat.String)
-    ) as GalleryTile[];
-    const galleryTile = content.find((item) => item.imageUID === imageUid);
 
-    if (
-      !galleryTile?.annotationUID ||
-      galleryTile.annotationUID[username] === undefined
-    )
-      return null;
+    // look up annotationUID if necessary:
+    let annotationUID: string;
+    if (annotation instanceof Object) {
+      const { imageUid, username } = annotation;
+      const content = JSON.parse(
+        await collection.getContent(OutputFormat.String)
+      ) as GalleryTile[];
+      const galleryTile = content.find((item) => item.imageUID === imageUid);
+
+      if (
+        !galleryTile?.annotationUID ||
+        galleryTile.annotationUID[username] === undefined
+      )
+        return null;
+
+      annotationUID = galleryTile.annotationUID[username];
+    } else {
+      annotationUID = annotation;
+    }
 
     const annotationItem = await this.fetchItem(
       collectionManager.getItemManager(collection),
-      galleryTile.annotationUID[username]
+      annotationUID
     );
     const annotationContent = await annotationItem.getContent(
       OutputFormat.String
@@ -1396,12 +1408,20 @@ export class DominateStore {
   };
 
   fetchMulti = async (
-    itemManager: ItemManager,
+    itemManager_: ItemManager | string, // ItemManager or collectionUid string
     UIDs: string[]
   ): Promise<Item[]> => {
     if (UIDs.length === 0) {
       // itemManager.fetchMulti will die messily if we pass it an empty UID array
       return [];
+    }
+    let itemManager: ItemManager;
+    if (itemManager_ instanceof ItemManager) {
+      itemManager = itemManager_;
+    } else {
+      const collectionManager = this.etebaseInstance.getCollectionManager();
+      const collection = await collectionManager.fetch(itemManager_);
+      itemManager = collectionManager.getItemManager(collection);
     }
     let items = (await itemManager.fetchMulti(UIDs)).data;
     // re-order the retrieved items to the match UIDs:
