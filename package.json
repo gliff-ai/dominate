@@ -52,7 +52,7 @@
     "@gliff-ai/upload": "^1.3.0",
     "@material-ui/types": "^5.1.0",
     "@mui/icons-material": "^5.8.4",
-    "@mui/material": "^5.8.5",
+    "@mui/material": "^5.9.0",
     "@mui/styles": "^5.8.4",
     "@mui/x-data-grid": "^5.12.3",
     "@sentry/integrations": "^6.19.7",
