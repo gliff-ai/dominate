@@ -114,6 +114,25 @@ interface DeletePluginV0 {
   };
 }
 
+interface CallPluginV0 {
+  type: "callPlugin";
+  pluginName: string;
+  pluginType?: string;
+  imageUid: string;
+  imageMetadata?: ({
+    [index: string]: string | number | boolean | string[] | undefined;
+  } & {
+    id?: string;
+    imageName?: string;
+    imageLabels?: string[];
+    filterShow?: boolean;
+    assignees?: string[];
+    numberOfDimensions?: "2" | "3";
+    dimensions?: string;
+    size?: string;
+  })[];
+}
+
 interface ProjectAuditActionV0 {
   action:
     | CreateProjectV0
@@ -130,7 +149,8 @@ interface ProjectAuditActionV0 {
     | SetRestrictLabelsV0
     | SetMultiLabelV0
     | SetPluginV0
-    | DeletePluginV0;
+    | DeletePluginV0
+    | CallPluginV0;
   username: string;
   timestamp: number;
 }

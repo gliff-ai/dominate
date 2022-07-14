@@ -16,7 +16,7 @@ import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import { Annotations, getTiffData } from "@gliff-ai/annotate";
 import { DominateStore } from "@/store";
-import { GalleryTile, Slices, MetaItem } from "@/interfaces";
+import { GalleryTile, Slices, MetaItem, Metadata } from "@/interfaces";
 import {
   ConfirmationDialog,
   MessageDialog,
@@ -476,6 +476,30 @@ export const CurateWrapper = ({
   )
     return null;
 
+  const logPluginCall = (data: {
+    pluginName: string;
+    pluginType?: string;
+    imageUid: string;
+    imageMetadata?: Metadata;
+  }) => {
+    storeInstance.logAuditActions(
+      [
+        {
+          action: {
+            type: "callPlugin",
+            pluginName: data.pluginName,
+            pluginType: data.pluginType,
+            imageUid: data.imageUid,
+            imageMetadata: data.imageMetadata,
+          },
+          username: auth.user?.username as string,
+          timestamp: Date.now(),
+        },
+      ],
+      collectionUid
+    );
+  };
+
   return (
     <>
       <Curate
@@ -503,6 +527,7 @@ export const CurateWrapper = ({
             : null
         }
         saveMetadataCallback={saveMetadataCallback}
+        logPluginCall={logPluginCall}
       />
 
       <ConfirmationDialog
