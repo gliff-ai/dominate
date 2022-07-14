@@ -106,7 +106,7 @@ export function convertGalleryToMetadata(gallery: GalleryTile[]): MetaItem[] {
         ...fileInfo,
         size: fileInfo.size.toString(),
         imageName: fileInfo.fileName, // CURATE expects imageName rather than fileName.
-        annotationUID,
+        usersWithAnnotations: Object.keys(annotationUID),
       })
   );
 }
