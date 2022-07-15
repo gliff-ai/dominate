@@ -154,7 +154,6 @@ export class DominateStore {
     );
 
     let result: TSUserCreated;
-    console.log(publicKey);
     if (publicKey) {
       console.log("activating plugin");
       const ecryptedKey = SealedCryptoBox.encrypt(accessKey, publicKey);
