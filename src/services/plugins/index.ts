@@ -1,65 +1,63 @@
 import { Plugin, PluginType } from "@gliff-ai/manage";
-import { JsPlugin, JsPluginOut, jsPluginsAPI } from "./jsPlugins";
-import { TrustedService, trustedServicesAPI } from "./trustedServices";
+import { pluginsAPI } from "./api";
 import { DominateStore } from "@/store";
 
 const getPlugins = async (): Promise<Plugin[]> => {
-  // DOTO: rewrite so as to make a single request.
-  let allPlugins: Plugin[] = [];
+  let plugins: Plugin[] = [];
 
   try {
-    const trustedServices =
-      (await trustedServicesAPI.getTrustedService()) as Plugin[];
-    allPlugins = allPlugins.concat(trustedServices);
+    plugins = await pluginsAPI.getPlugins();
   } catch (e) {
     console.error(e);
   }
+  return plugins;
+};
+
+const getZooPlugins = async (): Promise<Plugin[]> => {
+  let plugins: Plugin[] = [];
 
   try {
-    const jsplugins = (await jsPluginsAPI.getPlugins()) as Plugin[];
-    allPlugins = allPlugins.concat(jsplugins);
+    plugins = await pluginsAPI.getZooPlugins();
   } catch (e) {
     console.error(e);
   }
-  return allPlugins;
+  return plugins;
 };
 
 const createPlugin =
   (storeInstance: DominateStore) =>
-  async (plugin: Plugin): Promise<{ key: string; email: string } | null> => {
-    plugin.origin_id = null; // FIXME: when plugins can be shared.
-
+  async (plugin: Plugin): Promise<{ key?: string; email: string } | null> => {
     if (plugin.type === PluginType.Javascript) {
-      await jsPluginsAPI.createPlugin(plugin as JsPluginOut);
+      await pluginsAPI.createPlugin(plugin);
       return null;
     }
 
-    const { publicKey, encryptedAccessKey, privateKey, email } =
-      await storeInstance.createTrustedServiceUser();
+    // if the plugin has an origin and is therefore copied over from another team, use the origin's public-key
+    const originPublicKey =
+      plugin.origin_id !== null ? plugin.public_key : undefined;
 
-    const res = await trustedServicesAPI.createTrustedService({
-      username: email,
+    const { publicKey, encryptedAccessKey, privateKey, email } =
+      await storeInstance.createTrustedServiceUser(originPublicKey);
+
+    const res = await pluginsAPI.createPlugin({
       ...plugin,
+      username: email,
       public_key: publicKey,
       encrypted_access_key: encryptedAccessKey,
-    } as TrustedService);
+    });
 
     return { key: privateKey, email };
   };
 
 const updatePlugin = async (plugin: Plugin): Promise<number> => {
-  if (plugin.type === PluginType.Javascript) {
-    return jsPluginsAPI.updatePlugin(plugin as JsPlugin);
-  }
-  return trustedServicesAPI.updateTrustedService(plugin as TrustedService);
+  const pluginId = await pluginsAPI.updatePlugin(plugin);
+  return pluginId;
 };
 
-const deletePlugin = async (plugin: Plugin): Promise<number> => {
-  if (plugin.type === PluginType.Javascript) {
-    return jsPluginsAPI.deletePlugin(plugin as JsPlugin);
-  }
-  return trustedServicesAPI.deleteTrustedService(plugin as TrustedService);
+const deletePlugin = async ({ url }: Plugin): Promise<number> => {
+  const pluginId = await pluginsAPI.deletePlugin(url);
+  return pluginId;
 };
 
-export { getPlugins, createPlugin, updatePlugin, deletePlugin };
-export { jsPluginsAPI, trustedServicesAPI };
+export { getPlugins, getZooPlugins, createPlugin, updatePlugin, deletePlugin };
+export { pluginsAPI };

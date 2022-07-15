@@ -1,10 +1,13 @@
 import Ajv from "ajv";
 import { Plugin, PluginType } from "@gliff-ai/manage";
+import { apiRequest } from "@/api";
 import { PluginElement } from "@/plugins/interfaces";
 import { TrustedServiceClass } from "./TrustedServiceClass";
 import { UiTemplateSchema } from "./schemas";
-import { trustedServicesAPI } from "@/services/plugins";
-import { UiTemplate } from "@/services/plugins/trustedServices/interfaces";
+import { UiTemplate } from "./interfaces";
+
+const getUiTemplate = (apiUrl: string): Promise<UiTemplate> =>
+  apiRequest<UiTemplate>("/ui-template/", "POST", {}, apiUrl);
 
 function unpackUiElements(
   { type, name, url, username, public_key, encrypted_access_key }: Plugin,
@@ -45,7 +48,7 @@ async function initTrustedServiceObjects(
         // get UI template store as JSON file
         return {
           plugin,
-          template: await trustedServicesAPI.getUiTemplate(plugin.url),
+          template: await getUiTemplate(plugin.url),
         };
       })
   );

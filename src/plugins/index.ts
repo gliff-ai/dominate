@@ -1,8 +1,7 @@
 import { Product, Plugin } from "@gliff-ai/manage";
-import { jsPluginsAPI, trustedServicesAPI } from "@/services/plugins";
+import { pluginsAPI } from "@/services/plugins";
 import { PluginObject } from "./interfaces";
 import { initJsPluginObjects } from "./jsPlugin";
-
 import { initTrustedServiceObjects } from "./trustedService";
 
 async function getActivePlugins(
@@ -11,9 +10,7 @@ async function getActivePlugins(
 ): Promise<Plugin[] | null> {
   // Get plugins data from STORE
   try {
-    const newPlugins = (
-      (await trustedServicesAPI.getTrustedService()) as Plugin[]
-    ).concat((await jsPluginsAPI.getPlugins()) as Plugin[]);
+    const newPlugins = await pluginsAPI.getPlugins();
 
     return newPlugins.filter(
       ({ collection_uids, products, enabled }) =>

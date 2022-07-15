@@ -1,5 +1,5 @@
 import { JSONSchemaType } from "ajv";
-import { UiTemplate } from "../../services/plugins/trustedServices/interfaces";
+import { UiTemplate } from "./interfaces";
 
 const UiTemplateSchema: JSONSchemaType<UiTemplate> = {
   type: "object",
