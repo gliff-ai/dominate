@@ -36,6 +36,7 @@ interface Props {
   isOpen: boolean;
   openCard: () => void;
   closeCard: () => void;
+  activatePlugin: (plugin: Plugin) => Promise<unknown>;
 }
 
 export const PluginsZooCard = ({
@@ -43,6 +44,7 @@ export const PluginsZooCard = ({
   isOpen,
   openCard,
   closeCard,
+  activatePlugin,
 }: Props): ReactElement => {
   const scale = useMemo((): number => Number(isOpen) + 1, [isOpen]);
 
@@ -150,7 +152,9 @@ export const PluginsZooCard = ({
             },
           }}
           variant="outlined"
-          onClick={() => console.log("activate")}
+          onClick={() => {
+            void activatePlugin(data);
+          }}
         >
           Activate
         </Button>

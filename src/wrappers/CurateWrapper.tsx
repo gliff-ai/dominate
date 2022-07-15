@@ -5,6 +5,8 @@ import {
   useRef,
   useCallback,
   useMemo,
+  SetStateAction,
+  Dispatch,
 } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -15,7 +17,7 @@ import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import { Annotations, getTiffData } from "@gliff-ai/annotate";
-import { Product } from "@gliff-ai/manage";
+import { Product, Plugin } from "@gliff-ai/manage";
 import { DominateStore } from "@/store";
 import { GalleryTile, Slices, MetaItem } from "@/interfaces";
 import {
@@ -34,6 +36,7 @@ import {
   MetaItemWithId,
 } from "@/helpers";
 import { UserAccess } from "@/services/user";
+import { createPlugin } from "@/services/plugins";
 import { getTeam, Profile } from "@/services/team";
 import { ZooDialog } from "@/components";
 
@@ -43,6 +46,8 @@ interface Props {
   setIsLoading: (isLoading: boolean) => void;
   task: Task;
   setTask: (task: Task) => void;
+  pluginsRerender: number;
+  setPluginsRerender: Dispatch<SetStateAction<number>>;
 }
 
 export const CurateWrapper = ({
@@ -50,6 +55,8 @@ export const CurateWrapper = ({
   setIsLoading,
   task,
   setTask,
+  pluginsRerender,
+  setPluginsRerender,
 }: Props): ReactElement | null => {
   const navigate = useNavigate();
   const auth = useAuth();
@@ -73,7 +80,12 @@ export const CurateWrapper = ({
   // no images to download message state:
   const [showNoImageMessage, setShowNoImageMessage] = useState<boolean>(false);
   const [profiles, setProfiles] = useState<Profile[] | null>(null);
-  const plugins = usePlugins(collectionUid, auth, Product.CURATE);
+  const plugins = usePlugins(
+    collectionUid,
+    auth,
+    Product.CURATE,
+    pluginsRerender
+  );
 
   const isMounted = useRef(false);
 
@@ -506,7 +518,16 @@ export const CurateWrapper = ({
             : null
         }
         saveMetadataCallback={saveMetadataCallback}
-        ZooDialog={<ZooDialog />}
+        ZooDialog={
+          <ZooDialog
+            rerender={pluginsRerender}
+            activatePlugin={async (plugin: Plugin): Promise<unknown> => {
+              const result = await createPlugin(storeInstance)(plugin);
+              setPluginsRerender((count) => count + 1); // trigger a re-render so that plunginsView updates
+              return result;
+            }}
+          />
+        }
       />
 
       <ConfirmationDialog

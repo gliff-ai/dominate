@@ -4,7 +4,6 @@ import {
   useCallback,
   Dispatch,
   useMemo,
-  useState,
 } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -36,14 +35,18 @@ type Progress = {
 interface Props {
   storeInstance: DominateStore;
   setTask: Dispatch<SetStateAction<Task>>;
+  pluginsRerender: number;
+  setPluginsRerender: Dispatch<SetStateAction<number>>;
 }
 
 export const ManageWrapper = ({
   storeInstance,
   setTask,
+  pluginsRerender,
+  setPluginsRerender,
 }: Props): ReactElement | null => {
   const auth = useAuth();
-  const [rerender, setRerender] = useState<number>(0);
+
   const navigate = useNavigate();
 
   const getProjects = useCallback(async (): Promise<GalleryMeta[]> => {
@@ -305,11 +308,12 @@ export const ManageWrapper = ({
   const rerenderWrapper = useCallback(
     (func: (plugin: Plugin) => Promise<unknown>) =>
       async (plugin: Record<string, unknown>): Promise<unknown> => {
+        // NOTE: typescript to match ServiceFunction defined in MANAGE
         const res = await func(plugin as unknown as Plugin);
-        setRerender((count) => count + 1);
+        setPluginsRerender((count) => count + 1); // trigger a re-render so that plunginsView updates
         return res;
       },
-    [setRerender]
+    [setPluginsRerender]
   );
 
   const services: Services = useMemo(
@@ -327,8 +331,8 @@ export const ManageWrapper = ({
       inviteCollaborator,
       inviteToProject,
       removeFromProject,
-      createPlugin: rerenderWrapper(createPlugin(storeInstance)),
       getPlugins,
+      createPlugin: rerenderWrapper(createPlugin(storeInstance)),
       updatePlugin: rerenderWrapper(updatePlugin),
       deletePlugin: rerenderWrapper(deletePlugin),
       getAnnotationProgress,
@@ -376,7 +380,17 @@ export const ManageWrapper = ({
         }
         launchDocs={() => window.open("https://docs.gliff.app/", "_blank")}
         showAppBar={false}
-        ZooDialog={<ZooDialog rerender={rerender} />}
+        ZooDialog={
+          <ZooDialog
+            rerender={pluginsRerender}
+            activatePlugin={async (plugin: Plugin): Promise<unknown> => {
+              const result = await createPlugin(storeInstance)(plugin);
+              setPluginsRerender((count) => count + 1); // trigger a re-render so that plunginsView updates
+              return result;
+            }}
+          />
+        }
+        pluginsRerender={pluginsRerender}
       />
     </ProvideAuth>
   );

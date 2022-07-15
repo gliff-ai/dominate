@@ -6,7 +6,8 @@ import { AuthContext } from "./use-auth";
 export function usePlugins(
   collectionUid: string,
   auth: AuthContext | null,
-  product: Product
+  product: Product,
+  rerender?: number
 ): PluginObject | null {
   const [plugins, setPlugins] = useState<PluginObject | null>(null);
 
@@ -16,7 +17,7 @@ export function usePlugins(
     void initPluginObjects(product, collectionUid, auth.user.username).then(
       setPlugins
     );
-  }, [auth?.user?.username, collectionUid, product]);
+  }, [auth?.user?.username, collectionUid, product, rerender]);
 
   return plugins;
 }

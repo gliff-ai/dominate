@@ -58,6 +58,7 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
   const [productSection, setProductSection] =
     useState<JSX.Element | null>(null);
   const [tooSmall, setTooSmall] = useState(false);
+  const [pluginsRerender, setPluginsRerender] = useState<number>(0);
 
   const classes = useStyles(isOverflow);
 
@@ -159,6 +160,8 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
                           setIsLoading={setIsLoading}
                           task={task}
                           setTask={setTask}
+                          pluginsRerender={pluginsRerender}
+                          setPluginsRerender={setPluginsRerender}
                         />
                       }
                     />
@@ -188,6 +191,8 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
                         <Manage
                           storeInstance={storeInstance}
                           setTask={setTask}
+                          pluginsRerender={pluginsRerender}
+                          setPluginsRerender={setPluginsRerender}
                         />
                       }
                     />

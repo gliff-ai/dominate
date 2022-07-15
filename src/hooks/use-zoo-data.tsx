@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Plugin } from "@gliff-ai/manage";
 import { FilterData, FilterDataItem } from "@gliff-ai/curate";
-import { getPlugins } from "@/services/plugins";
+import { getZooPlugins } from "@/services/plugins";
 import { ActiveSection } from "../components/zoo/ZooDialog";
 
 interface Output {
@@ -17,7 +17,7 @@ interface Dataset {
 
 interface Props {
   activeSection: number;
-  rerender?: number | null;
+  rerender?: number;
 }
 
 export interface ExtendedPlugin extends Plugin, FilterDataItem {}
@@ -39,7 +39,7 @@ export function useZooData({ activeSection, rerender }: Props): Output | null {
   useEffect(() => {
     // work with plugins
     if (activeSection === ActiveSection.plugins) {
-      void getPlugins().then((newPlugins) => {
+      void getZooPlugins().then((newPlugins) => {
         const plugins = newPlugins.filter((p) => p.is_public);
         setData(addFilterDataKeys(plugins));
       });
@@ -63,5 +63,5 @@ export function useZooData({ activeSection, rerender }: Props): Output | null {
 }
 
 useZooData.defaultProps = {
-  rerender: null,
+  rerender: 0,
 };

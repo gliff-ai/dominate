@@ -7,6 +7,7 @@ import {
   MuiCard,
   theme,
 } from "@gliff-ai/style";
+import { Plugin } from "@gliff-ai/manage";
 import {
   SortPopover,
   Filters,
@@ -40,9 +41,13 @@ export enum ActiveSection {
 
 interface Props {
   rerender?: number;
+  activatePlugin: (plugin: Plugin) => Promise<unknown>;
 }
 
-export function ZooDialog({ rerender }: Props): ReactElement | null {
+export function ZooDialog({
+  rerender,
+  activatePlugin,
+}: Props): ReactElement | null {
   const [openCard, setOpenCard] = useState<string | null>(null);
   const [activeSection, setActiveSection] = useState<ActiveSection>(
     ActiveSection.plugins
@@ -161,6 +166,7 @@ export function ZooDialog({ rerender }: Props): ReactElement | null {
                         isOpen={openCard === item.name}
                         openCard={() => setOpenCard(item.name)}
                         closeCard={() => setOpenCard(null)}
+                        activatePlugin={activatePlugin}
                       />
                     ) : null}
                   </Grid>
