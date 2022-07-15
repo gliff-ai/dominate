@@ -35,7 +35,7 @@ export class SealedCryptoBox {
   ): string {
     const encodedMessage = sodium.crypto_box_seal(
       message,
-      this.to_uint8array(publicKey)
+      typeof publicKey === "string" ? this.to_uint8array(publicKey) : publicKey
     );
     return sodium.to_base64(encodedMessage, sodium.base64_variants.URLSAFE);
   }
