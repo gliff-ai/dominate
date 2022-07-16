@@ -779,25 +779,16 @@ export class DominateStore {
       );
 
       // update project level audit:
-      const projectAuditAction: ProjectAuditAction = {
-        action: { type: "inviteUser", inviteeUsername: userEmail },
-        username: this.etebaseInstance.user.username,
-        timestamp: Date.now(),
-      };
-
-      const projectAudit = await collectionManager.fetch(
-        collection.getMeta<GalleryMeta>().projectAuditUID
-      );
-
-      await projectAudit.setContent(
-        JSON.stringify(
-          JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
-            projectAuditAction
-          )
-        )
-      );
-
-      await collectionManager.upload(projectAudit);
+      if (!userEmail.includes("@trustedservice.gliff.app")) {
+        // if the email ends in @trustedservice.gliff.app, then it's a plugin invite, and will have already
+        // been logged in ManageWrapper
+        const projectAuditAction: ProjectAuditAction = {
+          action: { type: "inviteUser", inviteeUsername: userEmail },
+          username: this.etebaseInstance.user.username,
+          timestamp: Date.now(),
+        };
+        this.logAuditActions([projectAuditAction], collection);
+      }
 
       return true;
     } catch (e) {

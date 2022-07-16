@@ -180,6 +180,7 @@ export const ManageWrapper = ({
 
   const updatePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
     logSetPlugin(plugin);
+
     if (plugin.type === PluginType.Javascript) {
       return jsPluginsAPI.updatePlugin(plugin as JsPlugin);
     }
@@ -188,6 +189,7 @@ export const ManageWrapper = ({
 
   const deletePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
     logDeletePlugin(plugin);
+
     if (plugin.type === PluginType.Javascript) {
       return jsPluginsAPI.deletePlugin(plugin as JsPlugin);
     }
