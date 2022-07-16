@@ -187,10 +187,10 @@ export const ManageWrapper = ({
   }, []);
 
   const deletePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
+    logDeletePlugin(plugin);
     if (plugin.type === PluginType.Javascript) {
       return jsPluginsAPI.deletePlugin(plugin as JsPlugin);
     }
-    logDeletePlugin(plugin);
     return trustedServicesAPI.deleteTrustedService(plugin as TrustedService);
   }, []);
 
