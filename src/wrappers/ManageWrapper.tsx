@@ -158,6 +158,8 @@ export const ManageWrapper = ({
 
   const createPlugin = useCallback(
     async (plugin: Plugin): Promise<{ key: string; email: string } | null> => {
+      logSetPlugin(plugin);
+
       if (plugin.type === PluginType.Javascript) {
         await jsPluginsAPI.createPlugin(plugin as JsPlugin);
         return null;
@@ -170,8 +172,6 @@ export const ManageWrapper = ({
         username: email,
         ...plugin,
       } as TrustedService);
-
-      logSetPlugin(plugin);
 
       return { key, email };
     },
