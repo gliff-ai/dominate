@@ -179,10 +179,10 @@ export const ManageWrapper = ({
   );
 
   const updatePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
+    logSetPlugin(plugin);
     if (plugin.type === PluginType.Javascript) {
       return jsPluginsAPI.updatePlugin(plugin as JsPlugin);
     }
-    logSetPlugin(plugin);
     return trustedServicesAPI.updateTrustedService(plugin as TrustedService);
   }, []);
 
