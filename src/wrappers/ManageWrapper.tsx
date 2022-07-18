@@ -4,6 +4,7 @@ import {
   useCallback,
   Dispatch,
   useMemo,
+  useEffect,
 } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -24,7 +25,8 @@ import {
   trustedServicesAPI,
   TrustedServiceOut,
 } from "@/services/trustedServices";
-import { JsPlugin, jsPluginsAPI } from "@/services/plugins";
+import { jsPluginsAPI, JsPlugin } from "@/services/plugins";
+import { ProductNavbarData } from "@/components";
 import { FileInfo, GalleryTile, DemoMetadata, GalleryMeta } from "@/interfaces";
 import { PluginType, Plugin } from "@/plugins";
 import { loadNonTiffImageFromURL } from "@/imageConversions";
@@ -36,12 +38,14 @@ type Progress = {
 
 interface Props {
   storeInstance: DominateStore;
+  setProductNavbarData: (data: ProductNavbarData) => void;
   setTask: Dispatch<SetStateAction<Task>>;
 }
 
 export const ManageWrapper = ({
   storeInstance,
   setTask,
+  setProductNavbarData,
 }: Props): ReactElement | null => {
   const auth = useAuth();
   const navigate = useNavigate();
@@ -422,6 +426,17 @@ export const ManageWrapper = ({
     }),
     [auth]
   );
+
+  useEffect(() => {
+    setProductNavbarData({
+      teamName: auth?.userProfile?.team.name || "",
+      projectName: "",
+      imageName: "",
+      buttonBack: null,
+      buttonForward: null,
+      productLocation: "MANAGE",
+    });
+  }, []);
 
   if (!storeInstance || !auth?.user || !auth?.userProfile) return null;
 

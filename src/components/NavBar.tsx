@@ -1,89 +1,139 @@
 import { ReactElement, useState, useEffect } from "react";
-import {
-  AppBar,
-  Avatar,
-  Grid,
-  IconButton,
-  Menu,
-  MenuItem,
-  Theme,
-  Toolbar,
-  Typography,
-} from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
 import { Link, useNavigate } from "react-router-dom";
 import SVG from "react-inlinesvg";
-import { HtmlTooltip } from "@gliff-ai/style";
+import {
+  HtmlTooltip,
+  MuiIconbutton,
+  AppBar,
+  Avatar,
+  Button,
+  Grid,
+  Menu,
+  MenuItem,
+  theme,
+  Toolbar,
+  Typography,
+} from "@gliff-ai/style";
 import { imgSrc } from "@/imgSrc";
 
 import { useAuth } from "@/hooks/use-auth";
-import { ProductIcons, BaseProductIcon } from "@/components";
+import { ProductsNavbar, ProductNavbarData } from "@/components";
 
-const useStyles = makeStyles((theme: Theme) => ({
-  appBar: {
-    backgroundColor: `${theme.palette.secondary.light} !important`,
-    height: "90px",
-    paddingTop: "9px",
+const documentButton = {
+  marginLeft: "40px",
+  "& img": {
+    margin: "auto",
+    borderRadius: "50%",
+    height: "48px",
+    backgroundColor: "#FAFAFA",
   },
-  svgMedium: {
-    width: "22px",
-    height: "100%",
+  ".documentHover:hover": {
+    backgroundColor: "#02FFAD",
+  },
+};
+const svgMedium = {
+  marginLeft: "-1px",
+};
+const menuItem = {
+  opacity: "1",
+  "&:hover": {
+    background: theme.palette.primary.main,
+  },
+  "& a": {
+    color: theme.palette.text.primary,
+    textDecoration: "none",
+    fontSize: "1rem",
+    display: "inline-flex",
+  },
+  "& svg": {
     marginLeft: "-1px",
+    marginRight: "12px",
   },
-  avatarUser: {
-    width: "64px !important",
-    height: "64px !important",
+};
+const appBar = {
+  backgroundColor: `${theme.palette.secondary.light} !important`,
+  height: "90px",
+  paddingTop: "9px",
+  justifyContent: "space-between",
+};
+const logo = {
+  marginBottom: "5px",
+  marginTop: "7px",
+  marginRight: "200px",
+};
+const avatarUser = {
+  width: "40px !important",
+  height: "40px !important",
+  backgroundColor: `${theme.palette.text.secondary} !important`,
+  "&:hover": {
     backgroundColor: `${theme.palette.text.secondary} !important`,
-    "&:hover": {
-      backgroundColor: `${theme.palette.text.secondary} !important`,
-    },
   },
-  menuItem: {
-    opacity: "1",
-    "&:hover": {
-      background: theme.palette.primary.main,
-    },
-    "& a": {
-      color: theme.palette.text.primary,
-      textDecoration: "none",
-      fontSize: "1rem",
-      display: "inline-flex",
-    },
+};
+const productSectionGrid = {
+  paddingTop: "0px",
+  marginLeft: "30px",
+};
+const productSectionDiv = {
+  ".productNavbarData": {
+    display: "flex",
   },
-  logo: {
-    marginBottom: "5px",
-    marginTop: "7px",
-  },
-  productSectionGrid: {
-    position: "absolute",
-    top: "50%",
-    left: "50%",
-    transform: "translate(-50%, -50%)",
-  },
-  navGrid: {
-    marginLeft: "auto",
-    height: "90px",
-  },
-  navLinks: {
+};
+const navGrid = {
+  height: "90px",
+  ".navLinks": {
     height: "100%",
     alignItems: "center",
     display: "flex",
   },
-  accessibleSvg: {
-    fill: "#000000",
+  ".productLocation": {
+    border: "1px solid",
+    borderColor: "#DADDE9",
+    borderRadius: "9px",
+    height: "42px",
+    verticalAlign: "middle",
+    fontFamily: "Roboto",
+    fontWeight: "400",
+    fontSize: "0.875rem",
+    lineHeight: "1.75",
+    display: "flex",
+    paddingLeft: "10px",
+    paddingRight: "10px",
+    backgroundColor: "#FAFAFA",
   },
-  accessibleName: {
-    color: "#000000",
+  ".productLocationImage": {
+    margin: "auto",
+    paddingRight: "10px",
+    height: "40px",
+    width: "40px",
   },
-}));
+  ".productLocationText": {
+    margin: "auto",
+  },
+};
+
+const productLocationIcons = {
+  manage: imgSrc("manage"),
+  curate: imgSrc("curate"),
+  audit: imgSrc("audit"),
+  annotate: imgSrc("annotate"),
+};
+
+const getProductLocationIcon = (productLocation: string): string => {
+  if (productLocation === "manage") return productLocationIcons.manage;
+  if (productLocation === "curate") return productLocationIcons.curate;
+  if (productLocation === "audit") return productLocationIcons.audit;
+  if (productLocation === "annotate") return productLocationIcons.annotate;
+  return "";
+};
+
 interface Props {
   productSection: JSX.Element | null;
+  productNavbarData: ProductNavbarData;
 }
 export const NavBar = (props: Props): ReactElement | null => {
   // Get auth state and re-render anytime it changes
   const auth = useAuth();
   const navigate = useNavigate();
-  const classes = useStyles();
   const [userInitials, setUserInitials] = useState("");
   const [anchorElement, setAnchorEl] = useState<null | HTMLElement>(null);
 
@@ -113,6 +163,10 @@ export const NavBar = (props: Props): ReactElement | null => {
       "/recover",
     ].includes(window.location.pathname);
 
+  // If the URL begins with /annotate/ the productSection is rendered
+  const isAnnotate = (): boolean =>
+    window.location.pathname.startsWith("/annotate/");
+
   if (!auth) return null;
   if (!hasNavbar()) return null;
 
@@ -123,21 +177,16 @@ export const NavBar = (props: Props): ReactElement | null => {
 
   const accountMenu = (
     <>
-      <IconButton
-        onClick={handleClick}
-        aria-controls="menu"
-        style={{ paddingTop: 0 }}
-        size="large"
-      >
+      <MuiIconbutton onClick={handleClick} aria-controls="menu" size="large">
         <HtmlTooltip
           title={<Typography>Account</Typography>}
           placement="bottom"
         >
-          <Avatar variant="circular" className={classes.avatarUser}>
+          <Avatar variant="circular" sx={avatarUser}>
             {userInitials}
           </Avatar>
         </HtmlTooltip>
-      </IconButton>
+      </MuiIconbutton>
       <Menu
         anchorEl={anchorElement}
         keepMounted
@@ -150,30 +199,26 @@ export const NavBar = (props: Props): ReactElement | null => {
           horizontal: "right",
         }}
       >
-        <MenuItem className={classes.menuItem}>
+        <MenuItem sx={{ ...menuItem }}>
           <Link to="/account" onClick={() => setAnchorEl(null)}>
-            <SVG
-              src={imgSrc("account-settings")}
-              className={classes.svgMedium}
-              style={{ marginRight: "12px" }}
-            />
+            <SVG src={imgSrc("account-settings")} width="22px" height="100%" />
             Account Settings
           </Link>
         </MenuItem>
         {showBilling ? (
-          <MenuItem className={classes.menuItem}>
+          <MenuItem sx={{ ...menuItem }}>
             <Link to="/billing" onClick={() => setAnchorEl(null)}>
               <SVG
                 src={imgSrc("account-settings")}
-                className={classes.svgMedium}
-                style={{ marginRight: "12px" }}
+                width="22px"
+                height="100%"
               />
               Billing
             </Link>
           </MenuItem>
         ) : null}
         <MenuItem
-          className={classes.menuItem}
+          sx={{ ...menuItem }}
           onClick={() =>
             auth.signout().then(() => {
               navigate("signin");
@@ -181,11 +226,7 @@ export const NavBar = (props: Props): ReactElement | null => {
             })
           }
         >
-          <SVG
-            src={imgSrc("log-out")}
-            className={classes.svgMedium}
-            style={{ marginRight: "12px" }}
-          />
+          <SVG src={imgSrc("log-out")} width="22px" height="100%" />
           Log out
         </MenuItem>
       </Menu>
@@ -193,10 +234,15 @@ export const NavBar = (props: Props): ReactElement | null => {
   );
 
   return (
-    <AppBar position="sticky" className={classes.appBar} elevation={0}>
+    <AppBar position="sticky" sx={appBar} elevation={0}>
       <Toolbar>
-        <Grid container direction="row" alignContent="space-between">
-          <Grid className={classes.logo}>
+        <Grid
+          sx={productSectionDiv}
+          container
+          direction="row"
+          justifyContent="space-between"
+        >
+          <Grid sx={logo}>
             <img
               src={imgSrc("gliff-web-master-black")}
               width="79px"
@@ -204,23 +250,38 @@ export const NavBar = (props: Props): ReactElement | null => {
               alt="gliff logo"
             />
           </Grid>
-          <Grid className={classes.productSectionGrid}>
-            {props.productSection}
-          </Grid>
-          <Grid className={classes.navGrid}>
-            <nav className={classes.navLinks}>
+          <div className="productNavbarData">
+            <ProductsNavbar productNavbarData={props.productNavbarData} />
+            {isAnnotate() ? (
+              <Grid sx={productSectionGrid}>{props.productSection}</Grid>
+            ) : null}
+          </div>
+          <Grid sx={navGrid}>
+            <nav className="navLinks">
+              <div className="productLocation">
+                <img
+                  className="productLocationImage"
+                  src={getProductLocationIcon(
+                    props.productNavbarData.productLocation.toLowerCase()
+                  )}
+                  alt={props.productNavbarData.productLocation}
+                />
+                <p className="productLocationText">
+                  {props.productNavbarData.productLocation}
+                </p>
+              </div>
+              <Button
+                sx={documentButton}
+                onClick={() => window.open("https://docs.gliff.app/", "_blank")}
+              >
+                <img
+                  className="documentHover"
+                  src={imgSrc("document")}
+                  alt="help-center"
+                />
+              </Button>
               {auth.user ? (
-                <>
-                  <ProductIcons />
-                  <BaseProductIcon
-                    key="document"
-                    tool="document"
-                    customUrlPath="https://docs.gliff.app/"
-                    extraStyleSvg={classes.accessibleSvg}
-                    extraStyleName={classes.accessibleName}
-                  />
-                  {accountMenu}
-                </>
+                <>{accountMenu}</>
               ) : (
                 <Typography>
                   <Link to="/signin">Sign In</Link>
