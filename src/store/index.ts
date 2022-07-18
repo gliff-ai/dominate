@@ -1054,6 +1054,27 @@ export class DominateStore {
     return collectionManager.upload(projectAudit);
   };
 
+  logTeamActions = async (
+    teamAuditActions: ProjectAuditAction[]
+  ): Promise<void> => {
+    // fetch project level audit and concatenate new actions in its content
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+
+    const teamAudit = (
+      await collectionManager.list("gliff.teamAudit")
+    ).data.filter((audit: Collection) => !audit.isDeleted)[0];
+
+    await teamAudit.setContent(
+      JSON.stringify(
+        JSON.parse(await teamAudit.getContent(OutputFormat.String)).concat(
+          teamAuditActions
+        )
+      )
+    );
+
+    return collectionManager.upload(teamAudit);
+  };
+
   setImageLabels = async (
     collectionUid: string,
     imageUid: string,

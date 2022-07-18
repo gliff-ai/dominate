@@ -28,6 +28,13 @@ import {
   ProjectAuditMetaMigrations,
   ProjectAuditContentMigrations,
 } from "./ProjectAudit";
+import {
+  TeamAuditMeta,
+  TeamAuditContent,
+  TeamAuditAction,
+  TeamAuditMetaMigrations,
+  TeamAuditContentMigrations,
+} from "./TeamAudit";
 import { FileInfo, BaseMeta, DemoMetadata } from "./shared";
 
 type ImageBitmapBlob = ImageBitmap;
@@ -47,6 +54,8 @@ migrations["gliff.audit.meta"] = AuditMetaMigrations;
 migrations["gliff.audit.content"] = AuditContentMigrations;
 migrations["gliff.projectAudit.meta"] = ProjectAuditMetaMigrations;
 migrations["gliff.projectAudit.content"] = ProjectAuditContentMigrations;
+migrations["gliff.teamAudit.meta"] = TeamAuditMetaMigrations;
+migrations["gliff.teamAudit.content"] = TeamAuditContentMigrations;
 
 export type {
   BaseMeta,
@@ -59,6 +68,9 @@ export type {
   ProjectAuditMeta,
   ProjectAuditContent,
   ProjectAuditAction,
+  TeamAuditMeta,
+  TeamAuditContent,
+  TeamAuditAction,
   FileInfo,
   MetaItem,
   ImageBitmapBlob,

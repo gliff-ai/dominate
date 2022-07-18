@@ -80,6 +80,8 @@ export const ManageWrapper = ({
 
     const result = await inviteNewUser(email);
 
+    // storeInstance.logAuditActions([{action: {"inviteUser", inviteeUsername: email}, username: auth.user?.username, timestamp: Date.now()}])
+
     return true;
     // Share collections with them?
   }, []);
