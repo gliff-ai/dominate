@@ -47,7 +47,7 @@
     "@gliff-ai/audit": "^3.0.1",
     "@gliff-ai/curate": "^7.5.0",
     "@gliff-ai/etebase": "^0.44.0",
-    "@gliff-ai/manage": "^6.0.0",
+    "@gliff-ai/manage": "^7.0.0",
     "@gliff-ai/style": "^14.6.0",
     "@gliff-ai/upload": "^1.3.0",
     "@material-ui/types": "^5.1.0",
