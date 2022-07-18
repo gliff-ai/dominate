@@ -80,7 +80,13 @@ export const ManageWrapper = ({
 
     const result = await inviteNewUser(email);
 
-    // storeInstance.logAuditActions([{action: {"inviteUser", inviteeUsername: email}, username: auth.user?.username, timestamp: Date.now()}])
+    storeInstance.logTeamActions([
+      {
+        action: { type: "inviteUser", inviteeUsername: email },
+        username: auth?.user?.username as string,
+        timestamp: Date.now(),
+      },
+    ]);
 
     return true;
     // Share collections with them?
@@ -89,6 +95,14 @@ export const ManageWrapper = ({
   const inviteCollaborator = useCallback(async ({ email }) => {
     // Invite them to create a gliff account
     const result = await inviteNewCollaborator(email);
+
+    storeInstance.logTeamActions([
+      {
+        action: { type: "inviteCollaborator", inviteeUsername: email },
+        username: auth?.user?.username as string,
+        timestamp: Date.now(),
+      },
+    ]);
 
     return true;
     // Share collections with them?

@@ -1058,7 +1058,7 @@ export class DominateStore {
   };
 
   logTeamActions = async (
-    teamAuditActions: ProjectAuditAction[]
+    teamAuditActions: TeamAuditAction[]
   ): Promise<void> => {
     // fetch project level audit and concatenate new actions in its content
     const collectionManager = this.etebaseInstance.getCollectionManager();
