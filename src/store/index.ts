@@ -32,6 +32,9 @@ import {
   ProjectAuditMeta,
   ProjectAuditContent,
   ProjectAuditAction,
+  TeamAuditMeta,
+  TeamAuditContent,
+  TeamAuditAction,
   migrations,
 } from "@/interfaces";
 
@@ -1060,9 +1063,37 @@ export class DominateStore {
     // fetch project level audit and concatenate new actions in its content
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
-    const teamAudit = (
+    const teamAudits = (
       await collectionManager.list("gliff.teamAudit")
-    ).data.filter((audit: Collection) => !audit.isDeleted)[0];
+    ).data.filter((audit: Collection) => !audit.isDeleted);
+
+    let teamAudit: Collection;
+
+    if (teamAudits.length === 0) {
+      // create team audit if it doesn't exist already:
+      teamAudit = await collectionManager.create<TeamAuditMeta>(
+        "gliff.teamAudit",
+        {
+          type: "gliff.teamAudit",
+          meta_version: 0,
+          content_version: 0,
+          createdTime: Date.now(),
+          modifiedTime: Date.now(),
+        },
+        JSON.stringify([
+          {
+            action: {
+              type: "createTeam",
+              ownerName: this.etebaseInstance.user.username,
+            },
+            username: this.etebaseInstance.user.username,
+            timestamp: Date.now(),
+          },
+        ])
+      );
+    } else {
+      teamAudit = teamAudits[0];
+    }
 
     await teamAudit.setContent(
       JSON.stringify(

@@ -6,19 +6,15 @@ interface TeamAuditMetaV0 extends BaseMeta {
   meta_version: 0;
   content_version: 0;
   type: "gliff.teamAudit";
-  name: string; // should be the same as the team name
   createdTime: number;
   modifiedTime: number;
-  deletedTime: number | null;
-  galleryUID: string;
 }
 
 // ----------------------------- CONTENT -----------------------------
 
 interface CreateTeamV0 {
   type: "createTeam";
-  teamName: string;
-  description: string;
+  ownerName: string;
 }
 
 interface InviteUserV0 {
