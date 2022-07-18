@@ -783,7 +783,7 @@ export class DominateStore {
         // if the email ends in @trustedservice.gliff.app, then it's a plugin invite, and will have already
         // been logged in ManageWrapper
         const projectAuditAction: ProjectAuditAction = {
-          action: { type: "inviteUser", inviteeUsername: userEmail },
+          action: { type: "addUserToProject", username: userEmail },
           username: this.etebaseInstance.user.username,
           timestamp: Date.now(),
         };

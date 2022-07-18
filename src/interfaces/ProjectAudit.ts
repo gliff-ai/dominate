@@ -22,6 +22,11 @@ interface CreateProjectV0 {
   description: string;
 }
 
+interface AddUserToProjectV0 {
+  type: "addUserToProject";
+  username: string;
+}
+
 interface UploadImageV0 {
   type: "uploadImage";
   imageName: string;
@@ -136,6 +141,7 @@ interface CallPluginV0 {
 interface ProjectAuditActionV0 {
   action:
     | CreateProjectV0
+    | AddUserToProjectV0
     | UploadImageV0
     | DeleteImageV0
     | AssignImageV0
