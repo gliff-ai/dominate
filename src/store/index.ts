@@ -265,6 +265,16 @@ export class DominateStore {
 
     for (const invite of invitations) {
       void invitationManager.accept(invite).catch((e) => logger.log(e));
+      this.logTeamActions([
+        {
+          action: {
+            type: "inviteAccepted",
+            inviteeUsername: this.etebaseInstance.user.username,
+          },
+          username: this.etebaseInstance.user.username,
+          timestamp: Date.now(),
+        },
+      ]);
     }
   };
 

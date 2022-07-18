@@ -22,28 +22,18 @@ interface InviteUserV0 {
   inviteeUsername: string;
 }
 
-interface UserInviteAcceptedV0 {
-  type: "userInviteAccepted";
-  inviteeUsername: string;
-}
-
 interface InviteCollaboratorV0 {
   type: "inviteCollaborator";
   inviteeUsername: string;
 }
 
-interface CollaboratorInviteAcceptedV0 {
-  type: "collaboratorInviteAccepted";
+interface InviteAcceptedV0 {
+  type: "inviteAccepted";
   inviteeUsername: string;
 }
 
 interface TeamAuditActionV0 {
-  action:
-    | CreateTeamV0
-    | InviteUserV0
-    | UserInviteAcceptedV0
-    | InviteCollaboratorV0
-    | CollaboratorInviteAcceptedV0;
+  action: CreateTeamV0 | InviteUserV0 | InviteCollaboratorV0 | InviteAcceptedV0;
   username: string;
   timestamp: number;
 }
