@@ -128,7 +128,7 @@ export const ManageWrapper = ({
         ...p,
         collection_uids: p.collection_uids.map((uid) => ({
           uid,
-          is_invite_pending: "False",
+          is_invite_pending: false,
         })),
       })) as PluginWithExtra[];
       allPlugins = allPlugins.concat(jsplugins);

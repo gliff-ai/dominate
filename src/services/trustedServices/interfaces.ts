@@ -2,7 +2,7 @@ import { JsPlugin } from "../plugins/interfaces";
 
 export type CollectionUidsWithExtra = {
   uid: string;
-  is_invite_pending: "True" | "False";
+  is_invite_pending: boolean;
 };
 
 export interface TrustedServiceOut extends JsPlugin {
