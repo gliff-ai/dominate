@@ -18,6 +18,7 @@ import { imgSrc } from "@/imgSrc";
 
 import { useAuth } from "@/hooks/use-auth";
 import { ProductIcons, BaseProductIcon } from "@/components";
+import { getInitialsFromFullname } from "@/helpers";
 
 const useStyles = makeStyles((theme: Theme) => ({
   appBar: {
@@ -97,10 +98,8 @@ export const NavBar = (props: Props): ReactElement | null => {
 
   useEffect(() => {
     if (!auth?.userProfile?.name) return;
-    const initials = auth?.userProfile?.name
-      .split(" ")
-      .map((l) => l[0].toUpperCase())
-      .join("");
+
+    const initials = getInitialsFromFullname(auth?.userProfile?.name);
     setUserInitials(initials);
   }, [auth]);
 
