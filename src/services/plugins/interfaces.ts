@@ -1,4 +1,4 @@
-export interface JsPlugin {
+interface JsPlugin {
   type: "Javascript" | "Python" | "AI";
   name: string;
   url: string;
@@ -6,3 +6,5 @@ export interface JsPlugin {
   products: "CURATE" | "ANNOTATE" | "ALL";
   collection_uids: string[];
 }
+
+export type { JsPlugin };
