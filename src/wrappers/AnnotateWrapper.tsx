@@ -18,6 +18,7 @@ import { ProductNavbarData } from "@/components";
 import { DominateStore } from "@/store";
 import { AnnotationMeta, GalleryMeta } from "@/interfaces";
 import { UserAccess } from "@/services/user";
+import { createUserFeedback, UserFeedback } from "@/services/feedback";
 import { parseStringifiedSlices } from "@/imageConversions";
 import { useAuth, useStore, usePlugins } from "@/hooks";
 import {
@@ -113,6 +114,14 @@ export const AnnotateWrapper = ({
     (): boolean =>
       Boolean(imageUids && currImageIdx !== null && imageUids?.length > 1),
     [imageUids, currImageIdx]
+  );
+
+  const saveUserFeedback = useCallback(
+    async (feedback: UserFeedback): Promise<number> => {
+      const result = await createUserFeedback(feedback);
+      return result;
+    },
+    [createUserFeedback]
   );
 
   const cycleImage = useCallback(
@@ -539,6 +548,7 @@ export const AnnotateWrapper = ({
       saveMetadataCallback={saveMetadataCallback}
       readonly={!!annotationUid1}
       userAnnotations={userAnnotations}
+      saveUserFeedback={saveUserFeedback}
     />
   );
 };
