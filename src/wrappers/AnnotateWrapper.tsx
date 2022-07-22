@@ -18,7 +18,11 @@ import { ProductNavbarData } from "@/components";
 import { DominateStore } from "@/store";
 import { AnnotationMeta, GalleryMeta } from "@/interfaces";
 import { UserAccess } from "@/services/user";
-import { createUserFeedback, UserFeedback } from "@/services/feedback";
+import {
+  canRequestFeedback,
+  createUserFeedback,
+  UserFeedback,
+} from "@/services/feedback";
 import { parseStringifiedSlices } from "@/imageConversions";
 import { useAuth, useStore, usePlugins } from "@/hooks";
 import {
@@ -549,6 +553,7 @@ export const AnnotateWrapper = ({
       readonly={!!annotationUid1}
       userAnnotations={userAnnotations}
       saveUserFeedback={saveUserFeedback}
+      canRequestFeedback={canRequestFeedback}
     />
   );
 };
