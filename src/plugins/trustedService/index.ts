@@ -10,7 +10,7 @@ const getUiTemplate = (apiUrl: string): Promise<UiTemplate> =>
   apiRequest<UiTemplate>("/ui-template/", "POST", {}, apiUrl);
 
 function unpackUiElements(
-  { type, name, url, username, public_key, encrypted_access_key }: Plugin,
+  { type, name, url, username, encrypted_access_key }: Plugin,
   template: UiTemplate,
   user_username: string
 ): PluginElement[] {
@@ -25,7 +25,6 @@ function unpackUiElements(
         plugin: username as string,
         user: user_username,
       },
-      public_key as string,
       encrypted_access_key as string
     ),
   ];
