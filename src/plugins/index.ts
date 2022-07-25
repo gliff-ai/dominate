@@ -1,4 +1,4 @@
-import { Product, Plugin } from "@gliff-ai/manage";
+import { Product, PluginWithExtra, Plugin, PluginType } from "@gliff-ai/manage";
 import { pluginsAPI } from "@/services/plugins";
 import { PluginObject } from "./interfaces";
 import { initJsPluginObjects } from "./jsPlugin";
@@ -12,11 +12,19 @@ async function getActivePlugins(
   try {
     const newPlugins = await pluginsAPI.getPlugins();
 
-    return newPlugins.filter(
-      ({ collection_uids, products, enabled }) =>
-        collection_uids.includes(collectionUid) &&
-        (products === currentProduct || products === Product.ALL) &&
-        enabled
+    return (
+      newPlugins.map((p: PluginWithExtra) => ({
+        ...p,
+        collection_uids:
+          p.type !== PluginType.Javascript
+            ? p.collection_uids.map(({ uid }) => uid)
+            : p.collection_uids,
+      })) as Plugin[]
+    ).filter(
+      (p) =>
+        p.collection_uids.includes(collectionUid) &&
+        (p.products === currentProduct || p.products === Product.ALL) &&
+        p.enabled
     );
   } catch (e) {
     console.error(e);
@@ -30,10 +38,8 @@ async function initPluginObjects(
   user_username: string
 ): Promise<PluginObject | null> {
   // Initialise plugin objects
-
   try {
     const plugins = await getActivePlugins(currentProduct, collectionUid);
-
     if (plugins) {
       const jsPlugins = await initJsPluginObjects(plugins);
       const trustedServices = await initTrustedServiceObjects(

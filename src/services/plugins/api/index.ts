@@ -1,8 +1,8 @@
-import type { Plugin } from "@gliff-ai/manage";
+import type { Plugin, PluginWithExtra } from "@gliff-ai/manage";
 import { apiRequest } from "@/api";
 
-const getPlugins = (): Promise<Plugin[]> =>
-  apiRequest<Plugin[]>(`/plugin/`, "GET");
+const getPlugins = (): Promise<PluginWithExtra[]> =>
+  apiRequest<PluginWithExtra[]>(`/plugin/`, "GET");
 
 const getZooPlugins = (): Promise<Plugin[]> =>
   apiRequest<Plugin[]>(`/plugin/zoo/`, "GET");

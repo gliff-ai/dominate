@@ -1,9 +1,9 @@
-import { Plugin, PluginType } from "@gliff-ai/manage";
+import { Plugin, PluginType, PluginWithExtra } from "@gliff-ai/manage";
 import { pluginsAPI } from "./api";
 import { DominateStore } from "@/store";
 
-const getPlugins = async (): Promise<Plugin[]> => {
-  let plugins: Plugin[] = [];
+const getPlugins = async (): Promise<PluginWithExtra[]> => {
+  let plugins: PluginWithExtra[] = [];
 
   try {
     plugins = await pluginsAPI.getPlugins();
