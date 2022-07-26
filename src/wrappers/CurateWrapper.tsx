@@ -519,14 +519,16 @@ export const CurateWrapper = ({
         }
         saveMetadataCallback={saveMetadataCallback}
         ZooDialog={
-          <ZooDialog
-            rerender={pluginsRerender}
-            activatePlugin={async (plugin: Plugin): Promise<unknown> => {
-              const result = await createPlugin(storeInstance)(plugin);
-              setPluginsRerender((count) => count + 1); // trigger a re-render so that plunginsView updates
-              return result;
-            }}
-          />
+          isOwnerOrMember && (
+            <ZooDialog
+              rerender={pluginsRerender}
+              activatePlugin={async (plugin: Plugin): Promise<unknown> => {
+                const result = await createPlugin(storeInstance)(plugin);
+                setPluginsRerender((count) => count + 1); // trigger a re-render so that plunginsView updates
+                return result;
+              }}
+            />
+          )
         }
       />
 

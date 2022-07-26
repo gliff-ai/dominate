@@ -111,6 +111,13 @@ export const ManageWrapper = ({
     [storeInstance]
   );
 
+  const isOwnerOrMember = useMemo(
+    (): boolean =>
+      auth?.userAccess === UserAccess.Owner ||
+      auth?.userAccess === UserAccess.Member,
+    [auth?.userAccess]
+  );
+
   const getAnnotationProgress = useCallback(
     async ({
       username,
@@ -119,10 +126,6 @@ export const ManageWrapper = ({
       username: string;
       projectUid?: string;
     }): Promise<Progress> => {
-      const isOwnerOrMember =
-        auth?.userAccess === UserAccess.Owner ||
-        auth?.userAccess === UserAccess.Member;
-
       let collectionsContent: {
         uid: string;
         content: GalleryTile[];
@@ -160,7 +163,7 @@ export const ManageWrapper = ({
       });
       return progress;
     },
-    [auth?.userAccess, storeInstance]
+    [isOwnerOrMember, storeInstance]
   );
 
   const getCollectionMembers = useCallback(
@@ -381,14 +384,16 @@ export const ManageWrapper = ({
         launchDocs={() => window.open("https://docs.gliff.app/", "_blank")}
         showAppBar={false}
         ZooDialog={
-          <ZooDialog
-            rerender={pluginsRerender}
-            activatePlugin={async (plugin: Plugin): Promise<unknown> => {
-              const result = await createPlugin(storeInstance)(plugin);
-              setPluginsRerender((count) => count + 1); // trigger a re-render so that plunginsView updates
-              return result;
-            }}
-          />
+          isOwnerOrMember && (
+            <ZooDialog
+              rerender={pluginsRerender}
+              activatePlugin={async (plugin: Plugin): Promise<unknown> => {
+                const result = await createPlugin(storeInstance)(plugin);
+                setPluginsRerender((count) => count + 1); // trigger a re-render so that plunginsView updates
+                return result;
+              }}
+            />
+          )
         }
         pluginsRerender={pluginsRerender}
       />
