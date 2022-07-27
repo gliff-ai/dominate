@@ -5,34 +5,44 @@ import { PluginElement } from "@/plugins/interfaces";
 import { TrustedServiceClass } from "./TrustedServiceClass";
 import { UiTemplateSchema } from "./schemas";
 import { UiTemplate } from "./interfaces";
+import { SealedCryptoBox } from "@/crypto/SealedCryptoBox";
 
 const getUiTemplate = (apiUrl: string): Promise<UiTemplate> =>
   apiRequest<UiTemplate>("/ui-template/", "POST", {}, apiUrl);
 
 function unpackUiElements(
-  { type, name, url, username, encrypted_access_key }: Plugin,
+  plugin: Plugin,
   template: UiTemplate,
-  user_username: string
+  username: string
 ): PluginElement[] {
   // NOTE: having an array will make sense again once we introduce the toolbar.
+
+  const usernames = {
+    plugin: SealedCryptoBox.encrypt(
+      plugin.username as string,
+      plugin.public_key as string
+    ),
+    user: SealedCryptoBox.encrypt(
+      username as string,
+      plugin.public_key as string
+    ),
+  };
+
   return [
     new TrustedServiceClass(
-      type,
-      name,
-      url,
+      plugin.type,
+      plugin.name,
+      plugin.url,
       template.ui.button.tooltip,
-      {
-        plugin: username as string,
-        user: user_username,
-      },
-      encrypted_access_key as string
+      usernames,
+      plugin.encrypted_access_key as string
     ),
   ];
 }
 
 async function initTrustedServiceObjects(
   plugins: Plugin[],
-  user_username: string
+  username: string
 ): Promise<{ [name: string]: PluginElement[] }> {
   // prepare for validating JSON file
   const ajv = new Ajv();
@@ -62,7 +72,7 @@ async function initTrustedServiceObjects(
           trustedServices[plugin.name] = unpackUiElements(
             plugin,
             template,
-            user_username
+            username
           );
         } else {
           console.error(
