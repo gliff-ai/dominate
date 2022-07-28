@@ -400,19 +400,7 @@ export class DominateStore {
     }
 
     if (projectAuditActions.length > 0) {
-      const projectAudit = await collectionManager.fetch(
-        collection.getMeta<GalleryMeta>().projectAuditUID
-      );
-
-      await projectAudit.setContent(
-        JSON.stringify(
-          JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
-            projectAuditActions
-          )
-        )
-      );
-
-      await this.batchUpload(collectionManager, [collection, projectAudit]);
+      await this.logAuditActions(projectAuditActions, collection);
     } else {
       await collectionManager.upload(collection);
     }
@@ -1000,19 +988,10 @@ export class DominateStore {
       }));
 
       // fetch project level audit and concatenate new actions in its content:
-      const projectAudit = await collectionManager.fetch(
-        collection.getMeta<GalleryMeta>().projectAuditUID
+      const projectAuditUploadPromise = this.logAuditActions(
+        uploadAuditActions,
+        collection
       );
-
-      await projectAudit.setContent(
-        JSON.stringify(
-          JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
-            uploadAuditActions
-          )
-        )
-      );
-
-      const projectAuditUploadPromise = collectionManager.upload(projectAudit);
 
       setTask((prevTask) => ({
         ...prevTask,
@@ -1020,7 +999,7 @@ export class DominateStore {
         description: "Uploading...",
       }));
 
-      // resolve all promises: upload all the new items and update the gallery
+      // resolve all promises: upload all the new items and update the gallery and project level audit
       await Promise.all([
         itemsUploadPromise,
         galleryUploadPromise,
@@ -1151,22 +1130,18 @@ export class DominateStore {
       timestamp: Date.now(),
     };
 
-    // fetch project level audit and concatenate new actions in its content:
-    const projectAudit = await collectionManager.fetch(
-      collection.getMeta<GalleryMeta>().projectAuditUID
-    );
-
-    await projectAudit.setContent(
-      JSON.stringify(
-        JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
-          projectAuditAction
-        )
-      )
+    // update project level audit:
+    const projectAuditUploadPromise = this.logAuditActions(
+      [projectAuditAction],
+      collection
     );
 
     // save updated metadata and audit in store:
     await collection.setContent(JSON.stringify(newContent));
-    await this.batchUpload(collectionManager, [collection, projectAudit]);
+    await Promise.all([
+      collectionManager.upload(collection),
+      projectAuditUploadPromise,
+    ]);
   };
 
   deleteImages = async (
@@ -1222,7 +1197,7 @@ export class DominateStore {
     await collectionManager.upload(collection);
 
     // make project level audit actions for image deletions:
-    const uploadAuditActions: ProjectAuditAction[] = oldContent
+    const deleteAuditActions: ProjectAuditAction[] = oldContent
       .filter((tile) => uidsToDelete.includes(tile.imageUID))
       .map((tile) => ({
         action: {
@@ -1234,20 +1209,8 @@ export class DominateStore {
         timestamp: Date.now(),
       }));
 
-    // fetch project level audit and concatenate new actions in its content:
-    const projectAudit = await collectionManager.fetch(
-      collection.getMeta<GalleryMeta>().projectAuditUID
-    );
-
-    await projectAudit.setContent(
-      JSON.stringify(
-        JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
-          uploadAuditActions
-        )
-      )
-    );
-
-    const projectAuditUploadPromise = collectionManager.upload(projectAudit);
+    // update project level audit:
+    await this.logAuditActions(deleteAuditActions, collection);
 
     setTask({ isLoading: true, description: "Image deletion", progress: 50 });
 
@@ -1304,21 +1267,17 @@ export class DominateStore {
         }) || [], // unassign all items from a user
     }));
 
-    // fetch project level audit and concatenate new actions in its content:
-    const projectAudit = await collectionManager.fetch(
-      collection.getMeta<GalleryMeta>().projectAuditUID
-    );
-
-    await projectAudit.setContent(
-      JSON.stringify(
-        JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
-          projectAuditActions
-        )
-      )
+    // update project level audit:
+    const projectAuditUploadPromise = this.logAuditActions(
+      projectAuditActions,
+      collection
     );
 
     await collection.setContent(JSON.stringify(newContent));
-    await this.batchUpload(collectionManager, [collection, projectAudit]);
+    await Promise.all([
+      collectionManager.upload(collection),
+      projectAuditUploadPromise,
+    ]);
   };
 
   getAnnotationsObject = async (
@@ -2115,21 +2074,17 @@ export class DominateStore {
       });
     });
 
-    // fetch project level audit and concatenate new actions in its content:
-    const projectAudit = await collectionManager.fetch(
-      collection.getMeta<GalleryMeta>().projectAuditUID
-    );
-
-    await projectAudit.setContent(
-      JSON.stringify(
-        JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
-          projectAuditActions
-        )
-      )
+    // update project level audit:
+    const projectAuditPromise = this.logAuditActions(
+      projectAuditActions,
+      collection
     );
 
     // upload:
     await collection.setContent(JSON.stringify(newContent));
-    await this.batchUpload(collectionManager, [collection, projectAudit]);
+    await Promise.all([
+      collectionManager.upload(collection),
+      projectAuditPromise,
+    ]);
   };
 }
