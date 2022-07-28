@@ -13,7 +13,10 @@ async function getPlugins(
   // Get plugins data from STORE
   try {
     const newPlugins = (
-      (await trustedServicesAPI.getTrustedService()) as Plugin[]
+      (await trustedServicesAPI.getTrustedService()).map((p) => ({
+        ...p,
+        collection_uids: p.collection_uids.map(({ uid }) => uid),
+      })) as Plugin[]
     ).concat((await jsPluginsAPI.getPlugins()) as Plugin[]);
 
     return newPlugins.filter(

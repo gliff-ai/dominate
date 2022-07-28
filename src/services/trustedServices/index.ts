@@ -1,21 +1,25 @@
 import { apiRequest } from "@/api";
-import type { TrustedService, UiTemplate } from "./interfaces";
+import type {
+  TrustedServiceIn,
+  TrustedServiceOut,
+  UiTemplate,
+} from "./interfaces";
 
-const getTrustedService = (): Promise<TrustedService[]> =>
-  apiRequest<TrustedService[]>(`/trusted_service/`, "GET");
+const getTrustedService = (): Promise<TrustedServiceIn[]> =>
+  apiRequest<TrustedServiceIn[]>(`/trusted_service/`, "GET");
 
 const createTrustedService = (
-  trustedService: TrustedService
+  trustedService: TrustedServiceOut
 ): Promise<number> =>
   apiRequest<number>("/trusted_service/", "POST", { ...trustedService });
 
 const updateTrustedService = (
-  trustedService: TrustedService
+  trustedService: TrustedServiceOut
 ): Promise<number> =>
   apiRequest<number>("/trusted_service/", "PUT", { ...trustedService });
 
 const deleteTrustedService = (
-  trustedService: TrustedService
+  trustedService: TrustedServiceOut
 ): Promise<number> =>
   apiRequest<number>("/trusted_service/", "DELETE", { ...trustedService });
 
@@ -30,5 +34,5 @@ const trustedServicesAPI = {
   getUiTemplate,
 };
 
-export type { TrustedService };
 export { trustedServicesAPI };
+export type { TrustedServiceIn, TrustedServiceOut };

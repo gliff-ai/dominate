@@ -14,6 +14,7 @@ import { UserInterface, Annotations } from "@gliff-ai/annotate"; // note: Annota
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { icons, IconButton, Task } from "@gliff-ai/style";
 import { OutputFormat } from "@gliff-ai/etebase";
+import { ProductNavbarData } from "@/components";
 import { DominateStore } from "@/store";
 import { AnnotationMeta, GalleryMeta } from "@/interfaces";
 import { UserAccess } from "@/services/user";
@@ -31,6 +32,7 @@ interface Props {
   setIsLoading: (isLoading: boolean) => void;
   task: Task;
   setTask: (task: Task) => void;
+  setProductNavbarData: (data: ProductNavbarData) => void;
   setProductSection: (productSection: JSX.Element | null) => void;
 }
 
@@ -44,13 +46,19 @@ const useStyle = makeStyles({
   cardSize: {
     width: 40,
     height: 40,
-    borderRadius: 0,
+    borderRadius: "1px",
     display: "flex",
     justifyContent: "center",
     alignItems: "center",
+    boxShadow: "none",
+    border: "1px solid rgb(218, 221, 233)",
   },
   cardLeft: {
     borderRadius: "6px 0 0 6px",
+  },
+  cardMiddle: {
+    borderRight: "0",
+    borderLeft: "0",
   },
   cardRight: { borderRadius: "0 6px 6px 0" },
   rotateIcon: { transform: "rotate(180deg)" },
@@ -67,23 +75,35 @@ export const AnnotateWrapper = ({
   task,
   setTask,
   setProductSection,
+  setProductNavbarData,
 }: Props): ReactElement | null => {
   const navigate = useNavigate();
   const auth = useAuth();
 
-  const { collectionUid = "", imageUid = "" } = useParams();
+  const {
+    collectionUid = "",
+    imageUid = "",
+    annotationUid1 = "",
+    annotationUid2 = "",
+  } = useParams();
 
   const [imageContent, setImageContent] = useState<string | null>(null);
   const [slicesData, setSlicesData] = useState<ImageBitmap[][] | null>(null);
   const [imageFileInfo, setImageFileInfo] = useState<ImageFileInfo>();
   const [annotationsObject, setAnnotationsObject] = useState<Annotations>();
+  const [annotationsObject2, setAnnotationsObject2] = useState<Annotations>();
 
   const [isComplete, setIsComplete] = useState<boolean>(false);
   const [imageUids, setImageUids] = useState<string[] | null>(null);
   const [currImageIdx, setCurrImageIdx] = useState<number | null>(null);
+  const [collectionTitle, setCollectionTitle] = useState<string>("");
   const [defaultLabels, setDefaultLabels] = useState<string[]>([]);
   const [restrictLabels, setRestrictLabels] = useState<boolean>(false);
   const [multiLabel, setMultiLabel] = useState<boolean>(true);
+  const [userAnnotations, setUserAnnotations] = useState<{
+    [username: string]: Annotations;
+  }>({}); // object mapping usernames to annotations for the current image
+
   const plugins = usePlugins(collectionUid, auth, Product.ANNOTATE);
 
   const isMounted = useRef(false);
@@ -132,7 +152,7 @@ export const AnnotateWrapper = ({
 
       void storeInstance
         .getImagesMeta(collectionUid)
-        .then((items) => {
+        .then(async (items) => {
           const newImageUIDs = items.tiles
             .filter(
               ({ assignees, imageUID }) =>
@@ -141,13 +161,45 @@ export const AnnotateWrapper = ({
                 imageUID
             )
             .map(({ imageUID }) => imageUID);
+          const projectName = items.galleryMeta.name;
           setStateIfMounted(newImageUIDs, setImageUids, isMounted.current);
+          setStateIfMounted(projectName, setCollectionTitle, isMounted.current);
 
           const fileInfo = items.tiles.find(
             (item) => item.imageUID === imageUid
           )?.fileInfo;
           if (fileInfo) {
             setStateIfMounted(fileInfo, setImageFileInfo, isMounted.current);
+          }
+
+          if (annotationUid1) {
+            // fetch all the annotationsObjects for this image:
+            const annotationsMap = items.tiles.find(
+              (item) => item.imageUID === imageUid
+            )?.annotationUID;
+            if (annotationsMap) {
+              const contentStrings = await Promise.all(
+                (
+                  await storeInstance.fetchMulti(
+                    collectionUid,
+                    Object.values(annotationsMap)
+                  )
+                ).map((item) => item.getContent(OutputFormat.String))
+              );
+
+              const newUserAnnotations = Object.assign(
+                {},
+                ...Object.keys(annotationsMap).map((username, i) => ({
+                  [username]: new Annotations(JSON.parse(contentStrings[i])),
+                }))
+              ) as { [username: string]: Annotations };
+              setStateIfMounted(
+                // zip usernames and Annotations objects back together:
+                newUserAnnotations,
+                setUserAnnotations,
+                isMounted.current
+              );
+            }
           }
         })
         .catch((e) => {
@@ -170,7 +222,7 @@ export const AnnotateWrapper = ({
             size="small"
           />
         </Card>
-        <Card className={classes.cardSize}>
+        <Card className={` ${classes.cardSize} ${classes.cardMiddle}`}>
           <IconButton
             icon={icons.tick}
             tooltip={{ name: "Mark Annotation As Complete" }}
@@ -331,21 +383,52 @@ export const AnnotateWrapper = ({
       return newAnnotationsObject;
     };
 
-    const getAnnotationsObject = (): Promise<void> => {
+    const getAnnotationsObject = async (): Promise<void> => {
       if (!auth?.user?.username) return Promise.resolve();
 
       // Set state for annotation items.
-      return storeInstance
-        .getAnnotationsObject(collectionUid, imageUid, auth.user.username)
+      const fetch: Promise<{
+        annotations: Annotations;
+        meta: AnnotationMeta;
+      } | null>[] = [];
+      if (annotationUid1) {
+        fetch.push(
+          storeInstance.getAnnotationsObject(collectionUid, annotationUid1)
+        );
+      }
+      if (annotationUid2) {
+        fetch.push(
+          storeInstance.getAnnotationsObject(collectionUid, annotationUid2)
+        );
+      }
+      if (fetch.length === 0) {
+        // fetch annotation for currently signed in user
+        fetch.push(
+          storeInstance.getAnnotationsObject(collectionUid, {
+            imageUid,
+            username: auth.user.username,
+          })
+        );
+      }
+      return Promise.all(fetch)
         .then(
-          (data: { annotations: Annotations; meta: AnnotationMeta } | null) => {
+          (
+            data: ({ annotations: Annotations; meta: AnnotationMeta } | null)[]
+          ) => {
             setStateIfMounted(
-              data?.annotations || createAnnotationsObject(),
+              data[0]?.annotations || createAnnotationsObject(),
               setAnnotationsObject,
               isMounted.current
             );
+            if (data.length === 2) {
+              setStateIfMounted(
+                data[1]?.annotations,
+                setAnnotationsObject2,
+                isMounted.current
+              );
+            }
             setStateIfMounted(
-              data?.meta?.isComplete || false,
+              data[0]?.meta?.isComplete || false,
               setIsComplete,
               isMounted.current
             );
@@ -405,6 +488,26 @@ export const AnnotateWrapper = ({
     updateProductSection();
   }, [updateProductSection]);
 
+  useEffect(() => {
+    setProductNavbarData({
+      teamName: auth?.userProfile?.team.name || "",
+      projectName: collectionTitle || "",
+      imageName: imageFileInfo?.fileName || "",
+      buttonBack: (
+        <IconButton
+          onClick={() => navigate(`/curate/${collectionUid}`)}
+          tooltip={{
+            name: `Open ${collectionTitle} in CURATE `,
+          }}
+          tooltipPlacement="bottom"
+          icon={icons.navigationCURATE}
+        />
+      ),
+      buttonForward: null,
+      productLocation: "ANNOTATE",
+    });
+  }, [imageFileInfo, collectionTitle]);
+
   if (
     !storeInstance ||
     !collectionUid ||
@@ -420,6 +523,7 @@ export const AnnotateWrapper = ({
       slicesData={slicesData}
       imageFileInfo={imageFileInfo}
       annotationsObject={slicesData ? annotationsObject : undefined}
+      annotationsObject2={annotationsObject2}
       saveAnnotationsCallback={saveAnnotation}
       setIsLoading={setIsLoading}
       userAccess={auth.userAccess}
@@ -433,6 +537,8 @@ export const AnnotateWrapper = ({
       restrictLabels={restrictLabels}
       multiLabel={multiLabel}
       saveMetadataCallback={saveMetadataCallback}
+      readonly={!!annotationUid1}
+      userAnnotations={userAnnotations}
     />
   );
 };
