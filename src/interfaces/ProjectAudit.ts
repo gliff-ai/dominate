@@ -59,6 +59,7 @@ interface UpdateImageLabelsV0 {
   imageUid: string;
   labels: string[];
 }
+
 interface SetDefaultLabelsV0 {
   type: "setDefaultLabels";
   defaultLabels: string[];
