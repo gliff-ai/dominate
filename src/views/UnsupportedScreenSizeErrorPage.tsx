@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import { Typography } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
-import { BaseTextButton } from "@gliff-ai/style";
+import { Button } from "@gliff-ai/style";
 
 const useStyles = makeStyles(() => ({
   divButtons: {
@@ -40,7 +40,7 @@ export function UnsupportedScreenSizeErrorPage(): ReactElement {
       </Typography>
 
       <div className={classes.divButtons}>
-        <BaseTextButton
+        <Button
           text="Return to Website"
           onClick={() => window.open("https://gliff.ai")}
         />

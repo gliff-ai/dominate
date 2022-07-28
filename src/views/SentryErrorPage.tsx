@@ -1,7 +1,7 @@
 import { ReactElement } from "react";
 import { Typography } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
-import { BaseTextButton } from "@gliff-ai/style";
+import { Button } from "@gliff-ai/style";
 
 const useStyles = makeStyles(() => ({
   divButtons: {
@@ -41,11 +41,11 @@ export function SentryErrorPage(): ReactElement {
       </Typography>
 
       <div className={classes.divButtons}>
-        <BaseTextButton
+        <Button
           text="Report Error"
           onClick={() => window.open("https://gliff.ai/contact/")}
         />
-        <BaseTextButton
+        <Button
           text="Reload App"
           onClick={() => {
             window.open("/manage");
