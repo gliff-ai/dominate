@@ -544,13 +544,13 @@ export const CurateWrapper = ({
   )
     return null;
 
-  const logPluginCall = (data: {
+  const logPluginCall = async (data: {
     pluginName: string;
     pluginType?: string;
     imageUid: string;
     imageMetadata?: Metadata;
   }) => {
-    storeInstance.logAuditActions(
+    await storeInstance.logAuditActions(
       [
         {
           action: {

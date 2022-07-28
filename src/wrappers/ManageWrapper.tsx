@@ -83,12 +83,12 @@ export const ManageWrapper = ({
     [storeInstance]
   );
 
-  const inviteUser = useCallback(async ({ email }) => {
+  const inviteUser = useCallback(async ({ email }: { email: string }) => {
     // Invite them to create a gliff account
 
     const result = await inviteNewUser(email);
 
-    storeInstance.logTeamActions([
+    await storeInstance.logTeamActions([
       {
         action: { type: "inviteUser", inviteeUsername: email },
         username: auth?.user?.username as string,
@@ -100,21 +100,24 @@ export const ManageWrapper = ({
     // Share collections with them?
   }, []);
 
-  const inviteCollaborator = useCallback(async ({ email }) => {
-    // Invite them to create a gliff account
-    const result = await inviteNewCollaborator(email);
+  const inviteCollaborator = useCallback(
+    async ({ email }: { email: string }) => {
+      // Invite them to create a gliff account
+      const result = await inviteNewCollaborator(email);
 
-    storeInstance.logTeamActions([
-      {
-        action: { type: "inviteCollaborator", inviteeUsername: email },
-        username: auth?.user?.username as string,
-        timestamp: Date.now(),
-      },
-    ]);
+      await storeInstance.logTeamActions([
+        {
+          action: { type: "inviteCollaborator", inviteeUsername: email },
+          username: auth?.user?.username as string,
+          timestamp: Date.now(),
+        },
+      ]);
 
-    return true;
-    // Share collections with them?
-  }, []);
+      return true;
+      // Share collections with them?
+    },
+    []
+  );
 
   const inviteToProject = useCallback(
     async ({ projectUid, email }) => {
@@ -155,40 +158,44 @@ export const ManageWrapper = ({
     return allPlugins;
   }, []);
 
-  const logSetPlugin = (plugin: Plugin) => {
+  const logSetPlugin = async (plugin: Plugin) => {
     // log the new plugin configuration for all projects it's assigned to
-    plugin.collection_uids.map((coluid) => {
-      storeInstance.logAuditActions(
-        [
-          {
-            action: { type: "setPlugin", plugin },
-            username: auth?.user?.username as string,
-            timestamp: Date.now(),
-          },
-        ],
-        coluid
-      );
-    });
+    await Promise.all(
+      plugin.collection_uids.map((coluid) =>
+        storeInstance.logAuditActions(
+          [
+            {
+              action: { type: "setPlugin", plugin },
+              username: auth?.user?.username as string,
+              timestamp: Date.now(),
+            },
+          ],
+          coluid
+        )
+      )
+    );
   };
 
-  const logDeletePlugin = (plugin: Plugin) => {
-    plugin.collection_uids.map((coluid) => {
-      storeInstance.logAuditActions(
-        [
-          {
-            action: { type: "deletePlugin", plugin },
-            username: auth?.user?.username as string,
-            timestamp: Date.now(),
-          },
-        ],
-        coluid
-      );
-    });
+  const logDeletePlugin = async (plugin: Plugin) => {
+    await Promise.all(
+      plugin.collection_uids.map((coluid) =>
+        storeInstance.logAuditActions(
+          [
+            {
+              action: { type: "deletePlugin", plugin },
+              username: auth?.user?.username as string,
+              timestamp: Date.now(),
+            },
+          ],
+          coluid
+        )
+      )
+    );
   };
 
   const createPlugin = useCallback(
     async (plugin: Plugin): Promise<{ key: string; email: string } | null> => {
-      logSetPlugin(plugin);
+      await logSetPlugin(plugin);
 
       if (plugin.type === PluginType.Javascript) {
         await jsPluginsAPI.createPlugin(plugin as JsPlugin);
@@ -209,7 +216,7 @@ export const ManageWrapper = ({
   );
 
   const updatePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
-    logSetPlugin(plugin);
+    await logSetPlugin(plugin);
 
     if (plugin.type === PluginType.Javascript) {
       return jsPluginsAPI.updatePlugin(plugin as JsPlugin);
@@ -218,7 +225,7 @@ export const ManageWrapper = ({
   }, []);
 
   const deletePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
-    logDeletePlugin(plugin);
+    await logDeletePlugin(plugin);
 
     if (plugin.type === PluginType.Javascript) {
       return jsPluginsAPI.deletePlugin(plugin as JsPlugin);

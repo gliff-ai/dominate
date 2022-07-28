@@ -30,10 +30,8 @@ import {
   AnnotationMeta,
   AuditMeta,
   ProjectAuditMeta,
-  ProjectAuditContent,
   ProjectAuditAction,
   TeamAuditMeta,
-  TeamAuditContent,
   TeamAuditAction,
   migrations,
 } from "@/interfaces";
@@ -263,19 +261,19 @@ export class DominateStore {
       () => [] // catches the "User inactive or deleted" errors when the user isn't verified yet
     );
 
+    const teamAuditActions: TeamAuditAction[] = [];
     for (const invite of invitations) {
       void invitationManager.accept(invite).catch((e) => logger.log(e));
-      this.logTeamActions([
-        {
-          action: {
-            type: "inviteAccepted",
-            inviteeUsername: this.etebaseInstance.user.username,
-          },
-          username: this.etebaseInstance.user.username,
-          timestamp: Date.now(),
+      teamAuditActions.push({
+        action: {
+          type: "inviteAccepted",
+          inviteeUsername: this.etebaseInstance.user.username,
         },
-      ]);
+        username: this.etebaseInstance.user.username,
+        timestamp: Date.now(),
+      });
     }
+    await this.logTeamActions(teamAuditActions);
   };
 
   getCollectionContent = async (
@@ -788,7 +786,7 @@ export class DominateStore {
           username: this.etebaseInstance.user.username,
           timestamp: Date.now(),
         };
-        this.logAuditActions([projectAuditAction], collection);
+        await this.logAuditActions([projectAuditAction], collection);
       }
 
       return true;
@@ -1037,9 +1035,11 @@ export class DominateStore {
 
     await projectAudit.setContent(
       JSON.stringify(
-        JSON.parse(await projectAudit.getContent(OutputFormat.String)).concat(
-          projectAuditActions
-        )
+        (
+          JSON.parse(
+            await projectAudit.getContent(OutputFormat.String)
+          ) as ProjectAuditAction[]
+        ).concat(projectAuditActions)
       )
     );
 
@@ -1081,14 +1081,16 @@ export class DominateStore {
         ])
       );
     } else {
-      teamAudit = teamAudits[0];
+      [teamAudit] = teamAudits;
     }
 
     await teamAudit.setContent(
       JSON.stringify(
-        JSON.parse(await teamAudit.getContent(OutputFormat.String)).concat(
-          teamAuditActions
-        )
+        (
+          JSON.parse(
+            await teamAudit.getContent(OutputFormat.String)
+          ) as TeamAuditAction[]
+        ).concat(teamAuditActions)
       )
     );
 
@@ -1110,7 +1112,7 @@ export class DominateStore {
 
     // iterate through GalleryTile's, find the one whose imageUID matches imageUid, set its imageLabels to newLabels:
     let newContent: GalleryTile[] = JSON.parse(oldContent) as GalleryTile[];
-    let imageName: string = "";
+    let imageName = "";
     newContent = newContent.map((item) => {
       if (item.imageUID === imageUid) {
         imageName = item.fileInfo.fileName;
@@ -1264,6 +1266,7 @@ export class DominateStore {
             });
             return true;
           }
+          return false;
         }) || [], // unassign all items from a user
     }));
 
@@ -1911,9 +1914,11 @@ export class DominateStore {
     auditItem.setMeta({ ...auditItem.getMeta(), modifiedTime });
     await auditItem.setContent(
       JSON.stringify(
-        JSON.parse(await auditItem.getContent(OutputFormat.String)).concat(
-          auditData
-        )
+        (
+          JSON.parse(
+            await auditItem.getContent(OutputFormat.String)
+          ) as AuditAction[]
+        ).concat(auditData)
       )
     );
 
