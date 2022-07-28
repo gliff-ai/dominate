@@ -59,27 +59,6 @@ interface UpdateImageLabelsV0 {
   imageUid: string;
   labels: string[];
 }
-
-interface InviteUserV0 {
-  type: "inviteUser";
-  inviteeUsername: string;
-}
-
-interface UserInviteAcceptedV0 {
-  type: "userInviteAccepted";
-  inviteeUsername: string;
-}
-
-interface InviteCollaboratorV0 {
-  type: "inviteCollaborator";
-  inviteeUsername: string;
-}
-
-interface CollaboratorInviteAcceptedV0 {
-  type: "collaboratorInviteAccepted";
-  inviteeUsername: string;
-}
-
 interface SetDefaultLabelsV0 {
   type: "setDefaultLabels";
   defaultLabels: string[];
@@ -147,10 +126,6 @@ interface ProjectAuditActionV0 {
     | AssignImageV0
     | UnassignImageV0
     | UpdateImageLabelsV0
-    | InviteUserV0
-    | UserInviteAcceptedV0
-    | InviteCollaboratorV0
-    | CollaboratorInviteAcceptedV0
     | SetDefaultLabelsV0
     | SetRestrictLabelsV0
     | SetMultiLabelV0
