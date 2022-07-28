@@ -6,7 +6,6 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-  Button,
   Select,
   MenuItem,
   SelectChangeEvent,
@@ -16,7 +15,7 @@ import {
   theme,
   BaseIconButton,
   LoadingSpinner,
-  BaseTextButton,
+  Button,
 } from "@gliff-ai/style";
 
 import {
@@ -208,7 +207,7 @@ export function Billing(): JSX.Element {
       }
     };
 
-    return <BaseTextButton onClick={doCheckout} text="Add Payment Method" />;
+    return <Button onClick={doCheckout} text="Add Payment Method" />;
   };
 
   useEffect(() => {
@@ -273,7 +272,7 @@ export function Billing(): JSX.Element {
                   <tr>
                     <td colSpan={2}>
                       <br />
-                      <BaseTextButton
+                      <Button
                         text="Change Plan"
                         style={{ margin: "0 auto", display: "block" }}
                         onClick={() => {
@@ -289,7 +288,7 @@ export function Billing(): JSX.Element {
                   <tr>
                     <td colSpan={2}>
                       <br />
-                      <BaseTextButton
+                      <Button
                         text="Purchase Addons"
                         style={{ margin: "0 auto", display: "block" }}
                         onClick={() => {
@@ -321,7 +320,7 @@ export function Billing(): JSX.Element {
   );
 
   const cancelPlanButton = (
-    <BaseTextButton
+    <Button
       text="Cancel Plan"
       onClick={async () => {
         await cancelPlan();

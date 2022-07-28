@@ -90,9 +90,8 @@ export const RecoveryKeyDialog = ({ recoveryKey }: Props): JSX.Element => {
           color="primary"
           variant="contained"
           sx={{ textAlign: "center" }}
-        >
-          Ok
-        </Button>
+          text="Ok"
+        />
       </Typography>
     </AdvancedDialog>
   );
