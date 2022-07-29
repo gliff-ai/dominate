@@ -150,3 +150,10 @@ export function convertMetadataToGalleryTiles(
   });
   return newTiles;
 }
+
+export const getInitialsFromFullname = (fullname: string): string =>
+  fullname
+    .trim()
+    .split(" ")
+    .map((l) => l[0].toUpperCase())
+    .join("");

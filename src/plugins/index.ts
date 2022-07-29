@@ -1,29 +1,30 @@
-import { jsPluginsAPI } from "@/services/plugins";
-import { trustedServicesAPI } from "@/services/trustedServices";
-import { Plugin, Product, PluginType, PluginObject } from "./interfaces";
-
+import { Product, PluginWithExtra, Plugin, PluginType } from "@gliff-ai/manage";
+import { pluginsAPI } from "@/services/plugins";
+import { PluginObject } from "./interfaces";
 import { initJsPluginObjects } from "./jsPlugin";
-
 import { initTrustedServiceObjects } from "./trustedService";
 
-async function getPlugins(
+async function getActivePlugins(
   currentProduct: Product,
   collectionUid: string
 ): Promise<Plugin[] | null> {
   // Get plugins data from STORE
   try {
-    const newPlugins = (
-      (await trustedServicesAPI.getTrustedService()).map((p) => ({
-        ...p,
-        collection_uids: p.collection_uids.map(({ uid }) => uid),
-      })) as Plugin[]
-    ).concat((await jsPluginsAPI.getPlugins()) as Plugin[]);
+    const newPlugins = await pluginsAPI.getPlugins();
 
-    return newPlugins.filter(
-      ({ collection_uids, products, enabled }) =>
-        collection_uids.includes(collectionUid) &&
-        (products === currentProduct || products === Product.ALL) &&
-        enabled
+    return (
+      newPlugins.map((p: PluginWithExtra) => ({
+        ...p,
+        collection_uids:
+          p.type !== PluginType.Javascript
+            ? p.collection_uids.map(({ uid }) => uid)
+            : p.collection_uids,
+      })) as Plugin[]
+    ).filter(
+      (p) =>
+        p.collection_uids.includes(collectionUid) &&
+        (p.products === currentProduct || p.products === Product.ALL) &&
+        p.enabled
     );
   } catch (e) {
     console.error(e);
@@ -37,10 +38,8 @@ async function initPluginObjects(
   user_username: string
 ): Promise<PluginObject | null> {
   // Initialise plugin objects
-
   try {
-    const plugins = await getPlugins(currentProduct, collectionUid);
-
+    const plugins = await getActivePlugins(currentProduct, collectionUid);
     if (plugins) {
       const jsPlugins = await initJsPluginObjects(plugins);
       const trustedServices = await initTrustedServiceObjects(
@@ -56,5 +55,5 @@ async function initPluginObjects(
   return null;
 }
 
-export { getPlugins, initPluginObjects, Product, PluginType };
-export type { Plugin, PluginObject };
+export { initPluginObjects };
+export type { PluginObject };

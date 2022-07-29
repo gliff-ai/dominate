@@ -63,6 +63,7 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
   const [productSection, setProductSection] =
     useState<JSX.Element | null>(null);
   const [tooSmall, setTooSmall] = useState(false);
+  const [pluginsRerender, setPluginsRerender] = useState<number>(0);
   const [productNavbarData, setProductNavbarData] = useState<ProductNavbarData>(
     {
       teamName: "",
@@ -176,6 +177,8 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
                           setIsLoading={setIsLoading}
                           task={task}
                           setTask={setTask}
+                          pluginsRerender={pluginsRerender}
+                          setPluginsRerender={setPluginsRerender}
                           setProductNavbarData={setProductNavbarData}
                         />
                       }
@@ -243,6 +246,8 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
                           storeInstance={storeInstance}
                           setProductNavbarData={setProductNavbarData}
                           setTask={setTask}
+                          pluginsRerender={pluginsRerender}
+                          setPluginsRerender={setPluginsRerender}
                         />
                       }
                     />

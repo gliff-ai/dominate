@@ -31,6 +31,7 @@ import {
   AuditMeta,
   migrations,
 } from "@/interfaces";
+import { SealedCryptoBox } from "@/crypto/SealedCryptoBox";
 
 const logger = console;
 
@@ -39,6 +40,13 @@ type ProjectMember = {
   name?: string;
   username: string;
   isPending: boolean;
+};
+
+type TSUserCreated = {
+  publicKey: string;
+  encryptedAccessKey: string;
+  privateKey?: string;
+  email: string;
 };
 
 const getRandomValueFromArrayOrString = (
@@ -135,18 +143,38 @@ export class DominateStore {
     };
   };
 
-  createTrustedServiceUser = async (): Promise<{
-    key: string;
-    email: string;
-  }> => {
-    function base64AddPadding(str: string) {
-      return `${str}${Array(((4 - (str.length % 4)) % 4) + 1).join("=")}`;
-    }
-
+  createTrustedServiceUser = async (
+    publicKey?: string
+  ): Promise<TSUserCreated> => {
     const email = `${sodium.randombytes_random()}@trustedservice.gliff.app`;
     const password = sodium.randombytes_buf(64, "base64");
-    const key = base64AddPadding(toBase64(`${email}:${password}`));
+    const accessKey = sodium.to_base64(
+      `${email}:${password}`,
+      sodium.base64_variants.URLSAFE // url-safe base64 encoding with padding
+    );
 
+    let result: TSUserCreated;
+    if (publicKey) {
+      console.log("activating plugin");
+      const ecryptedKey = SealedCryptoBox.encrypt(accessKey, publicKey);
+
+      result = {
+        publicKey,
+        encryptedAccessKey: ecryptedKey,
+        email,
+      };
+    } else {
+      console.log("creating plugin");
+      const crypto = SealedCryptoBox.keygen();
+      const ecryptedKey = SealedCryptoBox.encrypt(accessKey, crypto.publicKey);
+
+      result = {
+        publicKey: crypto.publicKey,
+        encryptedAccessKey: ecryptedKey,
+        privateKey: crypto.privateKey,
+        email,
+      };
+    }
     await Account.signup(
       {
         username: toBase64(email),
@@ -156,7 +184,7 @@ export class DominateStore {
       SERVER_URL
     );
 
-    return { key, email };
+    return result;
   };
 
   signup = async (email: string, password: string): Promise<User> => {
@@ -612,7 +640,7 @@ export class DominateStore {
     return resolved;
   };
 
-  createCollection = async ({
+  createGallery = async ({
     name,
     description,
   }: {

@@ -5,6 +5,8 @@ import {
   useRef,
   useCallback,
   useMemo,
+  SetStateAction,
+  Dispatch,
 } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
@@ -15,6 +17,7 @@ import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
 import JSZip from "jszip";
 import { Annotations, getTiffData } from "@gliff-ai/annotate";
+import { Product, Plugin } from "@gliff-ai/manage";
 import { DominateStore } from "@/store";
 import { ProductNavbarData } from "@/components";
 import { GalleryTile, Slices, MetaItem } from "@/interfaces";
@@ -34,9 +37,10 @@ import {
   MetaItemWithId,
   setStateIfMounted,
 } from "@/helpers";
-import { Product } from "@/plugins";
 import { UserAccess } from "@/services/user";
+import { createPlugin } from "@/services/plugins";
 import { getTeam, Profile } from "@/services/team";
+import { ZooDialog } from "@/components";
 
 const logger = console;
 interface Props {
@@ -44,6 +48,8 @@ interface Props {
   setIsLoading: (isLoading: boolean) => void;
   task: Task;
   setTask: (task: Task) => void;
+  pluginsRerender: number;
+  setPluginsRerender: Dispatch<SetStateAction<number>>;
   setProductNavbarData: (data: ProductNavbarData) => void;
 }
 
@@ -52,6 +58,8 @@ export const CurateWrapper = ({
   setIsLoading,
   task,
   setTask,
+  pluginsRerender,
+  setPluginsRerender,
   setProductNavbarData,
 }: Props): ReactElement | null => {
   const navigate = useNavigate();
@@ -69,7 +77,6 @@ export const CurateWrapper = ({
   const [showMultilabelConfirm, setShowMultilabelConfirm] =
     useState<boolean>(false);
   const [multi, setMulti] = useState<boolean>(false);
-  const plugins = usePlugins(collectionUid, auth, Product.CURATE);
 
   // image deletion dialog state:
   const [showDeleteConfirm, setShowDeleteConfirm] = useState<boolean>(false);
@@ -78,6 +85,12 @@ export const CurateWrapper = ({
   // no images to download message state:
   const [showNoImageMessage, setShowNoImageMessage] = useState<boolean>(false);
   const [profiles, setProfiles] = useState<Profile[] | null>(null);
+  const plugins = usePlugins(
+    collectionUid,
+    auth,
+    Product.CURATE,
+    pluginsRerender
+  );
 
   const isMounted = useRef(false);
 
@@ -117,6 +130,7 @@ export const CurateWrapper = ({
               isOwnerOrMember ||
               (assignees as string[]).includes(auth?.user?.username as string)
           );
+
           setMetadata(newMetadata);
 
           setDefaultLabels(galleryMeta.defaultLabels);
@@ -571,6 +585,18 @@ export const CurateWrapper = ({
             : null
         }
         saveMetadataCallback={saveMetadataCallback}
+        ZooDialog={
+          isOwnerOrMember && (
+            <ZooDialog
+              rerender={pluginsRerender}
+              activatePlugin={async (plugin: Plugin): Promise<unknown> => {
+                const result = await createPlugin(storeInstance)(plugin);
+                setPluginsRerender((count) => count + 1); // trigger a re-render so that plunginsView updates
+                return result;
+              }}
+            />
+          )
+        }
       />
 
       <ConfirmationDialog

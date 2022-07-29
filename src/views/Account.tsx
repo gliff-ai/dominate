@@ -14,6 +14,7 @@ import { theme, HtmlTooltip } from "@gliff-ai/style";
 import { Link } from "react-router-dom";
 import { useAuth } from "@/hooks/use-auth";
 import { imgSrc } from "@/imgSrc";
+import { getInitialsFromFullname } from "@/helpers";
 
 const useStyles = makeStyles({
   avatar: {
@@ -74,12 +75,6 @@ export function Account(): ReactElement | null {
   const auth = useAuth();
   const classes = useStyles();
 
-  const getInitials = (name: string): string =>
-    name
-      .split(" ")
-      .map((l) => l[0].toUpperCase())
-      .join("");
-
   return auth?.user && auth?.userProfile ? (
     <Grid>
       <Card className={classes.card}>
@@ -92,7 +87,7 @@ export function Account(): ReactElement | null {
           <Box>
             <Avatar className={classes.avatar}>
               <Typography className={classes.avatarTopography}>
-                {getInitials(auth?.userProfile?.name)}
+                {getInitialsFromFullname(auth?.userProfile?.name)}
               </Typography>
             </Avatar>
           </Box>

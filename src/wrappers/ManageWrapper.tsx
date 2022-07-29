@@ -8,29 +8,27 @@ import {
 } from "react";
 import { useNavigate } from "react-router-dom";
 
-import {
-  UserInterface as Manage,
-  ProvideAuth /* TODO export Services */,
-} from "@gliff-ai/manage";
+import type { User, Services, Plugin } from "@gliff-ai/manage";
+import { UserInterface as Manage, ProvideAuth } from "@gliff-ai/manage";
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { Task } from "@gliff-ai/style";
 import { DominateStore, API_URL, DEMO_DATA_URL } from "@/store";
-import { useAuth } from "@/hooks/use-auth";
+import { useAuth } from "@/hooks";
 import {
   inviteNewCollaborator,
   inviteNewUser,
   UserAccess,
 } from "@/services/user";
 import {
-  trustedServicesAPI,
-  TrustedServiceOut,
-} from "@/services/trustedServices";
-import { jsPluginsAPI, JsPlugin } from "@/services/plugins";
+  getPlugins,
+  updatePlugin,
+  createPlugin,
+  deletePlugin,
+} from "@/services/plugins";
 import { ProductNavbarData } from "@/components";
 import { FileInfo, GalleryTile, DemoMetadata, GalleryMeta } from "@/interfaces";
-import { PluginType, Plugin } from "@/plugins";
 import { loadNonTiffImageFromURL } from "@/imageConversions";
-import { PluginWithExtra } from "@/plugins/interfaces";
+import { ZooDialog } from "@/components";
 
 type Progress = {
   [uid: string]: { complete: number; total: number };
@@ -40,14 +38,19 @@ interface Props {
   storeInstance: DominateStore;
   setProductNavbarData: (data: ProductNavbarData) => void;
   setTask: Dispatch<SetStateAction<Task>>;
+  pluginsRerender: number;
+  setPluginsRerender: Dispatch<SetStateAction<number>>;
 }
 
 export const ManageWrapper = ({
   storeInstance,
   setTask,
+  pluginsRerender,
+  setPluginsRerender,
   setProductNavbarData,
 }: Props): ReactElement | null => {
   const auth = useAuth();
+
   const navigate = useNavigate();
 
   const getProjects = useCallback(async (): Promise<GalleryMeta[]> => {
@@ -76,7 +79,7 @@ export const ManageWrapper = ({
 
   const createProject = useCallback(
     async (projectDetails: { name: string; description?: string }) => {
-      const uid = await storeInstance.createCollection(projectDetails);
+      const uid = await storeInstance.createGallery(projectDetails);
 
       return uid;
     },
@@ -112,66 +115,12 @@ export const ManageWrapper = ({
     [storeInstance]
   );
 
-  const getPlugins = useCallback(async (): Promise<PluginWithExtra[]> => {
-    let allPlugins: PluginWithExtra[] = [];
-
-    try {
-      const trustedServices =
-        (await trustedServicesAPI.getTrustedService()) as PluginWithExtra[];
-      allPlugins = allPlugins.concat(trustedServices);
-    } catch (e) {
-      console.error(e);
-    }
-
-    try {
-      const jsplugins = (await jsPluginsAPI.getPlugins()).map((p) => ({
-        ...p,
-        collection_uids: p.collection_uids.map((uid) => ({
-          uid,
-          is_invite_pending: false,
-        })),
-      })) as PluginWithExtra[];
-      allPlugins = allPlugins.concat(jsplugins);
-    } catch (e) {
-      console.error(e);
-    }
-
-    return allPlugins;
-  }, []);
-
-  const createPlugin = useCallback(
-    async (plugin: Plugin): Promise<{ key: string; email: string } | null> => {
-      if (plugin.type === PluginType.Javascript) {
-        await jsPluginsAPI.createPlugin(plugin as JsPlugin);
-        return null;
-      }
-      // First create a trusted service base user
-      const { key, email } = await storeInstance.createTrustedServiceUser();
-
-      // Set the user profile
-      const res = await trustedServicesAPI.createTrustedService({
-        username: email,
-        ...plugin,
-      } as TrustedServiceOut);
-
-      return { key, email };
-    },
-    [storeInstance]
+  const isOwnerOrMember = useMemo(
+    (): boolean =>
+      auth?.userAccess === UserAccess.Owner ||
+      auth?.userAccess === UserAccess.Member,
+    [auth?.userAccess]
   );
-
-  const updatePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
-    if (plugin.type === PluginType.Javascript) {
-      return jsPluginsAPI.updatePlugin(plugin as JsPlugin);
-    }
-    return trustedServicesAPI.updateTrustedService(plugin as TrustedServiceOut);
-  }, []);
-
-  const deletePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
-    if (plugin.type === PluginType.Javascript) {
-      return jsPluginsAPI.deletePlugin(plugin as JsPlugin);
-    }
-    return trustedServicesAPI.deleteTrustedService(plugin as TrustedServiceOut);
-  }, []);
 
   const getAnnotationProgress = useCallback(
     async ({
@@ -181,10 +130,6 @@ export const ManageWrapper = ({
       username: string;
       projectUid?: string;
     }): Promise<Progress> => {
-      const isOwnerOrMember =
-        auth?.userAccess === UserAccess.Owner ||
-        auth?.userAccess === UserAccess.Member;
-
       let collectionsContent: {
         uid: string;
         content: GalleryTile[];
@@ -222,7 +167,7 @@ export const ManageWrapper = ({
       });
       return progress;
     },
-    [auth?.userAccess, storeInstance]
+    [isOwnerOrMember, storeInstance]
   );
 
   const getCollectionMembers = useCallback(
@@ -264,11 +209,6 @@ export const ManageWrapper = ({
     [navigate]
   );
 
-  const launchDocs = useCallback(
-    () => window.open("https://docs.gliff.app/", "_blank"),
-    []
-  );
-
   const incrementTaskProgress = useCallback(
     (increment: number) => () => {
       setTask((prevTask) => ({
@@ -307,7 +247,7 @@ export const ManageWrapper = ({
     let projectUid: string | null = null;
     try {
       // create a new project
-      projectUid = await storeInstance.createCollection({
+      projectUid = await storeInstance.createGallery({
         name: "Giraffes-Hippos Demo",
       });
 
@@ -372,7 +312,18 @@ export const ManageWrapper = ({
     return projectUid;
   }, [storeInstance, setTask, incrementTaskProgress]);
 
-  const services = useMemo(
+  const rerenderWrapper = useCallback(
+    (func: (plugin: Plugin) => Promise<unknown>) =>
+      async (plugin: Record<string, unknown>): Promise<unknown> => {
+        // NOTE: typescript to match ServiceFunction defined in MANAGE
+        const res = await func(plugin as unknown as Plugin);
+        setPluginsRerender((count) => count + 1); // trigger a re-render so that plunginsView updates
+        return res;
+      },
+    [setPluginsRerender]
+  );
+
+  const services: Services = useMemo(
     () => ({
       queryTeam: "GET /team/",
       loginUser: "POST /user/login", // Not used, we pass an authd user down
@@ -387,15 +338,15 @@ export const ManageWrapper = ({
       inviteCollaborator,
       inviteToProject,
       removeFromProject,
-      createPlugin,
       getPlugins,
-      updatePlugin,
-      deletePlugin,
+      createPlugin: rerenderWrapper(createPlugin(storeInstance)),
+      updatePlugin: rerenderWrapper(updatePlugin),
+      deletePlugin: rerenderWrapper(deletePlugin),
       getAnnotationProgress,
-      launchDocs,
       downloadDemoData,
     }),
     [
+      storeInstance,
       getProjects,
       getProject,
       deleteProject,
@@ -407,22 +358,18 @@ export const ManageWrapper = ({
       inviteCollaborator,
       inviteToProject,
       removeFromProject,
-      createPlugin,
-      getPlugins,
-      updatePlugin,
-      deletePlugin,
       getAnnotationProgress,
-      launchDocs,
       downloadDemoData,
+      rerenderWrapper,
     ]
   );
 
-  const user = useMemo(
+  const user: User = useMemo(
     () => ({
-      email: auth?.user?.username,
-      authToken: auth?.user?.authToken,
-      userAccess: auth?.userAccess,
-      tierID: auth?.userProfile?.team?.tier?.id,
+      email: auth?.user?.username || null,
+      authToken: auth?.user?.authToken || null,
+      userAccess: auth?.userAccess || null,
+      tierID: auth?.userProfile?.team?.tier?.id || null,
     }),
     [auth]
   );
@@ -448,8 +395,23 @@ export const ManageWrapper = ({
         apiUrl={API_URL}
         launchCurateCallback={launchCurate}
         launchAuditCallback={
-          auth?.userProfile.team.tier.id > 1 ? launchAudit : null
+          auth?.userProfile.team.tier.id > 1 ? launchAudit : undefined
         }
+        launchDocs={() => window.open("https://docs.gliff.app/", "_blank")}
+        showAppBar={false}
+        ZooDialog={
+          isOwnerOrMember && (
+            <ZooDialog
+              rerender={pluginsRerender}
+              activatePlugin={async (plugin: Plugin): Promise<unknown> => {
+                const result = await createPlugin(storeInstance)(plugin);
+                setPluginsRerender((count) => count + 1); // trigger a re-render so that plunginsView updates
+                return result;
+              }}
+            />
+          )
+        }
+        pluginsRerender={pluginsRerender}
       />
     </ProvideAuth>
   );

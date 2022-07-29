@@ -1,34 +1,48 @@
 import Ajv from "ajv";
-import { Plugin, PluginType, PluginElement } from "@/plugins/interfaces";
+import { Plugin, PluginType } from "@gliff-ai/manage";
+import { apiRequest } from "@/api";
+import { PluginElement } from "@/plugins/interfaces";
 import { TrustedServiceClass } from "./TrustedServiceClass";
 import { UiTemplateSchema } from "./schemas";
-import { trustedServicesAPI } from "@/services/trustedServices";
-import { UiTemplate } from "@/services/trustedServices/interfaces";
+import { UiTemplate } from "./interfaces";
+import { SealedCryptoBox } from "@/crypto/SealedCryptoBox";
+
+const getUiTemplate = (apiUrl: string): Promise<UiTemplate> =>
+  apiRequest<UiTemplate>("/ui-template/", "POST", {}, apiUrl);
 
 function unpackUiElements(
-  { type, username, name, url: baseUrl }: Plugin,
+  plugin: Plugin,
   template: UiTemplate,
-  user_username: string
+  username: string
 ): PluginElement[] {
-  return template.uiElements.map(
-    ({ apiEndpoint, uiParams }) =>
-      new TrustedServiceClass(
-        type,
-        name,
-        baseUrl,
-        apiEndpoint,
-        uiParams.tooltip,
-        {
-          plugin: username as string,
-          user: user_username,
-        }
-      )
-  );
+  // NOTE: having an array will make sense again once we introduce the toolbar.
+
+  const usernames = {
+    plugin: SealedCryptoBox.encrypt(
+      plugin.username as string,
+      plugin.public_key as string
+    ),
+    user: SealedCryptoBox.encrypt(
+      username as string,
+      plugin.public_key as string
+    ),
+  };
+
+  return [
+    new TrustedServiceClass(
+      plugin.type,
+      plugin.name,
+      plugin.url,
+      template.ui.button.tooltip,
+      usernames,
+      plugin.encrypted_access_key as string
+    ),
+  ];
 }
 
 async function initTrustedServiceObjects(
   plugins: Plugin[],
-  user_username: string
+  username: string
 ): Promise<{ [name: string]: PluginElement[] }> {
   // prepare for validating JSON file
   const ajv = new Ajv();
@@ -43,7 +57,7 @@ async function initTrustedServiceObjects(
         // get UI template store as JSON file
         return {
           plugin,
-          template: await trustedServicesAPI.getUiTemplate(plugin.url),
+          template: await getUiTemplate(plugin.url),
         };
       })
   );
@@ -58,7 +72,7 @@ async function initTrustedServiceObjects(
           trustedServices[plugin.name] = unpackUiElements(
             plugin,
             template,
-            user_username
+            username
           );
         } else {
           console.error(

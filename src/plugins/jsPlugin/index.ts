@@ -1,6 +1,7 @@
+import { Plugin, PluginType } from "@gliff-ai/manage";
 import { IPluginConstructor, IObjectKeys } from "./interfaces";
 import { SamplePlugin } from "./example/SamplePlugin";
-import { Plugin, PluginType, PluginElement } from "@/plugins/interfaces";
+import { PluginElement } from "@/plugins/interfaces";
 
 const builtinPlugins: IObjectKeys = { SamplePlugin };
 
