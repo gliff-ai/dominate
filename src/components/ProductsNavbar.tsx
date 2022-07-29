@@ -1,6 +1,6 @@
 import { ReactElement } from "react";
 import { useLocation } from "react-router-dom";
-import { Grid, Button, ButtonGroup } from "@gliff-ai/style";
+import { Grid, MuiButton, ButtonGroup } from "@gliff-ai/style";
 import { useAuth } from "@/hooks/use-auth";
 
 const buttonBorder = {
@@ -63,10 +63,10 @@ export function ProductsNavbar({
         }}
       >
         <div style={{ borderRight: "1px solid #dadde9" }}>{buttonBack}</div>
-        <Button sx={buttonBorder}>
+        <MuiButton sx={buttonBorder}>
           {teamName} {projectName !== "" && `— ${projectName}`}
           {imageName !== "" && ` — ${imageName}`}
-        </Button>
+        </MuiButton>
         <div style={{ borderLeft: "1px solid #dadde9" }}>{buttonForward}</div>
       </ButtonGroup>
     </Grid>

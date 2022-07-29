@@ -6,7 +6,7 @@ import {
   MuiIconbutton,
   AppBar,
   Avatar,
-  Button,
+  MuiButton,
   Grid,
   Menu,
   MenuItem,
@@ -270,7 +270,7 @@ export const NavBar = (props: Props): ReactElement | null => {
                   {props.productNavbarData.productLocation}
                 </p>
               </div>
-              <Button
+              <MuiButton
                 sx={documentButton}
                 onClick={() => window.open("https://docs.gliff.app/", "_blank")}
               >
@@ -279,7 +279,7 @@ export const NavBar = (props: Props): ReactElement | null => {
                   src={imgSrc("document")}
                   alt="help-center"
                 />
-              </Button>
+              </MuiButton>
               {auth.user ? (
                 <>{accountMenu}</>
               ) : (

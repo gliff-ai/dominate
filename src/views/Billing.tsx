@@ -6,18 +6,12 @@ import {
   DialogContent,
   DialogTitle,
   Grid,
-  Button,
   Select,
   MenuItem,
   SelectChangeEvent,
 } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
-import {
-  theme,
-  BaseIconButton,
-  LoadingSpinner,
-  BaseTextButton,
-} from "@gliff-ai/style";
+import { theme, BaseIconButton, LoadingSpinner, Button } from "@gliff-ai/style";
 
 import {
   addAddons,
@@ -208,7 +202,7 @@ export function Billing(): JSX.Element {
       }
     };
 
-    return <BaseTextButton onClick={doCheckout} text="Add Payment Method" />;
+    return <Button onClick={doCheckout} text="Add Payment Method" />;
   };
 
   useEffect(() => {
@@ -273,7 +267,7 @@ export function Billing(): JSX.Element {
                   <tr>
                     <td colSpan={2}>
                       <br />
-                      <BaseTextButton
+                      <Button
                         text="Change Plan"
                         style={{ margin: "0 auto", display: "block" }}
                         onClick={() => {
@@ -289,7 +283,7 @@ export function Billing(): JSX.Element {
                   <tr>
                     <td colSpan={2}>
                       <br />
-                      <BaseTextButton
+                      <Button
                         text="Purchase Addons"
                         style={{ margin: "0 auto", display: "block" }}
                         onClick={() => {
@@ -321,7 +315,8 @@ export function Billing(): JSX.Element {
   );
 
   const cancelPlanButton = (
-    <BaseTextButton
+    <Button
+      sx={{ margin: "0 auto", display: "block" }}
       text="Cancel Plan"
       onClick={async () => {
         await cancelPlan();
@@ -330,7 +325,6 @@ export function Billing(): JSX.Element {
           setPlan(p);
         }
       }}
-      style={{ margin: "0 auto", display: "block" }}
     />
   );
 
