@@ -67,7 +67,7 @@ export const AuditWrapper = ({
     fetchAudit().catch((e) => {
       console.error(e);
     });
-  }, [collectionUid, storeInstance]);
+  }, [collectionUid, storeInstance, isMounted.current]);
 
   useEffect(() => {
     const tier = auth?.userProfile?.team.tier;

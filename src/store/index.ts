@@ -29,6 +29,10 @@ import {
   ImageMeta,
   AnnotationMeta,
   AuditMeta,
+  ProjectAuditMeta,
+  ProjectAuditAction,
+  TeamAuditMeta,
+  TeamAuditAction,
   migrations,
 } from "@/interfaces";
 
@@ -257,9 +261,19 @@ export class DominateStore {
       () => [] // catches the "User inactive or deleted" errors when the user isn't verified yet
     );
 
+    const teamAuditActions: TeamAuditAction[] = [];
     for (const invite of invitations) {
       void invitationManager.accept(invite).catch((e) => logger.log(e));
+      teamAuditActions.push({
+        action: {
+          type: "inviteAccepted",
+          inviteeUsername: this.etebaseInstance.user.username,
+        },
+        username: this.etebaseInstance.user.username,
+        timestamp: Date.now(),
+      });
     }
+    await this.logTeamActions(teamAuditActions);
   };
 
   getCollectionContent = async (
@@ -334,14 +348,60 @@ export class DominateStore {
       collectionUid
     );
 
-    const oldMeta = collection.getMeta();
+    const oldMeta = collection.getMeta<GalleryMeta>();
     collection.setMeta({
       ...oldMeta,
       ...newMeta, // should overwrite any fields that are already in oldMeta
       modifiedTime: Date.now(),
     });
 
-    await collectionManager.upload(collection);
+    const projectAuditActions: ProjectAuditAction[] = [];
+
+    if (
+      newMeta.defaultLabels !== undefined &&
+      JSON.stringify(newMeta.defaultLabels) !==
+        JSON.stringify(oldMeta.defaultLabels)
+    ) {
+      projectAuditActions.push({
+        action: {
+          type: "setDefaultLabels",
+          defaultLabels: newMeta.defaultLabels,
+        },
+        username: this.etebaseInstance.user.username,
+        timestamp: Date.now(),
+      });
+    }
+
+    if (
+      newMeta.restrictLabels !== undefined &&
+      newMeta.restrictLabels !== oldMeta.restrictLabels
+    ) {
+      projectAuditActions.push({
+        action: {
+          type: "setRestrictLabels",
+          restrictLabels: newMeta.restrictLabels,
+        },
+        username: this.etebaseInstance.user.username,
+        timestamp: Date.now(),
+      });
+    }
+
+    if (
+      newMeta.multiLabel !== undefined &&
+      newMeta.multiLabel !== oldMeta.multiLabel
+    ) {
+      projectAuditActions.push({
+        action: { type: "setMultiLabel", multiLabel: newMeta.multiLabel },
+        username: this.etebaseInstance.user.username,
+        timestamp: Date.now(),
+      });
+    }
+
+    if (projectAuditActions.length > 0) {
+      await this.logAuditActions(projectAuditActions, collection);
+    } else {
+      await collectionManager.upload(collection);
+    }
   };
 
   updateGallery = async (
@@ -622,6 +682,7 @@ export class DominateStore {
     const collectionManager = this.etebaseInstance.getCollectionManager();
 
     // Create, encrypt and upload a new collection
+    const createdTime = Date.now();
     const collection = await collectionManager.create<GalleryMeta>(
       "gliff.gallery", // type
       {
@@ -629,16 +690,44 @@ export class DominateStore {
         meta_version: 0,
         content_version: 0,
         name,
-        createdTime: Date.now(),
-        modifiedTime: Date.now(),
+        createdTime,
+        modifiedTime: createdTime,
         description: description || "",
         defaultLabels: [],
         restrictLabels: false,
         multiLabel: true,
+        projectAuditUID: "",
       }, // metadata
       "[]" // content
     );
-    await collectionManager.upload(collection);
+
+    const projectAudit = await collectionManager.create<ProjectAuditMeta>(
+      "gliff.projectMeta",
+      {
+        type: "gliff.projectAudit",
+        meta_version: 0,
+        content_version: 0,
+        name,
+        createdTime,
+        modifiedTime: createdTime,
+        deletedTime: null,
+        galleryUID: collection.uid,
+      },
+      JSON.stringify([
+        {
+          action: { type: "createProject", projectName: name, description },
+          username: this.etebaseInstance.user.username,
+          timestamp: Date.now(),
+        },
+      ])
+    );
+
+    collection.setMeta<GalleryMeta>({
+      ...collection.getMeta<GalleryMeta>(),
+      projectAuditUID: projectAudit.uid,
+    });
+
+    await this.batchUpload(collectionManager, [collection, projectAudit]);
     return collection.uid;
   };
 
@@ -687,6 +776,18 @@ export class DominateStore {
         user2.pubkey,
         CollectionAccessLevel.ReadWrite
       );
+
+      // update project level audit:
+      if (!userEmail.includes("@trustedservice.gliff.app")) {
+        // if the email ends in @trustedservice.gliff.app, then it's a plugin invite, and will have already
+        // been logged in ManageWrapper
+        const projectAuditAction: ProjectAuditAction = {
+          action: { type: "addUserToProject", username: userEmail },
+          username: this.etebaseInstance.user.username,
+          timestamp: Date.now(),
+        };
+        await this.logAuditActions([projectAuditAction], collection);
+      }
 
       return true;
     } catch (e) {
@@ -868,14 +969,40 @@ export class DominateStore {
           });
       });
 
+      // make project level audit actions for image uploads:
+      setTask((prevTask) => ({
+        ...prevTask,
+        progress: 45,
+        description: "Updating audit...",
+      }));
+      const uploadAuditActions: ProjectAuditAction[] = newTiles.map((tile) => ({
+        action: {
+          type: "uploadImage",
+          imageName: tile.fileInfo.fileName,
+          imageUid: tile.imageUID,
+        },
+        username: this.etebaseInstance.user.username,
+        timestamp: createdTime,
+      }));
+
+      // fetch project level audit and concatenate new actions in its content:
+      const projectAuditUploadPromise = this.logAuditActions(
+        uploadAuditActions,
+        collection
+      );
+
       setTask((prevTask) => ({
         ...prevTask,
         progress: 50,
         description: "Uploading...",
       }));
 
-      // resolve all promises: upload all the new items and update the gallery
-      await Promise.all([itemsUploadPromise, galleryUploadPromise]);
+      // resolve all promises: upload all the new items and update the gallery and project level audit
+      await Promise.all([
+        itemsUploadPromise,
+        galleryUploadPromise,
+        projectAuditUploadPromise,
+      ]);
 
       setTask((prevTask) => ({
         ...prevTask,
@@ -891,6 +1018,85 @@ export class DominateStore {
     }
   };
 
+  logAuditActions = async (
+    projectAuditActions: ProjectAuditAction[],
+    gallery_: Collection | string
+  ): Promise<void> => {
+    // fetch project level audit and concatenate new actions in its content
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+
+    let gallery: Collection;
+    if (gallery_ instanceof Collection) gallery = gallery_;
+    else gallery = await collectionManager.fetch(gallery_);
+
+    const projectAudit = await collectionManager.fetch(
+      gallery.getMeta<GalleryMeta>().projectAuditUID
+    );
+
+    await projectAudit.setContent(
+      JSON.stringify(
+        (
+          JSON.parse(
+            await projectAudit.getContent(OutputFormat.String)
+          ) as ProjectAuditAction[]
+        ).concat(projectAuditActions)
+      )
+    );
+
+    return collectionManager.upload(projectAudit);
+  };
+
+  logTeamActions = async (
+    teamAuditActions: TeamAuditAction[]
+  ): Promise<void> => {
+    // fetch project level audit and concatenate new actions in its content
+    const collectionManager = this.etebaseInstance.getCollectionManager();
+
+    const teamAudits = (
+      await collectionManager.list("gliff.teamAudit")
+    ).data.filter((audit: Collection) => !audit.isDeleted);
+
+    let teamAudit: Collection;
+
+    if (teamAudits.length === 0) {
+      // create team audit if it doesn't exist already:
+      teamAudit = await collectionManager.create<TeamAuditMeta>(
+        "gliff.teamAudit",
+        {
+          type: "gliff.teamAudit",
+          meta_version: 0,
+          content_version: 0,
+          createdTime: Date.now(),
+          modifiedTime: Date.now(),
+        },
+        JSON.stringify([
+          {
+            action: {
+              type: "createTeam",
+              ownerName: this.etebaseInstance.user.username,
+            },
+            username: this.etebaseInstance.user.username,
+            timestamp: Date.now(),
+          },
+        ])
+      );
+    } else {
+      [teamAudit] = teamAudits;
+    }
+
+    await teamAudit.setContent(
+      JSON.stringify(
+        (
+          JSON.parse(
+            await teamAudit.getContent(OutputFormat.String)
+          ) as TeamAuditAction[]
+        ).concat(teamAuditActions)
+      )
+    );
+
+    return collectionManager.upload(teamAudit);
+  };
+
   setImageLabels = async (
     collectionUid: string,
     imageUid: string,
@@ -904,18 +1110,40 @@ export class DominateStore {
     );
     const oldContent = await collection.getContent(OutputFormat.String);
 
-    // iterate through GalleryTile's, find the one whose imageUID matches imageUid, set its imageLabesl to newLabels:
+    // iterate through GalleryTile's, find the one whose imageUID matches imageUid, set its imageLabels to newLabels:
     let newContent: GalleryTile[] = JSON.parse(oldContent) as GalleryTile[];
+    let imageName = "";
     newContent = newContent.map((item) => {
       if (item.imageUID === imageUid) {
+        imageName = item.fileInfo.fileName;
         return { ...item, imageLabels: newLabels };
       }
       return item;
     });
 
-    // save updated metadata in store:
+    const projectAuditAction: ProjectAuditAction = {
+      action: {
+        type: "updateImageLabels",
+        imageName,
+        imageUid,
+        labels: newLabels,
+      },
+      username: this.etebaseInstance.user.username,
+      timestamp: Date.now(),
+    };
+
+    // update project level audit:
+    const projectAuditUploadPromise = this.logAuditActions(
+      [projectAuditAction],
+      collection
+    );
+
+    // save updated metadata and audit in store:
     await collection.setContent(JSON.stringify(newContent));
-    await collectionManager.upload(collection);
+    await Promise.all([
+      collectionManager.upload(collection),
+      projectAuditUploadPromise,
+    ]);
   };
 
   deleteImages = async (
@@ -970,6 +1198,22 @@ export class DominateStore {
     await collection.setContent(JSON.stringify(newContent));
     await collectionManager.upload(collection);
 
+    // make project level audit actions for image deletions:
+    const deleteAuditActions: ProjectAuditAction[] = oldContent
+      .filter((tile) => uidsToDelete.includes(tile.imageUID))
+      .map((tile) => ({
+        action: {
+          type: "deleteImage",
+          imageName: tile.fileInfo.fileName,
+          imageUid: tile.imageUID,
+        },
+        username: this.etebaseInstance.user.username,
+        timestamp: Date.now(),
+      }));
+
+    // update project level audit:
+    await this.logAuditActions(deleteAuditActions, collection);
+
     setTask({ isLoading: true, description: "Image deletion", progress: 50 });
 
     // delete image, annotation and audit items:
@@ -1003,13 +1247,40 @@ export class DominateStore {
       await collection.getContent(OutputFormat.String)
     ) as GalleryTile[];
 
+    const projectAuditActions: ProjectAuditAction[] = [];
+
     const newContent = content.map((tile) => ({
       ...tile,
-      assignees: tile?.assignees?.filter((a) => a !== username) || [], // unassign all items from a user
+      assignees:
+        tile?.assignees?.filter((a) => {
+          if (a !== username) {
+            projectAuditActions.push({
+              action: {
+                type: "unassignImage",
+                imageName: tile.fileInfo.fileName,
+                imageUid: tile.imageUID,
+                assigneeUsername: username,
+              },
+              username: this.etebaseInstance.user.username,
+              timestamp: Date.now(),
+            });
+            return true;
+          }
+          return false;
+        }) || [], // unassign all items from a user
     }));
 
+    // update project level audit:
+    const projectAuditUploadPromise = this.logAuditActions(
+      projectAuditActions,
+      collection
+    );
+
     await collection.setContent(JSON.stringify(newContent));
-    await collectionManager.transaction(collection);
+    await Promise.all([
+      collectionManager.upload(collection),
+      projectAuditUploadPromise,
+    ]);
   };
 
   getAnnotationsObject = async (
@@ -1641,7 +1912,15 @@ export class DominateStore {
 
     // Update audit item
     auditItem.setMeta({ ...auditItem.getMeta(), modifiedTime });
-    await auditItem.setContent(JSON.stringify(auditData));
+    await auditItem.setContent(
+      JSON.stringify(
+        (
+          JSON.parse(
+            await auditItem.getContent(OutputFormat.String)
+          ) as AuditAction[]
+        ).concat(auditData)
+      )
+    );
 
     // Save changes
     await itemManager.batch([annotationItem, auditItem]);
@@ -1786,6 +2065,8 @@ export class DominateStore {
 
     let newContent: GalleryTile[] = JSON.parse(oldContent) as GalleryTile[];
 
+    const projectAuditActions: ProjectAuditAction[] = [];
+
     imageUids.forEach((imageUid, i) => {
       newContent = newContent.map((item) => {
         if (item.imageUID === imageUid) {
@@ -1800,13 +2081,36 @@ export class DominateStore {
                 : false;
           });
 
+          newAssignees[i].forEach((username) => {
+            projectAuditActions.push({
+              action: {
+                type: "assignImage",
+                imageName: item.fileInfo.fileName,
+                imageUid: item.imageUID,
+                assigneeUsername: username,
+              },
+              username: this.etebaseInstance.user.username,
+              timestamp: Date.now(),
+            });
+          });
+
           return { ...item, assignees: newAssignees[i], annotationComplete };
         }
         return item;
       });
     });
 
+    // update project level audit:
+    const projectAuditPromise = this.logAuditActions(
+      projectAuditActions,
+      collection
+    );
+
+    // upload:
     await collection.setContent(JSON.stringify(newContent));
-    await collectionManager.upload(collection);
+    await Promise.all([
+      collectionManager.upload(collection),
+      projectAuditPromise,
+    ]);
   };
 }
