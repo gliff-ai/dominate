@@ -11,7 +11,7 @@ import {
 import { useParams, useNavigate } from "react-router-dom";
 
 import Curate from "@gliff-ai/curate";
-import { Task } from "@gliff-ai/style";
+import { Task, IconButton, icons } from "@gliff-ai/style";
 
 import { ImageFileInfo } from "@gliff-ai/upload";
 import { saveAs } from "file-saver";
@@ -19,6 +19,7 @@ import JSZip from "jszip";
 import { Annotations, getTiffData } from "@gliff-ai/annotate";
 import { Product, Plugin } from "@gliff-ai/manage";
 import { DominateStore } from "@/store";
+import { ProductNavbarData } from "@/components";
 import { GalleryTile, Slices, MetaItem } from "@/interfaces";
 import {
   ConfirmationDialog,
@@ -34,6 +35,7 @@ import {
   convertGalleryToMetadata,
   convertMetadataToGalleryTiles,
   MetaItemWithId,
+  setStateIfMounted,
 } from "@/helpers";
 import { UserAccess } from "@/services/user";
 import { createPlugin } from "@/services/plugins";
@@ -48,6 +50,7 @@ interface Props {
   setTask: (task: Task) => void;
   pluginsRerender: number;
   setPluginsRerender: Dispatch<SetStateAction<number>>;
+  setProductNavbarData: (data: ProductNavbarData) => void;
 }
 
 export const CurateWrapper = ({
@@ -57,6 +60,7 @@ export const CurateWrapper = ({
   setTask,
   pluginsRerender,
   setPluginsRerender,
+  setProductNavbarData,
 }: Props): ReactElement | null => {
   const navigate = useNavigate();
   const auth = useAuth();
@@ -67,6 +71,7 @@ export const CurateWrapper = ({
   const [restrictLabels, setRestrictLabels] = useState<boolean>(false); // more input for curate
   const [multiLabel, setMultiLabel] = useState<boolean>(true); // more input for curate
   const [collectionContent, setCollectionContent] = useState<GalleryTile[]>([]);
+  const [collectionTitle, setCollectionTitle] = useState<string>("");
 
   // multi-label image download dialog state:
   const [showMultilabelConfirm, setShowMultilabelConfirm] =
@@ -112,9 +117,15 @@ export const CurateWrapper = ({
         .then(({ tiles: gallery, galleryMeta }) => {
           setCollectionContent(gallery);
 
-          const newMetadata = convertGalleryToMetadata(gallery);
+          setStateIfMounted(
+            galleryMeta?.name,
+            setCollectionTitle,
+            isMounted.current
+          );
+
+          let newMetadata = convertGalleryToMetadata(gallery);
           // if user is collaborator, include only images assigned to them.
-          newMetadata.filter(
+          newMetadata = newMetadata.filter(
             ({ assignees }) =>
               isOwnerOrMember ||
               (assignees as string[]).includes(auth?.user?.username as string)
@@ -231,8 +242,32 @@ export const CurateWrapper = ({
       });
   };
 
-  const annotateCallback = (imageUid: string): void => {
-    navigate(`/annotate/${collectionUid}/${imageUid}`);
+  const annotateCallback = (
+    imageUid: string,
+    username1: string | null = null,
+    username2: string | null = null
+  ): void => {
+    if (username1) {
+      const annotationUid = collectionContent.find(
+        (tile) => tile.imageUID === imageUid
+      )?.annotationUID[username1];
+      if (username2) {
+        const annotationUid2 = collectionContent.find(
+          (tile) => tile.imageUID === imageUid
+        )?.annotationUID[username2];
+        if (annotationUid && annotationUid2) {
+          navigate(
+            `/annotate/${collectionUid}/${imageUid}/${annotationUid}/${annotationUid2}`
+          );
+          return;
+        }
+      }
+      if (annotationUid) {
+        navigate(`/annotate/${collectionUid}/${imageUid}/${annotationUid}`);
+      }
+    } else {
+      navigate(`/annotate/${collectionUid}/${imageUid}`);
+    }
   };
 
   const downloadDataset = async (): Promise<void> => {
@@ -482,6 +517,38 @@ export const CurateWrapper = ({
     // get image thumbnails and metadata (should run once at mount)
     fetchImageItems();
   }, [fetchImageItems]);
+
+  const tier = auth?.userProfile?.team.tier;
+  const tierIsAllowed = tier && tier.id > 0;
+
+  useEffect(() => {
+    setProductNavbarData({
+      teamName: auth?.userProfile?.team.name || "",
+      projectName: collectionTitle || "",
+      imageName: "",
+      buttonBack: (
+        <IconButton
+          onClick={() => navigate("/manage")}
+          tooltip={{
+            name: `Return to MANAGE `,
+          }}
+          tooltipPlacement="bottom"
+          icon={icons.navigationMANAGE}
+        />
+      ),
+      buttonForward: tierIsAllowed ? (
+        <IconButton
+          onClick={() => navigate(`/audit/${collectionUid}`)}
+          tooltip={{
+            name: `Open ${collectionTitle} in AUDIT`,
+          }}
+          tooltipPlacement="bottom"
+          icon={icons.navigationAUDIT}
+        />
+      ) : null,
+      productLocation: "CURATE",
+    });
+  }, [collectionTitle]);
 
   if (
     !storeInstance ||

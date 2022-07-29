@@ -22,7 +22,12 @@ import {
   Billing,
   UnsupportedScreenSizeErrorPage,
 } from "@/views";
-import { NavBar, PageSpinner, CookieConsent } from "@/components";
+import {
+  NavBar,
+  PageSpinner,
+  CookieConsent,
+  ProductNavbarData,
+} from "@/components";
 import { BasicPage } from "@/views/BasicPage";
 import { PrivateRoute } from "./wrappers/PrivateRouter";
 import { usePrompt } from "./hooks/use-blocker";
@@ -59,6 +64,16 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
     useState<JSX.Element | null>(null);
   const [tooSmall, setTooSmall] = useState(false);
   const [pluginsRerender, setPluginsRerender] = useState<number>(0);
+  const [productNavbarData, setProductNavbarData] = useState<ProductNavbarData>(
+    {
+      teamName: "",
+      projectName: "",
+      imageName: "",
+      buttonBack: null,
+      buttonForward: null,
+      productLocation: "",
+    }
+  );
 
   const classes = useStyles(isOverflow);
 
@@ -75,11 +90,10 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
     setIsOverflow(shouldOverflow(location.pathname));
   }, [location]);
 
-  useEffect(() => {
-    // clear product navbar (will be replaced soon)
-    if (!productSection) return;
-    setProductSection(null);
-  }, [window.location.pathname]);
+  // useEffect(() => {
+  //   if (!productSection) return;
+  //   setProductSection(null); // clear product section
+  // }, [window.location.pathname]);
 
   const handleResize = useCallback(() => {
     const tooSmallNow = window.innerWidth < 700 || window.innerHeight < 300;
@@ -112,7 +126,10 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
           <>
             <ProgressSnackbar task={task} setTask={setTask} />
             <CssBaseline />
-            <NavBar productSection={productSection} />
+            <NavBar
+              productSection={productSection}
+              productNavbarData={productNavbarData}
+            />
             <div className={isOverflow ? classes.overflow : classes.noOverflow}>
               <PageSpinner isLoading={isLoading} />
 
@@ -162,6 +179,7 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
                           setTask={setTask}
                           pluginsRerender={pluginsRerender}
                           setPluginsRerender={setPluginsRerender}
+                          setProductNavbarData={setProductNavbarData}
                         />
                       }
                     />
@@ -178,11 +196,47 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
                           task={task}
                           setTask={setTask}
                           setProductSection={setProductSection}
+                          setProductNavbarData={setProductNavbarData}
                         />
                       }
                     />
                   }
                 />
+                <Route
+                  path="annotate/:collectionUid/:imageUid/:annotationUid1"
+                  element={
+                    <PrivateRoute
+                      element={
+                        <Annotate
+                          storeInstance={storeInstance}
+                          setIsLoading={setIsLoading}
+                          task={task}
+                          setTask={setTask}
+                          setProductSection={setProductSection}
+                          setProductNavbarData={setProductNavbarData}
+                        />
+                      }
+                    />
+                  }
+                />
+                <Route
+                  path="annotate/:collectionUid/:imageUid/:annotationUid1/:annotationUid2"
+                  element={
+                    <PrivateRoute
+                      element={
+                        <Annotate
+                          storeInstance={storeInstance}
+                          setIsLoading={setIsLoading}
+                          task={task}
+                          setTask={setTask}
+                          setProductSection={setProductSection}
+                          setProductNavbarData={setProductNavbarData}
+                        />
+                      }
+                    />
+                  }
+                />
+
                 <Route
                   path="manage/*"
                   element={
@@ -190,6 +244,7 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
                       element={
                         <Manage
                           storeInstance={storeInstance}
+                          setProductNavbarData={setProductNavbarData}
                           setTask={setTask}
                           pluginsRerender={pluginsRerender}
                           setPluginsRerender={setPluginsRerender}
@@ -202,7 +257,12 @@ const UserInterface = ({ storeInstance }: Props): ReactElement | null => {
                   path="audit/:collectionUid"
                   element={
                     <PrivateRoute
-                      element={<Audit storeInstance={storeInstance} />}
+                      element={
+                        <Audit
+                          storeInstance={storeInstance}
+                          setProductNavbarData={setProductNavbarData}
+                        />
+                      }
                     />
                   }
                 />

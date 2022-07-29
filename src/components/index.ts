@@ -11,3 +11,5 @@ export {
 export { GliffCard } from "./GliffCard";
 export { CookieConsent } from "./CookieConsent";
 export { ZooDialog } from "./zoo/ZooDialog";
+export { ProductsNavbar } from "./ProductsNavbar";
+export type { ProductNavbarData } from "./ProductsNavbar";
