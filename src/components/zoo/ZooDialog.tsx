@@ -1,6 +1,6 @@
 import { ReactElement, useMemo, useState } from "react";
 import {
-  Dialog,
+  Dialogue,
   Grid,
   IconButton,
   icons,
@@ -59,7 +59,7 @@ export function ZooDialog({
   if (!zoo) return null;
 
   return (
-    <Dialog
+    <Dialogue
       title="EXPLORE"
       TriggerButton={
         <IconButton
@@ -175,7 +175,7 @@ export function ZooDialog({
           </Grid>
         </Grid>
       </Grid>
-    </Dialog>
+    </Dialogue>
   );
 }
 
