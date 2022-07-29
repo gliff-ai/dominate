@@ -2,20 +2,18 @@ import { useEffect, useState, Dispatch, SetStateAction } from "react";
 import { loadStripe } from "@stripe/stripe-js";
 import SVG from "react-inlinesvg";
 import {
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Grid,
-  Select,
-  MenuItem,
-  SelectChangeEvent,
+  SelectChangeEvent
 } from "@mui/material";
 import makeStyles from "@mui/styles/makeStyles";
 import {
   theme,
-  BaseIconButton,
   LoadingSpinner,
   Button,
+  AdvancedDialog,
+  Grid,
+  Select,
+  MenuItem,
+  Box,
 } from "@gliff-ai/style";
 
 import {
@@ -119,66 +117,61 @@ export function Billing(): JSX.Element {
 
   const upgradeForm = (
     <>
-      <Dialog
+      <AdvancedDialog
+        title="Change Plan"
         open={upgradeDialogOpen}
-        onClose={() => setUpgradeDialogOpen(false)}
-      >
-        <DialogTitle className={classes.dialogTitle}>
-          Change Plan
-          <BaseIconButton
-            tooltip={{
-              name: "Close",
-              icon: imgSrc("close"),
-            }}
-            onClick={() => setUpgradeDialogOpen(false)}
-          />
-        </DialogTitle>
-        <DialogContent style={{ padding: "10px" }}>
-          <form
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (upgradeValue && upgradeValue !== "") {
-                void upgradePlan(parseInt(upgradeValue, 10)).then((p: Plan) => {
-                  setUpgradeDialogOpen(false);
-                  setPlan(p);
-                });
-              }
-            }}
-          >
-            {upgradePrices ? (
-              <>
-                <Select
-                  id="upgrade-select"
-                  value={upgradeValue}
-                  label="Plan"
-                  onChange={(e: SelectChangeEvent) =>
-                    setUpgradeValue(e.target.value)
-                  }
-                >
-                  {upgradePrices?.tiers.map((p) => {
-                    if (plansMap[p.name]) {
+        warningDialog
+        // onClose={onClose}
+        children={
+          <Box style={{ padding: "10px" }}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                if (upgradeValue && upgradeValue !== "") {
+                  void upgradePlan(parseInt(upgradeValue, 10)).then(
+                    (p: Plan) => {
+                      setUpgradeDialogOpen(false);
+                      setPlan(p);
+                    }
+                  );
+                }
+              }}
+            >
+              {upgradePrices ? (
+                <>
+                  <Select
+                    id="upgrade-select"
+                    value={upgradeValue}
+                    label="Plan"
+                    onChange={(e: SelectChangeEvent) =>
+                      setUpgradeValue(e.target.value)
+                    }
+                  >
+                    {upgradePrices?.tiers.map((p) => {
+                      if (plansMap[p.name]) {
+                        return (
+                          <MenuItem key={p.id} value={p.id}>
+                            {plansMap[p.name].name} - £
+                            {(p.price / 100).toFixed(2)}
+                          </MenuItem>
+                        );
+                      }
                       return (
                         <MenuItem key={p.id} value={p.id}>
-                          {plansMap[p.name].name} - £
-                          {(p.price / 100).toFixed(2)}
+                          {p.name} - £{(p.price / 100).toFixed(2)}
                         </MenuItem>
                       );
-                    }
-                    return (
-                      <MenuItem key={p.id} value={p.id}>
-                        {p.name} - £{(p.price / 100).toFixed(2)}
-                      </MenuItem>
-                    );
-                  })}
-                </Select>
-                <SubmitButton value="Change Plan" loading={false} />
-              </>
-            ) : (
-              <LoadingSpinner />
-            )}
-          </form>
-        </DialogContent>
-      </Dialog>
+                    })}
+                  </Select>
+                  <SubmitButton value="Change Plan" loading={false} />
+                </>
+              ) : (
+                <LoadingSpinner />
+              )}
+            </form>
+          </Box>
+        }
+      />
     </>
   );
 
@@ -642,23 +635,13 @@ export function Billing(): JSX.Element {
         <Grid item xs={3}>
           {payment === false ? null : paymentElement}
         </Grid>
-
-        <Dialog
+        <AdvancedDialog
           open={addonDialogOpen}
-          onClose={() => setAddonDialogOpen(false)}
+          // onClose={() => setAddonDialogOpen(false)}
+          title="Add ons"
         >
-          <DialogTitle className={classes.dialogTitle}>
-            Add ons
-            <BaseIconButton
-              tooltip={{
-                name: "Close",
-                icon: imgSrc("close"),
-              }}
-              onClick={() => setAddonDialogOpen(false)}
-            />
-          </DialogTitle>
-          <DialogContent style={{ padding: "10px" }}>{addonForm}</DialogContent>
-        </Dialog>
+          <Box style={{ padding: "10px" }}>{addonForm}</Box>
+        </AdvancedDialog>
       </Grid>
     </div>
   );
