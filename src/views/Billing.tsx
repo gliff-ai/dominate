@@ -15,7 +15,6 @@ import {
   MenuItem,
   Box,
 } from "@gliff-ai/style";
-
 import {
   addAddons,
   getAddonPrices,
@@ -314,6 +313,7 @@ export function Billing(): JSX.Element {
 
   const cancelPlanButton = (
     <Button
+      sx={{ margin: "0 auto", display: "block" }}
       text="Cancel Plan"
       onClick={async () => {
         await cancelPlan();
@@ -322,7 +322,6 @@ export function Billing(): JSX.Element {
           setPlan(p);
         }
       }}
-      style={{ margin: "0 auto", display: "block" }}
     />
   );
 

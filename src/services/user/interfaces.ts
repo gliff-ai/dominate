@@ -10,6 +10,7 @@ enum UserAccess {
 }
 interface Team {
   id: number;
+  name: string;
   owner_id: number;
   tier: {
     id: number;
