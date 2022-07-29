@@ -143,6 +143,8 @@ export const AuditWrapper = ({
 
   if (!auth || !collectionUid || sessions === null) return null;
 
+  const projectAuditActions = storeInstance.getProjectLevelAudit();
+
   // annotation sessions contain all the actions for a given image/user; actual sessions
   // are delimited by sessionStart and sessionEnd, so split on those here:
   const actualSessions = sessions
@@ -160,7 +162,20 @@ export const AuditWrapper = ({
       }
       return splitSessions;
     })
-    .flat();
+    .flat()
+    // convert annotation sessions into the same format as other project audit actions:
+    .map((session) => ({
+      action: {
+        type: "annotate",
+        imageName: session.imageName,
+        audit: session.audit,
+      },
+      timestamp: session.timestamp,
+      username: session.username,
+    }))
+    // mix them in with other project audit actions:
+    .concat(projectAuditActions)
+    .sort((action1, action2) => action1.timestamp - action2.timestamp);
 
   return (
     <UserInterface
