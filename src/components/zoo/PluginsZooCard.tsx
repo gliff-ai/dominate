@@ -1,6 +1,6 @@
 import { ReactElement, useMemo } from "react";
 import { Plugin } from "@gliff-ai/manage";
-import { Divider, icons, MuiCard, Box, Button, theme } from "@gliff-ai/style";
+import { Divider, icons, MuiCard, Box, theme, Button } from "@gliff-ai/style";
 import { DialogActions } from "@mui/material";
 import SVG from "react-inlinesvg";
 
@@ -129,35 +129,18 @@ export const PluginsZooCard = ({
         sx={{ justifyContent: "space-between", padding: 0, marginBottom: 0 }}
       >
         <Button
-          sx={{
-            textTransform: "none",
-            backgroundColor: "transparent",
-            border: `2px solid ${theme.palette.grey[300]} !important`,
-            ":hover": {
-              borderColor: theme.palette.grey[300],
-            },
-          }}
+          color="secondary"
           variant="outlined"
           onClick={isOpen ? closeCard : openCard}
-        >
-          {isOpen ? "Go Back" : "See More"}
-        </Button>
+          text={isOpen ? "Go Back" : "See More"}
+        />
         <Button
-          sx={{
-            textTransform: "none",
-            backgroundColor: `${theme.palette.primary.main} !important`,
-            borderColor: `${theme.palette.primary.main} !important`,
-            ":hover": {
-              backgroundColor: theme.palette.secondary.main,
-            },
-          }}
-          variant="outlined"
+          text="Activate"
+          color="primary"
           onClick={() => {
             void activatePlugin(data);
           }}
-        >
-          Activate
-        </Button>
+        />
       </DialogActions>
     </MuiCard>
   );
