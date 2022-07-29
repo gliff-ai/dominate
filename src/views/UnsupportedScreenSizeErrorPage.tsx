@@ -41,6 +41,8 @@ export function UnsupportedScreenSizeErrorPage(): ReactElement {
 
       <div className={classes.divButtons}>
         <Button
+          color="primary"
+          variant="contained"
           text="Return to Website"
           onClick={() => window.open("https://gliff.ai")}
         />

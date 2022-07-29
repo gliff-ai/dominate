@@ -5,14 +5,16 @@
     "module": "es2020",
     "sourceMap": true,
     "target": "es6",
-    "jsx": "react-jsx",
+    "jsx": "preserve",
     "allowJs": false,
     "moduleResolution": "node",
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"]
+      "@/*": [
+        "src/*"
+      ]
     },
     "strictNullChecks": true,
   },
@@ -22,7 +24,10 @@
     "src/**/*.ts",
     "test/**/*.ts",
     "typings/**/*.ts",
-    "./jest-setup.ts"
-, "src/env.d.ts"  ],
-  "exclude": ["src/**/*_.tsx"]
+    "./jest-setup.ts",
+    "src/env.d.ts"
+  ],
+  "exclude": [
+    "src/**/*_.tsx"
+  ]
 }

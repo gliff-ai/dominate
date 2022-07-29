@@ -1,27 +1,18 @@
-import { theme } from "@gliff-ai/style";
-import { Button, CircularProgress } from "@mui/material";
-import makeStyles from "@mui/styles/makeStyles";
+import { CircularProgress } from "@mui/material";
+import { Button, Box } from "@gliff-ai/style";
 import { ReactElement } from "react";
 
-const useStyles = makeStyles(() => ({
-  submitDiv: {
+
+  const submitDiv = {
     width: "fit-content",
     marginRight: "auto",
     marginLeft: "auto",
-  },
-  submit: {
-    color: theme.palette.text.primary,
-    textTransform: "none",
-    fontWeight: 700,
-    fontSize: "15px",
+    "& > button": {
+    marginBottom: "20px !important",
+    marginTop: "20px !important",
     width: "169px",
-    "&:hover": {
-      backgroundColor: theme.palette.primary.main,
-    },
-    marginBottom: "20px",
-    marginTop: "20px",
-  },
-}));
+    }
+  }
 
 interface Props {
   loading: boolean;
@@ -29,25 +20,25 @@ interface Props {
   value: string;
 }
 
+
 function SubmitButton(props: Props): ReactElement {
-  const classes = useStyles();
+   
+const text = (props.loading ? (
+          <CircularProgress size="1.5rem" color="inherit" />
+        ) : (
+          props.value
+        ))
 
   return (
-    <div className={classes.submitDiv}>
+    <Box sx={{...submitDiv}}>
       <Button
         type="submit"
         variant="contained"
         color="primary"
         disabled={props.disabled}
-        className={classes.submit}
-      >
-        {props.loading ? (
-          <CircularProgress size="1.5rem" color="inherit" />
-        ) : (
-          props.value
-        )}
-      </Button>
-    </div>
+        text={text}
+      />
+    </Box>
   );
 }
 

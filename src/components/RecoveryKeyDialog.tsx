@@ -4,8 +4,8 @@ import {
   AdvancedDialog,
   theme,
   Typography,
-  MuiButton,
   MuiCard,
+  Button
 } from "@gliff-ai/style";
 import { useNavigate } from "react-router-dom";
 
@@ -81,7 +81,7 @@ export const RecoveryKeyDialog = ({ recoveryKey }: Props): JSX.Element => {
         <br />
         <br />
         <br />
-        <MuiButton
+        <Button
           onClick={() => {
             setForceClose(true);
             onClose();
@@ -90,9 +90,8 @@ export const RecoveryKeyDialog = ({ recoveryKey }: Props): JSX.Element => {
           color="primary"
           variant="contained"
           sx={{ textAlign: "center" }}
-        >
-          Ok
-        </MuiButton>
+          text="Ok"
+        />
       </Typography>
     </AdvancedDialog>
   );
