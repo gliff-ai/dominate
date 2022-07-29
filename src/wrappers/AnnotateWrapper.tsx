@@ -104,6 +104,7 @@ export const AnnotateWrapper = ({
     [username: string]: Annotations;
   }>({}); // object mapping usernames to annotations for the current image
 
+  const [offline, setOffline] = useState<boolean>(false);
   const plugins = usePlugins(collectionUid, auth, Product.ANNOTATE);
 
   const isMounted = useRef(false);
@@ -264,6 +265,10 @@ export const AnnotateWrapper = ({
   const saveAnnotation = useCallback(
     (newAnnotationsObject: Annotations): void => {
       if (!auth?.user?.username) return;
+
+      const isOffline = !navigator.onLine;
+      setOffline(isOffline);
+      if (isOffline) return;
 
       // Save annotations data
       setTask({
@@ -526,6 +531,7 @@ export const AnnotateWrapper = ({
       annotationsObject2={annotationsObject2}
       saveAnnotationsCallback={saveAnnotation}
       setIsLoading={setIsLoading}
+      offline={offline}
       userAccess={auth.userAccess}
       plugins={plugins}
       launchPluginSettingsCallback={
