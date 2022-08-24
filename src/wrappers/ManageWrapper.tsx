@@ -20,6 +20,7 @@ import {
   inviteNewCollaborator,
   inviteNewUser,
   UserAccess,
+  deleteExistingInvite,
 } from "@/services/user";
 import {
   trustedServicesAPI,
@@ -98,6 +99,13 @@ export const ManageWrapper = ({
 
     return true;
     // Share collections with them?
+  }, []);
+
+  const deleteInvite = useCallback(async ({ email }) => {
+    // Delete an existing invite
+    const result = await deleteExistingInvite(email);
+
+    return true;
   }, []);
 
   const inviteToProject = useCallback(
@@ -385,6 +393,7 @@ export const ManageWrapper = ({
       updateProjectDetails,
       inviteUser,
       inviteCollaborator,
+      deleteInvite,
       inviteToProject,
       removeFromProject,
       createPlugin,
@@ -405,6 +414,7 @@ export const ManageWrapper = ({
       updateProjectDetails,
       inviteUser,
       inviteCollaborator,
+      deleteInvite,
       inviteToProject,
       removeFromProject,
       createPlugin,

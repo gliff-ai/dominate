@@ -27,6 +27,9 @@ export const inviteNewUser = (email: string): Promise<unknown> =>
 export const inviteNewCollaborator = (email: string): Promise<unknown> =>
   apiRequest<unknown>("/user/invite/collaborator/", "POST", { email });
 
+export const deleteExistingInvite = (email: string): Promise<unknown> =>
+  apiRequest<unknown>("/user/invite/delete/", "POST", { email });
+
 export const getInvite = (inviteId: string): Promise<Invite> =>
   apiRequest<Invite>(`/user/invite?invite_id=${inviteId}`, "GET");
 
