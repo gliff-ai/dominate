@@ -1,8 +1,18 @@
 import { JsPlugin } from "../plugins/interfaces";
 
-export interface TrustedService extends JsPlugin {
+export type CollectionUidsWithExtra = {
+  uid: string;
+  is_invite_pending: boolean;
+};
+
+export interface TrustedServiceOut extends JsPlugin {
   username: string;
 }
+export interface TrustedServiceIn
+  extends Omit<TrustedServiceOut, "collection_uids"> {
+  collection_uids: CollectionUidsWithExtra[];
+}
+
 export interface UiTemplate {
   trustedService: string;
   uiElements: UiElement[];

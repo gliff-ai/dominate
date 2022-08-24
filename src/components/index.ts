@@ -10,3 +10,5 @@ export {
 
 export { GliffCard } from "./GliffCard";
 export { CookieConsent } from "./CookieConsent";
+export { ProductsNavbar } from "./ProductsNavbar";
+export type { ProductNavbarData } from "./ProductsNavbar";

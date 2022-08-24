@@ -733,7 +733,11 @@ export class DominateStore {
     if (!this.etebaseInstance) throw new Error("No store instance");
 
     try {
-      setTask((prevTask) => ({ ...prevTask, progress: 45 }));
+      setTask((prevTask) => ({
+        ...prevTask,
+        progress: 10,
+        description: "Fetching collection...",
+      }));
 
       // fetch the collectionManager, the collection and the itemManager
       const collectionManager = this.etebaseInstance.getCollectionManager();
@@ -742,6 +746,13 @@ export class DominateStore {
         collectionUid
       );
       const itemManager = collectionManager.getItemManager(collection);
+
+      setTask((prevTask) => ({
+        ...prevTask,
+        progress: 20,
+        description: "Creating image items...",
+      }));
+      await new Promise((resolve) => setTimeout(resolve, 50)); // gives the snackbar time to re-render
 
       // create new image items and the new gallery tiles
       const newItems: Item[] = [];
@@ -763,7 +774,13 @@ export class DominateStore {
           );
           return result;
         })
-      ).then((results) => {
+      ).then(async (results) => {
+        setTask((prevTask) => ({
+          ...prevTask,
+          progress: 30,
+          description: "Creating new tiles...",
+        }));
+        await new Promise((resolve) => setTimeout(resolve, 50)); // gives the snackbar time to re-render
         results.forEach((result, i) => {
           if (result.status === "fulfilled") {
             const newItem = result.value;
@@ -789,7 +806,12 @@ export class DominateStore {
         });
       });
 
-      setTask((prevTask) => ({ ...prevTask, progress: 55 }));
+      setTask((prevTask) => ({
+        ...prevTask,
+        progress: 35,
+        description: "Batching images...",
+      }));
+      await new Promise((resolve) => setTimeout(resolve, 50)); // gives the snackbar time to re-render
 
       let itemsUploadPromise;
       const numOfImages = imageFileInfos.length;
@@ -819,7 +841,12 @@ export class DominateStore {
         itemsUploadPromise = itemManager.batch(newItems);
       }
 
-      setTask((prevTask) => ({ ...prevTask, progress: 55 }));
+      setTask((prevTask) => ({
+        ...prevTask,
+        progress: 40,
+        description: "Updating collection...",
+      }));
+      await new Promise((resolve) => setTimeout(resolve, 50)); // gives the snackbar time to re-render
 
       // add the new gallery tiles to the gliff.gallery's content and update the content
       const galleryUploadPromise = new Promise((resolve, reject) => {
@@ -841,12 +868,22 @@ export class DominateStore {
           });
       });
 
-      setTask((prevTask) => ({ ...prevTask, progress: 75 }));
+      setTask((prevTask) => ({
+        ...prevTask,
+        progress: 50,
+        description: "Uploading...",
+      }));
 
       // resolve all promises: upload all the new items and update the gallery
       await Promise.all([itemsUploadPromise, galleryUploadPromise]);
 
-      setTask((prevTask) => ({ ...prevTask, isLoading: false, progress: 100 }));
+      setTask((prevTask) => ({
+        ...prevTask,
+        description: "Upload complete",
+        progress: 100,
+      }));
+      await new Promise((resolve) => setTimeout(resolve, 100)); // gives the snackbar time to re-render
+
       return newTiles;
     } catch (err) {
       logger.error(err);
@@ -977,30 +1014,42 @@ export class DominateStore {
 
   getAnnotationsObject = async (
     collectionUid: string,
-    imageUid: string,
-    username: string
+    annotation: { imageUid: string; username: string } | string
   ): Promise<{ meta: AnnotationMeta; annotations: Annotations } | null> => {
     // retrieves the Annotations object by the specified user for the specified image
+    // annotation can be either an {imageUid, username} object, in which case the
+    // annotationUID will be looked up from the gallery content, or it can just be
+    // the annotationUID
 
     const collectionManager = this.etebaseInstance.getCollectionManager();
     const collection = await this.fetchCollection(
       collectionManager,
       collectionUid
     );
-    const content = JSON.parse(
-      await collection.getContent(OutputFormat.String)
-    ) as GalleryTile[];
-    const galleryTile = content.find((item) => item.imageUID === imageUid);
 
-    if (
-      !galleryTile?.annotationUID ||
-      galleryTile.annotationUID[username] === undefined
-    )
-      return null;
+    // look up annotationUID if necessary:
+    let annotationUID: string;
+    if (annotation instanceof Object) {
+      const { imageUid, username } = annotation;
+      const content = JSON.parse(
+        await collection.getContent(OutputFormat.String)
+      ) as GalleryTile[];
+      const galleryTile = content.find((item) => item.imageUID === imageUid);
+
+      if (
+        !galleryTile?.annotationUID ||
+        galleryTile.annotationUID[username] === undefined
+      )
+        return null;
+
+      annotationUID = galleryTile.annotationUID[username];
+    } else {
+      annotationUID = annotation;
+    }
 
     const annotationItem = await this.fetchItem(
       collectionManager.getItemManager(collection),
-      galleryTile.annotationUID[username]
+      annotationUID
     );
     const annotationContent = await annotationItem.getContent(
       OutputFormat.String
@@ -1359,12 +1408,20 @@ export class DominateStore {
   };
 
   fetchMulti = async (
-    itemManager: ItemManager,
+    itemManager_: ItemManager | string, // ItemManager or collectionUid string
     UIDs: string[]
   ): Promise<Item[]> => {
     if (UIDs.length === 0) {
       // itemManager.fetchMulti will die messily if we pass it an empty UID array
       return [];
+    }
+    let itemManager: ItemManager;
+    if (itemManager_ instanceof ItemManager) {
+      itemManager = itemManager_;
+    } else {
+      const collectionManager = this.etebaseInstance.getCollectionManager();
+      const collection = await collectionManager.fetch(itemManager_);
+      itemManager = collectionManager.getItemManager(collection);
     }
     let items = (await itemManager.fetchMulti(UIDs)).data;
     // re-order the retrieved items to the match UIDs:
@@ -1689,6 +1746,7 @@ export class DominateStore {
         Object.keys(tile.auditUID).map((username) => ({
           username,
           imagename: tile.fileInfo.fileName,
+          imageUid: tile.imageUID,
         }))
       )
       .flat();

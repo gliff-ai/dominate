@@ -4,6 +4,7 @@ import {
   useCallback,
   Dispatch,
   useMemo,
+  useEffect,
 } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -19,12 +20,18 @@ import {
   inviteNewCollaborator,
   inviteNewUser,
   UserAccess,
+  deleteExistingInvite,
 } from "@/services/user";
-import { trustedServicesAPI, TrustedService } from "@/services/trustedServices";
+import {
+  trustedServicesAPI,
+  TrustedServiceOut,
+} from "@/services/trustedServices";
 import { jsPluginsAPI, JsPlugin } from "@/services/plugins";
+import { ProductNavbarData } from "@/components";
 import { FileInfo, GalleryTile, DemoMetadata, GalleryMeta } from "@/interfaces";
 import { PluginType, Plugin } from "@/plugins";
 import { loadNonTiffImageFromURL } from "@/imageConversions";
+import { PluginWithExtra } from "@/plugins/interfaces";
 
 type Progress = {
   [uid: string]: { complete: number; total: number };
@@ -32,12 +39,14 @@ type Progress = {
 
 interface Props {
   storeInstance: DominateStore;
+  setProductNavbarData: (data: ProductNavbarData) => void;
   setTask: Dispatch<SetStateAction<Task>>;
 }
 
 export const ManageWrapper = ({
   storeInstance,
   setTask,
+  setProductNavbarData,
 }: Props): ReactElement | null => {
   const auth = useAuth();
   const navigate = useNavigate();
@@ -92,6 +101,13 @@ export const ManageWrapper = ({
     // Share collections with them?
   }, []);
 
+  const deleteInvite = useCallback(async ({ email }) => {
+    // Delete an existing invite
+    const result = await deleteExistingInvite(email);
+
+    return true;
+  }, []);
+
   const inviteToProject = useCallback(
     async ({ projectUid, email }) => {
       const result = await storeInstance.inviteUserToCollection(
@@ -104,19 +120,25 @@ export const ManageWrapper = ({
     [storeInstance]
   );
 
-  const getPlugins = useCallback(async (): Promise<Plugin[]> => {
-    let allPlugins: Plugin[] = [];
+  const getPlugins = useCallback(async (): Promise<PluginWithExtra[]> => {
+    let allPlugins: PluginWithExtra[] = [];
 
     try {
       const trustedServices =
-        (await trustedServicesAPI.getTrustedService()) as Plugin[];
+        (await trustedServicesAPI.getTrustedService()) as PluginWithExtra[];
       allPlugins = allPlugins.concat(trustedServices);
     } catch (e) {
       console.error(e);
     }
 
     try {
-      const jsplugins = (await jsPluginsAPI.getPlugins()) as Plugin[];
+      const jsplugins = (await jsPluginsAPI.getPlugins()).map((p) => ({
+        ...p,
+        collection_uids: p.collection_uids.map((uid) => ({
+          uid,
+          is_invite_pending: false,
+        })),
+      })) as PluginWithExtra[];
       allPlugins = allPlugins.concat(jsplugins);
     } catch (e) {
       console.error(e);
@@ -138,7 +160,7 @@ export const ManageWrapper = ({
       const res = await trustedServicesAPI.createTrustedService({
         username: email,
         ...plugin,
-      } as TrustedService);
+      } as TrustedServiceOut);
 
       return { key, email };
     },
@@ -149,14 +171,14 @@ export const ManageWrapper = ({
     if (plugin.type === PluginType.Javascript) {
       return jsPluginsAPI.updatePlugin(plugin as JsPlugin);
     }
-    return trustedServicesAPI.updateTrustedService(plugin as TrustedService);
+    return trustedServicesAPI.updateTrustedService(plugin as TrustedServiceOut);
   }, []);
 
   const deletePlugin = useCallback(async (plugin: Plugin): Promise<number> => {
     if (plugin.type === PluginType.Javascript) {
       return jsPluginsAPI.deletePlugin(plugin as JsPlugin);
     }
-    return trustedServicesAPI.deleteTrustedService(plugin as TrustedService);
+    return trustedServicesAPI.deleteTrustedService(plugin as TrustedServiceOut);
   }, []);
 
   const getAnnotationProgress = useCallback(
@@ -371,6 +393,7 @@ export const ManageWrapper = ({
       updateProjectDetails,
       inviteUser,
       inviteCollaborator,
+      deleteInvite,
       inviteToProject,
       removeFromProject,
       createPlugin,
@@ -391,6 +414,7 @@ export const ManageWrapper = ({
       updateProjectDetails,
       inviteUser,
       inviteCollaborator,
+      deleteInvite,
       inviteToProject,
       removeFromProject,
       createPlugin,
@@ -412,6 +436,17 @@ export const ManageWrapper = ({
     }),
     [auth]
   );
+
+  useEffect(() => {
+    setProductNavbarData({
+      teamName: auth?.userProfile?.team.name || "",
+      projectName: "",
+      imageName: "",
+      buttonBack: null,
+      buttonForward: null,
+      productLocation: "MANAGE",
+    });
+  }, []);
 
   if (!storeInstance || !auth?.user || !auth?.userProfile) return null;
 
