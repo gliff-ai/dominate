@@ -45,7 +45,7 @@
     "@emotion/styled": "^11.10.0",
     "@gliff-ai/annotate": "^6.1.0",
     "@gliff-ai/audit": "^4.0.1",
-    "@gliff-ai/curate": "^7.7.1",
+    "@gliff-ai/curate": "^7.7.2",
     "@gliff-ai/etebase": "^0.44.0",
     "@gliff-ai/manage": "^9.0.0",
     "@gliff-ai/style": "^16.3.1",
