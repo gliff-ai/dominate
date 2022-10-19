@@ -1,7 +1,8 @@
 name: production deploy
 on:
-  schedule:
-    - cron: "00 06 * * 2"
+  workflow_dispatch:
+#   schedule:
+#     - cron: "00 06 * * 2"
 jobs:
   update-dep:
     runs-on: ubuntu-latest
