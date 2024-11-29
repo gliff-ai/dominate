@@ -7,6 +7,7 @@ import { DominateStore } from "@/store";
 import { useAuth, useStore } from "@/hooks";
 import { setStateIfMounted } from "@/helpers";
 import { ProductNavbarData } from "@/components";
+import { timestampInSeconds } from "@sentry/utils";
 
 const logger = console;
 
@@ -142,9 +143,43 @@ export const AuditWrapper = ({
 
   if (!auth || !collectionUid || sessions === null) return null;
 
+  const projectAuditActions = storeInstance.getProjectLevelAudit();
+
+  // annotation sessions contain all the actions for a given image/user; actual sessions
+  // are delimited by sessionStart and sessionEnd, so split on those here:
+  const actualSessions = sessions
+    .map((session) => {
+      const splitSessions: AnnotationSession[] = [];
+      for (const action of session.audit) {
+        if (action.method === "sessionStart") {
+          const newSession = session;
+          newSession.timestamp = action.timestamp;
+          newSession.audit = [action];
+          splitSessions.push(newSession);
+        } else {
+          splitSessions[splitSessions.length - 1].audit.push(action);
+        }
+      }
+      return splitSessions;
+    })
+    .flat()
+    // convert annotation sessions into the same format as other project audit actions:
+    .map((session) => ({
+      action: {
+        type: "annotate",
+        imageName: session.imageName,
+        audit: session.audit,
+      },
+      timestamp: session.timestamp,
+      username: session.username,
+    }))
+    // mix them in with other project audit actions:
+    .concat(projectAuditActions)
+    .sort((action1, action2) => action1.timestamp - action2.timestamp);
+
   return (
     <UserInterface
-      sessions={sessions}
+      actions={actions}
       setProductsNavbarImageData={setImageData}
       showAppBar={false}
     />
